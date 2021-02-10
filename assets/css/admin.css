@@ -1,0 +1,320 @@
+/* Plugins Screen
+------------------------------------------------------------------------------*/
+
+.column-pixelgradelt_records input[type="checkbox"] {
+	float: left;
+	margin-top: 4px;
+}
+
+.column-pixelgradelt_records .spinner {
+	float: left;
+}
+
+
+/* Settings Screen
+------------------------------------------------------------------------------*/
+
+.js .pixelgradelt_records-tab-panel {
+	display: none;
+}
+
+.pixelgradelt_records-tab-panel.is-active {
+	display: block;
+}
+
+.pixelgradelt_records-field-error {
+	color: #ff0000;
+}
+
+.pixelgradelt_records-repository-snippet {
+	background: #333;
+	color: #fff;
+	line-height: 1.2;
+	padding: 10px;
+}
+
+.pixelgradelt_records-repository-snippet code {
+	background: transparent;
+}
+
+
+/* Packages Tab
+----------------------------------------------------------------------------- */
+
+.pixelgradelt_records-card {
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	margin-top: 20px;
+	max-width: 620px;
+	padding: 0.7em 2em 1em;
+	position: relative;
+}
+
+.pixelgradelt_records-package {
+	margin-top: 20px;
+}
+
+.pixelgradelt_records-package tbody th,
+.pixelgradelt_records-package tbody td {
+	word-break: break-all;
+}
+
+.pixelgradelt_records-package tbody th {
+	font-size: 13px;
+	width: 150px;
+}
+
+.pixelgradelt_records-release.button {
+	line-height: 22px;
+	height: 24px;
+	margin-bottom: 3px;
+	margin-top: 3px;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+
+.pixelgradelt_records-release-actions {
+	background: #f9f9f9;
+	border: 1px solid #dedede;
+	margin-top: 1em;
+}
+
+.pixelgradelt_records-release-actions input {
+	background: #fff;
+	max-width: 100%;
+	width: 35em;
+}
+
+.pixelgradelt_records-release-actions td,
+.pixelgradelt_records-release-actions th {
+	padding: 5px 10px;
+}
+
+.pixelgradelt_records-release-actions tbody th {
+	width: auto;
+}
+
+.pixelgradelt_records-release-actions tr:first-child td,
+.pixelgradelt_records-release-actions tr:first-child th {
+	padding-top: 8px;
+}
+
+.pixelgradelt_records-release-actions tr:last-child td,
+.pixelgradelt_records-release-actions tr:last-child th {
+	padding-bottom: 10px;
+}
+
+@media screen and ( max-width: 782px ) {
+	.pixelgradelt_records-release.button {
+		line-height: normal;
+		height: auto;
+	}
+}
+
+
+/* API Keys Table
+----------------------------------------------------------------------------- */
+
+.pixelgradelt_records-api-key-table {
+	margin: 1em 0;
+}
+
+.pixelgradelt_records-api-key-table td,
+.pixelgradelt_records-api-key-table th {
+	width: auto;
+}
+
+.pixelgradelt_records-api-key-table tbody td,
+.pixelgradelt_records-api-key-table tbody th {
+	vertical-align: middle;
+}
+
+.pixelgradelt_records-api-key-table tfoot td {
+	background-color: #f9f9f9;
+}
+
+.pixelgradelt_records-api-key-table tfoot td input {
+	margin-left: 0;
+	padding: 4px 6px;
+	width: 20em;
+}
+
+.pixelgradelt_records-api-key-table tfoot td label {
+	display: inline-block;
+	line-height: 1;
+}
+
+.pixelgradelt_records-api-key-table tfoot td .spinner {
+	float: none;
+}
+
+.pixelgradelt_records-api-key-table .column-actions {
+	text-align: right;
+}
+
+.pixelgradelt_records-api-key-table .column-token input {
+	font-family: monospace;
+	max-width: 282px;
+}
+
+.screen-profile .pixelgradelt_records-api-key-table .column-user,
+.screen-user-edit .pixelgradelt_records-api-key-table .column-user,
+.network-admin.profile-php .pixelgradelt_records-api-key-table .column-user,
+.network-admin.user-edit-php .pixelgradelt_records-api-key-table .column-user {
+	display: none;
+}
+
+
+/* Dropdown Group
+----------------------------------------------------------------------------- */
+
+.pixelgradelt_records-dropdown-group {
+	display: inline-flex;
+	position: relative;
+}
+
+.pixelgradelt_records-dropdown-group > .button {
+	position: relative;
+	z-index: 2;
+}
+
+.pixelgradelt_records-dropdown-group > .button:first-child {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	border-right-width: 0;
+}
+
+.pixelgradelt_records-dropdown-group > .pixelgradelt_records-dropdown-toggle {
+	align-items: center;
+	background: transparent;
+	border-radius: 4px;
+	border-width: 0;
+	color: #68717a;
+	cursor: pointer;
+	display: flex;
+	padding: 8px 4px;
+	position: relative;
+}
+
+.pixelgradelt_records-dropdown-group > .pixelgradelt_records-dropdown-toggle svg {
+	fill: currentColor;
+	transform: rotate(90deg);
+}
+
+.pixelgradelt_records-dropdown-group > .pixelgradelt_records-dropdown-toggle:focus,
+.pixelgradelt_records-dropdown-group > .pixelgradelt_records-dropdown-toggle:hover {
+	box-shadow: inset 0 0 0 1px #e2e4e7, inset 0 0 0 2px #fff, 0 1px 1px rgba( 25, 30, 35, .2 );
+	color: #191e23;
+}
+
+.pixelgradelt_records-dropdown-group > .pixelgradelt_records-dropdown-toggle:focus {
+	background: #edeff0;
+	box-shadow: inset 0 0 0 1px #555d66, inset 0 0 0 2px #fff;
+	outline: none;
+}
+
+.pixelgradelt_records-dropdown-group-items {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	box-shadow: 1px 0 4px rgba( 0, 0, 0, 0.15 );
+	display: none;
+	list-style: none;
+	margin: 0;
+	max-width: 100%;
+	min-width: 180px;
+	padding: 5px 0;
+	position: absolute;
+	top: calc( 100% + 15px );
+	left: -15px;
+	z-index: 1;
+}
+
+.pixelgradelt_records-dropdown-group-items:after,
+.pixelgradelt_records-dropdown-group-items:before {
+	content: "";
+	display: block;
+	height: 0;
+	line-height: 0;
+	width: 0;
+}
+
+.pixelgradelt_records-dropdown-group-items:after {
+	border-color: #fff transparent;
+	border-style: solid inset;
+	border-width: 0 8px 8px 8px;
+	position: absolute;
+	top: -8px;
+	left: 19px;
+}
+
+.pixelgradelt_records-dropdown-group-items:before {
+	border-color: #e2e4e7 transparent;
+	border-style: solid inset;
+	border-width: 0 10px 10px 10px;
+	position: absolute;
+	top: -10px;
+	left: 17px;
+}
+
+.pixelgradelt_records-dropdown-group-items li {
+	display: block;
+	margin: 0;
+	padding: 5px 15px;
+	text-align: left;
+}
+
+.pixelgradelt_records-dropdown-group-items li a,
+.pixelgradelt_records-dropdown-group-items li button,
+.pixelgradelt_records-dropdown-group-items li button.button-link {
+	display: block;
+	line-height: 2;
+	margin: -5px -15px;
+	padding: 5px 15px;
+	text-align: left;
+	text-decoration: none;
+}
+
+.pixelgradelt_records-dropdown-group-items li a:hover,
+.pixelgradelt_records-dropdown-group-items li button:hover,
+.pixelgradelt_records-dropdown-group-items li button.button-link:hover {
+	background-color: #f8f8f8;
+}
+
+.pixelgradelt_records-dropdown-group-items li button,
+.pixelgradelt_records-dropdown-group-items li button.button-link {
+	width: calc(100% + 30px);
+}
+
+.pixelgradelt_records-dropdown-group-items ul {
+	margin: 0;
+}
+
+.pixelgradelt_records-dropdown-group-items.right {
+	right: -15px;
+	left: auto;
+}
+
+.pixelgradelt_records-dropdown-group-items.right:after {
+	right: 19px;
+	left: auto;
+}
+
+.pixelgradelt_records-dropdown-group-items.right:before {
+	right: 17px;
+	left: auto;
+}
+
+.pixelgradelt_records-dropdown-group.is-open {
+	z-index: 10;
+}
+
+.pixelgradelt_records-dropdown-group.is-open > .button {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	border-bottom-width: 0;
+}
+
+.pixelgradelt_records-dropdown-group.is-open .pixelgradelt_records-dropdown-group-items {
+	display: block;
+}

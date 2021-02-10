@@ -1,0 +1,58 @@
+<?php
+/**
+ * API Key factory.
+ *
+ * @package PixelgradeLT
+ * @license GPL-2.0-or-later
+ * @since 0.1.0
+ */
+
+declare ( strict_types = 1 );
+
+namespace PixelgradeLT\Records\Authentication\ApiKey;
+
+use WP_User;
+
+use function PixelgradeLT\Records\generate_random_string;
+
+/**
+ * API Key factory class.
+ *
+ * @since 0.1.0
+ */
+final class Factory {
+	/**
+	 * Create a new API key for a user.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param WP_User $user  WordPress user.
+	 * @param array   $data  Optional. Additional data associated with the API key.
+	 * @param string  $token Optional. API Key token.
+	 * @return ApiKey
+	 */
+	public function create( WP_User $user, array $data = null, string $token = null ): ApiKey {
+		$data = $data ?? [];
+
+		if ( ! isset( $data['created'] ) ) {
+			$data['created'] = time();
+		}
+
+		if ( empty( $token ) ) {
+			$token = self::generate_token();
+		}
+
+		return new ApiKey( $user, $token, $data );
+	}
+
+	/**
+	 * Generate an API key token.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	private static function generate_token(): string {
+		return generate_random_string( ApiKey::TOKEN_LENGTH );
+	}
+}
