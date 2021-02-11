@@ -56,6 +56,13 @@ final class Capabilities {
 	const MANAGE_OPTIONS = 'pixelgradelt_records_manage_options';
 
 	/**
+	 * Primitive capability for managing package types.
+	 *
+	 * @var string
+	 */
+	const MANAGE_PACKAGE_TYPES = 'pixelgradelt_records_manage_package_types';
+
+	/**
 	 * Register capabilities.
 	 *
 	 * @since 0.1.0

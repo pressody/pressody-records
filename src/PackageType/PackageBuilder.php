@@ -311,7 +311,7 @@ class PackageBuilder {
 	 * @param Package $package Package instance.
 	 * @return null|Release
 	 */
-	protected function get_package_update( Package $package ): Release {
+	protected function get_package_update( Package $package ): ?Release {
 		$release = null;
 
 		if ( $package instanceof Plugin ) {

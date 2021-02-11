@@ -172,7 +172,7 @@ class HealthCheck extends AbstractHookProvider {
 				'missing_header',
 				sprintf(
 					'The authorization header check failed; the header was missing. <a href="%s" target="_blank" rel="noopener noreferer">Learn more about this issue</a>.',
-					'https://github.com/cedaro/pixelgradelt_records/blob/develop/docs/troubleshooting.md#basic-auth-not-working'
+					'https://github.com/pixelgradelt/pixelgradelt-records/blob/develop/docs/troubleshooting.md#basic-auth-not-working'
 				)
 			);
 		}

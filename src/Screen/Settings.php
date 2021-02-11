@@ -267,7 +267,7 @@ class Settings extends AbstractHookProvider {
 		echo '<div id="pixelgradelt_records-api-key-manager"></div>';
 
 		printf(
-			'<p><a href="https://github.com/cedaro/pixelgradelt_records/blob/develop/docs/security.md" target="_blank" rel="noopener noreferer"><em>%s</em></a></p>',
+			'<p><a href="https://github.com/pixelgradelt/pixelgradelt-records/blob/develop/docs/security.md" target="_blank" rel="noopener noreferer"><em>%s</em></a></p>',
 			esc_html__( 'Read more about securing your PixelgradeLT Records repository.', 'pixelgradelt_records' )
 		);
 	}

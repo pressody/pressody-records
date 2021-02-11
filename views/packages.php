@@ -18,6 +18,7 @@ $allowed_tags = [
 	'em' => [],
 ];
 
+/** @global Package[] $packages */
 foreach ( $packages as $package ) :
 	?>
 	<table class="pixelgradelt_records-package widefat">
@@ -109,7 +110,7 @@ if ( empty( $packages ) ) :
 			<?php esc_html_e( 'Plugins and themes need to be whitelisted to make them available as Composer packages.', 'pixelgradelt_records' ); ?>
 		</p>
 		<p>
-			<a href="https://github.com/cedaro/pixelgradelt_records/blob/develop/docs/whitelisting.md" target="_blank" rel="noopener noreferer"><em><?php esc_html_e( 'Read more about whitelisting plugins and themes.', 'pixelgradelt_records' ); ?></em></a>
+			<a href="https://github.com/pixelgradelt/pixelgradelt-records/blob/develop/docs/whitelisting.md" target="_blank" rel="noopener noreferer"><em><?php esc_html_e( 'Read more about whitelisting plugins and themes.', 'pixelgradelt_records' ); ?></em></a>
 		</p>
 
 		<h4><?php esc_html_e( 'Plugins', 'pixelgradelt_records' ); ?></h4>

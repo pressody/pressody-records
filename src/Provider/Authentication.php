@@ -80,7 +80,7 @@ class Authentication extends AbstractHookProvider {
 		add_filter( 'user_has_cap', [ $this, 'maybe_allow_public_access' ] );
 
 		// Allow cookie authentication to work for download requests.
-		if ( 0 === strpos( $this->get_request_path(), '/pixelgradelt_records' ) ) {
+		if ( 0 === strpos( $this->get_request_path(), '/ltpackagist' ) ) {
 			remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
 		}
 	}
@@ -167,7 +167,7 @@ class Authentication extends AbstractHookProvider {
 			return true;
 		}
 
-		if ( 0 === strpos( $request_path, '/pixelgradelt_records' ) ) {
+		if ( 0 === strpos( $request_path, '/ltpackagist' ) ) {
 			return true;
 		}
 

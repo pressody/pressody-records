@@ -135,6 +135,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['hooks.package_post_type'] = function() {
+			return new PostType\PackagePostType();
+		};
+
 		$container['hooks.request_handler'] = function( $container ) {
 			return new Provider\RequestHandler(
 				$container['http.request'],

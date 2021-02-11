@@ -112,7 +112,7 @@ function get_packages_permalink( array $args = null ): string {
 	} else {
 		// Leave off the packages.json if 'base' arg is true.
 		$suffix = isset( $args['base'] ) && $args['base'] ? '' : 'packages.json';
-		$url    = sprintf( network_home_url( '/pixelgradelt_records/%s' ), $suffix );
+		$url    = sprintf( network_home_url( '/ltpackagist/%s' ), $suffix );
 	}
 
 	return $url;
@@ -157,7 +157,7 @@ function display_missing_dependencies_notice() {
 	$message = sprintf(
 		/* translators: %s: documentation URL */
 		__( 'PixelgradeLT Records is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'pixelgradelt_records' ),
-		'https://github.com/cedaro/pixelgradelt_records/blob/master/docs/installation.md'
+		'https://github.com/pixelgradelt/pixelgradelt-records/blob/master/docs/installation.md'
 	);
 
 	printf(

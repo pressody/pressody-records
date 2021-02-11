@@ -63,7 +63,7 @@ class Release {
 	 */
 	public function get_download_url( array $args = [] ): string {
 		$url = sprintf(
-			'/pixelgradelt_records/%s/%s',
+			'/ltpackagist/%s/%s',
 			$this->get_package()->get_slug(),
 			$this->get_version()
 		);
