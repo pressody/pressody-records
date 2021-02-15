@@ -11,6 +11,9 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\PostType;
 
+use Carbon_Fields\Carbon_Fields;
+use Carbon_Fields\Container;
+use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Capabilities;
 
@@ -52,6 +55,9 @@ class PackagePostType extends AbstractHookProvider {
 		],
 	];
 
+	const PACKAGE_KEYWORD_TAXONOMY = 'ltpackage_keywords';
+	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpackage_keyword';
+
 	public function register_hooks() {
 		/*
 		 * HANDLE THE CUSTOM POST TYPE LOGIC.
@@ -62,7 +68,7 @@ class PackagePostType extends AbstractHookProvider {
 		// Change the post title placeholder.
 		$this->add_filter( 'enter_title_here', 'change_title_placeholder', 10, 2 );
 		// Add a description to the slug
-		$this->add_filter( 'editable_slug', 'add_post_slug_description' );
+		$this->add_filter( 'editable_slug', 'add_post_slug_description', 10, 2 );
 		// Make sure that the slug and other metaboxes are never hidden.
 		$this->add_filter( 'hidden_meta_boxes', 'prevent_hidden_metaboxes', 10, 2 );
 		// Rearrange the core metaboxes.
@@ -79,7 +85,16 @@ class PackagePostType extends AbstractHookProvider {
 		// Show a dropdown to filter the posts list by the custom taxonomy.
 		$this->add_action( 'restrict_manage_posts', 'output_admin_list_filters' );
 
+		/*
+		 * Show edit post screen error messages.
+		 */
 		$this->add_action( 'edit_form_top', 'show_post_error_msgs' );
+
+		/*
+		 * ADD CUSTOM POST META VIA CARBON FIELDS
+		 */
+		$this->add_action( 'after_setup_theme', 'crb_load' );
+		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 	}
 
 	protected function register_post_type() {
@@ -141,7 +156,7 @@ class PackagePostType extends AbstractHookProvider {
 		register_taxonomy(
 			static::PACKAGE_TYPE_TAXONOMY,
 			[ static::POST_TYPE ],
-			$this->get_taxonomy_args()
+			$this->get_package_type_taxonomy_args()
 		);
 
 		foreach ( static::PACKAGE_TYPE_TERMS as $term ) {
@@ -149,9 +164,15 @@ class PackagePostType extends AbstractHookProvider {
 				wp_insert_term( $term['name'], static::PACKAGE_TYPE_TAXONOMY, $term );
 			}
 		}
+
+		register_taxonomy(
+			static::PACKAGE_KEYWORD_TAXONOMY,
+			[ static::POST_TYPE ],
+			$this->get_package_keyword_taxonomy_args()
+		);
 	}
 
-	protected function get_taxonomy_args(): array {
+	protected function get_package_type_taxonomy_args(): array {
 		$labels = [
 			'name'                  => __( 'Package Types', 'pixelgradelt_records' ),
 			'singular_name'         => __( 'Package Type', 'pixelgradelt_records' ),
@@ -184,6 +205,42 @@ class PackagePostType extends AbstractHookProvider {
 				'delete_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
 				'assign_terms' => 'edit_posts',
 			],
+		];
+	}
+
+	protected function get_package_keyword_taxonomy_args(): array {
+		$labels = [
+			'name'                       => __( 'Package Keywords', 'pixelgradelt_records' ),
+			'singular_name'              => __( 'Package Keyword', 'pixelgradelt_records' ),
+			'add_new'                    => _x( 'Add New', 'PixelgradeLT Package Keyword', 'pixelgradelt_records' ),
+			'add_new_item'               => __( 'Add New Package Keyword', 'pixelgradelt_records' ),
+			'update_item'                => __( 'Update Package Keyword', 'pixelgradelt_records' ),
+			'new_item_name'              => __( 'New Package Keyword Name', 'pixelgradelt_records' ),
+			'edit_item'                  => __( 'Edit Package Keyword', 'pixelgradelt_records' ),
+			'all_items'                  => __( 'All Package Keywords', 'pixelgradelt_records' ),
+			'search_items'               => __( 'Search Package Keywords', 'pixelgradelt_records' ),
+			'not_found'                  => __( 'No package tags found.', 'pixelgradelt_records' ),
+			'no_terms'                   => __( 'No package tags.', 'pixelgradelt_records' ),
+			'separate_items_with_commas' => __( 'Separate keywords with commas.', 'pixelgradelt_records' ),
+			'choose_from_most_used'      => __( 'Choose from the most used keywords.', 'pixelgradelt_records' ),
+			'most_used'                  => __( 'Most used.', 'pixelgradelt_records' ),
+			'items_list_navigation'      => __( 'Package Keywords list navigation', 'pixelgradelt_records' ),
+			'items_list'                 => __( 'Package Keywords list', 'pixelgradelt_records' ),
+			'back_to_items'              => __( '&larr; Go to Package Keywords', 'pixelgradelt_records' ),
+		];
+
+		return [
+			'labels'             => $labels,
+			'show_ui'            => true,
+			'show_in_quick_edit' => true,
+			'show_admin_column'  => true,
+			'hierarchical'       => false,
+//			'capabilities'       => [
+//				'manage_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
+//				'edit_terms'   => Capabilities::MANAGE_PACKAGE_TYPES,
+//				'delete_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
+//				'assign_terms' => 'edit_posts',
+//			],
 		];
 	}
 
@@ -224,25 +281,37 @@ class PackagePostType extends AbstractHookProvider {
 		}
 	}
 
-	protected function change_title_placeholder( string $placeholder, $post ) {
-		if ( static::POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+	protected function change_title_placeholder( string $placeholder, \WP_Post $post ): string {
+		if ( static::POST_TYPE !== get_post_type( $post ) ) {
 			return $placeholder;
 		}
 
 		return esc_html__( 'Add package title', 'pixelgradelt_records' );
 	}
 
-	protected function add_post_slug_description() {
+	protected function add_post_slug_description( string $post_name, \WP_Post $post ): string {
+		// we want this only on the edit post screen.
+		if ( static::POST_TYPE !== get_current_screen()->id ) {
+			return $post_name;
+		}
+
+		// Only on our post type.
+		if ( static::POST_TYPE !== get_post_type( $post ) ) {
+			return $post_name;
+		}
 		// Just output it since there is no way to add it other way. ?>
 		<p class="description">
-			<?php _e( '<strong>The slug is the PACKAGE NAME,</strong> excluding the vendor name. It is best to use <strong>the exact plugin or theme slug!</strong><br>In the end this will be prefixed with the vendor name (like so: <code>vendor/slug</code>) to form the identifier to be used in composer.json.', 'pixelgradelt_records' ); ?>
+			<?php _e( '<strong>The post slug is, at the same time, the PACKAGE NAME,</strong> excluding the vendor name. It is best to use <strong>the exact plugin or theme slug!</strong><br>In the end this will be prefixed with the vendor name (like so: <code>vendor/slug</code>) to form the identifier to be used in composer.json.', 'pixelgradelt_records' ); ?>
 		</p>
 		<style>
 			input#post_name {
-				width: 25%;
+				width: 20%;
 			}
 		</style>
 		<?php
+
+		// We must return the post slug.
+		return $post_name;
 	}
 
 	/**
@@ -289,7 +358,7 @@ class PackagePostType extends AbstractHookProvider {
 
 		// Since we are here, modify the package type title to be singular, rather than plural.
 		if ( ! empty( $wp_meta_boxes[ static::POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types'] ) ) {
-			$wp_meta_boxes[ static::POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types'] = esc_html__( 'Package Type', 'pixelgradelt_records' );
+			$wp_meta_boxes[ static::POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types']['title'] = esc_html__( 'Package Type', 'pixelgradelt_records' );
 		}
 	}
 
@@ -380,7 +449,7 @@ class PackagePostType extends AbstractHookProvider {
 		// Display an error regarding that the package type is required.
 		$package_type = wp_get_object_terms( $post->ID, static::PACKAGE_TYPE_TAXONOMY, array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
-			$taxonomy_args = $this->get_taxonomy_args();
+			$taxonomy_args = $this->get_package_type_taxonomy_args();
 			printf(
 				'<div class="error below-h2"><p>%s</p></div>',
 				sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
@@ -412,5 +481,128 @@ class PackagePostType extends AbstractHookProvider {
 			'taxonomy'        => $taxonomy->name,
 			'value_field'     => 'slug',
 		) );
+	}
+
+	protected function crb_load() {
+		Carbon_Fields::boot();
+	}
+
+	protected function attach_post_meta_fields() {
+		// Register the metabox for managing the source details of the package.
+		Container::make( 'post_meta', 'Source Configuration' )
+		         ->where( 'post_type', '=', static::POST_TYPE )
+		         ->set_context( 'normal' )
+		         ->set_priority( 'core' )
+		         ->add_fields( [
+			         Field::make( 'html', 'source_configuration_html', __( 'Section Description', 'pixelgradelt_records' ) )
+			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'First, configure details about <strong>where from should we get package/versions</strong> for this package.', 'pixelgradelt_records' ) ) ),
+
+			         Field::make( 'select', 'package_source_type', __( 'Set the package source type', 'pixelgradelt_records' ) )
+			              ->set_help_text( __( 'Composer works with packages and repositories to find the core to use for the defined dependencies. We will strive to keep as close to that in terms of concepts. Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+			              ->set_options( [
+				              null             => esc_html__( 'Pick your package source, carefully..', 'pixelgradelt_records' ),
+				              'packagist.org'  => esc_html__( 'A Packagist.org public repo', 'pixelgradelt_records' ),
+				              'wpackagist.org' => esc_html__( 'A WPackagist.org repo (mirror of wordpress.org)', 'pixelgradelt_records' ),
+				              'vcs'            => esc_html__( 'A VCS repo (git, SVN, fossil or hg)', 'pixelgradelt_records' ),
+				              'local'          => esc_html__( 'A local repo: package releases/versions are managed here, manually', 'pixelgradelt_records' ),
+			              ] )
+			              ->set_default_value( null )
+			              ->set_required( true )
+			              ->set_width( 50 ),
+
+			         Field::make( 'text', 'package_vendor', __( 'Package Vendor', 'pixelgradelt_records' ) )
+				         ->set_help_text( __( 'Composer identifies a certain package by its name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+			              ->set_width( 50 )
+				         ->set_conditional_logic( [
+					         'relation' => 'AND', // Optional, defaults to "AND"
+					         [
+						         'field' => 'package_source_type',
+						         'value' => ['packagist.org', 'vcs'], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+						         'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+					         ]
+				         ] ),
+
+			         Field::make( 'text', 'package_version_range', __( 'Package Version Range', 'pixelgradelt_records' ) )
+				         ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
+ Specify a version range to <strong>limit the available versions for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>
+ Learn more about Composer <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) )
+			              ->set_conditional_logic( [
+				              'relation' => 'AND', // Optional, defaults to "AND"
+				              [
+					              'field' => 'package_source_type',
+					              'value' => ['packagist.org', 'wpackagist.org', 'vcs'], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+					              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+				              ]
+			              ] ),
+
+			         Field::make( 'text', 'package_vcs_url', __( 'Package VCS URL', 'pixelgradelt_records' ) )
+			              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pixelgradelt/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+			              ->set_conditional_logic( [
+				              'relation' => 'AND', // Optional, defaults to "AND"
+				              [
+					              'field' => 'package_source_type',
+					              'value' => 'vcs', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+					              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+				              ]
+			              ] ),
+
+
+			         Field::make( 'separator', 'package_details_separator', __( '' ) ),
+			         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pixelgradelt_records' ) )
+			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br>Leave empty and we will try and deduce them the first time you add a version (from the theme or plugin headers).', 'pixelgradelt_records' ) ) )
+				         ->set_conditional_logic( [
+					         'relation' => 'AND', // Optional, defaults to "AND"
+					         [
+						         'field' => 'package_source_type',
+						         'value' => 'local', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+						         'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+					         ]
+				         ] ),
+			         Field::make( 'text', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
+			              ->set_conditional_logic( [
+				              'relation' => 'AND', // Optional, defaults to "AND"
+				              [
+					              'field' => 'package_source_type',
+					              'value' => 'local', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+					              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+				              ]
+			              ] ),
+			         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) )
+			              ->set_conditional_logic( [
+				              'relation' => 'AND', // Optional, defaults to "AND"
+				              [
+					              'field' => 'package_source_type',
+					              'value' => 'local', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+					              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+				              ]
+			              ] ),
+			         Field::make( 'text', 'package_details_license', __( 'Package License', 'pixelgradelt_records' ) )
+				         ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+			              ->set_conditional_logic( [
+				              'relation' => 'AND', // Optional, defaults to "AND"
+				              [
+					              'field' => 'package_source_type',
+					              'value' => 'local', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+					              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+				              ]
+			              ] ),
+			         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pixelgradelt_records' ) )
+			              ->set_help_text( __( 'The package authors details. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#authors" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				         ->add_fields( array(
+					         Field::make( 'text', 'name', __( 'Author Name', 'pixelgradelt_records' ) )->set_required( true )->set_width( 50 ),
+					         Field::make( 'text', 'email', __( 'Author Email', 'pixelgradelt_records' ) )->set_width( 50 ),
+					         Field::make( 'text', 'homepage', __( 'Author Homepage', 'pixelgradelt_records' ) )->set_width( 50 ),
+					         Field::make( 'text', 'role', __( 'Author Role', 'pixelgradelt_records' ) )->set_width( 50 ),
+				         ) )
+			              ->set_conditional_logic( [
+				              'relation' => 'AND', // Optional, defaults to "AND"
+				              [
+					              'field' => 'package_source_type',
+					              'value' => 'local', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+					              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+				              ]
+			              ] ),
+
+		         ] );
 	}
 }
