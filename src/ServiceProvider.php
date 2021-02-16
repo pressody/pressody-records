@@ -130,7 +130,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['hooks.package_archiver'] = function( $container ) {
 			return new Provider\PackageArchiver(
 				$container['repository.installed'],
-				$container['repository.whitelist'],
+				$container['repository.configured.installed'],
 				$container['release.manager'],
 				$container['logger']
 			);
@@ -153,7 +153,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['hooks.upgrade'] = function( $container ) {
 			return new Provider\Upgrade(
-				$container['repository.whitelist'],
+				$container['repository.configured.installed'],
 				$container['release.manager'],
 				$container['storage.packages'],
 				$container['htaccess.handler'],
@@ -239,7 +239,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['repository.whitelist'] = function( $container ) {
+		$container['repository.configured.installed'] = function( $container ) {
 			/**
 			 * Filter the list of installed plugins attached to a package (package type: local.plugin).
 			 *
@@ -291,14 +291,14 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['route.composer'] = function( $container ) {
 			return new Route\Composer(
-				$container['repository.whitelist'],
+				$container['repository.configured.installed'],
 				$container['transformer.composer_repository']
 			);
 		};
 
 		$container['route.download'] = function( $container ) {
 			return new Route\Download(
-				$container['repository.whitelist'],
+				$container['repository.configured.installed'],
 				$container['release.manager']
 			);
 		};
@@ -320,12 +320,12 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['screen.manage_plugins'] = function( $container ) {
-			return new Screen\ManagePlugins( $container['repository.whitelist'] );
+			return new Screen\ManagePlugins( $container['repository.configured.installed'] );
 		};
 
 		$container['screen.settings'] = function( $container ) {
 			return new Screen\Settings(
-				$container['repository.whitelist'],
+				$container['repository.configured.installed'],
 				$container['api_key.repository'],
 				$container['transformer.composer_package']
 			);
@@ -354,15 +354,10 @@ class ServiceProvider implements ServiceProviderInterface {
 				return $directory;
 			}
 
-			// Use old option name if it exists.
-			$directory = get_option( 'pixelgradelt_records_cache_directory' );
-			delete_option( 'pixelgradelt_records_cache_directory' );
+			// Append a random string to help hide it from nosey visitors.
+			$directory = sprintf( 'pixelgradelt_records-%s', generate_random_string() );
 
-			if ( empty( $directory ) ) {
-				// Append a random string to help hide it from nosey visitors.
-				$directory = sprintf( 'pixelgradelt_records-%s', generate_random_string() );
-			}
-
+			// Save the working directory so we will always use the same directory.
 			update_option( 'pixelgradelt_records_working_directory', $directory );
 
 			return $directory;

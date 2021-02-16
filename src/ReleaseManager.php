@@ -103,6 +103,28 @@ class ReleaseManager {
 	}
 
 	/**
+	 * Delete a release from storage.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param Release $release Release instance.
+	 *
+	 * @throws FileOperationFailed  If the release artifact can't be deleted from storage.
+	 * @return Release
+	 */
+	public function delete( Release $release ): Release {
+		if ( ! $this->exists( $release ) ) {
+			return $release;
+		}
+
+		if ( ! $this->storage->delete( $release->get_file_path() ) ) {
+			throw FileOperationFailed::unableToDeleteReleaseArtifactFromStorage( $release->get_file_path() );
+		}
+
+		return $release;
+	}
+
+	/**
 	 * Retrieve a checksum for a release.
 	 *
 	 * @since 0.1.0

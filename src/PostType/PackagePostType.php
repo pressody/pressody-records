@@ -29,28 +29,30 @@ class PackagePostType extends AbstractHookProvider {
 	const PACKAGE_TYPE_TAXONOMY = 'ltpackage_types';
 	const PACKAGE_TYPE_TAXONOMY_SINGULAR = 'ltpackage_type';
 
-	// We will automatically register these if they are not present.
-	// The important part is the slug that must match the package types defined by composer/installers
-	// @see https://packagist.org/packages/composer/installers
+	/**
+	 * We will automatically register these if they are not present.The slugs will be transformed into the package types defined by composer/installers
+	 * @see \PixelgradeLT\Records\Transformer\ComposerPackageTransformer::WORDPRESS_TYPES
+	 * @link https://packagist.org/packages/composer/installers
+	 */
 	const PACKAGE_TYPE_TERMS = [
 		[
 			'name'        => 'WordPress Plugin',
-			'slug'        => 'wordpress-plugin',
+			'slug'        => 'plugin',
 			'description' => 'A WordPress plugin package.',
 		],
 		[
 			'name'        => 'WordPress Theme',
-			'slug'        => 'wordpress-theme',
+			'slug'        => 'theme',
 			'description' => 'A WordPress theme package.',
 		],
 		[
 			'name'        => 'WordPress Must-Use Plugin',
-			'slug'        => 'wordpress-muplugin',
+			'slug'        => 'muplugin',
 			'description' => 'A WordPress Must-Use plugin package.',
 		],
 		[
 			'name'        => 'WordPress Drop-in Plugin',
-			'slug'        => 'wordpress-dropin',
+			'slug'        => 'dropin',
 			'description' => 'A WordPress Drop-in plugin package.',
 		],
 	];
@@ -283,7 +285,7 @@ class PackagePostType extends AbstractHookProvider {
 		return esc_html__( 'Add package title', 'pixelgradelt_records' );
 	}
 
-	protected function add_post_slug_description( string $post_name, \WP_Post $post ): string {
+	protected function add_post_slug_description( string $post_name, $post ): string {
 		// we want this only on the edit post screen.
 		if ( static::POST_TYPE !== get_current_screen()->id ) {
 			return $post_name;
@@ -747,5 +749,38 @@ class PackagePostType extends AbstractHookProvider {
 		$options = [ null => esc_html__( 'Pick your installed theme, carefully..', 'pixelgradelt_records' ) ] + $options;
 
 		return $options;
+	}
+
+	static function get_post_package_type( int $post_ID ): string {
+		/** @var \WP_Error|\WP_Term[] $package_type */
+		$package_type = wp_get_post_terms( $post_ID, static::PACKAGE_TYPE_TAXONOMY );
+		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
+			return '';
+		}
+		$package_type = reset( $package_type );
+
+		return $package_type->slug;
+	}
+
+	static function get_post_installed_package_slug( int $post_ID ): string {
+		$package_slug = '';
+
+		$package_type = PackagePostType::get_post_package_type( $post_ID );
+		if ( empty( $package_type ) ) {
+			return $package_slug;
+		}
+
+		$package_source_type = get_post_meta( $post_ID, '_package_source_type', true );
+		if ( empty( $package_source_type ) ) {
+			return $package_slug;
+		}
+
+		if ( 'plugin' === $package_type && 'local.plugin' === $package_source_type  ) {
+			$package_slug = get_post_meta( $post_ID, '_package_local_plugin_file', true );
+		} else if ( 'theme' === $package_type && 'local.theme' === $package_source_type ) {
+			$package_slug = get_post_meta( $post_ID, '_package_local_theme_slug', true );
+		}
+
+		return $package_slug;
 	}
 }

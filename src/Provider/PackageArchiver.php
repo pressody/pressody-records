@@ -12,6 +12,8 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use PixelgradeLT\Records\Exception\FileOperationFailed;
+use PixelgradeLT\Records\PostType\PackagePostType;
 use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Release;
@@ -50,28 +52,28 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @var PackageRepository
 	 */
-	protected $whitelisted_packages;
+	protected $configured_installed_packages;
 
 	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param PackageRepository $packages             Installed packages repository.
-	 * @param PackageRepository $whitelisted_packages Whitelisted packages repository.
-	 * @param ReleaseManager    $release_manager      Release manager.
-	 * @param LoggerInterface   $logger               Logger.
+	 * @param PackageRepository $packages                      Installed packages repository.
+	 * @param PackageRepository $configured_installed_packages Configured locally installed packages repository.
+	 * @param ReleaseManager    $release_manager               Release manager.
+	 * @param LoggerInterface   $logger                        Logger.
 	 */
 	public function __construct(
 		PackageRepository $packages,
-		PackageRepository $whitelisted_packages,
+		PackageRepository $configured_installed_packages,
 		ReleaseManager $release_manager,
 		LoggerInterface $logger
 	) {
-		$this->packages             = $packages;
-		$this->whitelisted_packages = $whitelisted_packages;
-		$this->release_manager      = $release_manager;
-		$this->logger               = $logger;
+		$this->packages                      = $packages;
+		$this->configured_installed_packages = $configured_installed_packages;
+		$this->release_manager               = $release_manager;
+		$this->logger                        = $logger;
 	}
 
 	/**
@@ -80,56 +82,42 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		add_action( 'add_option_pixelgradelt_records_plugins', [ $this, 'archive_on_option_add' ], 10, 2 );
-		add_action( 'add_option_pixelgradelt_records_themes', [ $this, 'archive_on_option_add' ], 10, 2 );
-		add_action( 'update_option_pixelgradelt_records_plugins', [ $this, 'archive_on_option_update' ], 10, 3 );
-		add_action( 'update_option_pixelgradelt_records_themes', [ $this, 'archive_on_option_update' ], 10, 3 );
+		add_action( 'save_post_' . PackagePostType::POST_TYPE, [ $this, 'archive_on_ltpackage_post_save' ], 10, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'upgrader_post_install', [ $this, 'archive_on_upgrade' ], 10, 3 );
+
+		add_action( 'before_delete_post', [ $this, 'clean_on_ltpackage_post_delete' ], 10, 2 );
 	}
 
 	/**
-	 * Archive packages when they're added to the whitelist.
+	 * Archive packages when an PixelgradeLT package CPT is saved.
 	 *
-	 * Archiving packages when they're whitelisted helps ensure a checksum can
+	 * Archiving packages when they're configured helps ensure a checksum can
 	 * be included in packages.json.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $option_name Option name.
-	 * @param array  $value       Value.
+	 * @param int      $post_ID Post ID.
+	 * @param \WP_Post $post    Post object.
+	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
-	public function archive_on_option_add( string $option_name, $value ) {
-		if ( empty( $value ) || ! \is_array( $value ) ) {
+	public function archive_on_ltpackage_post_save( int $post_ID, \WP_Post $post, bool $update ) {
+		if ( 'publish' !== $post->post_status ) {
 			return;
 		}
 
-		$type = 'pixelgradelt_records_plugins' === $option_name ? 'plugin' : 'theme';
-		$this->archive_packages( $value, $type );
-	}
-
-	/**
-	 * Archive packages when they're added to the whitelist.
-	 *
-	 * Archiving packages when they're whitelisted helps ensure a checksum can
-	 * be included in packages.json.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param array  $old_value   Old value.
-	 * @param array  $value       New value.
-	 * @param string $option_name Option name.
-	 */
-	public function archive_on_option_update( $old_value, $value, string $option_name ) {
-		$slugs = array_diff( (array) $value, (array) $old_value );
-
-		if ( empty( $slugs ) ) {
+		$package_type = PackagePostType::get_post_package_type( $post_ID );
+		if ( empty( $package_type ) ) {
 			return;
 		}
 
-		$type = 'pixelgradelt_records_plugins' === $option_name ? 'plugin' : 'theme';
-		$this->archive_packages( $slugs, $type );
+		$package_slug = PackagePostType::get_post_installed_package_slug( $post_ID );
+		if ( empty( $package_slug ) ) {
+			return;
+		}
+
+		$this->archive_package( $package_slug, $package_type );
 	}
 
 	/**
@@ -159,7 +147,7 @@ class PackageArchiver extends AbstractHookProvider {
 
 			$args = compact( 'slug', 'type' );
 			// Bail if the package isn't whitelisted.
-			if ( ! $this->whitelisted_packages->contains( $args ) ) {
+			if ( ! $this->configured_installed_packages->contains( $args ) ) {
 				continue;
 			}
 
@@ -216,7 +204,7 @@ class PackageArchiver extends AbstractHookProvider {
 		$slug = $result['destination_name'] ?? '';
 		$args = compact( 'slug', 'type' );
 
-		if ( $this->whitelisted_packages->contains( $args ) ) {
+		if ( $this->configured_installed_packages->contains( $args ) ) {
 			$this->archive_package( $slug, $type );
 		}
 
@@ -228,7 +216,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $slug Packge slug.
+	 * @param string $slug Package slug.
 	 * @param string $type Type of package.
 	 */
 	protected function archive_package( string $slug, string $type ) {
@@ -248,5 +236,60 @@ class PackageArchiver extends AbstractHookProvider {
 				]
 			);
 		}
+	}
+
+	/**
+	 * Clean a package by deleting all stored zips.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $slug Package slug.
+	 * @param string $type Type of package.
+	 */
+	protected function clean_package( string $slug, string $type ) {
+		$package = $this->packages->first_where( compact( 'slug', 'type' ) );
+
+		try {
+			foreach ( $package->get_releases() as $release ) {
+				$this->release_manager->delete( $release );
+			}
+
+			// Finally delete the package directory. But we must make sure that it is empty.
+			if ( ! \rmdir( $package->get_directory() ) ) {
+				throw FileOperationFailed::unableToDeleteReleaseArtifactFromStorage( $package->get_directory() );
+			}
+		} catch ( PixelgradeltRecordsException $e ) {
+			$this->logger->warning(
+				'Could not clean {package} storage before delete. Manual cleanup may be needed.',
+				[
+					'exception' => $e,
+					'package'   => $package->get_name(),
+				]
+			);
+		}
+	}
+
+	/**
+	 * Clean packages before a ltpackage post is deleted from the database.
+	 *
+	 * @param int     $post_ID Post ID.
+	 * @param \WP_Post $post   Post object.
+	 */
+	public function clean_on_ltpackage_post_delete( int $post_ID, \WP_Post $post ) {
+		if ( PackagePostType::POST_TYPE !== $post->post_type ) {
+			return;
+		}
+
+		$type = PackagePostType::get_post_package_type( $post_ID );
+		if ( empty( $type ) ) {
+			return;
+		}
+
+		$slug = PackagePostType::get_post_installed_package_slug( $post_ID );
+		if ( empty( $slug ) ) {
+			return;
+		}
+
+		$this->clean_package( $slug, $type );
 	}
 }

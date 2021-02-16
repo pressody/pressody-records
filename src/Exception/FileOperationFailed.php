@@ -43,6 +43,48 @@ class FileOperationFailed extends \RuntimeException implements PixelgradeltRecor
 	}
 
 	/**
+	 * Create an exception for being unable to delete a release artifact from storage.
+	 *
+	 * @since 0.1.0.
+	 *
+	 * @param string         $filepath    File path.
+	 * @param int            $code        Optional. The Exception code.
+	 * @param Throwable|null $previous    Optional. The previous throwable used for the exception chaining.
+	 *
+	 * @return FileOperationFailed
+	 */
+	public static function unableToDeleteReleaseArtifactFromStorage(
+		string $filepath,
+		int $code = 0,
+		Throwable $previous = null
+	): FileOperationFailed {
+		$message = "Unable to delete release artifact {$filepath} from storage.";
+
+		return new static( $message, $code, $previous );
+	}
+
+	/**
+	 * Create an exception for being unable to delete a package directory from storage.
+	 *
+	 * @since 0.1.0.
+	 *
+	 * @param string         $directorypath    Directory path.
+	 * @param int            $code        Optional. The Exception code.
+	 * @param Throwable|null $previous    Optional. The previous throwable used for the exception chaining.
+	 *
+	 * @return FileOperationFailed
+	 */
+	public static function unableToDeletePackageDirectoryFromStorage(
+		string $directorypath,
+		int $code = 0,
+		Throwable $previous = null
+	): FileOperationFailed {
+		$message = "Unable to delete package directory {$directorypath} from storage.";
+
+		return new static( $message, $code, $previous );
+	}
+
+	/**
 	 * Create an exception for being unable to create a temporary directory.
 	 *
 	 * @since 0.1.0.

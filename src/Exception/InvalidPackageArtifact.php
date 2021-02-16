@@ -41,7 +41,7 @@ class InvalidPackageArtifact extends \RuntimeException implements PixelgradeltRe
 	}
 
 	/**
-	 * Create an exception for artifact with a top level __MAXOSX directory.
+	 * Create an exception for artifact with a top level __MACOSX directory.
 	 *
 	 * @since 0.1.0
 	 *
