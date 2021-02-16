@@ -241,7 +241,9 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['repository.whitelist'] = function( $container ) {
 			/**
-			 * Filter the list of whitelisted plugins.
+			 * Filter the list of installed plugins attached to a package (package type: local.plugin).
+			 *
+			 * @see PackagePostType::attach_post_meta_fields()
 			 *
 			 * Plugins should be added to the whitelist by appending a plugin's
 			 * basename to the array. The basename is the main plugin file's
@@ -253,16 +255,18 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $plugins Array of plugin basenames.
 			 */
-			$plugins = apply_filters( 'pixelgradelt_records_plugins', (array) PackagePostType::get_used_installed_plugins() );
+			$plugins = apply_filters( 'pixelgradelt_records_installed_plugins_in_use', (array) PackagePostType::get_installed_plugins_in_use() );
 
 			/**
-			 * Filter the list of whitelisted themes.
+			 * Filter the list of installed themes attached to a package (package type: local.theme).
+			 *
+			 * @see PackagePostType::attach_post_meta_fields()
 			 *
 			 * @since 0.1.0
 			 *
 			 * @param array $themes Array of theme slugs.
 			 */
-			$themes = apply_filters( 'pixelgradelt_records_themes', (array) PackagePostType::get_used_installed_themes() );
+			$themes = apply_filters( 'pixelgradelt_records_installed_themes_in_use', (array) PackagePostType::get_installed_themes_in_use() );
 
 			return $container['repository.installed']
 				->with_filter(

@@ -93,7 +93,7 @@ class Settings extends AbstractHookProvider {
 		$page_hook = add_submenu_page(
 			$parent_slug,
 			esc_html__( 'PixelgradeLT Records', 'pixelgradelt_records' ),
-			esc_html__( 'PixelgradeLT Records', 'pixelgradelt_records' ),
+			esc_html__( 'LT Records', 'pixelgradelt_records' ),
 			Capabilities::MANAGE_OPTIONS,
 			'pixelgradelt_records',
 			[ $this, 'render_screen' ]
@@ -153,7 +153,6 @@ class Settings extends AbstractHookProvider {
 	 */
 	public function register_settings() {
 		register_setting( 'pixelgradelt_records', 'pixelgradelt_records', [ $this, 'sanitize_settings' ] );
-		register_setting( 'pixelgradelt_records', 'pixelgradelt_records_themes', [ $this, 'sanitize_theme_settings' ] );
 	}
 
 	/**
@@ -175,13 +174,6 @@ class Settings extends AbstractHookProvider {
 			[ $this, 'render_section_access_description' ],
 			'pixelgradelt_records'
 		);
-
-		add_settings_section(
-			'themes',
-			esc_html__( 'Themes', 'pixelgradelt_records' ),
-			[ $this, 'render_section_themes_description' ],
-			'pixelgradelt_records'
-		);
 	}
 
 	/**
@@ -196,14 +188,6 @@ class Settings extends AbstractHookProvider {
 			[ $this, 'render_field_vendor' ],
 			'pixelgradelt_records',
 			'default'
-		);
-
-		add_settings_field(
-			'themes',
-			esc_html__( 'Themes', 'pixelgradelt_records' ),
-			[ $this, 'render_field_themes' ],
-			'pixelgradelt_records',
-			'themes'
 		);
 	}
 
@@ -221,18 +205,6 @@ class Settings extends AbstractHookProvider {
 		}
 
 		return (array) apply_filters( 'pixelgradelt_records_sanitize_settings', $value );
-	}
-
-	/**
-	 * Sanitize list of themes.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param mixed $value Setting value.
-	 * @return array
-	 */
-	public function sanitize_theme_settings( $value ): array {
-		return array_filter( array_unique( (array) $value ) );
 	}
 
 	/**
@@ -273,18 +245,6 @@ class Settings extends AbstractHookProvider {
 	}
 
 	/**
-	 * Display the themes section description.
-	 *
-	 * @since 0.1.0
-	 */
-	public function render_section_themes_description() {
-		printf(
-			'<p>%s</p>',
-			esc_html__( 'Choose themes to make available in your PixelgradeLT Records repository.', 'pixelgradelt_records' )
-		);
-	}
-
-	/**
 	 * Display a field for defining the vendor.
 	 *
 	 * @since 0.1.0
@@ -294,27 +254,9 @@ class Settings extends AbstractHookProvider {
 		?>
 		<p>
 			<input type="text" name="pixelgradelt_records[vendor]" id="pixelgradelt_records-vendor" value="<?php echo esc_attr( $value ); ?>"><br />
-			<span class="description">Default is <code>pixelgradelt_records</code></span>
+			<span class="description">The default is <code>pixelgradelt_records</code></span>
 		</p>
 		<?php
-	}
-
-	/**
-	 * Display the themes list field.
-	 *
-	 * @since 0.1.0
-	 */
-	public function render_field_themes() {
-		$value = get_option( 'pixelgradelt_records_themes', [] );
-
-		foreach ( wp_get_themes() as $slug => $theme ) {
-			printf(
-				'<label><input type="checkbox" name="pixelgradelt_records_themes[]" value="%1$s"%2$s> %3$s</label><br />',
-				esc_attr( $slug ),
-				checked( \in_array( $slug, $value, true ), true, false ),
-				esc_html( $theme->get( 'Name' ) )
-			);
-		}
 	}
 
 	/**

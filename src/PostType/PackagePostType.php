@@ -631,7 +631,7 @@ class PackagePostType extends AbstractHookProvider {
 		         ] );
 	}
 
-	static function get_used_installed_plugins( array $query_args = [] ): array {
+	static function get_installed_plugins_in_use( array $query_args = [] ): array {
 		$all_plugins_files = array_keys( get_plugins() );
 
 		// Get all package posts that use installed plugins.
@@ -662,7 +662,7 @@ class PackagePostType extends AbstractHookProvider {
 	public function get_available_installed_plugins_options(): array {
 		$options = [];
 
-		$used_plugin_files = static::get_used_installed_plugins( [ 'post__not_in' => [ get_the_ID(), ], ] );
+		$used_plugin_files = static::get_installed_plugins_in_use( [ 'post__not_in' => [ get_the_ID(), ], ] );
 		foreach ( get_plugins() as $plugin_file => $plugin_data ) {
 			// Do not include plugins already attached to a package.
 			if ( in_array( $plugin_file, $used_plugin_files ) ) {
@@ -699,7 +699,7 @@ class PackagePostType extends AbstractHookProvider {
 		return $slug;
 	}
 
-	static function get_used_installed_themes( array $query_args = [] ): array {
+	static function get_installed_themes_in_use( array $query_args = [] ): array {
 		$all_theme_slugs = array_keys( wp_get_themes() );
 
 		// Get all package posts that use installed themes.
@@ -730,7 +730,7 @@ class PackagePostType extends AbstractHookProvider {
 	public function get_available_installed_themes_options(): array {
 		$options = [];
 
-		$used_theme_slugs = static::get_used_installed_themes( [ 'post__not_in' => [ get_the_ID(), ], ] );
+		$used_theme_slugs = static::get_installed_themes_in_use( [ 'post__not_in' => [ get_the_ID(), ], ] );
 
 		foreach ( wp_get_themes() as $theme_slug => $theme_data ) {
 			// Do not include themes already attached to a package.

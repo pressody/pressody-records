@@ -49,45 +49,8 @@ class ManagePlugins extends AbstractHookProvider {
 			add_filter( 'manage_plugins_columns', [ $this, 'register_columns' ] );
 		}
 
-		add_action( 'wp_ajax_pixelgradelt_records_toggle_plugin', [ $this, 'ajax_toggle_plugin_status' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_action( 'manage_plugins_custom_column', [ $this, 'display_columns' ], 10, 2 );
-	}
-
-	/**
-	 * Toggle whether or not a plugin is included in packages.json.
-	 *
-	 * @since 0.1.0
-	 */
-	public function ajax_toggle_plugin_status() {
-		if ( ! isset( $_POST['plugin_file'], $_POST['_wpnonce'] ) ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-		$plugin  = $_POST['plugin_file'];
-		$plugins = (array) get_option( 'pixelgradelt_records_plugins', [] );
-
-		// Bail if the nonce can't be verified.
-		check_admin_referer( 'toggle-status_' . $plugin );
-
-		// Bail if the current user can't manage PixelgradeLT Records options.
-		if ( ! current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
-			wp_send_json_error();
-		}
-
-		$key = array_search( $plugin, $plugins, true );
-		if ( false !== $key ) {
-			unset( $plugins[ $key ] );
-		} else {
-			$plugins[] = $plugin;
-		}
-
-		$plugins = array_filter( array_unique( $plugins ) );
-		sort( $plugins );
-
-		update_option( 'pixelgradelt_records_plugins', $plugins );
-		wp_send_json_success();
 	}
 
 	/**

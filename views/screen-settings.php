@@ -11,6 +11,10 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
+/**
+ * @global $permalink
+ */
+
 ?>
 <div class="wrap">
 	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -30,7 +34,7 @@ namespace PixelgradeLT\Records;
 			$allowed_html = [ 'code' => [] ];
 			printf(
 				/* translators: 1: <code>repositories</code>, 2: <code>composer.json</code> */
-				esc_html__( 'Add it to the %1$s list in your %2$s:', 'pixelgradelt_records' ),
+				esc_html__( 'Add it to the %1$s list in your project\'s %2$s, like so:', 'pixelgradelt_records' ),
 				'<code>repositories</code>',
 				'<code>composer.json</code>'
 			);

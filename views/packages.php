@@ -11,12 +11,28 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
+/**
+ * @global $permalink
+ */
+
 $allowed_tags = [
 	'a'  => [
 		'href' => true,
 	],
 	'em' => [],
+	'code' => [],
 ];
+
+if ( ! empty( $packages ) ) { ?>
+	<div class="pixelgradelt_records-card">
+		<p>
+			<?php
+			printf( __( 'These are <strong>all the packages</strong> that PixelgradeLT Records makes available as Composer packages, regardless of their configuration.<br>
+This view is primarily available to assist in <strong>double-checking that things work properly.</strong><br>
+If you want to <strong>dig deeper,</strong> check <a href="%s" target="_blank">the actual JSON</a> of the PixelgradeLT Records repo.', 'pixelgradelt_records' ), esc_url( $permalink ) ); ?>
+		</p>
+	</div>
+<?php }
 
 /** @global Package[] $packages */
 foreach ( $packages as $package ) :
@@ -105,40 +121,12 @@ endforeach;
 if ( empty( $packages ) ) :
 	?>
 	<div class="pixelgradelt_records-card">
-		<h3><?php esc_html_e( 'Whitelisting Packages', 'pixelgradelt_records' ); ?></h3>
+		<h3><?php esc_html_e( 'No packages defined', 'pixelgradelt_records' ); ?></h3>
 		<p>
-			<?php esc_html_e( 'Plugins and themes need to be whitelisted to make them available as Composer packages.', 'pixelgradelt_records' ); ?>
+			<?php esc_html_e( 'Plugins and themes need to be configured as Pixelgrade LT packages to make them available as Composer packages.', 'pixelgradelt_records' ); ?>
 		</p>
 		<p>
-			<a href="https://github.com/pixelgradelt/pixelgradelt-records/blob/develop/docs/whitelisting.md" target="_blank" rel="noopener noreferer"><em><?php esc_html_e( 'Read more about whitelisting plugins and themes.', 'pixelgradelt_records' ); ?></em></a>
-		</p>
-
-		<h4><?php esc_html_e( 'Plugins', 'pixelgradelt_records' ); ?></h4>
-		<p>
-			<?php
-			echo wp_kses(
-				sprintf(
-					/* translators: %s: Plugins screen URL */
-					__( 'Plugins can be whitelisted by visiting the <a href="%s"><em>Plugins &rarr; Installed Plugins</em></a> screen and toggling the checkbox for each plugin in the "PixelgradeLT Records" column.', 'pixelgradelt_records' ),
-					esc_url( self_admin_url( 'plugins.php' ) )
-				),
-				$allowed_tags
-			);
-			?>
-		</p>
-
-		<h4><?php esc_html_e( 'Themes', 'pixelgradelt_records' ); ?></h4>
-		<p>
-			<?php
-			echo wp_kses(
-				sprintf(
-					/* translators: %s: PixelgradeLT Records settings screen URL */
-					__( 'Themes can be toggled on the <a href="%s"><em>Settings &rarr; PixelgradeLT Records</em></a> screen.', 'pixelgradelt_records' ),
-					esc_url( self_admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-settings' ) )
-				),
-				$allowed_tags
-			);
-			?>
+			<?php echo wp_kses( __( 'Go to <code>LT Packages > Add New</code> and start managing your first package.', 'pixelgradelt_records' ), $allowed_tags ); ?>
 		</p>
 	</div>
 	<?php
