@@ -116,7 +116,7 @@ class ManagePlugins extends AbstractHookProvider {
 	 */
 	public function register_columns( array $columns ): array {
 		if ( current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
-			$columns['pixelgradelt_records'] = 'PixelgradeLT Records';
+			$columns['pixelgradelt_records'] = 'LT Package Source';
 		}
 
 		return $columns;
@@ -137,17 +137,14 @@ class ManagePlugins extends AbstractHookProvider {
 			return;
 		}
 
-		printf(
-			'<input type="checkbox" value="%1$s"%2$s class="pixelgradelt_records-status">',
-			esc_attr( $plugin_file ),
-			\checked( $this->repository->contains( [ 'slug' => $plugin_file ] ), true, false )
-		);
+		$output = '<span>';
+		if ( $this->repository->contains( [ 'slug' => $plugin_file ] ) ) {
+			$output .= '<span class="dashicons dashicons-yes"></span>';
+		} else {
+			$output .= '&nbsp;';
+		}
+		$output .= '</span>';
 
-		echo '<span class="spinner"></span>';
-
-		printf(
-			'<input type="hidden" value="%s" class="pixelgradelt_records-status-nonce">',
-			esc_attr( wp_create_nonce( 'toggle-status_' . $plugin_file ) )
-		);
+		echo $output;
 	}
 }

@@ -17,6 +17,7 @@ use Pimple\Container as PimpleContainer;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
 use Pimple\Psr11\ServiceLocator;
+use PixelgradeLT\Records\PostType\PackagePostType;
 use Psr\Log\LogLevel;
 use PixelgradeLT\Records\Authentication\ApiKey;
 use PixelgradeLT\Records\Authentication;
@@ -252,7 +253,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $plugins Array of plugin basenames.
 			 */
-			$plugins = apply_filters( 'pixelgradelt_records_plugins', (array) get_option( 'pixelgradelt_records_plugins', [] ) );
+			$plugins = apply_filters( 'pixelgradelt_records_plugins', (array) PackagePostType::get_used_installed_plugins() );
 
 			/**
 			 * Filter the list of whitelisted themes.
@@ -261,7 +262,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $themes Array of theme slugs.
 			 */
-			$themes = apply_filters( 'pixelgradelt_records_themes', (array) get_option( 'pixelgradelt_records_themes', [] ) );
+			$themes = apply_filters( 'pixelgradelt_records_themes', (array) PackagePostType::get_used_installed_themes() );
 
 			return $container['repository.installed']
 				->with_filter(
