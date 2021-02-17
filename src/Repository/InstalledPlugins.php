@@ -72,7 +72,10 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 	 */
 	protected function build( string $plugin_file, array $plugin_data ): Plugin {
 		return $this->factory->create( 'plugin' )
+			->from_file( $plugin_file )
+			->from_manager( $plugin_file )
 			->from_source( $plugin_file, $plugin_data )
+			->add_cached_releases()
 			->build();
 	}
 }

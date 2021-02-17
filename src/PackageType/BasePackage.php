@@ -30,18 +30,11 @@ class BasePackage implements \ArrayAccess, Package {
 	protected $name = '';
 
 	/**
-	 * Author.
+	 * Package authors.
 	 *
-	 * @var string
+	 * @var array
 	 */
-	protected $author = '';
-
-	/**
-	 * Author URL.
-	 *
-	 * @var string
-	 */
-	protected $author_url = '';
+	protected $authors = [];
 
 	/**
 	 * Description.
@@ -51,18 +44,32 @@ class BasePackage implements \ArrayAccess, Package {
 	protected $description = '';
 
 	/**
+	 * Package homepage URL.
+	 *
+	 * @var string
+	 */
+	protected $homepage = '';
+
+	/**
+	 * Package license.
+	 *
+	 * @var string
+	 */
+	protected $license = '';
+
+	/**
+	 * Package keywords.
+	 *
+	 * @var string[]
+	 */
+	protected $keywords = '';
+
+	/**
 	 * Absolute path to the package directory.
 	 *
 	 * @var string
 	 */
 	protected $directory;
-
-	/**
-	 * Homepage URL.
-	 *
-	 * @var string
-	 */
-	protected $homepage = '';
 
 	/**
 	 * Whether the package is installed.
@@ -112,25 +119,14 @@ class BasePackage implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the author.
+	 * Retrieve the authors.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string
+	 * @return array
 	 */
-	public function get_author(): string {
-		return $this->author;
-	}
-
-	/**
-	 * Retrieve the author URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_author_url(): string {
-		return $this->author_url;
+	public function get_authors(): array {
+		return $this->authors;
 	}
 
 	/**
@@ -142,6 +138,39 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function get_description(): string {
 		return $this->description;
+	}
+
+	/**
+	 * Retrieve the homepage URL.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_homepage(): string {
+		return $this->homepage;
+	}
+
+	/**
+	 * Retrieve the license.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_license(): string {
+		return $this->license;
+	}
+
+	/**
+	 * Retrieve the keywords.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string[]
+	 */
+	public function get_keywords() {
+		return $this->keywords;
 	}
 
 	/**
@@ -179,17 +208,6 @@ class BasePackage implements \ArrayAccess, Package {
 			},
 			$files
 		);
-	}
-
-	/**
-	 * Retrieve the homepage URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_homepage(): string {
-		return $this->homepage;
 	}
 
 	/**

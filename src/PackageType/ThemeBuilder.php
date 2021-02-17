@@ -11,8 +11,6 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\PackageType;
 
-use WP_Theme;
-
 /**
  * Theme builder class.
  *
@@ -24,22 +22,29 @@ final class ThemeBuilder extends PackageBuilder {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string   $slug  Theme slug.
-	 * @param WP_Theme $theme Optional. Theme instance.
+	 * @param string        $slug  Theme slug.
+	 * @param \WP_Theme|null $theme Optional. Theme instance.
+	 *
 	 * @return ThemeBuilder
 	 */
-	public function from_source( string $slug, WP_Theme $theme = null ): self {
+	public function from_source( string $slug, \WP_Theme $theme = null ): self {
 		if ( null === $theme ) {
 			$theme = wp_get_theme( $slug );
 		}
 
 		return $this
-			->set_author( $theme->get( 'Author' ) )
-			->set_author_url( $theme->get( 'AuthorURI' ) )
+			->set_authors( [
+				[
+					'name' => $theme->get( 'Author' ),
+					'homepage' => $theme->get( 'AuthorURI' ),
+				]
+			] )
 			->set_description( $theme->get( 'Description' ) )
+			->set_homepage( $theme->get( 'ThemeURI' ) )
+			->set_keywords( $theme->get( 'Tags' ) )
+			->set_license( $theme->get( 'License' ) )
 			->set_directory( get_theme_root() . '/' . $slug )
 			->set_name( $theme->get( 'Name' ) )
-			->set_homepage( $theme->get( 'ThemeURI' ) )
 			->set_installed( true )
 			->set_installed_version( $theme->get( 'Version' ) )
 			->set_slug( $slug )

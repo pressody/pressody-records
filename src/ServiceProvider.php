@@ -130,15 +130,19 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['hooks.package_archiver'] = function( $container ) {
 			return new Provider\PackageArchiver(
 				$container['repository.installed'],
-				$container['repository.configured.installed'],
+				$container['repository.managed.installed'],
 				$container['release.manager'],
+				$container['package.manager'],
 				$container['storage.packages'],
 				$container['logger']
 			);
 		};
 
-		$container['hooks.package_post_type'] = function() {
-			return new PostType\PackagePostType();
+		$container['hooks.package_post_type'] = function( $container ) {
+			return new PostType\PackagePostType(
+				$container['package.manager'],
+				$container['repository.installed']
+			);
 		};
 
 		$container['hooks.request_handler'] = function( $container ) {
@@ -154,7 +158,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['hooks.upgrade'] = function( $container ) {
 			return new Provider\Upgrade(
-				$container['repository.configured.installed'],
+				$container['repository.managed.installed'],
 				$container['release.manager'],
 				$container['storage.packages'],
 				$container['htaccess.handler'],
@@ -196,7 +200,15 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['package.factory'] = function( $container ) {
 			return new PackageFactory(
+				$container['package.manager'],
 				$container['release.manager']
+			);
+		};
+
+		$container['package.manager'] = function( $container ) {
+			return new PackageManager(
+				$container['storage.packages'],
+				$container['archiver']
 			);
 		};
 
@@ -212,15 +224,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new ReleaseManager(
 				$container['storage.packages'],
 				$container['archiver']
-			);
-		};
-
-		$container['repository.installed'] = function( $container ) {
-			return new Repository\MultiRepository(
-				[
-					$container['repository.plugins'],
-					$container['repository.themes'],
-				]
 			);
 		};
 
@@ -240,15 +243,22 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['repository.configured.installed'] = function( $container ) {
+		$container['repository.installed'] = function( $container ) {
+			return new Repository\MultiRepository(
+				[
+					$container['repository.plugins'],
+					$container['repository.themes'],
+				]
+			);
+		};
+
+		$container['repository.managed.installed'] = function( $container ) {
 			/**
 			 * Filter the list of installed plugins attached to a package (package type: local.plugin).
 			 *
 			 * @see PackagePostType::attach_post_meta_fields()
 			 *
-			 * Plugins should be added to the whitelist by appending a plugin's
-			 * basename to the array. The basename is the main plugin file's
-			 * relative path from the root plugin directory.
+			 * The basename is the main plugin file's relative path from the root plugin directory.
 			 *
 			 * Example: plugin-name/plugin-name.php
 			 *
@@ -256,7 +266,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $plugins Array of plugin basenames.
 			 */
-			$plugins = apply_filters( 'pixelgradelt_records_installed_plugins_in_use', (array) PackagePostType::get_installed_plugins_in_use() );
+			$plugins = apply_filters( 'pixelgradelt_records_installed_plugins_in_use', $container['package.manager']->get_installed_plugins_in_use() );
 
 			/**
 			 * Filter the list of installed themes attached to a package (package type: local.theme).
@@ -267,7 +277,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $themes Array of theme slugs.
 			 */
-			$themes = apply_filters( 'pixelgradelt_records_installed_themes_in_use', (array) PackagePostType::get_installed_themes_in_use() );
+			$themes = apply_filters( 'pixelgradelt_records_installed_themes_in_use', $container['package.manager']->get_installed_themes_in_use() );
 
 			return $container['repository.installed']
 				->with_filter(
@@ -292,14 +302,14 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['route.composer'] = function( $container ) {
 			return new Route\Composer(
-				$container['repository.configured.installed'],
+				$container['repository.managed.installed'],
 				$container['transformer.composer_repository']
 			);
 		};
 
 		$container['route.download'] = function( $container ) {
 			return new Route\Download(
-				$container['repository.configured.installed'],
+				$container['repository.managed.installed'],
 				$container['release.manager']
 			);
 		};
@@ -321,12 +331,12 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['screen.manage_plugins'] = function( $container ) {
-			return new Screen\ManagePlugins( $container['repository.configured.installed'] );
+			return new Screen\ManagePlugins( $container['repository.managed.installed'] );
 		};
 
 		$container['screen.settings'] = function( $container ) {
 			return new Screen\Settings(
-				$container['repository.configured.installed'],
+				$container['repository.managed.installed'],
 				$container['api_key.repository'],
 				$container['transformer.composer_package']
 			);

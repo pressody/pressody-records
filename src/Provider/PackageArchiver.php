@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
+use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PostType\PackagePostType;
 use PixelgradeLT\Records\Storage\Storage;
 use Psr\Log\LoggerInterface;
@@ -49,6 +50,13 @@ class PackageArchiver extends AbstractHookProvider {
 	protected $release_manager;
 
 	/**
+	 * Package manager.
+	 *
+	 * @var PackageManager
+	 */
+	protected $package_manager;
+
+	/**
 	 * Storage.
 	 *
 	 * @var Storage
@@ -56,7 +64,7 @@ class PackageArchiver extends AbstractHookProvider {
 	protected $storage;
 
 	/**
-	 * Whitelisted packages repository.
+	 * Configured packages repository.
 	 *
 	 * @var PackageRepository
 	 */
@@ -70,6 +78,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @param PackageRepository $packages                      Installed packages repository.
 	 * @param PackageRepository $configured_installed_packages Configured locally installed packages repository.
 	 * @param ReleaseManager    $release_manager               Release manager.
+	 * @param PackageManager    $package_manager               Packages manager.
 	 * @param Storage           $storage                       Storage service.
 	 * @param LoggerInterface   $logger                        Logger.
 	 */
@@ -77,12 +86,14 @@ class PackageArchiver extends AbstractHookProvider {
 		PackageRepository $packages,
 		PackageRepository $configured_installed_packages,
 		ReleaseManager $release_manager,
+		PackageManager $package_manager,
 		Storage $storage,
 		LoggerInterface $logger
 	) {
 		$this->packages                      = $packages;
 		$this->configured_installed_packages = $configured_installed_packages;
 		$this->release_manager               = $release_manager;
+		$this->package_manager               = $package_manager;
 		$this->storage                       = $storage;
 		$this->logger                        = $logger;
 	}
@@ -93,7 +104,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		add_action( 'save_post_' . PackagePostType::POST_TYPE, [ $this, 'archive_on_ltpackage_post_save' ], 10, 3 );
+		add_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, [ $this, 'archive_on_ltpackage_post_save' ], 10, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'upgrader_post_install', [ $this, 'archive_on_upgrade' ], 10, 3 );
@@ -118,12 +129,12 @@ class PackageArchiver extends AbstractHookProvider {
 			return;
 		}
 
-		$package_type = PackagePostType::get_post_package_type( $post_ID );
+		$package_type = $this->package_manager->get_post_package_type( $post_ID );
 		if ( empty( $package_type ) ) {
 			return;
 		}
 
-		$package_slug = PackagePostType::get_post_installed_package_slug( $post_ID );
+		$package_slug = $this->package_manager->get_post_installed_package_slug( $post_ID );
 		if ( empty( $package_slug ) ) {
 			return;
 		}
@@ -261,11 +272,12 @@ class PackageArchiver extends AbstractHookProvider {
 		$package = $this->packages->first_where( compact( 'slug', 'type' ) );
 
 		try {
+			// Delete each release zip.
 			foreach ( $package->get_releases() as $release ) {
 				$this->release_manager->delete( $release );
 			}
 
-			// Finally delete the empty package directory.
+			// Delete the (empty) package directory.
 			$package_storage_dir_absolute_path = $this->storage->get_absolute_path( $package->get_slug() );
 			if ( ! \rmdir( $package_storage_dir_absolute_path ) ) {
 				throw FileOperationFailed::unableToDeletePackageDirectoryFromStorage( $package_storage_dir_absolute_path );
@@ -288,16 +300,16 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @param \WP_Post $post   Post object.
 	 */
 	public function clean_on_ltpackage_post_delete( int $post_ID, \WP_Post $post ) {
-		if ( PackagePostType::POST_TYPE !== $post->post_type ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
 			return;
 		}
 
-		$type = PackagePostType::get_post_package_type( $post_ID );
+		$type = $this->package_manager->get_post_package_type( $post_ID );
 		if ( empty( $type ) ) {
 			return;
 		}
 
-		$slug = PackagePostType::get_post_installed_package_slug( $post_ID );
+		$slug = $this->package_manager->get_post_installed_package_slug( $post_ID );
 		if ( empty( $slug ) ) {
 			return;
 		}

@@ -20,22 +20,13 @@ use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
  */
 interface Package {
 	/**
-	 * Retrieve the author.
+	 * Retrieve the authors.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string
+	 * @return array
 	 */
-	public function get_author(): string;
-
-	/**
-	 * Retrieve the author URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_author_url(): string;
+	public function get_authors(): array;
 
 	/**
 	 * Retrieve the description.
@@ -45,6 +36,24 @@ interface Package {
 	 * @return string
 	 */
 	public function get_description(): string;
+
+	/**
+	 * Retrieve the homepage URL.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_homepage(): string;
+
+	/**
+	 * Retrieve the pacakge license.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_license(): string;
 
 	/**
 	 * Retrieve the package directory.
@@ -64,15 +73,6 @@ interface Package {
 	 * @return array
 	 */
 	public function get_files( array $excludes = [] ): array;
-
-	/**
-	 * Retrieve the homepage URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_homepage(): string;
 
 	/**
 	 * Retrieve the name.

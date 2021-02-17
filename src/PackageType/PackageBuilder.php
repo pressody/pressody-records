@@ -11,6 +11,7 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\PackageType;
 
+use PixelgradeLT\Records\PackageManager;
 use ReflectionClass;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\Release;
@@ -44,6 +45,13 @@ class PackageBuilder {
 	protected $releases = [];
 
 	/**
+	 * Package manager.
+	 *
+	 * @var PackageManager
+	 */
+	protected $package_manager;
+
+	/**
 	 * Release manager.
 	 *
 	 * @var ReleaseManager
@@ -56,16 +64,23 @@ class PackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param Package        $package         Package instance to build.
+	 * @param PackageManager $package_manager Packages manager.
 	 * @param ReleaseManager $release_manager Release manager.
 	 */
-	public function __construct( Package $package, ReleaseManager $release_manager ) {
+	public function __construct(
+		Package $package,
+		PackageManager $package_manager,
+		ReleaseManager $release_manager
+	) {
 		$this->package = $package;
 		try {
 			$this->class = new ReflectionClass( $package );
-		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 		} catch ( \ReflectionException $e ) {
 			// noop.
 		}
+
+		$this->package_manager = $package_manager;
 		$this->release_manager = $release_manager;
 	}
 
@@ -89,27 +104,15 @@ class PackageBuilder {
 	}
 
 	/**
-	 * Set the author.
+	 * Set the authors.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $author Author.
+	 * @param array $authors Authors.
 	 * @return $this
 	 */
-	public function set_author( string $author ): self {
-		return $this->set( 'author', $author );
-	}
-
-	/**
-	 * Set the author URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $author_url Author URL.
-	 * @return $this
-	 */
-	public function set_author_url( string $author_url ): self {
-		return $this->set( 'author_url', $author_url );
+	public function set_authors( array $authors ): self {
+		return $this->set( 'authors', $authors );
 	}
 
 	/**
@@ -125,6 +128,146 @@ class PackageBuilder {
 	}
 
 	/**
+	 * Set the keywords.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string|string[] $keywords
+	 * @return $this
+	 */
+	public function set_keywords( $keywords ): self {
+		return $this->set( 'keywords', $this->normalize_keywords( $keywords ) );
+	}
+
+	/**
+	 * Normalize a given set of keywords.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string|string[] $keywords
+	 * @return array
+	 */
+	protected function normalize_keywords( $keywords ): array {
+		$delimiter = ',';
+		// If by any chance we are given an array, sanitize and return it.
+		if ( is_array( $keywords ) ) {
+			foreach ( $keywords as $key => $keyword ) {
+				// Reject non-string or empty entries.
+				if ( ! is_string( $keyword ) || empty( $keyword ) ) {
+					unset( $keywords[ $key ] );
+					continue;
+				}
+
+				$keywords[ $key ] = trim( sanitize_text_field( $keyword ) );
+			}
+
+			return $keywords;
+		}
+
+		// Anything else we coerce to a string.
+		if ( ! is_string( $keywords ) ) {
+			$keywords = (string) $keywords;
+		}
+
+		// Make sure we trim it.
+		$keywords = trim( $keywords );
+
+		// Bail on empty string.
+		if ( empty( $keywords ) ) {
+			return [];
+		}
+
+		// Return the whole string as an element if the delimiter is missing.
+		if ( false === strpos( $keywords, $delimiter ) ) {
+			return [ trim( sanitize_text_field( $keywords ) ) ];
+		}
+
+		$keywords = explode( $delimiter, $keywords );
+		foreach ( $keywords as $key => $keyword ) {
+			$keywords[ $key ] = trim( sanitize_text_field( $keyword ) );
+
+			if ( empty( $keywords[ $key ] ) ) {
+				unset( $keywords[ $key ] );
+			}
+		}
+
+		return $keywords;
+	}
+
+	/**
+	 * Set the homepage URL.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $url URL.
+	 *
+	 * @return $this
+	 */
+	public function set_homepage( string $url ): self {
+		return $this->set( 'homepage', $url );
+	}
+
+	/**
+	 * Set the license.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $license
+	 *
+	 * @return $this
+	 */
+	public function set_license( string $license ): self {
+		return $this->set( 'license', $this->normalize_license( $license ) );
+	}
+
+	/**
+	 * We want to try and normalize the license to the SPDX format.
+	 *
+	 * @link https://spdx.org/licenses/
+	 *
+	 * @param string $license
+	 *
+	 * @return string
+	 */
+	protected function normalize_license( string $license ): string {
+		$license = trim( $license );
+
+		$tmp_license = strtolower( $license);
+
+		if ( empty( $tmp_license ) ) {
+			// Default to the WordPress license.
+			return 'GPL-2.0-or-later';
+		}
+
+		// Handle the `GPL-2.0-or-later` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(2[.-]?0?\s*-?)(or\s*-?later|\+)#i', $tmp_license ) ) {
+			return 'GPL-2.0-or-later';
+		}
+
+		// Handle the `GPL-2.0-only` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(2[.-]?0?\s*-?)(only)?#i', $tmp_license ) ) {
+			return 'GPL-2.0-only';
+		}
+
+		// Handle the `GPL-3.0-or-later` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(3[.-]?0?\s*-?)(or\s*-?later|\+)#i', $tmp_license ) ) {
+			return 'GPL-3.0-or-later';
+		}
+
+		// Handle the `GPL-3.0-only` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(3[.-]?0?\s*-?)(only)?#i', $tmp_license ) ) {
+			return 'GPL-3.0-only';
+		}
+
+		// Handle the `MIT` license.
+		if ( preg_match( '#(The\s*)?(MIT\s*)(License)?#i', $tmp_license ) ) {
+			return 'MIT';
+		}
+
+		return $license;
+	}
+
+	/**
 	 * Set a package's directory.
 	 *
 	 * @since 0.1.0
@@ -134,18 +277,6 @@ class PackageBuilder {
 	 */
 	public function set_directory( string $directory ): self {
 		return $this->set( 'directory', rtrim( $directory, '/' ) . '/' );
-	}
-
-	/**
-	 * Set the homepage URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $url URL.
-	 * @return $this
-	 */
-	public function set_homepage( string $url ): self {
-		return $this->set( 'homepage', $url );
 	}
 
 	/**
@@ -245,11 +376,12 @@ class PackageBuilder {
 	 */
 	public function with_package( Package $package ): self {
 		$this
-			->set_author( $package->get_author() )
-			->set_author_url( $package->get_author_url() )
-			->set_description( $package->get_description() )
-			->set_name( $package->get_name() )
+			->set_authors( $package->get_authors() )
 			->set_homepage( $package->get_homepage() )
+			->set_description( $package->get_description() )
+			->set_keywords( $package->get_keywords() )
+			->set_license( $package->get_license() )
+			->set_name( $package->get_name() )
 			->set_slug( $package->get_slug() )
 			->set_type( $package->get_type() );
 
@@ -343,7 +475,7 @@ class PackageBuilder {
 	 * @param mixed  $value Property value.
 	 *
 	 * @return $this
-	 * @throws \ReflectionException
+	 * @throws \ReflectionException If no property exists by that name.
 	 */
 	protected function set( $name, $value ): self {
 		$property = $this->class->getProperty( $name );

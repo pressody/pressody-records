@@ -113,11 +113,11 @@ class Upgrade extends AbstractHookProvider {
 	public function maybe_upgrade() {
 		$saved_version = get_option( self::VERSION_OPTION_NAME, '0' );
 
-		if ( version_compare( $saved_version, '0.3.0-dev1', '<' ) ) {
-			Capabilities::register();
-			$this->setup_storage();
-			$this->cache_packages();
-		}
+//		if ( version_compare( $saved_version, '0.3.0-dev1', '<' ) ) {
+//			Capabilities::register();
+//			$this->setup_storage();
+//			$this->cache_packages();
+//		}
 
 		if ( version_compare( $saved_version, VERSION, '<' ) ) {
 			update_option( self::VERSION_OPTION_NAME, VERSION );

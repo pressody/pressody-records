@@ -153,10 +153,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 						'composer/installers' => '^1.0',
 					],
 					'type'               => $package->get_type(),
-					'authors'            => [
-						'name'     => $package->get_author(),
-						'homepage' => esc_url( $package->get_author_url() ),
-					],
+					'authors'            => $package->get_authors(),
 					'description'        => $package->get_description(),
 					'homepage'           => $package->get_homepage(),
 				];

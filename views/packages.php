@@ -55,18 +55,25 @@ foreach ( $packages as $package ) :
 
 		<?php
 		$homepage = $package->get_homepage();
-		if ( $homepage ) :
-			?>
+		if ( ! empty( $homepage ) ) { ?>
 			<tr>
 				<th><?php esc_html_e( 'Homepage', 'pixelgradelt_records' ); ?></th>
 				<td><a href="<?php echo esc_url( $homepage ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $homepage ); ?></a></td>
 			</tr>
-		<?php endif; ?>
+		<?php }
 
+		$authors = $package->get_authors();
+		if ( ! empty( $authors ) ) { ?>
 		<tr>
 			<th><?php esc_html_e( 'Authors', 'pixelgradelt_records' ); ?></th>
-			<td><a href="<?php echo esc_url( $package->get_author_url() ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $package->get_author() ); ?></a></td>
+			<?php foreach ( $authors as $author ) { ?>
+
+				<td><a href="<?php echo esc_url( $author['homepage'] ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $author['name'] ); ?></a></td>
+
+			<?php } ?>
 		</tr>
+		<?php } ?>
+
 		<tr>
 			<th><?php esc_html_e( 'Releases', 'pixelgradelt_records' ); ?></th>
 			<td class="pixelgradelt_records-releases">

@@ -24,6 +24,14 @@ use PixelgradeLT\Records\PackageType\ThemeBuilder;
  * @since 0.1.0
  */
 final class PackageFactory {
+
+	/**
+	 * Package manager.
+	 *
+	 * @var PackageManager
+	 */
+	private $package_manager;
+
 	/**
 	 * Release manager.
 	 *
@@ -36,9 +44,14 @@ final class PackageFactory {
 	 *
 	 * @since 0.1.0
 	 *
+	 * @param PackageManager $package_manager Packages manager.
 	 * @param ReleaseManager $release_manager Release manager.
 	 */
-	public function __construct( ReleaseManager $release_manager ) {
+	public function __construct(
+		PackageManager $package_manager,
+		ReleaseManager $release_manager
+	) {
+		$this->package_manager = $package_manager;
 		$this->release_manager = $release_manager;
 	}
 
@@ -53,11 +66,11 @@ final class PackageFactory {
 	public function create( string $package_type ): PackageBuilder {
 		switch ( $package_type ) {
 			case 'plugin':
-				return new PluginBuilder( new Plugin(), $this->release_manager );
+				return new PluginBuilder( new Plugin(), $this->package_manager, $this->release_manager );
 			case 'theme':
-				return new ThemeBuilder( new Theme(), $this->release_manager );
+				return new ThemeBuilder( new Theme(), $this->package_manager, $this->release_manager );
 		}
 
-		return new PackageBuilder( new BasePackage(), $this->release_manager );
+		return new PackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager );
 	}
 }

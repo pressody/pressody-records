@@ -16,49 +16,45 @@ use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Capabilities;
+use PixelgradeLT\Records\Repository\PackageRepository;
+use PixelgradeLT\Records\PackageManager;
 
 /**
- * The Package custom post type provider: handle the information about each managed package.
+ * The Package custom post type provider: provides the interface for and stores the information about each managed package.
  *
  * @since 0.1.0
  */
 class PackagePostType extends AbstractHookProvider {
-	const POST_TYPE = 'ltpackage';
-	const POST_TYPE_PLURAL = 'ltpackages';
-
-	const PACKAGE_TYPE_TAXONOMY = 'ltpackage_types';
-	const PACKAGE_TYPE_TAXONOMY_SINGULAR = 'ltpackage_type';
 
 	/**
-	 * We will automatically register these if they are not present.The slugs will be transformed into the package types defined by composer/installers
-	 * @see \PixelgradeLT\Records\Transformer\ComposerPackageTransformer::WORDPRESS_TYPES
-	 * @link https://packagist.org/packages/composer/installers
+	 * Package manager.
+	 *
+	 * @var PackageManager
 	 */
-	const PACKAGE_TYPE_TERMS = [
-		[
-			'name'        => 'WordPress Plugin',
-			'slug'        => 'plugin',
-			'description' => 'A WordPress plugin package.',
-		],
-		[
-			'name'        => 'WordPress Theme',
-			'slug'        => 'theme',
-			'description' => 'A WordPress theme package.',
-		],
-		[
-			'name'        => 'WordPress Must-Use Plugin',
-			'slug'        => 'muplugin',
-			'description' => 'A WordPress Must-Use plugin package.',
-		],
-		[
-			'name'        => 'WordPress Drop-in Plugin',
-			'slug'        => 'dropin',
-			'description' => 'A WordPress Drop-in plugin package.',
-		],
-	];
+	protected $package_manager;
 
-	const PACKAGE_KEYWORD_TAXONOMY = 'ltpackage_keywords';
-	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpackage_keyword';
+	/**
+	 * Packages repository.
+	 *
+	 * @var PackageRepository
+	 */
+	protected $packages;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param PackageManager    $package_manager Packages manager.
+	 * @param PackageRepository $packages        Packages repository.
+	 */
+	public function __construct(
+			PackageManager $package_manager,
+			PackageRepository $packages
+	) {
+		$this->package_manager = $package_manager;
+		$this->packages        = $packages;
+	}
 
 	public function register_hooks() {
 		/*
@@ -66,7 +62,7 @@ class PackagePostType extends AbstractHookProvider {
 		 */
 		$this->add_action( 'init', 'register_post_type' );
 		// Make sure that the post has a title.
-		$this->add_action( 'save_post_' . static::POST_TYPE, 'prevent_post_save_without_title' );
+		$this->add_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'prevent_post_save_without_title' );
 		// Change the post title placeholder.
 		$this->add_filter( 'enter_title_here', 'change_title_placeholder', 10, 2 );
 		// Add a description to the slug
@@ -74,16 +70,18 @@ class PackagePostType extends AbstractHookProvider {
 		// Make sure that the slug and other metaboxes are never hidden.
 		$this->add_filter( 'hidden_meta_boxes', 'prevent_hidden_metaboxes', 10, 2 );
 		// Rearrange the core metaboxes.
-		$this->add_action( 'add_meta_boxes_' . static::POST_TYPE, 'adjust_core_metaboxes', 99 );
+		$this->add_action( 'add_meta_boxes_' . $this->package_manager::PACKAGE_POST_TYPE, 'adjust_core_metaboxes', 99 );
 
-		$this->add_action( 'init', 'register_meta' );
+		// We want extra header fields included in the plugin and theme data.
+		$this->add_filter( 'extra_plugin_headers', 'add_extra_installed_headers' );
+		$this->add_filter( 'extra_theme_headers', 'add_extra_installed_headers' );
 
 		/*
 		 * HANDLE THE CUSTOM TAXONOMY LOGIC.
 		 */
 		$this->add_action( 'init', 'register_taxonomy' );
 		// Handle the custom taxonomy logic on the post edit screen.
-		$this->add_action( 'save_post_' . static::POST_TYPE, 'save_package_type_meta_box' );
+		$this->add_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'save_package_type_meta_box' );
 		// Show a dropdown to filter the posts list by the custom taxonomy.
 		$this->add_action( 'restrict_manage_posts', 'output_admin_list_filters' );
 
@@ -97,19 +95,12 @@ class PackagePostType extends AbstractHookProvider {
 		 */
 		$this->add_action( 'after_setup_theme', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
+		// Fill empty package details from source.
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_config_details_on_post_save', 10, 2 );
 	}
 
 	protected function register_post_type() {
-		register_post_type( static::POST_TYPE, $this->get_post_type_args() );
-	}
-
-	protected function register_meta() {
-		register_meta( 'post', 'isbn', array(
-			'type'              => 'string',
-			'single'            => true,
-			'sanitize_callback' => 'sanitize_text_field',
-			'show_in_rest'      => true,
-		) );
+		register_post_type( $this->package_manager::PACKAGE_POST_TYPE, $this->get_post_type_args() );
 	}
 
 	protected function get_post_type_args(): array {
@@ -139,7 +130,7 @@ class PackagePostType extends AbstractHookProvider {
 			'public'             => false,
 			'publicly_queryable' => true,
 			'has_archive'        => false,
-			'rest_base'          => static::POST_TYPE_PLURAL,
+			'rest_base'          => $this->package_manager::PACKAGE_POST_TYPE_PLURAL,
 			'show_ui'            => true,
 			'show_in_menu'       => true,
 			'show_in_nav_menus'  => false,
@@ -156,20 +147,20 @@ class PackagePostType extends AbstractHookProvider {
 	protected function register_taxonomy() {
 
 		register_taxonomy(
-			static::PACKAGE_TYPE_TAXONOMY,
-			[ static::POST_TYPE ],
+				$this->package_manager::PACKAGE_TYPE_TAXONOMY,
+			[ $this->package_manager::PACKAGE_POST_TYPE ],
 			$this->get_package_type_taxonomy_args()
 		);
 
-		foreach ( static::PACKAGE_TYPE_TERMS as $term ) {
-			if ( ! term_exists( $term['name'], static::PACKAGE_TYPE_TAXONOMY ) ) {
-				wp_insert_term( $term['name'], static::PACKAGE_TYPE_TAXONOMY, $term );
+		foreach ( $this->package_manager::PACKAGE_TYPE_TERMS as $term ) {
+			if ( ! term_exists( $term['name'], $this->package_manager::PACKAGE_TYPE_TAXONOMY ) ) {
+				wp_insert_term( $term['name'], $this->package_manager::PACKAGE_TYPE_TAXONOMY, $term );
 			}
 		}
 
 		register_taxonomy(
-			static::PACKAGE_KEYWORD_TAXONOMY,
-			[ static::POST_TYPE ],
+				$this->package_manager::PACKAGE_KEYWORD_TAXONOMY,
+			[ $this->package_manager::PACKAGE_POST_TYPE ],
 			$this->get_package_keyword_taxonomy_args()
 		);
 	}
@@ -264,7 +255,7 @@ class PackagePostType extends AbstractHookProvider {
 		// A valid title is required, so don't let this get published without one
 		if ( empty( $package_title ) ) {
 			// unhook this function so it doesn't loop infinitely
-			$this->remove_action( 'save_post_' . static::POST_TYPE, 'prevent_post_save_without_title' );
+			$this->remove_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'prevent_post_save_without_title' );
 
 			$postdata = array(
 				'ID'          => $post_id,
@@ -278,7 +269,7 @@ class PackagePostType extends AbstractHookProvider {
 	}
 
 	protected function change_title_placeholder( string $placeholder, \WP_Post $post ): string {
-		if ( static::POST_TYPE !== get_post_type( $post ) ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) ) {
 			return $placeholder;
 		}
 
@@ -287,12 +278,12 @@ class PackagePostType extends AbstractHookProvider {
 
 	protected function add_post_slug_description( string $post_name, $post ): string {
 		// we want this only on the edit post screen.
-		if ( static::POST_TYPE !== get_current_screen()->id ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_current_screen()->id ) {
 			return $post_name;
 		}
 
 		// Only on our post type.
-		if ( static::POST_TYPE !== get_post_type( $post ) ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) ) {
 			return $post_name;
 		}
 		// Just output it since there is no way to add it other way. ?>
@@ -319,9 +310,9 @@ class PackagePostType extends AbstractHookProvider {
 	protected function prevent_hidden_metaboxes( array $hidden, \WP_Screen $screen ): array {
 		if ( ! empty( $hidden ) && is_array( $hidden ) &&
 			! empty( $screen->id ) &&
-			 static::POST_TYPE === $screen->id &&
+		     $this->package_manager::PACKAGE_POST_TYPE === $screen->id &&
 		     ! empty( $screen->post_type ) &&
-		     static::POST_TYPE === $screen->post_type
+		     $this->package_manager::PACKAGE_POST_TYPE === $screen->post_type
 		) {
 			// Prevent the slug metabox from being hidden.
 			if ( false !== ( $key = array_search( 'slugdiv', $hidden ) ) ) {
@@ -340,21 +331,21 @@ class PackagePostType extends AbstractHookProvider {
 	protected function adjust_core_metaboxes( \WP_Post $post ) {
 		global $wp_meta_boxes;
 
-		if ( empty( $wp_meta_boxes[ static::POST_TYPE ] ) ) {
+		if ( empty( $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ] ) ) {
 			return;
 		}
 
 		// We will move the slug metabox at the very top.
-		if ( ! empty( $wp_meta_boxes[ static::POST_TYPE ]['normal']['core']['slugdiv'] ) ) {
-			$tmp = $wp_meta_boxes[ static::POST_TYPE ]['normal']['core']['slugdiv'];
-			unset( $wp_meta_boxes[ static::POST_TYPE ]['normal']['core']['slugdiv'] );
+		if ( ! empty( $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['normal']['core']['slugdiv'] ) ) {
+			$tmp = $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['normal']['core']['slugdiv'];
+			unset( $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['normal']['core']['slugdiv'] );
 
-			$wp_meta_boxes[ static::POST_TYPE ]['normal']['core'] = [ 'slugdiv' => $tmp ] + $wp_meta_boxes[ static::POST_TYPE ]['normal']['core'];
+			$wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['normal']['core'] = [ 'slugdiv' => $tmp ] + $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['normal']['core'];
 		}
 
 		// Since we are here, modify the package type title to be singular, rather than plural.
-		if ( ! empty( $wp_meta_boxes[ static::POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types'] ) ) {
-			$wp_meta_boxes[ static::POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types']['title'] = esc_html__( 'Package Type', 'pixelgradelt_records' ) . '<span style="color: red; flex: auto">*</span>';
+		if ( ! empty( $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types'] ) ) {
+			$wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types']['title'] = esc_html__( 'Package Type', 'pixelgradelt_records' ) . '<span style="color: red; flex: auto">*</span>';
 		}
 	}
 
@@ -364,9 +355,9 @@ class PackagePostType extends AbstractHookProvider {
 	 * @param \WP_Post $post
 	 */
 	public function package_type_meta_box( \WP_Post $post ) {
-		$terms = get_terms( static::PACKAGE_TYPE_TAXONOMY, array( 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
+		$terms = get_terms( $this->package_manager::PACKAGE_TYPE_TAXONOMY, array( 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
 
-		$package_type = wp_get_object_terms( $post->ID, static::PACKAGE_TYPE_TAXONOMY, array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
+		$package_type = wp_get_object_terms( $post->ID, $this->package_manager::PACKAGE_TYPE_TAXONOMY, array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
 		$package_type_name   = '';
 
 		if ( ! is_wp_error( $package_type ) ) {
@@ -377,7 +368,7 @@ class PackagePostType extends AbstractHookProvider {
 
 		foreach ( $terms as $term ) { ?>
 			<label title="<?php esc_attr_e( $term->name ); ?>">
-				<input type="radio" name="<?php esc_attr_e( static::PACKAGE_TYPE_TAXONOMY_SINGULAR ); ?>"
+				<input type="radio" name="<?php esc_attr_e( $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ); ?>"
 				       value="<?php esc_attr_e( $term->name ); ?>" <?php checked( $term->name, $package_type_name ); ?>>
 				<span><?php esc_html_e( $term->name ); ?></span>
 			</label><br>
@@ -402,12 +393,12 @@ class PackagePostType extends AbstractHookProvider {
 			return;
 		}
 
-		$package_type = isset( $_POST[ static::PACKAGE_TYPE_TAXONOMY_SINGULAR ] ) ? sanitize_text_field( $_POST[ static::PACKAGE_TYPE_TAXONOMY_SINGULAR ] ) : '';
+		$package_type = isset( $_POST[ $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ] ) ? sanitize_text_field( $_POST[ $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ] ) : '';
 
 		// A valid rating is required, so don't let this get published without one
 		if ( empty( $package_type ) ) {
 			// unhook this function so it doesn't loop infinitely
-			$this->remove_action( 'save_post_' . static::POST_TYPE, 'save_package_type_meta_box' );
+			$this->remove_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'save_package_type_meta_box' );
 
 			$postdata = array(
 				'ID'          => $post_id,
@@ -415,9 +406,9 @@ class PackagePostType extends AbstractHookProvider {
 			);
 			wp_update_post( $postdata );
 		} else {
-			$term = get_term_by( 'name', $package_type, static::PACKAGE_TYPE_TAXONOMY );
+			$term = get_term_by( 'name', $package_type, $this->package_manager::PACKAGE_TYPE_TAXONOMY );
 			if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
-				wp_set_object_terms( $post_id, $term->term_id, static::PACKAGE_TYPE_TAXONOMY, false );
+				wp_set_object_terms( $post_id, $term->term_id, $this->package_manager::PACKAGE_TYPE_TAXONOMY, false );
 			}
 		}
 	}
@@ -430,7 +421,7 @@ class PackagePostType extends AbstractHookProvider {
 	 * @param \WP_Post The current post object.
 	 */
 	protected function show_post_error_msgs( \WP_Post $post ) {
-		if ( static::POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
 			return;
 		}
 
@@ -443,7 +434,7 @@ class PackagePostType extends AbstractHookProvider {
 		}
 
 		// Display an error regarding that the package type is required.
-		$package_type = wp_get_object_terms( $post->ID, static::PACKAGE_TYPE_TAXONOMY, array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
+		$package_type = wp_get_object_terms( $post->ID, $this->package_manager::PACKAGE_TYPE_TAXONOMY, array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
 			$taxonomy_args = $this->get_package_type_taxonomy_args();
 			printf(
@@ -459,11 +450,11 @@ class PackagePostType extends AbstractHookProvider {
 	 * @param string $post_type The current post type.
 	 */
 	protected function output_admin_list_filters( string $post_type ) {
-		if ( static::POST_TYPE !== $post_type ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== $post_type ) {
 			return;
 		}
 
-		$taxonomy = get_taxonomy( static::PACKAGE_TYPE_TAXONOMY );
+		$taxonomy = get_taxonomy( $this->package_manager::PACKAGE_TYPE_TAXONOMY );
 
 		wp_dropdown_categories( array(
 			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_records' ), $taxonomy->label ),
@@ -486,7 +477,7 @@ class PackagePostType extends AbstractHookProvider {
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the source details of the package.
 		Container::make( 'post_meta', 'Source Configuration' )
-		         ->where( 'post_type', '=', static::POST_TYPE )
+		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
@@ -576,7 +567,7 @@ class PackagePostType extends AbstractHookProvider {
 
 				         Field::make( 'separator', 'package_details_separator', '' ),
 				         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pixelgradelt_records' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br>Leave empty and we will try and deduce them the first time a version is available (from the theme or plugin headers).', 'pixelgradelt_records' ) ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pixelgradelt_records' ) ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
@@ -585,7 +576,7 @@ class PackagePostType extends AbstractHookProvider {
 							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
-				         Field::make( 'text', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
+				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
@@ -633,38 +624,67 @@ class PackagePostType extends AbstractHookProvider {
 		         ] );
 	}
 
-	static function get_installed_plugins_in_use( array $query_args = [] ): array {
-		$all_plugins_files = array_keys( get_plugins() );
+	protected function add_extra_installed_headers( array $extra_headers ): array {
+		$extra_headers = $extra_headers + ['License', 'Tags', ];
 
-		// Get all package posts that use installed plugins.
-		$query = new \WP_Query( array_merge( [
-				'post_type'  => static::POST_TYPE,
-				'fields' => 'ids',
-				'meta_query' => [
-						[
-								'key'   => '_package_source_type',
-								'value' => 'local.plugin',
-								'compare' => '=',
-						],
-				],
-		], $query_args ) );
-		$package_ids = $query->get_posts();
-		// Go through all posts and gather all the plugin_file values.
-		$used_plugin_files = [];
-		foreach ( $package_ids as $package_id ) {
-			$plugin_file = get_post_meta( $package_id, '_package_local_plugin_file', true );
-			if ( ! empty( $plugin_file ) && in_array( $plugin_file, $all_plugins_files ) ) {
-				$used_plugin_files[] = $plugin_file;
-			}
+		return array_unique( $extra_headers );
+	}
+
+	/**
+	 * Attempt to fill empty package details from the package source.
+	 *
+	 * @param int      $post_ID
+	 * @param Container\Post_Meta_Container $meta_container
+	 */
+	protected function fill_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+		$post = get_post( $post_ID );
+		if ( empty( $post ) || 'publish' !== $post->post_status ) {
+			return;
 		}
 
-		return $used_plugin_files;
+		$package_type = $this->package_manager->get_post_package_type( $post_ID );
+		if ( empty( $package_type ) ) {
+			return;
+		}
+
+		$package_slug = $this->package_manager->get_post_installed_package_slug( $post_ID );
+		if ( empty( $package_slug ) ) {
+			return;
+		}
+
+		$package = $this->packages->first_where( ['slug' => $package_slug, 'type' => $package_type, ] );
+		if ( empty( $package ) ) {
+			return;
+		}
+
+		// The package description.
+		if ( ! get_post_meta( $post_ID, '_package_details_description', true ) && $package->get_description() ) {
+			update_post_meta( $post_ID, '_package_details_description', sanitize_text_field( $package->get_description() ) );
+		}
+		// The package homepage URL.
+		if ( ! get_post_meta( $post_ID, '_package_details_homepage', true ) && $package->get_homepage() ) {
+			update_post_meta( $post_ID, '_package_details_homepage', esc_url_raw( $package->get_homepage() ) );
+		}
+		// The package license.
+		if ( ! get_post_meta( $post_ID, '_package_details_license', true ) && $package->get_license() ) {
+			update_post_meta( $post_ID, '_package_details_license', sanitize_text_field( $package->get_license() ) );
+		}
+		// The package author.
+		if ( ! carbon_get_post_meta( $post_ID, 'package_details_authors', $meta_container->get_id() ) && $package->get_authors() ) {
+			carbon_set_post_meta( $post_ID, 'package_details_authors', $package->get_authors() );
+		}
+
+		// The package keywords.
+		$package_keywords = wp_get_post_terms( $post_ID, $this->package_manager::PACKAGE_KEYWORD_TAXONOMY );
+		if ( ( is_wp_error( $package_keywords ) || empty( $package_keywords ) ) && $package->get_keywords() ) {
+			wp_set_post_terms( $post_ID, $package->get_keywords(), $this->package_manager::PACKAGE_KEYWORD_TAXONOMY );
+		}
 	}
 
 	public function get_available_installed_plugins_options(): array {
 		$options = [];
 
-		$used_plugin_files = static::get_installed_plugins_in_use( [ 'post__not_in' => [ get_the_ID(), ], ] );
+		$used_plugin_files = $this->package_manager->get_managed_installed_plugins( [ 'post__not_in' => [ get_the_ID(), ], ] );
 		foreach ( get_plugins() as $plugin_file => $plugin_data ) {
 			// Do not include plugins already attached to a package.
 			if ( in_array( $plugin_file, $used_plugin_files ) ) {
@@ -701,38 +721,10 @@ class PackagePostType extends AbstractHookProvider {
 		return $slug;
 	}
 
-	static function get_installed_themes_in_use( array $query_args = [] ): array {
-		$all_theme_slugs = array_keys( wp_get_themes() );
-
-		// Get all package posts that use installed themes.
-		$query = new \WP_Query( array_merge( [
-				'post_type'  => static::POST_TYPE,
-				'fields' => 'ids',
-				'meta_query' => [
-						[
-								'key'   => '_package_source_type',
-								'value' => 'local.theme',
-								'compare' => '=',
-						],
-				],
-		], $query_args ) );
-		$package_ids = $query->get_posts();
-		// Go through all posts and gather all the theme_slug values.
-		$used_theme_slugs = [];
-		foreach ( $package_ids as $package_id ) {
-			$theme_slug = get_post_meta( $package_id, '_package_local_theme_slug', true );
-			if ( ! empty( $theme_slug ) && in_array( $theme_slug, $all_theme_slugs ) ) {
-				$used_theme_slugs[] = $theme_slug;
-			}
-		}
-
-		return $used_theme_slugs;
-	}
-
 	public function get_available_installed_themes_options(): array {
 		$options = [];
 
-		$used_theme_slugs = static::get_installed_themes_in_use( [ 'post__not_in' => [ get_the_ID(), ], ] );
+		$used_theme_slugs = $this->package_manager->get_managed_installed_themes( [ 'post__not_in' => [ get_the_ID(), ], ] );
 
 		foreach ( wp_get_themes() as $theme_slug => $theme_data ) {
 			// Do not include themes already attached to a package.
@@ -749,38 +741,5 @@ class PackagePostType extends AbstractHookProvider {
 		$options = [ null => esc_html__( 'Pick your installed theme, carefully..', 'pixelgradelt_records' ) ] + $options;
 
 		return $options;
-	}
-
-	static function get_post_package_type( int $post_ID ): string {
-		/** @var \WP_Error|\WP_Term[] $package_type */
-		$package_type = wp_get_post_terms( $post_ID, static::PACKAGE_TYPE_TAXONOMY );
-		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
-			return '';
-		}
-		$package_type = reset( $package_type );
-
-		return $package_type->slug;
-	}
-
-	static function get_post_installed_package_slug( int $post_ID ): string {
-		$package_slug = '';
-
-		$package_type = PackagePostType::get_post_package_type( $post_ID );
-		if ( empty( $package_type ) ) {
-			return $package_slug;
-		}
-
-		$package_source_type = get_post_meta( $post_ID, '_package_source_type', true );
-		if ( empty( $package_source_type ) ) {
-			return $package_slug;
-		}
-
-		if ( 'plugin' === $package_type && 'local.plugin' === $package_source_type  ) {
-			$package_slug = get_post_meta( $post_ID, '_package_local_plugin_file', true );
-		} else if ( 'theme' === $package_type && 'local.theme' === $package_source_type ) {
-			$package_slug = get_post_meta( $post_ID, '_package_local_theme_slug', true );
-		}
-
-		return $package_slug;
 	}
 }
