@@ -132,6 +132,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['repository.installed'],
 				$container['repository.configured.installed'],
 				$container['release.manager'],
+				$container['storage.packages'],
 				$container['logger']
 			);
 		};

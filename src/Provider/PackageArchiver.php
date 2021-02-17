@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\Provider;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
 use PixelgradeLT\Records\PostType\PackagePostType;
+use PixelgradeLT\Records\Storage\Storage;
 use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Release;
@@ -48,6 +49,13 @@ class PackageArchiver extends AbstractHookProvider {
 	protected $release_manager;
 
 	/**
+	 * Storage.
+	 *
+	 * @var Storage
+	 */
+	protected $storage;
+
+	/**
 	 * Whitelisted packages repository.
 	 *
 	 * @var PackageRepository
@@ -62,17 +70,20 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @param PackageRepository $packages                      Installed packages repository.
 	 * @param PackageRepository $configured_installed_packages Configured locally installed packages repository.
 	 * @param ReleaseManager    $release_manager               Release manager.
+	 * @param Storage           $storage                       Storage service.
 	 * @param LoggerInterface   $logger                        Logger.
 	 */
 	public function __construct(
 		PackageRepository $packages,
 		PackageRepository $configured_installed_packages,
 		ReleaseManager $release_manager,
+		Storage $storage,
 		LoggerInterface $logger
 	) {
 		$this->packages                      = $packages;
 		$this->configured_installed_packages = $configured_installed_packages;
 		$this->release_manager               = $release_manager;
+		$this->storage                       = $storage;
 		$this->logger                        = $logger;
 	}
 
@@ -254,9 +265,10 @@ class PackageArchiver extends AbstractHookProvider {
 				$this->release_manager->delete( $release );
 			}
 
-			// Finally delete the package directory. But we must make sure that it is empty.
-			if ( ! \rmdir( $package->get_directory() ) ) {
-				throw FileOperationFailed::unableToDeleteReleaseArtifactFromStorage( $package->get_directory() );
+			// Finally delete the empty package directory.
+			$package_storage_dir_absolute_path = $this->storage->get_absolute_path( $package->get_slug() );
+			if ( ! \rmdir( $package_storage_dir_absolute_path ) ) {
+				throw FileOperationFailed::unableToDeletePackageDirectoryFromStorage( $package_storage_dir_absolute_path );
 			}
 		} catch ( PixelgradeltRecordsException $e ) {
 			$this->logger->warning(
