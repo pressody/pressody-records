@@ -26,8 +26,8 @@ final class PluginBuilder extends PackageBuilder {
 	 *
 	 * @param string $basename Relative path from the main plugin directory.
 	 *
-	 * @return PluginBuilder
 	 * @throws \ReflectionException
+	 * @return PluginBuilder
 	 */
 	public function set_basename( string $basename ): self {
 		return $this->set( 'basename', $basename );
@@ -39,6 +39,9 @@ final class PluginBuilder extends PackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $plugin_file Relative path to the main plugin file.
+	 *
+	 * @throws \ReflectionException
+	 * @return PluginBuilder
 	 */
 	public function from_file( string $plugin_file ): self {
 		$slug = $this->get_slug_from_plugin_file( $plugin_file );
@@ -55,52 +58,15 @@ final class PluginBuilder extends PackageBuilder {
 	}
 
 	/**
-	 * Fill missing plugin package details from the PackageManager if this is a managed plugin (via CPT).
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $plugin_file Relative path to the main plugin file.
-	 */
-	public function from_manager( string $plugin_file ): self {
-		$slug = $this->get_slug_from_plugin_file( $plugin_file );
-
-		// Account for single-file plugins.
-		$directory = '.' === \dirname( $plugin_file ) ? '' : \dirname( $plugin_file );
-
-		if ( empty( $plugin_data ) ) {
-			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_file, false, false );
-		}
-
-		// If we don't have 'Tags', attempt to get them from the plugin's readme.txt.
-		if ( empty( $plugin_data['Tags'] ) ) {
-			$plugin_data['Tags'] = $this->get_tags_from_readme( $directory );
-		}
-
-		return $this
-			->set_authors( [
-				[
-					'name' => $plugin_data['AuthorName'],
-					'homepage' => $plugin_data['AuthorURI'],
-				]
-			] )
-			->set_homepage( $plugin_data['PluginURI'] )
-			->set_description( $plugin_data['Description'] )
-			->set_keywords( $plugin_data['Tags'] )
-			->set_license( $plugin_data['License'] )
-			->set_name( $plugin_data['Name'] )
-			->set_installed_version( $plugin_data['Version'] );
-	}
-
-	/**
-	 * Fill missing plugin package details from source.
+	 * Fill (missing) plugin package details from source.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param string $plugin_file Relative path to the main plugin file.
 	 * @param array  $plugin_data Optional. Array of plugin data.
 	 *
-	 * @return PluginBuilder
 	 * @throws \ReflectionException
+	 * @return PluginBuilder
 	 */
 	public function from_source( string $plugin_file, array $plugin_data = [] ): self {
 		$slug = $this->get_slug_from_plugin_file( $plugin_file );
@@ -117,19 +83,60 @@ final class PluginBuilder extends PackageBuilder {
 			$plugin_data['Tags'] = $this->get_tags_from_readme( $directory );
 		}
 
-		return $this
-			->set_authors( [
+		/*
+		 * Start filling info.
+		 */
+
+		if ( empty( $this->package->get_basename() ) ) {
+			$this->set_basename( $plugin_file );
+		}
+
+		if ( empty( $this->package->get_directory() ) ) {
+			$this->set_directory( WP_PLUGIN_DIR . '/' . $directory );
+		}
+
+		if ( empty( $this->package->get_slug() ) ) {
+			$this->set_slug( $slug );
+		}
+
+		if ( empty( $this->package->get_type() ) ) {
+			$this->set_type( 'plugin' );
+		}
+
+		if ( empty( $this->package->get_authors() ) ) {
+			$this->set_authors( [
 				[
-					'name' => $plugin_data['AuthorName'],
+					'name'     => $plugin_data['AuthorName'],
 					'homepage' => $plugin_data['AuthorURI'],
-				]
-			] )
-			->set_homepage( $plugin_data['PluginURI'] )
-			->set_description( $plugin_data['Description'] )
-			->set_keywords( $plugin_data['Tags'] )
-			->set_license( $plugin_data['License'] )
-			->set_name( $plugin_data['Name'] )
-			->set_installed_version( $plugin_data['Version'] );
+				],
+			] );
+		}
+
+		if ( empty( $this->package->get_homepage() ) ) {
+			$this->set_homepage( $plugin_data['PluginURI'] );
+		}
+
+		if ( empty( $this->package->get_description() ) ) {
+			$this->set_description( $plugin_data['Description'] );
+		}
+
+		if ( empty( $this->package->get_keywords() ) ) {
+			$this->set_keywords( $plugin_data['Tags'] );
+		}
+
+		if ( empty( $this->package->get_license() ) ) {
+			$this->set_license( $plugin_data['License'] );
+		}
+
+		if ( empty( $this->package->get_name() ) ) {
+			$this->set_name( $plugin_data['Name'] );
+		}
+
+		if ( empty( $this->package->get_installed_version() ) ) {
+			$this->set_installed_version( $plugin_data['Version'] );
+		}
+
+		return $this;
 	}
 
 	/**

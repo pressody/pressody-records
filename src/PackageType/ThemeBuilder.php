@@ -2,12 +2,12 @@
 /**
  * Theme builder.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType;
 
@@ -17,12 +17,31 @@ namespace PixelgradeLT\Records\PackageType;
  * @since 0.1.0
  */
 final class ThemeBuilder extends PackageBuilder {
+
 	/**
-	 * Create a theme from source.
+	 * Fill the basic theme package details that we can deduce from a given theme slug.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string        $slug  Theme slug.
+	 * @param string $slug Theme slug.
+	 *
+	 * @return ThemeBuilder
+	 */
+	public function from_slug( string $slug ): self {
+
+		return $this
+			->set_directory( get_theme_root() . '/' . $slug )
+			->set_installed( true )
+			->set_slug( $slug )
+			->set_type( 'theme' );
+	}
+
+	/**
+	 * Fill (missing) plugin package details from source.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string         $slug  Theme slug.
 	 * @param \WP_Theme|null $theme Optional. Theme instance.
 	 *
 	 * @return ThemeBuilder
@@ -32,23 +51,55 @@ final class ThemeBuilder extends PackageBuilder {
 			$theme = wp_get_theme( $slug );
 		}
 
-		return $this
-			->set_authors( [
+		/*
+		 * Start filling info.
+		 */
+
+		if ( empty( $this->package->get_directory() ) ) {
+			$this->set_directory( get_theme_root() . '/' . $slug );
+		}
+
+		if ( empty( $this->package->get_slug() ) ) {
+			$this->set_slug( $slug );
+		}
+
+		if ( empty( $this->package->get_type() ) ) {
+			$this->set_type( 'theme' );
+		}
+
+		if ( empty( $this->package->get_authors() ) ) {
+			$this->set_authors( [
 				[
-					'name' => $theme->get( 'Author' ),
+					'name'     => $theme->get( 'Author' ),
 					'homepage' => $theme->get( 'AuthorURI' ),
-				]
-			] )
-			->set_description( $theme->get( 'Description' ) )
-			->set_homepage( $theme->get( 'ThemeURI' ) )
-			->set_keywords( $theme->get( 'Tags' ) )
-			->set_license( $theme->get( 'License' ) )
-			->set_directory( get_theme_root() . '/' . $slug )
-			->set_name( $theme->get( 'Name' ) )
-			->set_installed( true )
-			->set_installed_version( $theme->get( 'Version' ) )
-			->set_slug( $slug )
-			->set_type( 'theme' )
-			->add_cached_releases();
+				],
+			] );
+		}
+
+		if ( empty( $this->package->get_homepage() ) ) {
+			$this->set_homepage( $theme->get( 'ThemeURI' ) );
+		}
+
+		if ( empty( $this->package->get_description() ) ) {
+			$this->set_description( $theme->get( 'Description' ) );
+		}
+
+		if ( empty( $this->package->get_keywords() ) ) {
+			$this->set_keywords( $theme->get( 'Tags' ) );
+		}
+
+		if ( empty( $this->package->get_license() ) ) {
+			$this->set_license( $theme->get( 'License' ) );
+		}
+
+		if ( empty( $this->package->get_name() ) ) {
+			$this->set_name( $theme->get( 'Name' ) );
+		}
+
+		if ( empty( $this->package->get_installed_version() ) ) {
+			$this->set_installed_version( $theme->get( 'Version' ) );
+		}
+
+		return $this;
 	}
 }

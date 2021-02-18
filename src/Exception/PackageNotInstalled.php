@@ -61,7 +61,7 @@ class PackageNotInstalled extends \RuntimeException implements PixelgradeltRecor
 		Throwable $previous = null
 	): PackageNotInstalled {
 		$name    = $package->get_name();
-		$message = "Unable to archive {$package}; source does not exist.";
+		$message = "Unable to archive the '{$name}' package; source does not exist.";
 
 		return new static( $message, $code, $previous );
 	}

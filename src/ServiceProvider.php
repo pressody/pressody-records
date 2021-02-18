@@ -266,7 +266,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $plugins Array of plugin basenames.
 			 */
-			$plugins = apply_filters( 'pixelgradelt_records_installed_plugins_in_use', $container['package.manager']->get_installed_plugins_in_use() );
+			$plugins = apply_filters( 'pixelgradelt_records_installed_plugins_in_use', $container['package.manager']->get_managed_installed_plugins() );
 
 			/**
 			 * Filter the list of installed themes attached to a package (package type: local.theme).
@@ -277,7 +277,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $themes Array of theme slugs.
 			 */
-			$themes = apply_filters( 'pixelgradelt_records_installed_themes_in_use', $container['package.manager']->get_installed_themes_in_use() );
+			$themes = apply_filters( 'pixelgradelt_records_installed_themes_in_use', $container['package.manager']->get_managed_installed_themes() );
 
 			return $container['repository.installed']
 				->with_filter(

@@ -72,8 +72,12 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 	 */
 	protected function build( string $plugin_file, array $plugin_data ): Plugin {
 		return $this->factory->create( 'plugin' )
+			// Fill package details in a cascade.
+			// First from just the plugin file.
 			->from_file( $plugin_file )
-			->from_manager( $plugin_file )
+			// Then from the managed data, if this plugin is managed.
+			->from_manager( 'local.plugin', [ 'local_plugin_file' => $plugin_file ] )
+			// Then from the plugin source files, if there is anything left to fill.
 			->from_source( $plugin_file, $plugin_data )
 			->add_cached_releases()
 			->build();

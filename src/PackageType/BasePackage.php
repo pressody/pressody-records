@@ -62,7 +62,7 @@ class BasePackage implements \ArrayAccess, Package {
 	 *
 	 * @var string[]
 	 */
-	protected $keywords = '';
+	protected $keywords = [];
 
 	/**
 	 * Absolute path to the package directory.

@@ -499,21 +499,33 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_required( true )
 				              ->set_width( 50 ),
 
-				         Field::make( 'text', 'package_vendor', __( 'Package Vendor', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Composer identifies a certain package by its project name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The vendor must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.', 'pixelgradelt_records' ) )
+				         Field::make( 'text', 'package_source_name', __( 'Package Source Name', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket<code>)!</strong>', 'pixelgradelt_records' ) )
 				              ->set_width( 50 )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 							              'field'   => 'package_source_type',
-							              'value'   => [ 'packagist.org', 'vcs' ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+							              'value'   => [ 'packagist.org', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 
-				         Field::make( 'text', 'package_version_range', __( 'Package Version Range', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
- Specify a version range to <strong>limit the available versions for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>
+				         Field::make( 'text', 'package_source_project_name', __( 'Package Source Project Name', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Composer identifies a certain package by its project name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide only the project name (e.g. <code>akismet</code>), not the whole package name (e.g. <code>wpackagist-plugin/akismet</code>)!</strong>', 'pixelgradelt_records' ) )
+				              ->set_width( 50 )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'wpackagist.org', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+						              ],
+				              ] ),
+
+				         Field::make( 'text', 'package_source_version_range', __( 'Package Source Version Range', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions/releases. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
+ Specify a version range to <strong>limit the available versions/releases for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>
  Learn more about Composer <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
@@ -669,15 +681,15 @@ class PackagePostType extends AbstractHookProvider {
 		if ( ! get_post_meta( $post_ID, '_package_details_license', true ) && $package->get_license() ) {
 			update_post_meta( $post_ID, '_package_details_license', sanitize_text_field( $package->get_license() ) );
 		}
-		// The package author.
-		if ( ! carbon_get_post_meta( $post_ID, 'package_details_authors', $meta_container->get_id() ) && $package->get_authors() ) {
-			carbon_set_post_meta( $post_ID, 'package_details_authors', $package->get_authors() );
+		// The package authors.
+		if ( ! $this->package_manager->get_post_package_authors( $post_ID, $meta_container->get_id() ) && $package->get_authors() ) {
+			$this->package_manager->set_post_package_authors( $post_ID, $package->get_authors(), $meta_container->get_id() );
 		}
 
 		// The package keywords.
-		$package_keywords = wp_get_post_terms( $post_ID, $this->package_manager::PACKAGE_KEYWORD_TAXONOMY );
-		if ( ( is_wp_error( $package_keywords ) || empty( $package_keywords ) ) && $package->get_keywords() ) {
-			wp_set_post_terms( $post_ID, $package->get_keywords(), $this->package_manager::PACKAGE_KEYWORD_TAXONOMY );
+		$package_keywords = $this->package_manager->get_post_package_keywords( $post_ID );
+		if ( empty( $package_keywords ) && $package->get_keywords() ) {
+			$this->package_manager->set_post_package_keywords( $post_ID, $package->get_keywords() );
 		}
 	}
 

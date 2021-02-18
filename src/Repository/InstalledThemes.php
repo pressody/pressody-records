@@ -70,7 +70,14 @@ class InstalledThemes extends AbstractRepository implements PackageRepository {
 	 */
 	protected function build( string $slug, WP_Theme $theme ): Theme {
 		return $this->factory->create( 'theme' )
+			// Fill package details in a cascade.
+			// First from just the plugin file.
+			->from_slug( $slug )
+			// Then from the managed data, if this theme is managed.
+			->from_manager( 'local.theme', [ 'local_theme_slug' => $slug ] )
+			// Then from the theme source files, if there is anything left to fill.
 			->from_source( $slug, $theme )
+			->add_cached_releases()
 			->build();
 	}
 }

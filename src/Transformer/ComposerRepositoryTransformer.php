@@ -155,6 +155,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 					'type'               => $package->get_type(),
 					'authors'            => $package->get_authors(),
 					'description'        => $package->get_description(),
+					'keywords'           => $package->get_keywords(),
 					'homepage'           => $package->get_homepage(),
 				];
 			} catch ( FileNotFound $e ) {

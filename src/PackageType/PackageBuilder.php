@@ -367,6 +367,53 @@ class PackageBuilder {
 	}
 
 	/**
+	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $source_type The package source type.
+	 * @param array  $args
+	 *
+	 * @return PluginBuilder
+	 */
+	public function from_manager( string $source_type, array $args ): self {
+		$package_data = $this->package_manager->get_managed_package_data( $source_type, $args );
+		if ( empty( $package_data ) ) {
+			return $this;
+		}
+
+		if ( ! empty( $package_data['name'] ) ) {
+			$this->set_name( $package_data['name'] );
+		}
+
+		if ( ! empty( $package_data['type'] ) ) {
+			$this->set_type( $package_data['type'] );
+		}
+
+		if ( ! empty( $package_data['slug'] ) ) {
+			$this->set_slug( $package_data['slug'] );
+		}
+
+		if ( ! empty( $package_data['keywords'] ) ) {
+			$this->set_keywords( $package_data['keywords'] );
+		}
+
+		if ( ! empty( $package_data['details'] ) ) {
+			$this
+				->set_authors( $package_data['details']['authors'] )
+				->set_homepage( $package_data['details']['homepage'] )
+				->set_description( $package_data['details']['description'] )
+				->set_license( $package_data['details']['license'] );
+		}
+
+		if ( ! empty( $package_data['local_installed'] ) ) {
+			$this->set_installed( $package_data['local_installed'] );
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Set properties from an existing package.
 	 *
 	 * @since 0.1.0
