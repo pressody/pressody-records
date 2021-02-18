@@ -13,18 +13,16 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
-use DateTime;
+use Composer\IO\BaseIO;
 use Exception;
-use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
-use ReflectionClass;
 
 /**
  * Default logger class.
  *
  * @since 0.1.0
  */
-final class Logger extends AbstractLogger {
+final class Logger extends BaseIO {
 	/**
 	 * PSR log levels.
 	 *
@@ -197,5 +195,140 @@ final class Logger extends AbstractLogger {
 	protected function get_level_code( $level ): int {
 		$code = array_search( $level, $this->levels, true );
 		return false === $code ? -1 : $code;
+	}
+
+	/*
+	 * IOInterface bridge
+	 */
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function isInteractive() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function isVerbose() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function isVeryVerbose() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function isDebug() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function isDecorated() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function write($messages, $newline = true, $verbosity = self::NORMAL) {
+		if ( is_array( $messages ) ) {
+			$separator = ' | ';
+			if ( $newline ) {
+				$separator = PHP_EOL;
+			}
+			$messages = implode( $separator, $messages );
+		}
+
+		$this->log( $this->matchVerbosityWithLevel( $verbosity ), $messages );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function writeError($messages, $newline = true, $verbosity = self::NORMAL) {
+		$this->write( $messages, $newline, $verbosity );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function overwrite($messages, $newline = true, $size = 80, $verbosity = self::NORMAL) {
+		// Nothing to do.
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function overwriteError($messages, $newline = true, $size = 80, $verbosity = self::NORMAL) {
+		// Nothing to do.
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function ask($question, $default = null) {
+		return $default;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function askConfirmation($question, $default = true) {
+		return $default;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function askAndValidate($question, $validator, $attempts = false, $default = null) {
+		return $default;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function askAndHideAnswer($question) {
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function select($question, $choices, $default, $attempts = false, $errorMessage = 'Value "%s" is invalid', $multiselect = false) {
+		return $default;
+	}
+
+	protected function matchVerbosityWithLevel( $verbosity ) {
+		$logLevel = $this->minimum_level_code;
+		switch ( $verbosity ) {
+			case self::QUIET:
+				$logLevel = LogLevel::EMERGENCY;
+				break;
+			case self::NORMAL:
+				$logLevel = LogLevel::ERROR;
+				break;
+			case self::VERBOSE:
+				$logLevel = LogLevel::WARNING;
+				break;
+			case self::VERY_VERBOSE:
+				$logLevel = LogLevel::INFO;
+				break;
+			case self::DEBUG:
+				$logLevel = LogLevel::DEBUG;
+				break;
+			default:
+				break;
+		}
+
+		return $logLevel;
 	}
 }

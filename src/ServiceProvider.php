@@ -83,6 +83,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Authentication\UnauthorizedServer();
 		};
 
+		$container['client.composer'] = function( $container ) {
+			return new Client\ComposerClient( $container['logger'] );
+		};
+
 		$container['hooks.activation'] = function() {
 			return new Provider\Activation();
 		};
