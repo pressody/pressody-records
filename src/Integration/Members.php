@@ -80,5 +80,13 @@ class Members extends AbstractHookProvider {
 				'group' => 'pixelgradelt_records',
 			]
 		);
+
+		members_register_cap(
+			Capabilities::MANAGE_PACKAGE_TYPES,
+			[
+				'label' => esc_html__( 'Manage Package Types', 'pixelgradelt_records' ),
+				'group' => 'pixelgradelt_records',
+			]
+		);
 	}
 }
