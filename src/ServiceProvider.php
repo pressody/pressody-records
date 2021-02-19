@@ -84,7 +84,10 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['client.composer'] = function( $container ) {
-			return new Client\ComposerClient( $container['logger'] );
+			return new Client\ComposerClient(
+				$container['storage.working_directory_name'],
+				$container['logger']
+			);
 		};
 
 		$container['hooks.activation'] = function() {
@@ -212,7 +215,8 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['package.manager'] = function( $container ) {
 			return new PackageManager(
 				$container['storage.packages'],
-				$container['archiver']
+				$container['archiver'],
+				$container['client.composer']
 			);
 		};
 

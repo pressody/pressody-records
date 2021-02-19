@@ -11,8 +11,7 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
-use PixelgradeLT\Records\Exception\FileOperationFailed;
-use PixelgradeLT\Records\Exception\InvalidReleaseSource;
+use PixelgradeLT\Records\Client\ComposerClient;
 use PixelgradeLT\Records\Storage\Storage;
 
 /**
@@ -69,6 +68,13 @@ class PackageManager {
 	protected $archiver;
 
 	/**
+	 * External Composer repository client.
+	 *
+	 * @var ComposerClient
+	 */
+	protected $composer_client;
+
+	/**
 	 * Storage.
 	 *
 	 * @var Storage
@@ -80,12 +86,14 @@ class PackageManager {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Storage  $storage  Storage service.
-	 * @param Archiver $archiver Archiver.
+	 * @param Storage        $storage  Storage service.
+	 * @param Archiver       $archiver Archiver.
+	 * @param ComposerClient $composer_client
 	 */
-	public function __construct( Storage $storage, Archiver $archiver ) {
+	public function __construct( Storage $storage, Archiver $archiver, ComposerClient $composer_client ) {
 		$this->archiver = $archiver;
 		$this->storage  = $storage;
+		$this->composer_client  = $composer_client;
 	}
 
 	/**
@@ -107,6 +115,10 @@ class PackageManager {
 		ksort( $items );
 
 		return $items;
+	}
+
+	public function get_composer_client(): ComposerClient {
+		return $this->composer_client;
 	}
 
 	/**

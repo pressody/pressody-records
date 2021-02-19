@@ -2,12 +2,12 @@
 /**
  * The Package custom post type.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PostType;
 
@@ -97,6 +97,7 @@ class PackagePostType extends AbstractHookProvider {
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 		// Fill empty package details from source.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_config_details_on_post_save', 10, 2 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 10, 1 );
 	}
 
 	protected function register_post_type() {
@@ -105,42 +106,42 @@ class PackagePostType extends AbstractHookProvider {
 
 	protected function get_post_type_args(): array {
 		$labels = [
-			'name'                  => __( 'PixelgradeLT Packages', 'pixelgradelt_records' ),
-			'singular_name'         => __( 'PixelgradeLT Package', 'pixelgradelt_records' ),
-			'menu_name'             => _x( 'LT Packages', 'Admin Menu text', 'pixelgradelt_records' ),
-			'add_new'               => _x( 'Add New', 'PixelgradeLT Package', 'pixelgradelt_records' ),
-			'add_new_item'          => __( 'Add New PixelgradeLT Package', 'pixelgradelt_records' ),
-			'new_item'              => __( 'New PixelgradeLT Package', 'pixelgradelt_records' ),
-			'edit_item'             => __( 'Edit PixelgradeLT Package', 'pixelgradelt_records' ),
-			'view_item'             => __( 'View PixelgradeLT Package', 'pixelgradelt_records' ),
-			'all_items'             => __( 'All Packages', 'pixelgradelt_records' ),
-			'search_items'          => __( 'Search Packages', 'pixelgradelt_records' ),
-			'not_found'             => __( 'No packages found.', 'pixelgradelt_records' ),
-			'not_found_in_trash'    => __( 'No packages found in Trash.', 'pixelgradelt_records' ),
-			'uploaded_to_this_item' => __( 'Uploaded to this package', 'pixelgradelt_records' ),
-			'filter_items_list'     => __( 'Filter packages list', 'pixelgradelt_records' ),
-			'items_list_navigation' => __( 'Packages list navigation', 'pixelgradelt_records' ),
-			'items_list'            => __( 'PixelgradeLT Packages list', 'pixelgradelt_records' ),
+				'name'                  => __( 'PixelgradeLT Packages', 'pixelgradelt_records' ),
+				'singular_name'         => __( 'PixelgradeLT Package', 'pixelgradelt_records' ),
+				'menu_name'             => _x( 'LT Packages', 'Admin Menu text', 'pixelgradelt_records' ),
+				'add_new'               => _x( 'Add New', 'PixelgradeLT Package', 'pixelgradelt_records' ),
+				'add_new_item'          => __( 'Add New PixelgradeLT Package', 'pixelgradelt_records' ),
+				'new_item'              => __( 'New PixelgradeLT Package', 'pixelgradelt_records' ),
+				'edit_item'             => __( 'Edit PixelgradeLT Package', 'pixelgradelt_records' ),
+				'view_item'             => __( 'View PixelgradeLT Package', 'pixelgradelt_records' ),
+				'all_items'             => __( 'All Packages', 'pixelgradelt_records' ),
+				'search_items'          => __( 'Search Packages', 'pixelgradelt_records' ),
+				'not_found'             => __( 'No packages found.', 'pixelgradelt_records' ),
+				'not_found_in_trash'    => __( 'No packages found in Trash.', 'pixelgradelt_records' ),
+				'uploaded_to_this_item' => __( 'Uploaded to this package', 'pixelgradelt_records' ),
+				'filter_items_list'     => __( 'Filter packages list', 'pixelgradelt_records' ),
+				'items_list_navigation' => __( 'Packages list navigation', 'pixelgradelt_records' ),
+				'items_list'            => __( 'PixelgradeLT Packages list', 'pixelgradelt_records' ),
 		];
 
 		return [
-			'labels'             => $labels,
-			'description'        => __( 'Composer packages to be used in the PixelgradeLT modules delivered to PixelgradeLT users.', 'pixelgradelt_records' ),
-			'hierarchical'       => false,
-			'public'             => false,
-			'publicly_queryable' => true,
-			'has_archive'        => false,
-			'rest_base'          => $this->package_manager::PACKAGE_POST_TYPE_PLURAL,
-			'show_ui'            => true,
-			'show_in_menu'       => true,
-			'show_in_nav_menus'  => false,
-			'show_in_rest'       => true,
-			'map_meta_cap'       => true,
-			'supports'           => [
-				'title',
-				'revisions',
-				'custom-fields',
-			],
+				'labels'             => $labels,
+				'description'        => __( 'Composer packages to be used in the PixelgradeLT modules delivered to PixelgradeLT users.', 'pixelgradelt_records' ),
+				'hierarchical'       => false,
+				'public'             => false,
+				'publicly_queryable' => true,
+				'has_archive'        => false,
+				'rest_base'          => $this->package_manager::PACKAGE_POST_TYPE_PLURAL,
+				'show_ui'            => true,
+				'show_in_menu'       => true,
+				'show_in_nav_menus'  => false,
+				'show_in_rest'       => true,
+				'map_meta_cap'       => true,
+				'supports'           => [
+						'title',
+						'revisions',
+						'custom-fields',
+				],
 		];
 	}
 
@@ -148,8 +149,8 @@ class PackagePostType extends AbstractHookProvider {
 
 		register_taxonomy(
 				$this->package_manager::PACKAGE_TYPE_TAXONOMY,
-			[ $this->package_manager::PACKAGE_POST_TYPE ],
-			$this->get_package_type_taxonomy_args()
+				[ $this->package_manager::PACKAGE_POST_TYPE ],
+				$this->get_package_type_taxonomy_args()
 		);
 
 		foreach ( $this->package_manager::PACKAGE_TYPE_TERMS as $term ) {
@@ -160,74 +161,74 @@ class PackagePostType extends AbstractHookProvider {
 
 		register_taxonomy(
 				$this->package_manager::PACKAGE_KEYWORD_TAXONOMY,
-			[ $this->package_manager::PACKAGE_POST_TYPE ],
-			$this->get_package_keyword_taxonomy_args()
+				[ $this->package_manager::PACKAGE_POST_TYPE ],
+				$this->get_package_keyword_taxonomy_args()
 		);
 	}
 
 	protected function get_package_type_taxonomy_args(): array {
 		$labels = [
-			'name'                  => __( 'Package Types', 'pixelgradelt_records' ),
-			'singular_name'         => __( 'Package Type', 'pixelgradelt_records' ),
-			'add_new'               => _x( 'Add New', 'PixelgradeLT Package Type', 'pixelgradelt_records' ),
-			'add_new_item'          => __( 'Add New Package Type', 'pixelgradelt_records' ),
-			'update_item'           => __( 'Update Package Type', 'pixelgradelt_records' ),
-			'new_item_name'         => __( 'New Package Type Name', 'pixelgradelt_records' ),
-			'edit_item'             => __( 'Edit Package Type', 'pixelgradelt_records' ),
-			'all_items'             => __( 'All Package Types', 'pixelgradelt_records' ),
-			'search_items'          => __( 'Search Package Types', 'pixelgradelt_records' ),
-			'parent_item'           => __( 'Parent Package Type', 'pixelgradelt_records' ),
-			'parent_item_colon'     => __( 'Parent Package Type:', 'pixelgradelt_records' ),
-			'not_found'             => __( 'No package types found.', 'pixelgradelt_records' ),
-			'no_terms'              => __( 'No package types.', 'pixelgradelt_records' ),
-			'items_list_navigation' => __( 'Package Types list navigation', 'pixelgradelt_records' ),
-			'items_list'            => __( 'Package Types list', 'pixelgradelt_records' ),
-			'back_to_items'         => __( '&larr; Go to Package Types', 'pixelgradelt_records' ),
+				'name'                  => __( 'Package Types', 'pixelgradelt_records' ),
+				'singular_name'         => __( 'Package Type', 'pixelgradelt_records' ),
+				'add_new'               => _x( 'Add New', 'PixelgradeLT Package Type', 'pixelgradelt_records' ),
+				'add_new_item'          => __( 'Add New Package Type', 'pixelgradelt_records' ),
+				'update_item'           => __( 'Update Package Type', 'pixelgradelt_records' ),
+				'new_item_name'         => __( 'New Package Type Name', 'pixelgradelt_records' ),
+				'edit_item'             => __( 'Edit Package Type', 'pixelgradelt_records' ),
+				'all_items'             => __( 'All Package Types', 'pixelgradelt_records' ),
+				'search_items'          => __( 'Search Package Types', 'pixelgradelt_records' ),
+				'parent_item'           => __( 'Parent Package Type', 'pixelgradelt_records' ),
+				'parent_item_colon'     => __( 'Parent Package Type:', 'pixelgradelt_records' ),
+				'not_found'             => __( 'No package types found.', 'pixelgradelt_records' ),
+				'no_terms'              => __( 'No package types.', 'pixelgradelt_records' ),
+				'items_list_navigation' => __( 'Package Types list navigation', 'pixelgradelt_records' ),
+				'items_list'            => __( 'Package Types list', 'pixelgradelt_records' ),
+				'back_to_items'         => __( '&larr; Go to Package Types', 'pixelgradelt_records' ),
 		];
 
 		return [
-			'labels'             => $labels,
-			'show_ui'            => true,
-			'show_in_quick_edit' => true,
-			'show_admin_column'  => true,
-			'hierarchical'       => false,
-			'meta_box_cb'        => [ $this, 'package_type_meta_box' ],
-			'capabilities'       => [
-				'manage_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
-				'edit_terms'   => Capabilities::MANAGE_PACKAGE_TYPES,
-				'delete_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
-				'assign_terms' => 'edit_posts',
-			],
+				'labels'             => $labels,
+				'show_ui'            => true,
+				'show_in_quick_edit' => true,
+				'show_admin_column'  => true,
+				'hierarchical'       => false,
+				'meta_box_cb'        => [ $this, 'package_type_meta_box' ],
+				'capabilities'       => [
+						'manage_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
+						'edit_terms'   => Capabilities::MANAGE_PACKAGE_TYPES,
+						'delete_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
+						'assign_terms' => 'edit_posts',
+				],
 		];
 	}
 
 	protected function get_package_keyword_taxonomy_args(): array {
 		$labels = [
-			'name'                       => __( 'Package Keywords', 'pixelgradelt_records' ),
-			'singular_name'              => __( 'Package Keyword', 'pixelgradelt_records' ),
-			'add_new'                    => _x( 'Add New', 'PixelgradeLT Package Keyword', 'pixelgradelt_records' ),
-			'add_new_item'               => __( 'Add New Package Keyword', 'pixelgradelt_records' ),
-			'update_item'                => __( 'Update Package Keyword', 'pixelgradelt_records' ),
-			'new_item_name'              => __( 'New Package Keyword Name', 'pixelgradelt_records' ),
-			'edit_item'                  => __( 'Edit Package Keyword', 'pixelgradelt_records' ),
-			'all_items'                  => __( 'All Package Keywords', 'pixelgradelt_records' ),
-			'search_items'               => __( 'Search Package Keywords', 'pixelgradelt_records' ),
-			'not_found'                  => __( 'No package tags found.', 'pixelgradelt_records' ),
-			'no_terms'                   => __( 'No package tags.', 'pixelgradelt_records' ),
-			'separate_items_with_commas' => __( 'Separate keywords with commas.', 'pixelgradelt_records' ),
-			'choose_from_most_used'      => __( 'Choose from the most used keywords.', 'pixelgradelt_records' ),
-			'most_used'                  => __( 'Most used.', 'pixelgradelt_records' ),
-			'items_list_navigation'      => __( 'Package Keywords list navigation', 'pixelgradelt_records' ),
-			'items_list'                 => __( 'Package Keywords list', 'pixelgradelt_records' ),
-			'back_to_items'              => __( '&larr; Go to Package Keywords', 'pixelgradelt_records' ),
+				'name'                       => __( 'Package Keywords', 'pixelgradelt_records' ),
+				'singular_name'              => __( 'Package Keyword', 'pixelgradelt_records' ),
+				'add_new'                    => _x( 'Add New', 'PixelgradeLT Package Keyword', 'pixelgradelt_records' ),
+				'add_new_item'               => __( 'Add New Package Keyword', 'pixelgradelt_records' ),
+				'update_item'                => __( 'Update Package Keyword', 'pixelgradelt_records' ),
+				'new_item_name'              => __( 'New Package Keyword Name', 'pixelgradelt_records' ),
+				'edit_item'                  => __( 'Edit Package Keyword', 'pixelgradelt_records' ),
+				'all_items'                  => __( 'All Package Keywords', 'pixelgradelt_records' ),
+				'search_items'               => __( 'Search Package Keywords', 'pixelgradelt_records' ),
+				'not_found'                  => __( 'No package tags found.', 'pixelgradelt_records' ),
+				'no_terms'                   => __( 'No package tags.', 'pixelgradelt_records' ),
+				'separate_items_with_commas' => __( 'Separate keywords with commas.', 'pixelgradelt_records' ),
+				'choose_from_most_used'      => __( 'Choose from the most used keywords.', 'pixelgradelt_records' ),
+				'most_used'                  => __( 'Most used.', 'pixelgradelt_records' ),
+				'items_list_navigation'      => __( 'Package Keywords list navigation', 'pixelgradelt_records' ),
+				'items_list'                 => __( 'Package Keywords list', 'pixelgradelt_records' ),
+				'back_to_items'              => __( '&larr; Go to Package Keywords', 'pixelgradelt_records' ),
 		];
 
 		return [
-			'labels'             => $labels,
-			'show_ui'            => true,
-			'show_in_quick_edit' => true,
-			'show_admin_column'  => true,
-			'hierarchical'       => false,
+				'labels'             => $labels,
+				'show_ui'            => true,
+				'show_in_quick_edit' => true,
+				'show_admin_column'  => true,
+				'hierarchical'       => false,
 		];
 	}
 
@@ -258,8 +259,8 @@ class PackagePostType extends AbstractHookProvider {
 			$this->remove_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'prevent_post_save_without_title' );
 
 			$postdata = array(
-				'ID'          => $post_id,
-				'post_status' => 'draft',
+					'ID'          => $post_id,
+					'post_status' => 'draft',
 			);
 			wp_update_post( $postdata );
 
@@ -309,7 +310,7 @@ class PackagePostType extends AbstractHookProvider {
 	 */
 	protected function prevent_hidden_metaboxes( array $hidden, \WP_Screen $screen ): array {
 		if ( ! empty( $hidden ) && is_array( $hidden ) &&
-			! empty( $screen->id ) &&
+		     ! empty( $screen->id ) &&
 		     $this->package_manager::PACKAGE_POST_TYPE === $screen->id &&
 		     ! empty( $screen->post_type ) &&
 		     $this->package_manager::PACKAGE_POST_TYPE === $screen->post_type
@@ -355,10 +356,17 @@ class PackagePostType extends AbstractHookProvider {
 	 * @param \WP_Post $post
 	 */
 	public function package_type_meta_box( \WP_Post $post ) {
-		$terms = get_terms( $this->package_manager::PACKAGE_TYPE_TAXONOMY, array( 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
+		$terms = get_terms( $this->package_manager::PACKAGE_TYPE_TAXONOMY, array(
+				'hide_empty' => false,
+				'orderby'    => 'term_id',
+				'order'      => 'ASC',
+		) );
 
-		$package_type = wp_get_object_terms( $post->ID, $this->package_manager::PACKAGE_TYPE_TAXONOMY, array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
-		$package_type_name   = '';
+		$package_type      = wp_get_object_terms( $post->ID, $this->package_manager::PACKAGE_TYPE_TAXONOMY, array(
+				'orderby' => 'term_id',
+				'order'   => 'ASC',
+		) );
+		$package_type_name = '';
 
 		if ( ! is_wp_error( $package_type ) ) {
 			if ( isset( $package_type[0] ) && isset( $package_type[0]->name ) ) {
@@ -368,7 +376,8 @@ class PackagePostType extends AbstractHookProvider {
 
 		foreach ( $terms as $term ) { ?>
 			<label title="<?php esc_attr_e( $term->name ); ?>">
-				<input type="radio" name="<?php esc_attr_e( $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ); ?>"
+				<input type="radio"
+				       name="<?php esc_attr_e( $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ); ?>"
 				       value="<?php esc_attr_e( $term->name ); ?>" <?php checked( $term->name, $package_type_name ); ?>>
 				<span><?php esc_html_e( $term->name ); ?></span>
 			</label><br>
@@ -401,8 +410,8 @@ class PackagePostType extends AbstractHookProvider {
 			$this->remove_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'save_package_type_meta_box' );
 
 			$postdata = array(
-				'ID'          => $post_id,
-				'post_status' => 'draft',
+					'ID'          => $post_id,
+					'post_status' => 'draft',
 			);
 			wp_update_post( $postdata );
 		} else {
@@ -428,18 +437,21 @@ class PackagePostType extends AbstractHookProvider {
 		// Display an error regarding that the package title is required.
 		if ( empty( $post->post_title ) ) {
 			printf(
-				'<div class="error below-h2"><p>%s</p></div>',
-				esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pixelgradelt_records' )
+					'<div class="error below-h2"><p>%s</p></div>',
+					esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pixelgradelt_records' )
 			);
 		}
 
 		// Display an error regarding that the package type is required.
-		$package_type = wp_get_object_terms( $post->ID, $this->package_manager::PACKAGE_TYPE_TAXONOMY, array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
+		$package_type = wp_get_object_terms( $post->ID, $this->package_manager::PACKAGE_TYPE_TAXONOMY, array(
+				'orderby' => 'term_id',
+				'order'   => 'ASC',
+		) );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
 			$taxonomy_args = $this->get_package_type_taxonomy_args();
 			printf(
-				'<div class="error below-h2"><p>%s</p></div>',
-				sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
+					'<div class="error below-h2"><p>%s</p></div>',
+					sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
 			);
 		}
 	}
@@ -457,16 +469,16 @@ class PackagePostType extends AbstractHookProvider {
 		$taxonomy = get_taxonomy( $this->package_manager::PACKAGE_TYPE_TAXONOMY );
 
 		wp_dropdown_categories( array(
-			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_records' ), $taxonomy->label ),
-			'orderby'         => 'term_id',
-			'order'           => 'ASC',
-			'hide_empty'      => false,
-			'hide_if_empty'   => true,
-			'selected'        => filter_input( INPUT_GET, $taxonomy->query_var, FILTER_SANITIZE_STRING ),
-			'hierarchical'    => false,
-			'name'            => $taxonomy->query_var,
-			'taxonomy'        => $taxonomy->name,
-			'value_field'     => 'slug',
+				'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_records' ), $taxonomy->label ),
+				'orderby'         => 'term_id',
+				'order'           => 'ASC',
+				'hide_empty'      => false,
+				'hide_if_empty'   => true,
+				'selected'        => filter_input( INPUT_GET, $taxonomy->query_var, FILTER_SANITIZE_STRING ),
+				'hierarchical'    => false,
+				'name'            => $taxonomy->query_var,
+				'taxonomy'        => $taxonomy->name,
+				'value_field'     => 'slug',
 		) );
 	}
 
@@ -505,9 +517,11 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => [ 'packagist.org', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'packagist.org', ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 
@@ -518,8 +532,10 @@ class PackagePostType extends AbstractHookProvider {
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-								              'value'   => [ 'wpackagist.org', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'value'   => [ 'wpackagist.org', ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 
@@ -530,9 +546,11 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 
@@ -541,9 +559,11 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => 'vcs', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => 'vcs',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => '=',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 
@@ -557,8 +577,10 @@ class PackagePostType extends AbstractHookProvider {
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-								              'value'   => 'local.plugin', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'value'   => 'local.plugin',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => '=',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 				         Field::make( 'select', 'package_local_theme_slug', __( 'Choose one of the installed themes', 'pixelgradelt_records' ) )
@@ -571,8 +593,10 @@ class PackagePostType extends AbstractHookProvider {
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-								              'value'   => 'local.theme', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'value'   => 'local.theme',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => '=',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 
@@ -583,27 +607,33 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => ['local.plugin', 'local.theme', 'local.manual', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => ['local.plugin', 'local.theme', 'local.manual', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 				         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => ['local.plugin', 'local.theme', 'local.manual', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 				         Field::make( 'text', 'package_details_license', __( 'Package License', 'pixelgradelt_records' ) )
@@ -611,9 +641,11 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => ['local.plugin', 'local.theme', 'local.manual', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 				         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pixelgradelt_records' ) )
@@ -627,9 +659,11 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
-							              'field'   => 'package_source_type',
-							              'value'   => ['local.plugin', 'local.theme', 'local.manual', ], // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-							              'compare' => 'IN', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 						              ],
 				              ] ),
 
@@ -637,7 +671,7 @@ class PackagePostType extends AbstractHookProvider {
 	}
 
 	protected function add_extra_installed_headers( array $extra_headers ): array {
-		$extra_headers = $extra_headers + ['License', 'Tags', ];
+		$extra_headers = $extra_headers + [ 'License', 'Tags', ];
 
 		return array_unique( $extra_headers );
 	}
@@ -645,7 +679,7 @@ class PackagePostType extends AbstractHookProvider {
 	/**
 	 * Attempt to fill empty package details from the package source.
 	 *
-	 * @param int      $post_ID
+	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
 	protected function fill_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
@@ -664,7 +698,7 @@ class PackagePostType extends AbstractHookProvider {
 			return;
 		}
 
-		$package = $this->packages->first_where( ['slug' => $package_slug, 'type' => $package_type, ] );
+		$package = $this->packages->first_where( [ 'slug' => $package_slug, 'type' => $package_type, ] );
 		if ( empty( $package ) ) {
 			return;
 		}
@@ -690,6 +724,63 @@ class PackagePostType extends AbstractHookProvider {
 		$package_keywords = $this->package_manager->get_post_package_keywords( $post_ID );
 		if ( empty( $package_keywords ) && $package->get_keywords() ) {
 			$this->package_manager->set_post_package_keywords( $post_ID, $package->get_keywords() );
+		}
+	}
+
+	/**
+	 * Attempt to fetch external packages on post save.
+	 *
+	 * @param int                           $post_ID
+	 * @param Container\Post_Meta_Container $meta_container
+	 */
+	protected function fetch_external_packages_on_post_save( int $post_ID ) {
+		$post = get_post( $post_ID );
+		if ( empty( $post ) || 'publish' !== $post->post_status ) {
+			return;
+		}
+
+		$package_data = $this->package_manager->get_package_id_data( $post_ID );
+		if ( empty( $package_data['source_type'] ) || ! in_array( $package_data['source_type'], [
+						'packagist.org',
+						'wpackagist.org',
+						'vcs',
+				] ) ) {
+			return;
+		}
+
+		$client = $this->package_manager->get_composer_client();
+
+		$packages = [];
+
+		switch ( $package_data['source_type'] ) {
+			case 'packagist.org':
+				// Nothing right now.
+				break;
+			case 'wpackagist.org':
+				$packages = $client->getPackages( [
+						'repositories' => [
+								[
+										'type' => 'composer',
+										'url'  => 'https://wpackagist.org',
+//										'only' => [
+//												'wpackagist-plugin/*',
+//												'wpackagist-theme/*',
+//										],
+								],
+						],
+						'packages'     => [
+								$package_data['package_source_name'],
+						],
+						'require'     => [
+								$package_data['package_source_name'] => '*',
+						],
+				] );
+				break;
+			case 'vcs':
+				// Nothing right now.
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -744,7 +835,7 @@ class PackagePostType extends AbstractHookProvider {
 				continue;
 			}
 
-			$options[ $theme_slug ] = sprintf( __( '%s (by %s) - %s', 'pixelgradelt_records' ), $theme_data->get('Name'), $theme_data->get('Author'), $theme_slug );
+			$options[ $theme_slug ] = sprintf( __( '%s (by %s) - %s', 'pixelgradelt_records' ), $theme_data->get( 'Name' ), $theme_data->get( 'Author' ), $theme_slug );
 		}
 
 		ksort( $options );
