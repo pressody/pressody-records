@@ -107,7 +107,7 @@ class PackageManager {
 	 *
 	 * @return int[] Package post ids.
 	 */
-	public function get_package_ids( string $types = 'all' ): array {
+	public function get_package_type_ids( string $types = 'all' ): array {
 
 		return $this->get_package_ids_by( [
 			'package_type' => $types,
@@ -264,13 +264,14 @@ class PackageManager {
 
 		$data['name']        = $this->get_post_package_name( $post_ID );
 		$data['type']        = $this->get_post_package_type( $post_ID );
-		$data['source_type'] = $this->get_post_package_source_type( $post_ID );
 		$data['slug']        = $this->get_post_package_slug( $post_ID );
+		$data['source_type'] = $this->get_post_package_source_type( $post_ID );
 		$data['keywords']    = $this->get_post_package_keywords( $post_ID );
 
 		switch ( $data['source_type'] ) {
 			case 'packagist.org':
-				$data['package_source_name'] = get_post_meta( $post_ID, '_package_source_name', true );
+				// For packagist we expect a complete package name (in the form vendor/name).
+				$data['source_name'] = get_post_meta( $post_ID, '_package_source_name', true );
 				break;
 			case 'wpackagist.org':
 				// WPackagist.org used special vendor names.
@@ -278,12 +279,15 @@ class PackageManager {
 				if ( 'theme' === $data['type'] ) {
 					$vendor = 'wpackagist-theme';
 				}
-				$data['package_source_name'] = $vendor . '/' . get_post_meta( $post_ID, '_package_source_project_name', true );
+				$data['source_name'] = $vendor . '/' . get_post_meta( $post_ID, '_package_source_project_name', true );
 				break;
 			case 'vcs':
+				$data['source_name'] = 'vcs' . '/' . $data['slug'];
 				$data['vcs_url']       = get_post_meta( $post_ID, '_package_vcs_url', true );
 				break;
 			case 'local.plugin':
+				$data['source_name'] = 'local-plugin' . '/' . $data['slug'];
+
 				$data['local_plugin_file'] = get_post_meta( $post_ID, '_package_local_plugin_file', true );
 
 				// Determine if plugin is actually (still) installed.
@@ -294,6 +298,7 @@ class PackageManager {
 				}
 				break;
 			case 'local.theme':
+				$data['source_name'] = 'local-theme' . '/' . $data['slug'];
 				$data['local_theme_slug'] = get_post_meta( $post_ID, '_package_local_theme_slug', true );
 
 				// Determine if theme is actually (still) installed.
@@ -304,7 +309,7 @@ class PackageManager {
 				}
 				break;
 			case 'local.manual':
-				// To be determined.
+				$data['source_name'] = 'manual-plugin' . '/' . $data['slug'];
 				break;
 			default:
 				// Nothing
@@ -500,38 +505,4 @@ class PackageManager {
 
 		return $package_slug;
 	}
-
-//	/**
-//	 * Archive a release.
-//	 *
-//	 * @since 0.1.0
-//	 *
-//	 * @param Release $release Release instance.
-//	 * @throws InvalidReleaseSource If a source URL is not available or the
-//	 *                              version doesn't match the currently installed version.
-//	 * @throws FileOperationFailed  If the release artifact can't be moved to storage.
-//	 * @return Release
-//	 */
-//	public function archive( Release $release ): Release {
-//		if ( $this->exists( $release ) ) {
-//			return $release;
-//		}
-//
-//		$package    = $release->get_package();
-//		$source_url = $release->get_source_url();
-//
-//		if ( ! empty( $source_url ) ) {
-//			$filename = $this->archiver->archive_from_url( $release );
-//		} elseif ( $package->is_installed() && $package->is_installed_release( $release ) ) {
-//			$filename = $this->archiver->archive_from_source( $package, $release->get_version() );
-//		} else {
-//			throw InvalidReleaseSource::forRelease( $release );
-//		}
-//
-//		if ( ! $this->storage->move( $filename, $release->get_file_path() ) ) {
-//			throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
-//		}
-//
-//		return $release;
-//	}
 }

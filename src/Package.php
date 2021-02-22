@@ -58,6 +58,15 @@ interface Package {
 	public function get_source_type(): string;
 
 	/**
+	 * Retrieve the package source name.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_source_name(): string;
+
+	/**
 	 * Retrieve the authors.
 	 *
 	 * @since 0.1.0

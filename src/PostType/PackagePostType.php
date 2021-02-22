@@ -96,7 +96,7 @@ class PackagePostType extends AbstractHookProvider {
 		$this->add_action( 'after_setup_theme', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 		// Fill empty package details from source.
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_config_details_on_post_save', 10, 2 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_local_package_config_details_on_post_save', 10, 2 );
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 10, 1 );
 	}
 
@@ -632,7 +632,7 @@ class PackagePostType extends AbstractHookProvider {
 	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
-	protected function fill_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+	protected function fill_local_package_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		$post = get_post( $post_ID );
 		if ( empty( $post ) || 'publish' !== $post->post_status ) {
 			return;
@@ -722,7 +722,7 @@ class PackagePostType extends AbstractHookProvider {
 								],
 						],
 						'require'      => [
-								$package_data['package_source_name'] => ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*',
+								$package_data['source_name'] => ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*',
 						],
 				] );
 				break;

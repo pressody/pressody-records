@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin class
+ * Local plugin class
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
@@ -12,7 +12,9 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\PackageType;
 
 /**
- * Plugin package class.
+ * Local plugin package class.
+ *
+ * A local plugin is a plugin that is installed in the current WordPress installation.
  *
  * @since 0.1.0
  */

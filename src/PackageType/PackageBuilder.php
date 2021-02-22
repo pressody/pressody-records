@@ -145,12 +145,25 @@ class PackageBuilder {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $source_type Package type.
+	 * @param string $source_type Package source type.
 	 *
 	 * @return $this
 	 */
 	public function set_source_type( string $source_type ): self {
 		return $this->set( 'source_type', $source_type );
+	}
+
+	/**
+	 * Set the source name (in the form vendor/name).
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $source_name Package source name.
+	 *
+	 * @return $this
+	 */
+	public function set_source_name( string $source_name ): self {
+		return $this->set( 'source_name', $source_name );
 	}
 
 	/**
@@ -330,30 +343,6 @@ class PackageBuilder {
 	}
 
 	/**
-	 * Set whether the package is installed.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param bool $is_installed Whether the package is installed.
-	 * @return $this
-	 */
-	public function set_installed( bool $is_installed ): self {
-		return $this->set( 'is_installed', $is_installed );
-	}
-
-	/**
-	 * Set the installed version.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $version Version.
-	 * @return $this
-	 */
-	public function set_installed_version( string $version ): self {
-		return $this->set( 'installed_version', $version );
-	}
-
-	/**
 	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
 	 *
 	 * @since 0.1.0
@@ -361,7 +350,7 @@ class PackageBuilder {
 	 * @param int   $post_id Optional. The package post ID to retrieve data for. Leave empty and provide $args to query.
 	 * @param array $args Optional. Args used to query for a managed package if the post ID failed to retrieve data.
 	 *
-	 * @return PluginBuilder
+	 * @return LocalPluginBuilder
 	 */
 	public function from_manager( int $post_id = 0, array $args = [] ): self {
 		$package_data = $this->package_manager->get_package_id_data( $post_id );
@@ -378,6 +367,10 @@ class PackageBuilder {
 			$this->set_name( $package_data['name'] );
 		}
 
+		if ( ! empty( $package_data['slug'] ) ) {
+			$this->set_slug( $package_data['slug'] );
+		}
+
 		if ( ! empty( $package_data['type'] ) ) {
 			$this->set_type( $package_data['type'] );
 		}
@@ -386,8 +379,8 @@ class PackageBuilder {
 			$this->set_source_type( $package_data['source_type'] );
 		}
 
-		if ( ! empty( $package_data['slug'] ) ) {
-			$this->set_slug( $package_data['slug'] );
+		if ( ! empty( $package_data['source_name'] ) ) {
+			$this->set_source_name( $package_data['source_name'] );
 		}
 
 		if ( ! empty( $package_data['keywords'] ) ) {
@@ -420,21 +413,15 @@ class PackageBuilder {
 	public function with_package( Package $package ): self {
 		$this
 			->set_name( $package->get_name() )
+			->set_slug( $package->get_slug() )
 			->set_type( $package->get_type() )
 			->set_source_type( $package->get_source_type() )
-			->set_slug( $package->get_slug() )
+			->set_source_name( $package->get_source_name() )
 			->set_authors( $package->get_authors() )
 			->set_homepage( $package->get_homepage() )
 			->set_description( $package->get_description() )
 			->set_keywords( $package->get_keywords() )
 			->set_license( $package->get_license() );
-
-		if ( in_array( $package->get_source_type(), [ 'local.theme', 'local.plugin'] ) && $package->is_installed() ) {
-			$this
-				->set_directory( $package->get_directory() )
-				->set_installed_version( $package->get_installed_version() )
-				->set_installed( $package->is_installed() );
-		}
 
 		foreach ( $package->get_releases() as $release ) {
 			$this->add_release( $release->get_version(), $release->get_source_url() );
@@ -468,70 +455,6 @@ class PackageBuilder {
 	public function remove_release( string $version ): self {
 		unset( $this->releases[ $version ] );
 		return $this;
-	}
-
-	/**
-	 * Add cached releases to a package.
-	 *
-	 * This must be called after setting the installed state and version for
-	 * the package.
-	 *
-	 * @todo Rename this?
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return $this
-	 */
-	public function add_cached_releases(): self {
-		$releases = $this->release_manager->all( $this->package );
-
-		if ( $this->package->is_installed() ) {
-			// Add the installed version in case it hasn't been cached yet.
-			$installed_version = $this->package->get_installed_version();
-			if ( ! isset( $releases[ $installed_version ] ) ) {
-				$releases[ $installed_version ] = new Release( $this->package, $installed_version );
-			}
-
-			// Add a pending update if one is available.
-			$update = $this->get_package_update( $this->package );
-			if ( $update instanceof Release ) {
-				$releases[ $update->get_version() ] = $update;
-			}
-		}
-
-		foreach ( $releases as $release ) {
-			$this->add_release( $release->get_version(), $release->get_source_url() );
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Retrieve a release for a pending theme or plugin update.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param Package $package Package instance.
-	 * @return null|Release
-	 */
-	protected function get_package_update( Package $package ): ?Release {
-		$release = null;
-
-		if ( $package instanceof LocalPlugin ) {
-			$updates = get_site_transient( 'update_plugins' );
-			if ( ! empty( $updates->response[ $package->get_basename() ]->package ) ) {
-				$update  = $updates->response[ $package->get_basename() ];
-				$release = new Release( $package, $update->new_version, (string) $update->package );
-			}
-		} elseif ( $package instanceof LocalTheme ) {
-			$updates = get_site_transient( 'update_themes' );
-			if ( ! empty( $updates->response[ $package->get_slug() ]['package'] ) ) {
-				$update  = $updates->response[ $package->get_slug() ];
-				$release = new Release( $package, $update['new_version'], (string) $update['package'] );
-			}
-		}
-
-		return $release;
 	}
 
 	/**

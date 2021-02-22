@@ -11,12 +11,13 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
+use PixelgradeLT\Records\PackageType\BasePackage;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\PackageType\PackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\PluginBuilder;
+use PixelgradeLT\Records\PackageType\LocalPluginBuilder;
 use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\PackageType\ThemeBuilder;
+use PixelgradeLT\Records\PackageType\LocalThemeBuilder;
 
 /**
  * Factory for creating package builders.
@@ -61,16 +62,38 @@ final class PackageFactory {
 	 * @since 0.1.0
 	 *
 	 * @param string $package_type Package type.
-	 * @return PluginBuilder|ThemeBuilder|PackageBuilder Package builder instance.
+	 * @param string $source_type The managed package source type, if that is the case.
+	 *
+	 * @return LocalPluginBuilder|LocalThemeBuilder|PackageBuilder Package builder instance.
 	 */
-	public function create( string $package_type ): PackageBuilder {
+	public function create( string $package_type, string $source_type = '' ): PackageBuilder {
 		switch ( $package_type ) {
 			case 'plugin':
-				return new PluginBuilder( new LocalPlugin(), $this->package_manager, $this->release_manager );
+				switch ( $source_type ) {
+					case 'local.plugin':
+						return new LocalPluginBuilder( new LocalPlugin(), $this->package_manager, $this->release_manager );
+					case 'packagist.org':
+					case 'wpackagist.org':
+					case 'vcs':
+					default:
+						break;
+				}
+				break;
 			case 'theme':
-				return new ThemeBuilder( new LocalTheme(), $this->package_manager, $this->release_manager );
+				switch ( $source_type ) {
+					case 'local.theme':
+						return new LocalThemeBuilder( new LocalTheme(), $this->package_manager, $this->release_manager );
+					case 'packagist.org':
+					case 'wpackagist.org':
+					case 'vcs':
+					default:
+						break;
+				}
+				break;
+			default:
+				break;
 		}
 
-		return new PackageBuilder( new LocalBasePackage(), $this->package_manager, $this->release_manager );
+		return new PackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager );
 	}
 }

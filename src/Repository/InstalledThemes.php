@@ -69,7 +69,7 @@ class InstalledThemes extends AbstractRepository implements PackageRepository {
 	 * @return LocalTheme|Package
 	 */
 	protected function build( string $slug, WP_Theme $theme ): LocalTheme {
-		return $this->factory->create( 'theme' )
+		return $this->factory->create( 'theme', 'local.theme' )
 			// Fill package details in a cascade.
 			// First from just the plugin file.
 			->from_slug( $slug )

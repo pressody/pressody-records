@@ -1,6 +1,6 @@
 <?php
 /**
- * Theme class
+ * Local theme class
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
@@ -12,7 +12,9 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\PackageType;
 
 /**
- * Theme package class.
+ * Local theme package class.
+ *
+ * A local theme is a theme that is installed in the current WordPress installation.
  *
  * @since 0.1.0
  */

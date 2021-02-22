@@ -257,6 +257,15 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['repository.external.themes'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ExternalThemes(
+					$container['package.factory'],
+					$container['package.manager']
+				)
+			);
+		};
+
 		$container['repository.installed'] = function( $container ) {
 			return new Repository\MultiRepository(
 				[

@@ -1,6 +1,6 @@
 <?php
 /**
- * Theme builder.
+ * Local theme builder.
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
@@ -12,11 +12,13 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\PackageType;
 
 /**
- * Theme builder class.
+ * Local theme builder class.
+ *
+ * A local theme is a theme that is installed in the current WordPress installation.
  *
  * @since 0.1.0
  */
-final class ThemeBuilder extends PackageBuilder {
+final class LocalThemeBuilder extends LocalPackageBuilder {
 
 	/**
 	 * Fill the basic theme package details that we can deduce from a given theme slug.
@@ -25,7 +27,7 @@ final class ThemeBuilder extends PackageBuilder {
 	 *
 	 * @param string $slug Theme slug.
 	 *
-	 * @return ThemeBuilder
+	 * @return LocalThemeBuilder
 	 */
 	public function from_slug( string $slug ): self {
 
@@ -44,7 +46,7 @@ final class ThemeBuilder extends PackageBuilder {
 	 * @param string         $slug  Theme slug.
 	 * @param \WP_Theme|null $theme Optional. Theme instance.
 	 *
-	 * @return ThemeBuilder
+	 * @return LocalThemeBuilder
 	 */
 	public function from_source( string $slug, \WP_Theme $theme = null ): self {
 		if ( null === $theme ) {

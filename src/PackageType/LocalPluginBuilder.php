@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin builder.
+ * Local plugin builder.
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
@@ -16,18 +16,20 @@ use PixelgradeLT\Records\Package;
 use function PixelgradeLT\Records\is_plugin_file;
 
 /**
- * Plugin builder class.
+ * Local plugin builder class.
+ *
+ * A local plugin is a plugin that is installed in the current WordPress installation.
  *
  * @since 0.1.0
  */
-final class PluginBuilder extends PackageBuilder {
+final class LocalPluginBuilder extends LocalPackageBuilder {
 	/**
 	 * Set the plugin basename.
 	 *
 	 * @param string $basename Relative path from the main plugin directory.
 	 *
 	 * @throws \ReflectionException
-	 * @return PluginBuilder
+	 * @return LocalPluginBuilder
 	 */
 	public function set_basename( string $basename ): self {
 		return $this->set( 'basename', $basename );
@@ -41,7 +43,7 @@ final class PluginBuilder extends PackageBuilder {
 	 * @param string $plugin_file Relative path to the main plugin file.
 	 *
 	 * @throws \ReflectionException
-	 * @return PluginBuilder
+	 * @return LocalPluginBuilder
 	 */
 	public function from_file( string $plugin_file ): self {
 		$slug = $this->get_slug_from_plugin_file( $plugin_file );
@@ -66,7 +68,7 @@ final class PluginBuilder extends PackageBuilder {
 	 * @param array  $plugin_data Optional. Array of plugin data.
 	 *
 	 * @throws \ReflectionException
-	 * @return PluginBuilder
+	 * @return LocalPluginBuilder
 	 */
 	public function from_source( string $plugin_file, array $plugin_data = [] ): self {
 		$slug = $this->get_slug_from_plugin_file( $plugin_file );

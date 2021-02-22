@@ -71,7 +71,7 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 	 * @return LocalPlugin|Package
 	 */
 	protected function build( string $plugin_file, array $plugin_data ): LocalPlugin {
-		return $this->factory->create( 'plugin' )
+		return $this->factory->create( 'plugin', 'local.plugin' )
 			// Fill package details in a cascade.
 			// First from just the plugin file.
 			->from_file( $plugin_file )

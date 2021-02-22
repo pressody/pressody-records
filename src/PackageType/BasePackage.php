@@ -43,6 +43,13 @@ class BasePackage implements \ArrayAccess, Package {
 	protected $source_type = '';
 
 	/**
+	 * Package source name (in the form vendor/name).
+	 *
+	 * @var string
+	 */
+	protected $source_name = '';
+
+	/**
 	 * Package slug.
 	 *
 	 * @var string
