@@ -603,51 +603,11 @@ class PackagePostType extends AbstractHookProvider {
 
 				         Field::make( 'separator', 'package_details_separator', '' ),
 				         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pixelgradelt_records' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pixelgradelt_records' ) ) )
-				              ->set_conditional_logic( [
-						              'relation' => 'AND', // Optional, defaults to "AND"
-						              [
-								              'field'   => 'package_source_type',
-								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => 'IN',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-						              ],
-				              ] ),
-				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
-				              ->set_conditional_logic( [
-						              'relation' => 'AND', // Optional, defaults to "AND"
-						              [
-								              'field'   => 'package_source_type',
-								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => 'IN',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-						              ],
-				              ] ),
-				         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) )
-				              ->set_conditional_logic( [
-						              'relation' => 'AND', // Optional, defaults to "AND"
-						              [
-								              'field'   => 'package_source_type',
-								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => 'IN',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-						              ],
-				              ] ),
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pixelgradelt_records' ) ) ),
+				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) ),
+				         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) ),
 				         Field::make( 'text', 'package_details_license', __( 'Package License', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pixelgradelt_records' ) )
-				              ->set_conditional_logic( [
-						              'relation' => 'AND', // Optional, defaults to "AND"
-						              [
-								              'field'   => 'package_source_type',
-								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => 'IN',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-						              ],
-				              ] ),
+				              ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pixelgradelt_records' ) ),
 				         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pixelgradelt_records' ) )
 				              ->set_help_text( __( 'The package authors details. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#authors" target="_blank">here</a>.', 'pixelgradelt_records' ) )
 				              ->add_fields( array(
@@ -655,17 +615,7 @@ class PackagePostType extends AbstractHookProvider {
 						              Field::make( 'text', 'email', __( 'Author Email', 'pixelgradelt_records' ) )->set_width( 50 ),
 						              Field::make( 'text', 'homepage', __( 'Author Homepage', 'pixelgradelt_records' ) )->set_width( 50 ),
 						              Field::make( 'text', 'role', __( 'Author Role', 'pixelgradelt_records' ) )->set_width( 50 ),
-				              ) )
-				              ->set_conditional_logic( [
-						              'relation' => 'AND', // Optional, defaults to "AND"
-						              [
-								              'field'   => 'package_source_type',
-								              'value'   => [ 'local.plugin', 'local.theme', 'local.manual', ],
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-								              'compare' => 'IN',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-						              ],
-				              ] ),
+				              ) ),
 
 		         ] );
 	}
@@ -730,8 +680,7 @@ class PackagePostType extends AbstractHookProvider {
 	/**
 	 * Attempt to fetch external packages on post save.
 	 *
-	 * @param int                           $post_ID
-	 * @param Container\Post_Meta_Container $meta_container
+	 * @param int $post_ID
 	 */
 	protected function fetch_external_packages_on_post_save( int $post_ID ) {
 		$post = get_post( $post_ID );
@@ -760,19 +709,20 @@ class PackagePostType extends AbstractHookProvider {
 				$packages = $client->getPackages( [
 						'repositories' => [
 								[
+										// Disable the default packagist.org repo.
+										"packagist.org" => false,
+								],
+								[
 										'type' => 'composer',
 										'url'  => 'https://wpackagist.org',
-//										'only' => [
-//												'wpackagist-plugin/*',
-//												'wpackagist-theme/*',
-//										],
+										'only' => [
+												'wpackagist-plugin/*',
+												'wpackagist-theme/*',
+										],
 								],
 						],
-						'packages'     => [
-								$package_data['package_source_name'],
-						],
-						'require'     => [
-								$package_data['package_source_name'] => '*',
+						'require'      => [
+								$package_data['package_source_name'] => ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*',
 						],
 				] );
 				break;

@@ -13,7 +13,7 @@ namespace PixelgradeLT\Records\Repository;
 
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageType\Plugin;
+use PixelgradeLT\Records\PackageType\LocalPlugin;
 
 /**
  * Installed plugins repository class.
@@ -68,15 +68,15 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 	 * @param array  $plugin_data Plugin data.
 	 *
 	 * @throws \ReflectionException
-	 * @return Plugin|Package
+	 * @return LocalPlugin|Package
 	 */
-	protected function build( string $plugin_file, array $plugin_data ): Plugin {
+	protected function build( string $plugin_file, array $plugin_data ): LocalPlugin {
 		return $this->factory->create( 'plugin' )
 			// Fill package details in a cascade.
 			// First from just the plugin file.
 			->from_file( $plugin_file )
 			// Then from the managed data, if this plugin is managed.
-			->from_manager( 'local.plugin', [ 'local_plugin_file' => $plugin_file ] )
+			->from_manager( 0, [ 'package_source_type' => 'local.plugin', 'local_plugin_file' => $plugin_file ] )
 			// Then from the plugin source files, if there is anything left to fill.
 			->from_source( $plugin_file, $plugin_data )
 			->add_cached_releases()

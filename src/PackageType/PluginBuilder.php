@@ -95,12 +95,16 @@ final class PluginBuilder extends PackageBuilder {
 			$this->set_directory( WP_PLUGIN_DIR . '/' . $directory );
 		}
 
-		if ( empty( $this->package->get_slug() ) ) {
-			$this->set_slug( $slug );
+		if ( empty( $this->package->get_name() ) ) {
+			$this->set_name( $plugin_data['Name'] );
 		}
 
 		if ( empty( $this->package->get_type() ) ) {
 			$this->set_type( 'plugin' );
+		}
+
+		if ( empty( $this->package->get_slug() ) ) {
+			$this->set_slug( $slug );
 		}
 
 		if ( empty( $this->package->get_authors() ) ) {
@@ -126,10 +130,6 @@ final class PluginBuilder extends PackageBuilder {
 
 		if ( empty( $this->package->get_license() ) ) {
 			$this->set_license( $plugin_data['License'] );
-		}
-
-		if ( empty( $this->package->get_name() ) ) {
-			$this->set_name( $plugin_data['Name'] );
 		}
 
 		if ( empty( $this->package->get_installed_version() ) ) {
@@ -181,7 +181,7 @@ final class PluginBuilder extends PackageBuilder {
 	public function with_package( Package $package ): PackageBuilder {
 		parent::with_package( $package );
 
-		if ( $package instanceof Plugin ) {
+		if ( $package instanceof LocalPlugin ) {
 			$this->set_basename( $package->get_basename() );
 		}
 

@@ -100,7 +100,57 @@ class PackageBuilder {
 		);
 
 		$this->set( 'releases', $this->releases );
+
 		return $this->package;
+	}
+
+	/**
+	 * Set the name.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $name Package name.
+	 * @return $this
+	 */
+	public function set_name( string $name ): self {
+		return $this->set( 'name', $name );
+	}
+
+	/**
+	 * Set the slug.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $slug Slug.
+	 * @return $this
+	 */
+	public function set_slug( string $slug ): self {
+		return $this->set( 'slug', $slug );
+	}
+
+	/**
+	 * Set the type.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $type Package type.
+	 * @return $this
+	 */
+	public function set_type( string $type ): self {
+		return $this->set( 'type', $type );
+	}
+
+	/**
+	 * Set the source type.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $source_type Package type.
+	 *
+	 * @return $this
+	 */
+	public function set_source_type( string $source_type ): self {
+		return $this->set( 'source_type', $source_type );
 	}
 
 	/**
@@ -304,80 +354,22 @@ class PackageBuilder {
 	}
 
 	/**
-	 * Set the name.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $name Package name.
-	 * @return $this
-	 */
-	public function set_name( string $name ): self {
-		return $this->set( 'name', $name );
-	}
-
-	/**
-	 * Set the slug.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $slug Slug.
-	 * @return $this
-	 */
-	public function set_slug( string $slug ): self {
-		return $this->set( 'slug', $slug );
-	}
-
-	/**
-	 * Set the type.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $type Package type.
-	 * @return $this
-	 */
-	public function set_type( string $type ): self {
-		return $this->set( 'type', $type );
-	}
-
-	/**
-	 * Add a release.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $version    Version.
-	 * @param string $source_url Optional. Release source URL.
-	 * @return $this
-	 */
-	public function add_release( string $version, string $source_url = '' ): self {
-		$this->releases[ $version ] = new Release( $this->package, $version, $source_url );
-		return $this;
-	}
-
-	/**
-	 * Remove a release.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $version Version.
-	 * @return $this
-	 */
-	public function remove_release( string $version ): self {
-		unset( $this->releases[ $version ] );
-		return $this;
-	}
-
-	/**
 	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $source_type The package source type.
-	 * @param array  $args
+	 * @param int   $post_id Optional. The package post ID to retrieve data for. Leave empty and provide $args to query.
+	 * @param array $args Optional. Args used to query for a managed package if the post ID failed to retrieve data.
 	 *
 	 * @return PluginBuilder
 	 */
-	public function from_manager( string $source_type, array $args ): self {
-		$package_data = $this->package_manager->get_managed_package_data( $source_type, $args );
+	public function from_manager( int $post_id = 0, array $args = [] ): self {
+		$package_data = $this->package_manager->get_package_id_data( $post_id );
+		// If we couldn't fetch package data by the post ID, try via the args.
+		if ( empty( $package_data ) ) {
+			$package_data = $this->package_manager->get_managed_package_data_by( $args );
+		}
+		// No data, no play.
 		if ( empty( $package_data ) ) {
 			return $this;
 		}
@@ -388,6 +380,10 @@ class PackageBuilder {
 
 		if ( ! empty( $package_data['type'] ) ) {
 			$this->set_type( $package_data['type'] );
+		}
+
+		if ( ! empty( $package_data['source_type'] ) ) {
+			$this->set_source_type( $package_data['source_type'] );
 		}
 
 		if ( ! empty( $package_data['slug'] ) ) {
@@ -423,16 +419,17 @@ class PackageBuilder {
 	 */
 	public function with_package( Package $package ): self {
 		$this
+			->set_name( $package->get_name() )
+			->set_type( $package->get_type() )
+			->set_source_type( $package->get_source_type() )
+			->set_slug( $package->get_slug() )
 			->set_authors( $package->get_authors() )
 			->set_homepage( $package->get_homepage() )
 			->set_description( $package->get_description() )
 			->set_keywords( $package->get_keywords() )
-			->set_license( $package->get_license() )
-			->set_name( $package->get_name() )
-			->set_slug( $package->get_slug() )
-			->set_type( $package->get_type() );
+			->set_license( $package->get_license() );
 
-		if ( $package->is_installed() ) {
+		if ( in_array( $package->get_source_type(), [ 'local.theme', 'local.plugin'] ) && $package->is_installed() ) {
 			$this
 				->set_directory( $package->get_directory() )
 				->set_installed_version( $package->get_installed_version() )
@@ -443,6 +440,33 @@ class PackageBuilder {
 			$this->add_release( $release->get_version(), $release->get_source_url() );
 		}
 
+		return $this;
+	}
+
+	/**
+	 * Add a release.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $version    Version.
+	 * @param string $source_url Optional. Release source URL.
+	 * @return $this
+	 */
+	public function add_release( string $version, string $source_url = '' ): self {
+		$this->releases[ $version ] = new Release( $this->package, $version, $source_url );
+		return $this;
+	}
+
+	/**
+	 * Remove a release.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $version Version.
+	 * @return $this
+	 */
+	public function remove_release( string $version ): self {
+		unset( $this->releases[ $version ] );
 		return $this;
 	}
 
@@ -493,13 +517,13 @@ class PackageBuilder {
 	protected function get_package_update( Package $package ): ?Release {
 		$release = null;
 
-		if ( $package instanceof Plugin ) {
+		if ( $package instanceof LocalPlugin ) {
 			$updates = get_site_transient( 'update_plugins' );
 			if ( ! empty( $updates->response[ $package->get_basename() ]->package ) ) {
 				$update  = $updates->response[ $package->get_basename() ];
 				$release = new Release( $package, $update->new_version, (string) $update->package );
 			}
-		} elseif ( $package instanceof Theme ) {
+		} elseif ( $package instanceof LocalTheme ) {
 			$updates = get_site_transient( 'update_themes' );
 			if ( ! empty( $updates->response[ $package->get_slug() ]['package'] ) ) {
 				$update  = $updates->response[ $package->get_slug() ];

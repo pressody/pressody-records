@@ -96,101 +96,73 @@ class PackageManager {
 		$this->composer_client  = $composer_client;
 	}
 
-	/**
-	 * Retrieve managed packages.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $type Package type.
-	 * @return Package[]
-	 */
-	public function all( string $type = 'all' ): array {
-		$items = [];
-
-		foreach ( get_plugins() as $plugin_file => $plugin_data ) {
-			$package = $this->build( $plugin_file, $plugin_data );
-			$items[] = $package;
-		}
-
-		ksort( $items );
-
-		return $items;
-	}
-
 	public function get_composer_client(): ComposerClient {
 		return $this->composer_client;
 	}
 
 	/**
-	 * Get post ids for managed packages.
+	 * Get post ids for managed packages by type.
 	 *
-	 * @param string $types            Optional. Package types. Default is to query for all package types.
-	 * @param array  $extra_query_args Optional. Query args.
+	 * @param string $types Optional. Package types. Default is to query for all package types.
 	 *
-	 * @return int[] Post ids.
+	 * @return int[] Package post ids.
 	 */
-	public function get_package_ids( string $types = 'all', array $extra_query_args = [] ): array {
-		$query_args = [
-			'post_type'  => static::PACKAGE_POST_TYPE,
-			'fields' => 'ids',
-			'post_status' => 'publish',
-			'nopaging' => true,
-			'no_found_rows' => true,
-			'suppress_filters' => true,
-		];
+	public function get_package_ids( string $types = 'all' ): array {
 
-		if ( 'all' !== $types && ! empty( $types ) ) {
-			if ( is_string( $types ) ) {
-				$types = [ $types ];
-			}
-
-			$types = array_filter( array_values( $types ), 'is_string' );
-
-			$query_args['tax_query'] = [
-				[
-					'taxonomy' => static::PACKAGE_TYPE_TAXONOMY,
-					'field'    => 'slug',
-					'terms'    => $types,
-					'operator' => 'IN',
-				],
-			];
-		}
-
-		$query = new \WP_Query( array_merge( $query_args, $extra_query_args ) );
-		$package_ids = $query->get_posts();
-		if ( empty( $package_ids ) ) {
-			return [];
-		}
-
-		return $package_ids;
+		return $this->get_package_ids_by( [
+			'package_type' => $types,
+		] );
 	}
 
 	/**
-	 * Identify a package post ID based on certain details about it.
+	 * Identify packages post IDs based on certain details.
 	 *
-	 * @param string $source_type The package source type.
-	 * @param array  $args Array of package details to look for.
+	 * @param array $args Array of package details to look for.
 	 *
-	 * @return int|false The post ID or false if not found.
+	 * @return int[] The package post IDs list.
 	 */
-	public function get_package_id_by( string $source_type, array $args ) {
+	public function get_package_ids_by( array $args ): array {
 		$query_args = [
-			'post_type'  => PackageManager::PACKAGE_POST_TYPE,
-			'fields' => 'ids',
-			'post_status' => 'any',
-			'meta_query' => [
-				'relation' => 'AND',
-				[
-					'key'   => '_package_source_type',
-					'value' => $source_type,
-					'compare' => '=',
-				],
-			],
-			'posts_per_page' => 1, // We only want one package.
-			'nopaging' => true,
-			'no_found_rows' => true,
+			'post_type'        => PackageManager::PACKAGE_POST_TYPE,
+			'fields'           => 'ids',
+			'post_status'      => 'publish',
+			'tax_query'        => [],
+			'meta_query'       => [],
+			'nopaging'         => true,
+			'no_found_rows'    => true,
 			'suppress_filters' => true,
 		];
+
+		if ( ! empty( $args['package_type'] ) && 'all' !== $args['package_type'] ) {
+			if ( is_string( $args['package_type'] ) ) {
+				$args['package_type'] = [ $args['package_type'] ];
+			}
+
+			$args['package_type'] = array_filter( array_values( $args['package_type'] ), 'is_string' );
+
+			$query_args['tax_query'][] = [
+				'taxonomy' => static::PACKAGE_TYPE_TAXONOMY,
+				'field'    => 'slug',
+				'terms'    => $args['package_type'],
+				'operator' => 'IN',
+			];
+		}
+
+		if ( ! empty( $args['post_ids'] ) ) {
+			if ( ! is_array( $args['post_ids'] ) ) {
+				$args['post_ids'] = [ intval( $args['post_ids'] ) ];
+			}
+
+			$query_args['post__in'] = $args['post_ids'];
+		}
+
+		if ( ! empty( $args['exclude_post_ids'] ) ) {
+			if ( ! is_array( $args['exclude_post_ids'] ) ) {
+				$args['exclude_post_ids'] = [ intval( $args['exclude_post_ids'] ) ];
+			}
+
+			$query_args['post__not_in'] = $args['exclude_post_ids'];
+		}
 
 		if ( ! empty( $args['slug'] ) ) {
 			if ( is_string( $args['slug'] ) ) {
@@ -210,8 +182,8 @@ class PackageManager {
 			}
 
 			$query_args['meta_query'][] = [
-				'key'   => '_package_local_plugin_file',
-				'value' => $args['local_plugin_file'],
+				'key'     => '_package_local_plugin_file',
+				'value'   => $args['local_plugin_file'],
 				'compare' => 'IN',
 			];
 		}
@@ -222,8 +194,20 @@ class PackageManager {
 			}
 
 			$query_args['meta_query'][] = [
-				'key'   => '_package_local_theme_slug',
-				'value' => $args['local_theme_slug'],
+				'key'     => '_package_local_theme_slug',
+				'value'   => $args['local_theme_slug'],
+				'compare' => 'IN',
+			];
+		}
+
+		if ( ! empty( $args['package_source_type'] ) ) {
+			if ( is_string( $args['package_source_type'] ) ) {
+				$args['package_source_type'] = [ $args['package_source_type'] ];
+			}
+
+			$query_args['meta_query'][] = [
+				'key'     => '_package_source_type',
+				'value'   => $args['package_source_type'],
 				'compare' => 'IN',
 			];
 		}
@@ -234,8 +218,8 @@ class PackageManager {
 			}
 
 			$query_args['meta_query'][] = [
-				'key'   => '_package_source_name',
-				'value' => $args['package_source_name'],
+				'key'     => '_package_source_name',
+				'value'   => $args['package_source_name'],
 				'compare' => 'IN',
 			];
 		}
@@ -246,20 +230,20 @@ class PackageManager {
 			}
 
 			$query_args['meta_query'][] = [
-				'key'   => '_package_source_project_name',
-				'value' => $args['package_source_project_name'],
+				'key'     => '_package_source_project_name',
+				'value'   => $args['package_source_project_name'],
 				'compare' => 'IN',
 			];
 		}
 
-		$query = new \WP_Query( $query_args );
-		$post_ids = $query->get_posts();
+		$query       = new \WP_Query( $query_args );
+		$package_ids = $query->get_posts();
 
-		if ( empty( $post_ids ) ) {
-			return false;
+		if ( empty( $package_ids ) ) {
+			return [];
 		}
 
-		return reset( $post_ids );
+		return $package_ids;
 	}
 
 	/**
@@ -270,13 +254,19 @@ class PackageManager {
 	 * @return array The package data we have available.
 	 */
 	public function get_package_id_data( int $post_ID ): array {
-		$data = [
-			'name'        => $this->get_post_package_name( $post_ID ),
-			'type'        => $this->get_post_package_type( $post_ID ),
-			'source_type' => $this->get_post_package_source_type( $post_ID ),
-			'slug'        => $this->get_post_package_slug( $post_ID ),
-			'keywords'    => $this->get_post_package_keywords( $post_ID ),
-		];
+		$data = [];
+
+		// First, some checking.
+		$post = get_post( $post_ID );
+		if ( empty( $post ) || PackageManager::PACKAGE_TYPE_TAXONOMY !== $post->post_type ) {
+			return $data;
+		}
+
+		$data['name']        = $this->get_post_package_name( $post_ID );
+		$data['type']        = $this->get_post_package_type( $post_ID );
+		$data['source_type'] = $this->get_post_package_source_type( $post_ID );
+		$data['slug']        = $this->get_post_package_slug( $post_ID );
+		$data['keywords']    = $this->get_post_package_keywords( $post_ID );
 
 		switch ( $data['source_type'] ) {
 			case 'packagist.org':
@@ -322,7 +312,7 @@ class PackageManager {
 		}
 
 		if ( in_array( $data['source_type'], [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
-			$data['source_version_range'] = get_post_meta( $post_ID, '_package_source_version_range', true );
+			$data['source_version_range'] = trim( get_post_meta( $post_ID, '_package_source_version_range', true ) );
 		}
 
 		if ( in_array( $data['source_type'], [ 'local.plugin', 'local.theme', 'local.manual', ] ) ) {
@@ -340,16 +330,18 @@ class PackageManager {
 	/**
 	 * Identify a package post ID based on certain details about it and return all configured data about it.
 	 *
-	 * @param string $source_type The package source type.
 	 * @param array  $args Array of package details to look for.
 	 *
 	 * @return array The found package data.
 	 */
-	public function get_managed_package_data( string $source_type, array $args ): array {
-		$found_package_id = $this->get_package_id_by( $source_type, $args );
+	public function get_managed_package_data_by( array $args ): array {
+		$found_package_id = $this->get_package_ids_by( $args );
 		if ( empty( $found_package_id ) ) {
 			return [];
 		}
+
+		// Make sure we only tackle the first package found.
+		$found_package_id = reset( $found_package_id );
 
 		return $this->get_package_id_data( $found_package_id );
 	}

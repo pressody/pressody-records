@@ -11,11 +11,11 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
-use PixelgradeLT\Records\PackageType\BasePackage;
+use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\PackageType\PackageBuilder;
-use PixelgradeLT\Records\PackageType\Plugin;
+use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\PackageType\PluginBuilder;
-use PixelgradeLT\Records\PackageType\Theme;
+use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\PackageType\ThemeBuilder;
 
 /**
@@ -66,11 +66,11 @@ final class PackageFactory {
 	public function create( string $package_type ): PackageBuilder {
 		switch ( $package_type ) {
 			case 'plugin':
-				return new PluginBuilder( new Plugin(), $this->package_manager, $this->release_manager );
+				return new PluginBuilder( new LocalPlugin(), $this->package_manager, $this->release_manager );
 			case 'theme':
-				return new ThemeBuilder( new Theme(), $this->package_manager, $this->release_manager );
+				return new ThemeBuilder( new LocalTheme(), $this->package_manager, $this->release_manager );
 		}
 
-		return new PackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager );
+		return new PackageBuilder( new LocalBasePackage(), $this->package_manager, $this->release_manager );
 	}
 }

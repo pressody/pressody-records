@@ -149,7 +149,7 @@ class ComposerPackageSelection {
 	 * @param bool     $verbose
 	 *
 	 * @throws \Exception
-	 * @return array
+	 * @return PackageInterface[]
 	 */
 	public function select( Composer $composer, bool $verbose ): array {
 		// run over all packages and store matching ones
@@ -161,7 +161,7 @@ class ComposerPackageSelection {
 			return BasePackage::$stabilities[ $value ];
 		}, $this->minimumStabilityPerPackage );
 
-		$repositorySet = new RepositorySet($this->minimumStability);
+		$repositorySet = new RepositorySet($this->minimumStability, $stabilityFlags);
 
 		if ( $this->hasRepositoryFilter() ) {
 			$repos = $this->filterRepositories( $repos );
@@ -175,23 +175,29 @@ class ComposerPackageSelection {
 			}
 		}
 
-//		if ( $this->hasFilterForPackages() ) {
-//			$repos = $this->filterPackages( $repos );
-//
-//			if ( 0 === count( $repos ) ) {
-//				throw new \InvalidArgumentException( sprintf( 'Could not find any repositories config with "name" matching your package(s) filter: %s', implode( ', ', $this->packagesFilter ) ) );
-//			}
-//		}
+		if ( $this->hasFilterForPackages() ) {
+			$repos = $this->filterPackages( $repos );
+
+			if ( 0 === count( $repos ) ) {
+				throw new \InvalidArgumentException( sprintf( 'Could not find any repositories config with "name" matching your package(s) filter: %s', implode( ', ', $this->packagesFilter ) ) );
+			}
+		}
 
 		foreach ($repos as $repo) {
 			$repositorySet->addRepository($repo);
 		}
 
-		$request = new Request();
-		$pool = $repositorySet->createPool($request, $this->io);
-
 		// determine the required packages
 		$rootLinks = $this->requireAll ? $this->getAllLinks( $repos, $this->minimumStability, $verbose ) : $this->getFilteredLinks( $composer );
+
+		// creating requirements request
+		$request = new Request();
+		// Add the root links to the list of required packages.
+		foreach ($rootLinks as $link) {
+			$request->requireName($link->getTarget(), $link->getConstraint());
+		}
+		// Create the pool of required packages.
+		$pool = $repositorySet->createPool($request, $this->io);
 
 		// select the required packages and determine dependencies
 		$depsLinks = $this->selectLinks( $pool, $rootLinks, true, $verbose );

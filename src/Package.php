@@ -16,9 +16,47 @@ use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
 /**
  * Package interface.
  *
+ * This is different from Composer\Package\PackageInterface. This is an interface for our internal use.
+ *
  * @since 0.1.0
  */
 interface Package {
+	/**
+	 * Retrieve the name.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_name(): string;
+
+	/**
+	 * Retrieve the slug.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_slug(): string;
+
+	/**
+	 * Retrieve the package type.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_type(): string;
+
+	/**
+	 * Retrieve the package source type.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_source_type(): string;
+
 	/**
 	 * Retrieve the authors.
 	 *
@@ -56,71 +94,6 @@ interface Package {
 	public function get_license(): string;
 
 	/**
-	 * Retrieve the package directory.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_directory(): string;
-
-	/**
-	 * Retrieve the list of files in the package.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param array $excludes Optional. Array of file names to exclude.
-	 * @return array
-	 */
-	public function get_files( array $excludes = [] ): array;
-
-	/**
-	 * Retrieve the name.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_name(): string;
-
-	/**
-	 * Retrieve the path to a file in the package.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $path Optional. Path relative to the package root.
-	 * @return string
-	 */
-	public function get_path( string $path = '' ): string;
-
-	/**
-	 * Retrieve the slug.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_slug(): string;
-
-	/**
-	 * Retrieve the package type.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_type(): string;
-
-	/**
-	 * Whether the package is installed.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool
-	 */
-	public function is_installed(): bool;
-
-	/**
 	 * Whether the package has any releases.
 	 *
 	 * @since 0.1.0
@@ -148,33 +121,6 @@ interface Package {
 	 * @return Release[]
 	 */
 	public function get_releases(): array;
-
-	/**
-	 * Retrieve the installed version.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_installed_version(): string;
-	/**
-	 * Retrieve the installed release.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return Release
-	 */
-	public function get_installed_release(): Release;
-
-	/**
-	 * Whether a given release is the currently installed version.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param Release $release Release.
-	 * @return bool
-	 */
-	public function is_installed_release( Release $release ): bool;
 
 	/**
 	 * Retrieve the version for the latest release.
@@ -205,13 +151,4 @@ interface Package {
 	 * @return string
 	 */
 	public function get_latest_download_url(): string;
-
-	/**
-	 * Whether an update is available.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool
-	 */
-	public function is_update_available(): bool;
 }

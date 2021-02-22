@@ -16,6 +16,6 @@ namespace PixelgradeLT\Records\PackageType;
  *
  * @since 0.1.0
  */
-final class Theme extends BasePackage {
+final class LocalTheme extends LocalBasePackage {
 
 }

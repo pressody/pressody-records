@@ -24,8 +24,8 @@ use PixelgradeLT\Records\Authentication;
 use PixelgradeLT\Records\HTTP\Request;
 use PixelgradeLT\Records\Integration;
 use PixelgradeLT\Records\Logger;
-use PixelgradeLT\Records\PackageType\Plugin;
-use PixelgradeLT\Records\PackageType\Theme;
+use PixelgradeLT\Records\PackageType\LocalPlugin;
+use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\Provider;
 use PixelgradeLT\Records\Repository;
 use PixelgradeLT\Records\Screen;
@@ -84,10 +84,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['client.composer'] = function( $container ) {
-			return new Client\ComposerClient(
-				$container['storage.working_directory_name'],
-				$container['logger']
-			);
+			return new Client\ComposerClient();
 		};
 
 		$container['hooks.activation'] = function() {
@@ -137,7 +134,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['hooks.package_archiver'] = function( $container ) {
 			return new Provider\PackageArchiver(
 				$container['repository.installed'],
-				$container['repository.managed.installed'],
+				$container['repository.installed.managed'],
 				$container['release.manager'],
 				$container['package.manager'],
 				$container['storage.packages'],
@@ -165,7 +162,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['hooks.upgrade'] = function( $container ) {
 			return new Provider\Upgrade(
-				$container['repository.managed.installed'],
+				$container['repository.installed.managed'],
 				$container['release.manager'],
 				$container['storage.packages'],
 				$container['htaccess.handler'],
@@ -235,7 +232,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['repository.plugins'] = function( $container ) {
+		$container['repository.local.plugins'] = function( $container ) {
 			return new Repository\CachedRepository(
 				new Repository\InstalledPlugins(
 					$container['package.factory']
@@ -243,7 +240,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['repository.themes'] = function( $container ) {
+		$container['repository.local.themes'] = function( $container ) {
 			return new Repository\CachedRepository(
 				new Repository\InstalledThemes(
 					$container['package.factory']
@@ -251,16 +248,25 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['repository.external.plugins'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ExternalPlugins(
+					$container['package.factory'],
+					$container['package.manager']
+				)
+			);
+		};
+
 		$container['repository.installed'] = function( $container ) {
 			return new Repository\MultiRepository(
 				[
-					$container['repository.plugins'],
-					$container['repository.themes'],
+					$container['repository.local.plugins'],
+					$container['repository.local.themes'],
 				]
 			);
 		};
 
-		$container['repository.managed.installed'] = function( $container ) {
+		$container['repository.installed.managed'] = function( $container ) {
 			/**
 			 * Filter the list of installed plugins attached to a package (package type: local.plugin).
 			 *
@@ -290,7 +296,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			return $container['repository.installed']
 				->with_filter(
 					function( $package ) use ( $plugins ) {
-						if ( ! $package instanceof Plugin ) {
+						if ( ! $package instanceof LocalPlugin ) {
 							return true;
 						}
 
@@ -299,7 +305,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				)
 				->with_filter(
 					function( $package ) use ( $themes ) {
-						if ( ! $package instanceof Theme ) {
+						if ( ! $package instanceof LocalTheme ) {
 							return true;
 						}
 
@@ -310,14 +316,14 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['route.composer'] = function( $container ) {
 			return new Route\Composer(
-				$container['repository.managed.installed'],
+				$container['repository.installed.managed'],
 				$container['transformer.composer_repository']
 			);
 		};
 
 		$container['route.download'] = function( $container ) {
 			return new Route\Download(
-				$container['repository.managed.installed'],
+				$container['repository.installed.managed'],
 				$container['release.manager']
 			);
 		};
@@ -339,12 +345,12 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['screen.manage_plugins'] = function( $container ) {
-			return new Screen\ManagePlugins( $container['repository.managed.installed'] );
+			return new Screen\ManagePlugins( $container['repository.installed.managed'] );
 		};
 
 		$container['screen.settings'] = function( $container ) {
 			return new Screen\Settings(
-				$container['repository.managed.installed'],
+				$container['repository.installed.managed'],
 				$container['api_key.repository'],
 				$container['transformer.composer_package']
 			);

@@ -13,7 +13,7 @@ namespace PixelgradeLT\Records\Repository;
 
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageType\Theme;
+use PixelgradeLT\Records\PackageType\LocalTheme;
 use WP_Theme;
 
 /**
@@ -66,15 +66,15 @@ class InstalledThemes extends AbstractRepository implements PackageRepository {
 	 * @param WP_Theme $theme WP theme instance.
 	 *
 	 * @throws \ReflectionException
-	 * @return Theme|Package
+	 * @return LocalTheme|Package
 	 */
-	protected function build( string $slug, WP_Theme $theme ): Theme {
+	protected function build( string $slug, WP_Theme $theme ): LocalTheme {
 		return $this->factory->create( 'theme' )
 			// Fill package details in a cascade.
 			// First from just the plugin file.
 			->from_slug( $slug )
 			// Then from the managed data, if this theme is managed.
-			->from_manager( 'local.theme', [ 'local_theme_slug' => $slug ] )
+			->from_manager( 0, [ 'package_source_type' => 'local.theme', 'local_theme_slug' => $slug ] )
 			// Then from the theme source files, if there is anything left to fill.
 			->from_source( $slug, $theme )
 			->add_cached_releases()

@@ -24,7 +24,7 @@ use PixelgradeLT\Records\Exception\FileOperationFailed;
 use PixelgradeLT\Records\Exception\InvalidPackageArtifact;
 use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
 use PixelgradeLT\Records\Exception\PackageNotInstalled;
-use PixelgradeLT\Records\PackageType\Plugin;
+use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\Validator\ArtifactValidator;
 
 /**
@@ -92,7 +92,7 @@ class Archiver {
 
 		$files = $package->get_files( $excludes );
 
-		if ( $package instanceof Plugin && $package->is_single_file() ) {
+		if ( $package instanceof LocalPlugin && $package->is_single_file() ) {
 			$remove_path = $package->get_directory();
 		}
 
@@ -137,7 +137,7 @@ class Archiver {
 	protected function get_excluded_files( Package $package, Release $release ): array {
 		$dist_ignore_path = $package->get_directory() . '/.distignore';
 
-		if ( ( ! $package instanceof Plugin || ! $package->is_single_file() ) && file_exists( $dist_ignore_path ) ) {
+		if ( ( ! $package instanceof LocalPlugin || ! $package->is_single_file() ) && file_exists( $dist_ignore_path ) ) {
 			$excludes = $this->get_dist_ignored_files( $dist_ignore_path );
 		} else {
 			$excludes = [

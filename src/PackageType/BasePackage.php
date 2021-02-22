@@ -12,7 +12,6 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\PackageType;
 
 use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
-use PixelgradeLT\Records\Exception\PackageNotInstalled;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\Release;
 
@@ -28,6 +27,34 @@ class BasePackage implements \ArrayAccess, Package {
 	 * @var string
 	 */
 	protected $name = '';
+
+	/**
+	 * Package type.
+	 *
+	 * @var string
+	 */
+	protected $type = '';
+
+	/**
+	 * Package source type.
+	 *
+	 * @var string
+	 */
+	protected $source_type = '';
+
+	/**
+	 * Package slug.
+	 *
+	 * @var string
+	 */
+	protected $slug = '';
+
+	/**
+	 * Releases.
+	 *
+	 * @var Release[]
+	 */
+	protected $releases = [];
 
 	/**
 	 * Package authors.
@@ -65,48 +92,6 @@ class BasePackage implements \ArrayAccess, Package {
 	protected $keywords = [];
 
 	/**
-	 * Absolute path to the package directory.
-	 *
-	 * @var string
-	 */
-	protected $directory;
-
-	/**
-	 * Whether the package is installed.
-	 *
-	 * @var bool
-	 */
-	protected $is_installed = false;
-
-	/**
-	 * Installed version.
-	 *
-	 * @var string
-	 */
-	protected $installed_version = '';
-
-	/**
-	 * Releases.
-	 *
-	 * @var Release[]
-	 */
-	protected $releases = [];
-
-	/**
-	 * Package slug.
-	 *
-	 * @var string
-	 */
-	protected $slug = '';
-
-	/**
-	 * Package type.
-	 *
-	 * @var string
-	 */
-	protected $type = '';
-
-	/**
 	 * Magic setter.
 	 *
 	 * @since 0.1.0
@@ -116,6 +101,50 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function __set( string $name, $value ) {
 		// Don't allow undefined properties to be set.
+	}
+
+	/**
+	 * Retrieve the name.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_name(): string {
+		return $this->name;
+	}
+
+	/**
+	 * Retrieve the slug.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_slug(): string {
+		return $this->slug;
+	}
+
+	/**
+	 * Retrieve the package type.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_type(): string {
+		return $this->type;
+	}
+
+	/**
+	 * Retrieve the package source type.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_source_type(): string {
+		return $this->source_type;
 	}
 
 	/**
@@ -169,101 +198,8 @@ class BasePackage implements \ArrayAccess, Package {
 	 *
 	 * @return string[]
 	 */
-	public function get_keywords() {
+	public function get_keywords(): array {
 		return $this->keywords;
-	}
-
-	/**
-	 * Retrieve the package directory.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_directory(): string {
-		return $this->directory;
-	}
-
-	/**
-	 * Retrieve the list of files in the package.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param array $excludes Optional. Array of file names to exclude.
-	 * @throws PackageNotInstalled If the package is not installed.
-	 * @return array
-	 */
-	public function get_files( array $excludes = [] ): array {
-		if ( ! $this->is_installed() ) {
-			throw PackageNotInstalled::forInvalidMethodCall( __FUNCTION__, $this );
-		}
-
-		$directory = $this->get_directory();
-		$files     = scandir( $directory, SCANDIR_SORT_NONE );
-		$files     = array_values( array_diff( $files, $excludes, [ '.', '..' ] ) );
-
-		return array_map(
-			function( $file ) {
-					return $this->get_path( $file );
-			},
-			$files
-		);
-	}
-
-	/**
-	 * Retrieve the name.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_name(): string {
-		return $this->name;
-	}
-
-	/**
-	 * Retrieve the path to a file in the package.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $path Optional. Path relative to the package root.
-	 * @return string
-	 */
-	public function get_path( string $path = '' ): string {
-		return $this->directory . ltrim( $path, '/' );
-	}
-
-	/**
-	 * Retrieve the slug.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_slug(): string {
-		return $this->slug;
-	}
-
-	/**
-	 * Retrieve the package type.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_type(): string {
-		return $this->type;
-	}
-
-	/**
-	 * Whether the package is installed.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool
-	 */
-	public function is_installed(): bool {
-		return $this->is_installed;
 	}
 
 	/**
@@ -306,54 +242,6 @@ class BasePackage implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the installed version.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @throws PackageNotInstalled If the package is not installed.
-	 * @return string
-	 */
-	public function get_installed_version(): string {
-		if ( ! $this->is_installed() ) {
-			throw PackageNotInstalled::forInvalidMethodCall( __FUNCTION__, $this );
-		}
-
-		return $this->installed_version;
-	}
-
-	/**
-	 * Retrieve the installed release.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @throws PackageNotInstalled If the package is not installed.
-	 * @return Release
-	 */
-	public function get_installed_release(): Release {
-		if ( ! $this->is_installed() ) {
-			throw PackageNotInstalled::forInvalidMethodCall( __FUNCTION__, $this );
-		}
-
-		return $this->get_release( $this->get_installed_version() );
-	}
-
-	/**
-	 * Whether a given release is the currently installed version.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param Release $release Release.
-	 * @return bool
-	 */
-	public function is_installed_release( Release $release ): bool {
-		if ( ! $this->is_installed() ) {
-			return false;
-		}
-
-		return version_compare( $release->get_version(), $this->get_installed_version(), '=' );
-	}
-
-	/**
 	 * Retrieve the version for the latest release.
 	 *
 	 * @since 0.1.0
@@ -393,17 +281,6 @@ class BasePackage implements \ArrayAccess, Package {
 		$url = $this->get_latest_release()->get_download_url();
 		$url = substr( $url, 0, strrpos( $url, '/' ) );
 		return $url . '/latest';
-	}
-
-	/**
-	 * Whether an update is available.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool
-	 */
-	public function is_update_available(): bool {
-		return $this->is_installed() && version_compare( $this->get_installed_version(), $this->get_latest_version(), '<' );
 	}
 
 	/**

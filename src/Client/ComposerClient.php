@@ -16,10 +16,12 @@ use Composer\Config;
 use Composer\Config\JsonConfigSource;
 use Composer\Factory;
 use Composer\IO\BaseIO;
+use Composer\IO\BufferIO;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
+use Composer\Package\PackageInterface;
 use JsonSchema\Validator;
 use PixelgradeLT\Records\Client\Builder\ComposerArchiveBuilder;
 use PixelgradeLT\Records\Client\Builder\ComposerPackagesBuilder;
@@ -42,18 +44,10 @@ class ComposerClient implements Client {
 	protected $composer;
 
 	/**
-	 * The working directory path.
 	 *
-	 * @var string
+	 * @var BaseIO
 	 */
-	protected $working_directory;
-
-	/**
-	 * Logger that also implements the IOInterface so it can be used with Composer.
-	 *
-	 * @var LoggerInterface|BaseIO
-	 */
-	protected $logger;
+	protected $io;
 
 	/**
 	 * Constructor.
@@ -61,22 +55,26 @@ class ComposerClient implements Client {
 	 * @since 0.1.0
 	 *
 	 * @param string $working_directory
-	 * @param BaseIO $logger
+	 * @param BaseIO $io
 	 */
 	public function __construct(
-		string $working_directory,
-		BaseIO $logger
+		BaseIO $io = null
 	) {
-		$this->working_directory = $working_directory;
-		$this->logger            = $logger;
+		$this->io = $io;
 	}
 
+	/**
+	 * @param array $args
+	 *
+	 * @throws \Exception
+	 * @return PackageInterface[]
+	 */
 	public function getPackages( array $args ): array {
 		// load auth.json authentication information and pass it to the io interface
 		$io = $this->getIO();
 		$io->loadConfiguration( $this->getConfiguration() );
 
-		$verbose        = true;
+		$verbose = false;
 		// Allow the passing of a full composer config.
 		$config = ! empty( $args['config'] ) ? $args['config'] : $this->getDefaultConfig();
 
@@ -90,16 +88,14 @@ class ComposerClient implements Client {
 
 		$packagesFilter = ! empty( $args['packages'] ) ? $args['packages'] : [];
 		$repositoryUrl  = ! empty( $args['repository-url'] ) ? $args['repository-url'] : null;
-		$skipErrors     = false;
+		$skipErrors     = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
+		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : false;
 
-		$outputDir = trailingslashit( $this->working_directory ) . 'testing123';
+//		$outputDir = trailingslashit( $this->working_directory ) . 'testing123';
 
 		if ( null !== $repositoryUrl && count( $packagesFilter ) > 0 ) {
 			throw new \InvalidArgumentException( 'The arguments "package" and "repository-url" can not be used together.' );
 		}
-
-		// disable packagist by default
-		unset( Config::$defaultRepositories['packagist'], Config::$defaultRepositories['packagist.org'] );
 
 		$composer         = $this->getComposer( $config );
 		$packageSelection = new ComposerPackageSelection( $io, $outputDir, $config, $skipErrors );
@@ -128,8 +124,8 @@ class ComposerClient implements Client {
 			ksort( $packages );
 		}
 
-//		$packagesBuilder = new ComposerPackagesBuilder( $io, $outputDir, $config, $skipErrors );
-//		$packagesBuilder->dump( $packages );
+		$packagesBuilder = new ComposerPackagesBuilder( $io, $outputDir, $config, $skipErrors );
+		$packagesBuilder->dump( $packages );
 
 		return $packages;
 	}
@@ -155,9 +151,9 @@ class ComposerClient implements Client {
 	public function getComposer( $config = null ): Composer {
 		if ( null === $this->composer ) {
 			try {
-				$this->composer = Factory::create( $this->logger, $config );
+				$this->composer = Factory::create( $this->io, $config );
 			} catch ( \InvalidArgumentException $e ) {
-				$this->logger->error( $e->getMessage() );
+				$this->io->error( $e->getMessage() );
 				exit( 1 );
 			}
 		}
@@ -169,18 +165,18 @@ class ComposerClient implements Client {
 	 * @return IOInterface
 	 */
 	public function getIO() {
-		if ( null === $this->logger ) {
-			$this->logger = new NullIO();
+		if ( null === $this->io ) {
+			$this->io = new BufferIO();
 		}
 
-		return $this->logger;
+		return $this->io;
 	}
 
 	/**
-	 * @param IOInterface $io
+	 * @param BaseIO $io
 	 */
-	public function setIO( IOInterface $io ) {
-		$this->logger = $io;
+	public function setIO( BaseIO $io ) {
+		$this->io = $io;
 	}
 
 	private function getConfiguration(): Config {
@@ -216,41 +212,5 @@ class ComposerClient implements Client {
 		}
 
 		return $home;
-	}
-
-	/**
-	 * @throws ParsingException        if the json file has an invalid syntax
-	 * @throws JsonValidationException if the json file doesn't match the schema
-	 */
-	private function check( string $configFile ): bool {
-		$content = file_get_contents( $configFile );
-
-		$parser = new JsonParser();
-		$result = $parser->lint( $content );
-		if ( null === $result ) {
-			if ( defined( 'JSON_ERROR_UTF8' ) && JSON_ERROR_UTF8 === json_last_error() ) {
-				throw new \UnexpectedValueException( '"' . $configFile . '" is not UTF-8, could not parse as JSON' );
-			}
-
-			$data = json_decode( $content );
-
-			$schemaFile = __DIR__ . '/../../../res/satis-schema.json';
-			$schema     = json_decode( file_get_contents( $schemaFile ) );
-			$validator  = new Validator();
-			$validator->check( $data, $schema );
-
-			if ( ! $validator->isValid() ) {
-				$errors = [];
-				foreach ( (array) $validator->getErrors() as $error ) {
-					$errors[] = ( $error['property'] ? $error['property'] . ' : ' : '' ) . $error['message'];
-				}
-
-				throw new JsonValidationException( 'The json config file does not match the expected JSON schema', $errors );
-			}
-
-			return true;
-		}
-
-		throw new ParsingException( '"' . $configFile . '" does not contain valid JSON' . "\n" . $result->getMessage(), $result->getDetails() );
 	}
 }
