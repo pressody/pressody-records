@@ -205,7 +205,8 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['package.factory'] = function( $container ) {
 			return new PackageFactory(
 				$container['package.manager'],
-				$container['release.manager']
+				$container['release.manager'],
+				$container['logger']
 			);
 		};
 

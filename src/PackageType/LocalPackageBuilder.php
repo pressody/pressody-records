@@ -22,6 +22,18 @@ use PixelgradeLT\Records\Release;
 class LocalPackageBuilder extends PackageBuilder {
 
 	/**
+	 * Set a package's directory.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $directory Absolute path to the package directory.
+	 * @return $this
+	 */
+	public function set_directory( string $directory ): self {
+		return $this->set( 'directory', rtrim( $directory, '/' ) . '/' );
+	}
+
+	/**
 	 * Set whether the package is installed.
 	 *
 	 * @since 0.1.0

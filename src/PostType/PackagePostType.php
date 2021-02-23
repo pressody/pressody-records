@@ -543,6 +543,28 @@ class PackagePostType extends AbstractHookProvider {
 				              ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions/releases. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
  Specify a version range to <strong>limit the available versions/releases for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>
  Learn more about Composer <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) )
+				              ->set_width( 75 )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'compare' => 'IN',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+						              ],
+				              ] ),
+				         Field::make( 'select', 'package_source_stability', __( 'Package Source Stability', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Limit the minimum stability required for versions. <code>Stable</code> is the most restrictive one, while <code>dev</code> the most all encompassing.<br><code>Stable</code> is the recommended (and default) one.', 'pixelgradelt_records' ) )
+				              ->set_width( 25 )
+				              ->set_options( [
+						              'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
+						              'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
+						              'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
+						              'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
+						              'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+				              ] )
+				              ->set_default_value( 'stable' )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
@@ -701,6 +723,12 @@ class PackagePostType extends AbstractHookProvider {
 
 		$packages = [];
 
+		$version_range = ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*';
+		$stability = ! empty( $package_data['source_stability'] ) ? $package_data['source_stability'] : 'stable';
+		if ( ! empty( $stability ) || 'stable' !== $stability ) {
+			$version_range .= '@' . $stability;
+		}
+
 		switch ( $package_data['source_type'] ) {
 			case 'packagist.org':
 				// Nothing right now.
@@ -709,7 +737,7 @@ class PackagePostType extends AbstractHookProvider {
 				$packages = $client->getPackages( [
 						'repositories' => [
 								[
-										// Disable the default packagist.org repo.
+									// Disable the default packagist.org repo.
 										"packagist.org" => false,
 								],
 								[
@@ -722,7 +750,7 @@ class PackagePostType extends AbstractHookProvider {
 								],
 						],
 						'require'      => [
-								$package_data['source_name'] => ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*',
+								$package_data['source_name'] => $version_range,
 						],
 				] );
 				break;
@@ -731,6 +759,12 @@ class PackagePostType extends AbstractHookProvider {
 				break;
 			default:
 				break;
+		}
+
+		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
+		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\PackageBuilder::build() to do the work.
+		if ( ! empty( $packages ) ) {
+			$standardized_packages = $client->standardizePackagesForJson( $packages, $stability );
 		}
 	}
 

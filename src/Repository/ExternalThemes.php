@@ -67,7 +67,7 @@ class ExternalThemes extends AbstractRepository implements PackageRepository {
 		];
 		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {
 			$post = get_post( $post_id );
-			if ( empty( $post ) || $this->package_manager::PACKAGE_TYPE_TAXONOMY !== $post->post_type ) {
+			if ( empty( $post ) || $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
 				continue;
 			}
 
@@ -81,7 +81,7 @@ class ExternalThemes extends AbstractRepository implements PackageRepository {
 	}
 
 	/**
-	 * Build an external plugin.
+	 * Build an external theme.
 	 *
 	 * @since 0.1.0
 	 *
@@ -91,7 +91,7 @@ class ExternalThemes extends AbstractRepository implements PackageRepository {
 	 */
 	protected function build( int $post_id ): Package {
 		return $this->factory->create( 'theme' )
-			// Then add managed data, if this plugin is managed.
+			// Then add managed data, if this theme is managed.
 			->from_manager( $post_id )
 			->add_cached_releases()
 			->build();

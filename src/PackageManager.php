@@ -257,8 +257,11 @@ class PackageManager {
 		$data = [];
 
 		// First, some checking.
+		if ( empty( $post_ID ) ) {
+			return $data;
+		}
 		$post = get_post( $post_ID );
-		if ( empty( $post ) || PackageManager::PACKAGE_TYPE_TAXONOMY !== $post->post_type ) {
+		if ( empty( $post ) || PackageManager::PACKAGE_POST_TYPE !== $post->post_type ) {
 			return $data;
 		}
 
@@ -309,7 +312,7 @@ class PackageManager {
 				}
 				break;
 			case 'local.manual':
-				$data['source_name'] = 'manual-plugin' . '/' . $data['slug'];
+				$data['source_name'] = 'local-manual' . '/' . $data['slug'];
 				break;
 			default:
 				// Nothing
@@ -318,6 +321,7 @@ class PackageManager {
 
 		if ( in_array( $data['source_type'], [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
 			$data['source_version_range'] = trim( get_post_meta( $post_ID, '_package_source_version_range', true ) );
+			$data['source_stability'] = trim( get_post_meta( $post_ID, '_package_source_stability', true ) );
 		}
 
 		if ( in_array( $data['source_type'], [ 'local.plugin', 'local.theme', 'local.manual', ] ) ) {
@@ -438,7 +442,12 @@ class PackageManager {
 	}
 
 	public function get_post_package_source_type( int $post_ID ): string {
-		return get_post_meta( $post_ID, '_package_source_type', true );
+		$source_type = get_post_meta( $post_ID, '_package_source_type', true );
+		if ( ! is_string( $source_type ) ) {
+			return '';
+		}
+
+		return $source_type;
 	}
 
 	public function get_post_package_slug( int $post_ID ): string {
@@ -501,6 +510,10 @@ class PackageManager {
 			$package_slug = get_post_meta( $post_ID, '_package_local_plugin_file', true );
 		} else if ( 'theme' === $package_type && 'local.theme' === $package_source_type ) {
 			$package_slug = get_post_meta( $post_ID, '_package_local_theme_slug', true );
+		}
+
+		if ( ! is_string( $package_slug ) ) {
+			return '';
 		}
 
 		return $package_slug;

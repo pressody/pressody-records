@@ -79,9 +79,10 @@ class Release {
 	 * @return string
 	 */
 	public function get_file_path(): string {
+		// We will organize artifacts by their source package name.
 		return sprintf(
 			'%1$s/%2$s',
-			$this->get_package()->get_slug(),
+			$this->get_package()->get_source_name(),
 			$this->get_file()
 		);
 	}

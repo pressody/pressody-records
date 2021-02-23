@@ -67,7 +67,7 @@ class ExternalPlugins extends AbstractRepository implements PackageRepository {
 		];
 		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {
 			$post = get_post( $post_id );
-			if ( empty( $post ) || $this->package_manager::PACKAGE_TYPE_TAXONOMY !== $post->post_type ) {
+			if ( empty( $post ) || $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
 				continue;
 			}
 

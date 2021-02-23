@@ -31,15 +31,6 @@ interface Package {
 	public function get_name(): string;
 
 	/**
-	 * Retrieve the slug.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_slug(): string;
-
-	/**
 	 * Retrieve the package type.
 	 *
 	 * @since 0.1.0
@@ -58,13 +49,22 @@ interface Package {
 	public function get_source_type(): string;
 
 	/**
-	 * Retrieve the package source name.
+	 * Retrieve the package source name (in the form vendor/name).
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return string
 	 */
 	public function get_source_name(): string;
+
+	/**
+	 * Retrieve the slug.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_slug(): string;
 
 	/**
 	 * Retrieve the authors.
@@ -101,6 +101,15 @@ interface Package {
 	 * @return string
 	 */
 	public function get_license(): string;
+
+	/**
+	 * Whether the package is managed by us.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function is_managed(): bool;
 
 	/**
 	 * Whether the package has any releases.

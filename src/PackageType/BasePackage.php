@@ -57,6 +57,13 @@ class BasePackage implements \ArrayAccess, Package {
 	protected $slug = '';
 
 	/**
+	 * Is managed package?
+	 *
+	 * @var string
+	 */
+	protected $is_managed = false;
+
+	/**
 	 * Releases.
 	 *
 	 * @var Release[]
@@ -122,17 +129,6 @@ class BasePackage implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the slug.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_slug(): string {
-		return $this->slug;
-	}
-
-	/**
 	 * Retrieve the package type.
 	 *
 	 * @since 0.1.0
@@ -152,6 +148,28 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function get_source_type(): string {
 		return $this->source_type;
+	}
+
+	/**
+	 * Retrieve the package source name (in the form vendor/name).
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_source_name(): string {
+		return $this->source_name;
+	}
+
+	/**
+	 * Retrieve the slug.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_slug(): string {
+		return $this->slug;
 	}
 
 	/**
@@ -207,6 +225,17 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function get_keywords(): array {
 		return $this->keywords;
+	}
+
+	/**
+	 * Whether the package is managed by us.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function is_managed(): bool {
+		return $this->is_managed;
 	}
 
 	/**

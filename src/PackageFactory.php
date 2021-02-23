@@ -12,12 +12,14 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records;
 
 use PixelgradeLT\Records\PackageType\BasePackage;
+use PixelgradeLT\Records\PackageType\ExternalPackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\PackageType\PackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\PackageType\LocalPluginBuilder;
 use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\PackageType\LocalThemeBuilder;
+use Psr\Log\LoggerInterface;
 
 /**
  * Factory for creating package builders.
@@ -41,19 +43,29 @@ final class PackageFactory {
 	private $release_manager;
 
 	/**
+	 * Logger.
+	 *
+	 * @var Logger
+	 */
+	protected $logger;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param PackageManager $package_manager Packages manager.
-	 * @param ReleaseManager $release_manager Release manager.
+	 * @param PackageManager  $package_manager Packages manager.
+	 * @param ReleaseManager  $release_manager Release manager.
+	 * @param LoggerInterface $logger          Logger.
 	 */
 	public function __construct(
 		PackageManager $package_manager,
-		ReleaseManager $release_manager
+		ReleaseManager $release_manager,
+		LoggerInterface $logger
 	) {
 		$this->package_manager = $package_manager;
 		$this->release_manager = $release_manager;
+		$this->logger          = $logger;
 	}
 
 	/**
@@ -64,36 +76,22 @@ final class PackageFactory {
 	 * @param string $package_type Package type.
 	 * @param string $source_type The managed package source type, if that is the case.
 	 *
-	 * @return LocalPluginBuilder|LocalThemeBuilder|PackageBuilder Package builder instance.
+	 * @return LocalPluginBuilder|LocalThemeBuilder|ExternalPackageBuilder|PackageBuilder Package builder instance.
 	 */
 	public function create( string $package_type, string $source_type = '' ): PackageBuilder {
-		switch ( $package_type ) {
-			case 'plugin':
-				switch ( $source_type ) {
-					case 'local.plugin':
-						return new LocalPluginBuilder( new LocalPlugin(), $this->package_manager, $this->release_manager );
-					case 'packagist.org':
-					case 'wpackagist.org':
-					case 'vcs':
-					default:
-						break;
-				}
-				break;
-			case 'theme':
-				switch ( $source_type ) {
-					case 'local.theme':
-						return new LocalThemeBuilder( new LocalTheme(), $this->package_manager, $this->release_manager );
-					case 'packagist.org':
-					case 'wpackagist.org':
-					case 'vcs':
-					default:
-						break;
-				}
-				break;
-			default:
-				break;
+
+		if ( 'plugin' === $package_type && 'local.plugin' === $source_type ) {
+			return new LocalPluginBuilder( new LocalPlugin(), $this->package_manager, $this->release_manager, $this->logger );
 		}
 
-		return new PackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager );
+		if ( 'theme' === $package_type && 'local.theme' === $source_type ) {
+			return new LocalThemeBuilder( new LocalTheme(), $this->package_manager, $this->release_manager, $this->logger );
+		}
+
+		if ( in_array( $source_type, [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
+			return new ExternalPackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager, $this->logger );
+		}
+
+		return new PackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager, $this->logger );
 	}
 }

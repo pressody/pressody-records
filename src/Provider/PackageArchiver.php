@@ -14,7 +14,7 @@ namespace PixelgradeLT\Records\Provider;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
 use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PostType\PackagePostType;
+use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\Storage\Storage;
 use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
@@ -245,7 +245,7 @@ class PackageArchiver extends AbstractHookProvider {
 		$package = $this->packages->first_where( compact( 'slug', 'type' ) );
 
 		try {
-			if ( $package->is_installed() ) {
+			if ( $package instanceof LocalBasePackage && $package->is_installed() ) {
 				$this->release_manager->archive( $package->get_installed_release() );
 				$this->release_manager->archive( $package->get_latest_release() );
 			}

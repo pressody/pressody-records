@@ -11,7 +11,10 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\PackageType;
 
+use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
+use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageManager;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\Release;
@@ -59,18 +62,27 @@ class PackageBuilder {
 	protected $release_manager;
 
 	/**
+	 * Logger.
+	 *
+	 * @var Logger
+	 */
+	protected $logger;
+
+	/**
 	 * Create a builder for installed packages.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Package        $package         Package instance to build.
-	 * @param PackageManager $package_manager Packages manager.
-	 * @param ReleaseManager $release_manager Release manager.
+	 * @param Package         $package         Package instance to build.
+	 * @param PackageManager  $package_manager Packages manager.
+	 * @param ReleaseManager  $release_manager Release manager.
+	 * @param LoggerInterface $logger          Logger.
 	 */
 	public function __construct(
 		Package $package,
 		PackageManager $package_manager,
-		ReleaseManager $release_manager
+		ReleaseManager $release_manager,
+		LoggerInterface $logger
 	) {
 		$this->package = $package;
 		try {
@@ -82,6 +94,7 @@ class PackageBuilder {
 
 		$this->package_manager = $package_manager;
 		$this->release_manager = $release_manager;
+		$this->logger          = $logger;
 	}
 
 	/**
@@ -101,6 +114,23 @@ class PackageBuilder {
 
 		$this->set( 'releases', $this->releases );
 
+		// Attempt to cache any releases not cached yet. But only for managed packages.
+		foreach ( $this->releases as $release ) {
+			if ( $this->package->is_managed() ) {
+				try {
+					$this->release_manager->archive( $release );
+				} catch ( PixelgradeltRecordsException $e ) {
+					$this->logger->error(
+						'Error archiving {package}.',
+						[
+							'exception' => $e,
+							'package'   => $this->package->get_name(),
+						]
+					);
+				}
+			}
+		}
+
 		return $this->package;
 	}
 
@@ -114,18 +144,6 @@ class PackageBuilder {
 	 */
 	public function set_name( string $name ): self {
 		return $this->set( 'name', $name );
-	}
-
-	/**
-	 * Set the slug.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $slug Slug.
-	 * @return $this
-	 */
-	public function set_slug( string $slug ): self {
-		return $this->set( 'slug', $slug );
 	}
 
 	/**
@@ -164,6 +182,30 @@ class PackageBuilder {
 	 */
 	public function set_source_name( string $source_name ): self {
 		return $this->set( 'source_name', $source_name );
+	}
+
+	/**
+	 * Set the slug.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $slug Slug.
+	 * @return $this
+	 */
+	public function set_slug( string $slug ): self {
+		return $this->set( 'slug', $slug );
+	}
+
+	/**
+	 * Set is this package is managed by us.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param bool $is_managed
+	 * @return $this
+	 */
+	public function set_is_managed( bool $is_managed ): self {
+		return $this->set( 'is_managed', $is_managed );
 	}
 
 	/**
@@ -331,18 +373,6 @@ class PackageBuilder {
 	}
 
 	/**
-	 * Set a package's directory.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $directory Absolute path to the package directory.
-	 * @return $this
-	 */
-	public function set_directory( string $directory ): self {
-		return $this->set( 'directory', rtrim( $directory, '/' ) . '/' );
-	}
-
-	/**
 	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
 	 *
 	 * @since 0.1.0
@@ -360,8 +390,11 @@ class PackageBuilder {
 		}
 		// No data, no play.
 		if ( empty( $package_data ) ) {
+			$this->set_is_managed( false );
 			return $this;
 		}
+
+		$this->set_is_managed( true );
 
 		if ( ! empty( $package_data['name'] ) ) {
 			$this->set_name( $package_data['name'] );

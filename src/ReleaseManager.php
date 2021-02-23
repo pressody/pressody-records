@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
 use PixelgradeLT\Records\Exception\InvalidReleaseSource;
 use PixelgradeLT\Records\HTTP\Response;
+use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\Storage\Storage;
 
 /**
@@ -50,7 +51,7 @@ class ReleaseManager {
 	}
 
 	/**
-	 * Retrieve all releases for a package.
+	 * Retrieve all cached releases for a package.
 	 *
 	 * @since 0.1.0
 	 *
@@ -60,7 +61,7 @@ class ReleaseManager {
 	public function all( Package $package ): array {
 		$releases = [];
 
-		foreach ( $this->storage->list_files( $package->get_slug() ) as $filename ) {
+		foreach ( $this->storage->list_files( $package->get_source_name() ) as $filename ) {
 			$version              = str_replace( $package->get_slug() . '-', '', basename( $filename, '.zip' ) );
 			$releases[ $version ] = new Release( $package, $version );
 		}
@@ -89,7 +90,7 @@ class ReleaseManager {
 
 		if ( ! empty( $source_url ) ) {
 			$filename = $this->archiver->archive_from_url( $release );
-		} elseif ( $package->is_installed() && $package->is_installed_release( $release ) ) {
+		} elseif ( $package instanceof LocalBasePackage && $package->is_installed() && $package->is_installed_release( $release ) ) {
 			$filename = $this->archiver->archive_from_source( $package, $release->get_version() );
 		} else {
 			throw InvalidReleaseSource::forRelease( $release );
