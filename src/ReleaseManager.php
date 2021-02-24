@@ -16,6 +16,7 @@ use PixelgradeLT\Records\Exception\InvalidReleaseSource;
 use PixelgradeLT\Records\HTTP\Response;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\Storage\Storage;
+use Composer\Semver\VersionParser;
 
 /**
  * Release manager class.
@@ -58,11 +59,23 @@ class ReleaseManager {
 	 * @param Package $package Package instance.
 	 * @return Release[]
 	 */
-	public function all( Package $package ): array {
+	public function all_cached( Package $package ): array {
 		$releases = [];
+		$version_parser = new VersionParser();
 
 		foreach ( $this->storage->list_files( $package->get_source_name() ) as $filename ) {
-			$version              = str_replace( $package->get_slug() . '-', '', basename( $filename, '.zip' ) );
+			$version = trim( str_replace( $package->get_slug() . '-', '', basename( $filename, '.zip' ) ) );
+			if ( empty( $version ) ) {
+				continue;
+			}
+			try {
+				// Check that the version is actually valid.
+				$tmp_version = $version_parser->normalize( $version );
+			} catch ( \Exception $e ) {
+				// If there was an exception it means that something is wrong with this version. So ignore it.
+				continue;
+			}
+
 			$releases[ $version ] = new Release( $package, $version );
 		}
 
@@ -100,7 +113,8 @@ class ReleaseManager {
 			throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
 		}
 
-		return $release;
+		// We have safely cached the release. This means we should remove the source URL so from now on, so the cached zip is used instead.
+		return new Release( $package, $release->get_version() );
 	}
 
 	/**
@@ -146,6 +160,20 @@ class ReleaseManager {
 	 */
 	public function exists( Release $release ): bool {
 		return $this->storage->exists( $release->get_file_path() );
+	}
+
+	/**
+	 * Retrieve the absolute file path for an artifact.
+	 *
+	 * @param Release $release Release instance.
+	 * @return string|false The absolute file path or false if it doesn't exist.
+	 */
+	public function get_absolute_path( Release $release ) {
+		if ( ! $this->exists( $release ) ) {
+			return false;
+		}
+
+		return $this->storage->get_absolute_path( $release->get_file_path() );
 	}
 
 	/**

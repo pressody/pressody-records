@@ -146,7 +146,7 @@ class ComposerClient implements Client {
 			foreach ( $packagesByName as $packageName => $versionPackages ) {
 				foreach ( $versionPackages as $version => $versionConfig ) {
 					$versionStability = VersionParser::parseStability( $versionConfig['version'] );
-					if ( ! in_array( $versionStability, $acceptableStabilities ) ) {
+					if ( ! isset( BasePackage::$stabilities[ $versionStability ] ) || ! in_array( BasePackage::$stabilities[ $versionStability ], $acceptableStabilities ) ) {
 						unset( $packagesByName[ $packageName ][ $version ] );
 					}
 				}

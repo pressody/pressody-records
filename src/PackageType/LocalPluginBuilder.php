@@ -71,17 +71,15 @@ final class LocalPluginBuilder extends LocalPackageBuilder {
 	 * @return LocalPluginBuilder
 	 */
 	public function from_source( string $plugin_file, array $plugin_data = [] ): self {
-		$slug = $this->get_slug_from_plugin_file( $plugin_file );
-
-		// Account for single-file plugins.
-		$directory = '.' === \dirname( $plugin_file ) ? '' : \dirname( $plugin_file );
-
 		if ( empty( $plugin_data ) ) {
 			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_file, false, false );
 		}
 
 		// If we don't have 'Tags', attempt to get them from the plugin's readme.txt.
 		if ( empty( $plugin_data['Tags'] ) ) {
+			// Account for single-file plugins.
+			$directory = '.' === \dirname( $plugin_file ) ? '' : \dirname( $plugin_file );
+
 			$plugin_data['Tags'] = $this->get_tags_from_readme( $directory );
 		}
 
@@ -89,56 +87,23 @@ final class LocalPluginBuilder extends LocalPackageBuilder {
 		 * Start filling info.
 		 */
 
-		if ( empty( $this->package->get_basename() ) ) {
-			$this->set_basename( $plugin_file );
-		}
-
-		if ( empty( $this->package->get_directory() ) ) {
-			$this->set_directory( WP_PLUGIN_DIR . '/' . $directory );
-		}
-
-		if ( empty( $this->package->get_name() ) ) {
-			$this->set_name( $plugin_data['Name'] );
-		}
-
 		if ( empty( $this->package->get_type() ) ) {
 			$this->set_type( 'plugin' );
 		}
 
+		if ( empty( $this->package->get_basename() ) ) {
+			$this->set_basename( $plugin_file );
+		}
+
 		if ( empty( $this->package->get_slug() ) ) {
-			$this->set_slug( $slug );
-		}
-
-		if ( empty( $this->package->get_authors() ) ) {
-			$this->set_authors( [
-				[
-					'name'     => $plugin_data['AuthorName'],
-					'homepage' => $plugin_data['AuthorURI'],
-				],
-			] );
-		}
-
-		if ( empty( $this->package->get_homepage() ) ) {
-			$this->set_homepage( $plugin_data['PluginURI'] );
-		}
-
-		if ( empty( $this->package->get_description() ) ) {
-			$this->set_description( $plugin_data['Description'] );
-		}
-
-		if ( empty( $this->package->get_keywords() ) ) {
-			$this->set_keywords( $plugin_data['Tags'] );
-		}
-
-		if ( empty( $this->package->get_license() ) ) {
-			$this->set_license( $plugin_data['License'] );
+			$this->set_slug( $this->get_slug_from_plugin_file( $plugin_file ) );
 		}
 
 		if ( empty( $this->package->get_installed_version() ) ) {
 			$this->set_installed_version( $plugin_data['Version'] );
 		}
 
-		return $this;
+		return $this->from_header_data( $plugin_data );
 	}
 
 	/**

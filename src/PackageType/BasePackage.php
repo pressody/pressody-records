@@ -57,20 +57,6 @@ class BasePackage implements \ArrayAccess, Package {
 	protected $slug = '';
 
 	/**
-	 * Is managed package?
-	 *
-	 * @var string
-	 */
-	protected $is_managed = false;
-
-	/**
-	 * Releases.
-	 *
-	 * @var Release[]
-	 */
-	protected $releases = [];
-
-	/**
 	 * Package authors.
 	 *
 	 * @var array
@@ -104,6 +90,20 @@ class BasePackage implements \ArrayAccess, Package {
 	 * @var string[]
 	 */
 	protected $keywords = [];
+
+	/**
+	 * Is managed package?
+	 *
+	 * @var string
+	 */
+	protected $is_managed = false;
+
+	/**
+	 * Releases.
+	 *
+	 * @var Release[]
+	 */
+	protected $releases = [];
 
 	/**
 	 * Magic setter.
@@ -264,6 +264,17 @@ class BasePackage implements \ArrayAccess, Package {
 		}
 
 		return $this->releases[ $version ];
+	}
+
+	/**
+	 * Set a release by version.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param Release $release
+	 */
+	public function set_release( Release $release ) {
+		$this->releases[ $release->get_version() ] = $release;
 	}
 
 	/**

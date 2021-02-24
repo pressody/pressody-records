@@ -132,6 +132,15 @@ interface Package {
 	public function get_release( string $version ): Release;
 
 	/**
+	 * Set a release by version.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param Release $release
+	 */
+	public function set_release( Release $release );
+
+	/**
 	 * Retrieve releases.
 	 *
 	 * @since 0.1.0

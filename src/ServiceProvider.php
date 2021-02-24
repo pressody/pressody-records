@@ -324,16 +324,27 @@ class ServiceProvider implements ServiceProviderInterface {
 				);
 		};
 
+		// This is the repo that hold all of our managed packages (themes or plugins).
+		$container['repository.managed'] = function( $container ) {
+			return new Repository\MultiRepository(
+				[
+					$container['repository.installed.managed'],
+					$container['repository.external.plugins'],
+					$container['repository.external.themes'],
+				]
+			);
+		};
+
 		$container['route.composer'] = function( $container ) {
 			return new Route\Composer(
-				$container['repository.installed.managed'],
+				$container['repository.managed'],
 				$container['transformer.composer_repository']
 			);
 		};
 
 		$container['route.download'] = function( $container ) {
 			return new Route\Download(
-				$container['repository.installed.managed'],
+				$container['repository.managed'],
 				$container['release.manager']
 			);
 		};
@@ -360,7 +371,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['screen.settings'] = function( $container ) {
 			return new Screen\Settings(
-				$container['repository.installed.managed'],
+				$container['repository.managed'],
 				$container['api_key.repository'],
 				$container['transformer.composer_package']
 			);

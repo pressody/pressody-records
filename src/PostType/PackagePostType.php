@@ -676,19 +676,19 @@ class PackagePostType extends AbstractHookProvider {
 		}
 
 		// The package description.
-		if ( ! get_post_meta( $post_ID, '_package_details_description', true ) && $package->get_description() ) {
+		if ( empty( get_post_meta( $post_ID, '_package_details_description', true ) ) && $package->get_description() ) {
 			update_post_meta( $post_ID, '_package_details_description', sanitize_text_field( $package->get_description() ) );
 		}
 		// The package homepage URL.
-		if ( ! get_post_meta( $post_ID, '_package_details_homepage', true ) && $package->get_homepage() ) {
+		if ( empty( get_post_meta( $post_ID, '_package_details_homepage', true ) ) && $package->get_homepage() ) {
 			update_post_meta( $post_ID, '_package_details_homepage', esc_url_raw( $package->get_homepage() ) );
 		}
 		// The package license.
-		if ( ! get_post_meta( $post_ID, '_package_details_license', true ) && $package->get_license() ) {
+		if ( empty( get_post_meta( $post_ID, '_package_details_license', true ) ) && $package->get_license() ) {
 			update_post_meta( $post_ID, '_package_details_license', sanitize_text_field( $package->get_license() ) );
 		}
 		// The package authors.
-		if ( ! $this->package_manager->get_post_package_authors( $post_ID, $meta_container->get_id() ) && $package->get_authors() ) {
+		if ( empty( $this->package_manager->get_post_package_authors( $post_ID, $meta_container->get_id() ) ) && $package->get_authors() ) {
 			$this->package_manager->set_post_package_authors( $post_ID, $package->get_authors(), $meta_container->get_id() );
 		}
 
@@ -765,6 +765,10 @@ class PackagePostType extends AbstractHookProvider {
 		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\PackageBuilder::build() to do the work.
 		if ( ! empty( $packages ) ) {
 			$standardized_packages = $client->standardizePackagesForJson( $packages, $stability );
+
+			if ( ! empty( $standardized_packages[ $package_data['source_name'] ] ) ) {
+				update_post_meta( $post_ID, '_package_source_cached_release_packages', $standardized_packages[ $package_data['source_name'] ] );
+			}
 		}
 	}
 

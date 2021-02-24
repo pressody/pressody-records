@@ -245,9 +245,11 @@ class PackageArchiver extends AbstractHookProvider {
 		$package = $this->packages->first_where( compact( 'slug', 'type' ) );
 
 		try {
+			// Right now only for local installed packages.
 			if ( $package instanceof LocalBasePackage && $package->is_installed() ) {
-				$this->release_manager->archive( $package->get_installed_release() );
-				$this->release_manager->archive( $package->get_latest_release() );
+				// Once the release is successfully archived (cached), it is transformed so we need to overwrite.
+				$package->set_release( $this->release_manager->archive( $package->get_installed_release() ) );
+				$package->set_release( $this->release_manager->archive( $package->get_latest_release() ) );
 			}
 		} catch ( PixelgradeltRecordsException $e ) {
 			$this->logger->error(

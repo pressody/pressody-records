@@ -270,6 +270,12 @@ class PackageManager {
 		$data['slug']        = $this->get_post_package_slug( $post_ID );
 		$data['source_type'] = $this->get_post_package_source_type( $post_ID );
 		$data['keywords']    = $this->get_post_package_keywords( $post_ID );
+		$data['description'] = get_post_meta( $post_ID, '_package_details_description', true );
+		$data['homepage']    = get_post_meta( $post_ID, '_package_details_homepage', true );
+		$data['license']     = get_post_meta( $post_ID, '_package_details_license', true );
+		$data['authors'] = $this->get_post_package_authors( $post_ID );
+
+		$data['source_cached_release_packages'] = [];
 
 		switch ( $data['source_type'] ) {
 			case 'packagist.org':
@@ -307,7 +313,7 @@ class PackageManager {
 				// Determine if theme is actually (still) installed.
 				$data['local_installed'] = false;
 				$installed_themes = search_theme_directories();
-				if ( is_array( $installed_themes ) && in_array( $data['local_theme_slug'], $installed_themes ) ) {
+				if ( is_array( $installed_themes ) && in_array( $data['local_theme_slug'], array_keys( $installed_themes ) ) ) {
 					$data['local_installed'] = true;
 				}
 				break;
@@ -322,15 +328,9 @@ class PackageManager {
 		if ( in_array( $data['source_type'], [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
 			$data['source_version_range'] = trim( get_post_meta( $post_ID, '_package_source_version_range', true ) );
 			$data['source_stability'] = trim( get_post_meta( $post_ID, '_package_source_stability', true ) );
-		}
 
-		if ( in_array( $data['source_type'], [ 'local.plugin', 'local.theme', 'local.manual', ] ) ) {
-			$data['details'] = [
-				'description' => get_post_meta( $post_ID, '_package_details_description', true ),
-				'homepage'    => get_post_meta( $post_ID, '_package_details_homepage', true ),
-				'license'     => get_post_meta( $post_ID, '_package_details_license', true ),
-				'authors'     => $this->get_post_package_authors( $post_ID ),
-			];
+			// Get the source version/release packages data (fetched from the external repo) we have stored.
+			$data['source_cached_release_packages'] = get_post_meta( $post_ID, '_package_source_cached_release_packages', true );
 		}
 
 		return $data;

@@ -11,6 +11,8 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType;
 
+use function Patchwork\Config\get;
+
 /**
  * Local theme builder class.
  *
@@ -39,7 +41,7 @@ final class LocalThemeBuilder extends LocalPackageBuilder {
 	}
 
 	/**
-	 * Fill (missing) plugin package details from source.
+	 * Fill (missing) theme package details from source.
 	 *
 	 * @since 0.1.0
 	 *
@@ -69,39 +71,20 @@ final class LocalThemeBuilder extends LocalPackageBuilder {
 			$this->set_type( 'theme' );
 		}
 
-		if ( empty( $this->package->get_authors() ) ) {
-			$this->set_authors( [
-				[
-					'name'     => $theme->get( 'Author' ),
-					'homepage' => $theme->get( 'AuthorURI' ),
-				],
-			] );
-		}
-
-		if ( empty( $this->package->get_homepage() ) ) {
-			$this->set_homepage( $theme->get( 'ThemeURI' ) );
-		}
-
-		if ( empty( $this->package->get_description() ) ) {
-			$this->set_description( $theme->get( 'Description' ) );
-		}
-
-		if ( empty( $this->package->get_keywords() ) ) {
-			$this->set_keywords( $theme->get( 'Tags' ) );
-		}
-
-		if ( empty( $this->package->get_license() ) ) {
-			$this->set_license( $theme->get( 'License' ) );
-		}
-
-		if ( empty( $this->package->get_name() ) ) {
-			$this->set_name( $theme->get( 'Name' ) );
-		}
-
 		if ( empty( $this->package->get_installed_version() ) ) {
 			$this->set_installed_version( $theme->get( 'Version' ) );
 		}
 
-		return $this;
+		$theme_data = [
+			'Name' => $theme->get( 'Name' ),
+			'ThemeURI' => $theme->get( 'ThemeURI' ),
+			'Author' => $theme->get( 'Author' ),
+			'AuthorURI' => $theme->get( 'AuthorURI' ),
+			'Description' => $theme->get( 'Description' ),
+			'License' => $theme->get( 'License' ),
+			'Tags' => $theme->get( 'Tags' ),
+		];
+
+		return $this->from_header_data( $theme_data );
 	}
 }

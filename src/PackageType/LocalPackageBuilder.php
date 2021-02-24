@@ -58,6 +58,22 @@ class LocalPackageBuilder extends PackageBuilder {
 	}
 
 	/**
+	 * Set properties from a package data array.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $package_data Package data.
+	 * @return PackageBuilder
+	 */
+	public function from_package_data( array $package_data ): PackageBuilder {
+		if ( ! empty( $package_data['local_installed'] ) ) {
+			$this->set_installed( $package_data['local_installed'] );
+		}
+
+		return parent::from_package_data( $package_data );
+	}
+
+	/**
 	 * Set properties from an existing package.
 	 *
 	 * @since 0.1.0
@@ -91,7 +107,7 @@ class LocalPackageBuilder extends PackageBuilder {
 	 * @return $this
 	 */
 	public function add_cached_releases(): PackageBuilder {
-		$releases = $this->release_manager->all( $this->package );
+		$releases = $this->release_manager->all_cached( $this->package );
 
 		if ( $this->package->is_installed() ) {
 			// Add the installed version in case it hasn't been cached yet.

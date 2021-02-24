@@ -115,10 +115,11 @@ class PackageBuilder {
 		$this->set( 'releases', $this->releases );
 
 		// Attempt to cache any releases not cached yet. But only for managed packages.
-		foreach ( $this->releases as $release ) {
+		foreach ( $this->releases as $key => $release ) {
 			if ( $this->package->is_managed() ) {
 				try {
-					$this->release_manager->archive( $release );
+					// Once the release is successfully archived (cached), it is transformed so we need to overwrite.
+					$this->package->set_release( $this->release_manager->archive( $release ) );
 				} catch ( PixelgradeltRecordsException $e ) {
 					$this->logger->error(
 						'Error archiving {package}.',
@@ -380,7 +381,7 @@ class PackageBuilder {
 	 * @param int   $post_id Optional. The package post ID to retrieve data for. Leave empty and provide $args to query.
 	 * @param array $args Optional. Args used to query for a managed package if the post ID failed to retrieve data.
 	 *
-	 * @return LocalPluginBuilder
+	 * @return $this
 	 */
 	public function from_manager( int $post_id = 0, array $args = [] ): self {
 		$package_data = $this->package_manager->get_package_id_data( $post_id );
@@ -390,46 +391,115 @@ class PackageBuilder {
 		}
 		// No data, no play.
 		if ( empty( $package_data ) ) {
+			// Mark this package as not being managed by us, yet.
 			$this->set_is_managed( false );
+
 			return $this;
 		}
 
+		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
 
-		if ( ! empty( $package_data['name'] ) ) {
+		$this->from_package_data( $package_data );
+
+		return $this;
+	}
+
+	/**
+	 * Set properties from a package data array.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $package_data Package data.
+	 * @return $this
+	 */
+	public function from_package_data( array $package_data ): self {
+		if ( empty( $this->package->get_name() ) && ! empty( $package_data['name'] ) ) {
 			$this->set_name( $package_data['name'] );
 		}
 
-		if ( ! empty( $package_data['slug'] ) ) {
+		if ( empty( $this->package->get_slug() ) && ! empty( $package_data['slug'] ) ) {
 			$this->set_slug( $package_data['slug'] );
 		}
 
-		if ( ! empty( $package_data['type'] ) ) {
+		if ( empty( $this->package->get_type() ) && ! empty( $package_data['type'] ) ) {
 			$this->set_type( $package_data['type'] );
 		}
 
-		if ( ! empty( $package_data['source_type'] ) ) {
+		if ( empty( $this->package->get_source_type() ) && ! empty( $package_data['source_type'] ) ) {
 			$this->set_source_type( $package_data['source_type'] );
 		}
 
-		if ( ! empty( $package_data['source_name'] ) ) {
+		if ( empty( $this->package->get_source_name() ) && ! empty( $package_data['source_name'] ) ) {
 			$this->set_source_name( $package_data['source_name'] );
 		}
 
-		if ( ! empty( $package_data['keywords'] ) ) {
+		if ( empty( $this->package->get_authors() ) && ! empty( $package_data['authors'] ) ) {
+			$this->set_authors( $package_data['authors'] );
+		}
+
+		if ( empty( $this->package->get_homepage() ) && ! empty( $package_data['homepage'] ) ) {
+			$this->set_homepage( $package_data['homepage'] );
+		}
+
+		if ( empty( $this->package->get_description() ) && ! empty( $package_data['description'] ) ) {
+			$this->set_description( $package_data['description'] );
+		}
+
+		if ( empty( $this->package->get_license() ) && ! empty( $package_data['license'] ) ) {
+			$this->set_license( $package_data['license'] );
+		}
+
+		if ( empty( $this->package->get_keywords() ) && ! empty( $package_data['keywords'] ) ) {
 			$this->set_keywords( $package_data['keywords'] );
 		}
 
-		if ( ! empty( $package_data['details'] ) ) {
-			$this
-				->set_authors( $package_data['details']['authors'] )
-				->set_homepage( $package_data['details']['homepage'] )
-				->set_description( $package_data['details']['description'] )
-				->set_license( $package_data['details']['license'] );
+		return $this;
+	}
+
+	/**
+	 * Fill (missing) package details from header data.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $header_data The package (plugin or theme) header data.
+	 *
+	 * @return $this
+	 */
+	public function from_header_data( array $header_data ): self {
+
+		if ( empty( $this->package->get_name() ) && ! empty( $header_data['Name'] ) ) {
+			$this->set_name( $header_data['Name'] );
 		}
 
-		if ( ! empty( $package_data['local_installed'] ) ) {
-			$this->set_installed( $package_data['local_installed'] );
+		// Treat both theme and plugin headers.
+		if ( empty( $this->package->get_homepage() ) ) {
+			if ( ! empty( $header_data['ThemeURI'] ) ) {
+				$this->set_homepage( $header_data['ThemeURI'] );
+			} else if ( ! empty( $header_data['PluginURI'] ) ) {
+				$this->set_homepage( $header_data['PluginURI'] );
+			}
+		}
+
+		if ( empty( $this->package->get_authors() ) && ! empty( $header_data['Author'] ) ) {
+			$this->set_authors( [
+				[
+					'name'     => $header_data['Author'],
+					'homepage' => $header_data[ 'AuthorURI'],
+				],
+			] );
+		}
+
+		if ( empty( $this->package->get_description() ) && ! empty( $header_data['Description'] ) ) {
+			$this->set_description( $header_data['Description'] );
+		}
+
+		if ( empty( $this->package->get_license() ) && ! empty( $header_data['License'] ) ) {
+			$this->set_license( $header_data['License'] );
+		}
+
+		if ( empty( $this->package->get_keywords() ) && ! empty( $header_data['Tags'] ) ) {
+			$this->set_keywords( $header_data['Tags'] );
 		}
 
 		return $this;
@@ -457,6 +527,23 @@ class PackageBuilder {
 			->set_license( $package->get_license() );
 
 		foreach ( $package->get_releases() as $release ) {
+			$this->add_release( $release->get_version(), $release->get_source_url() );
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add cached releases to a package.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return $this
+	 */
+	public function add_cached_releases(): PackageBuilder {
+		$releases = $this->release_manager->all_cached( $this->package );
+
+		foreach ( $releases as $release ) {
 			$this->add_release( $release->get_version(), $release->get_source_url() );
 		}
 

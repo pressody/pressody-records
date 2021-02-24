@@ -71,7 +71,7 @@ class ExternalThemes extends AbstractRepository implements PackageRepository {
 				continue;
 			}
 
-			$package = $this->build( $post_id );
+			$package = $this->build( $post_id, $this->package_manager->get_post_package_source_type( $post_id ) );
 			$items[] = $package;
 		}
 
@@ -85,12 +85,13 @@ class ExternalThemes extends AbstractRepository implements PackageRepository {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $post_id
+	 * @param int    $post_id
+	 * @param string $source_type Optional.
 	 *
 	 * @return Package
 	 */
-	protected function build( int $post_id ): Package {
-		return $this->factory->create( 'theme' )
+	protected function build( int $post_id, string $source_type = '' ): Package {
+		return $this->factory->create( 'theme', $source_type )
 			// Then add managed data, if this theme is managed.
 			->from_manager( $post_id )
 			->add_cached_releases()
