@@ -4,7 +4,6 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Test\Unit\Validator;
 
 use PixelgradeLT\Records\Exception\InvalidPackageArtifact;
-use PixelgradeLT\Records\PackageType\Plugin;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 use PixelgradeLT\Records\Validator\ZipValidator;

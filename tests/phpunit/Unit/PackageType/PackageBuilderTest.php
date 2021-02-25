@@ -3,27 +3,41 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Test\Unit\PackageType;
 
+use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\Package;
+use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\PackageBuilder;
+use PixelgradeLT\Records\PackageType\Builder\PackageBuilder;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
 class PackageBuilderTest extends TestCase {
+	protected $builder = null;
+
 	public function setUp(): void {
 		parent::setUp();
 
-		$manager = $this->getMockBuilder( ReleaseManager::class )
-			->disableOriginalConstructor()
-			->getMock();
-
+		// Provide direct getters.
 		$package = new class extends BasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
 		};
 
-		$this->builder = new PackageBuilder( $package, $manager );
+
+		$package_manager = $this->getMockBuilder( PackageManager::class )
+		                ->disableOriginalConstructor()
+		                ->getMock();
+
+		$release_manager = $this->getMockBuilder( ReleaseManager::class )
+		                        ->disableOriginalConstructor()
+		                        ->getMock();
+
+		$logger = $this->getMockBuilder( Logger::class )
+		                        ->disableOriginalConstructor()
+		                        ->getMock();
+
+		$this->builder = new PackageBuilder( $package, $package_manager, $release_manager, $logger );
 	}
 
 	public function test_implements_package_interface() {
@@ -33,17 +47,17 @@ class PackageBuilderTest extends TestCase {
 	}
 
 	public function test_author() {
-		$expected = 'Cedaro';
-		$package  = $this->builder->set_author( $expected )->build();
+		$expected = [
+			[
+				'name'     => 'Pixelgrade',
+				'email'    => 'contact@pixelgrade.com',
+				'homepage' => 'https://pixelgrade.com',
+				'role'     => 'Maker',
+			]
+		];
+		$package  = $this->builder->set_authors( $expected )->build();
 
-		$this->assertSame( $expected, $package->author );
-	}
-
-	public function test_author_url() {
-		$expected = 'https://www.cedaro.com/';
-		$package  = $this->builder->set_author_url( $expected )->build();
-
-		$this->assertSame( $expected, $package->author_url );
+		$this->assertSame( $expected, $package->authors );
 	}
 
 	public function test_description() {

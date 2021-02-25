@@ -4,16 +4,22 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Test\Unit\PackageType;
 
 use Brain\Monkey\Functions;
+use Composer\Semver\VersionParser;
+use PixelgradeLT\Records\ComposerVersionParser;
+use PixelgradeLT\Records\Logger;
+use PixelgradeLT\Records\PackageManager;
 use Psr\Log\NullLogger;
 use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\PackageType\Plugin;
-use PixelgradeLT\Records\PackageType\PluginBuilder;
+use PixelgradeLT\Records\PackageType\LocalPlugin;
+use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
 class PluginTest extends TestCase {
+	protected $builder = null;
+
 	public function setUp(): void {
 		parent::setUp();
 
@@ -22,10 +28,21 @@ class PluginTest extends TestCase {
 
 		$archiver = new Archiver( new NullLogger() );
 		$storage  = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
-		$manager  = new ReleaseManager( $storage, $archiver );
-		$package  = new Plugin();
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 
-		$this->builder = new PluginBuilder( $package, $manager );
+		$package_manager = $this->getMockBuilder( PackageManager::class )
+		                        ->disableOriginalConstructor()
+		                        ->getMock();
+
+		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser );
+
+		$logger = $this->getMockBuilder( Logger::class )
+		               ->disableOriginalConstructor()
+		               ->getMock();
+
+		$package  = new LocalPlugin();
+
+		$this->builder = new LocalPluginBuilder( $package, $package_manager, $release_manager, $logger );
 	}
 
 	public function test_get_plugin_from_source() {
@@ -33,10 +50,16 @@ class PluginTest extends TestCase {
 			->from_source( 'basic/basic.php' )
 			->build();
 
-		$this->assertInstanceOf( Plugin::class, $package );
+		$this->assertInstanceOf( LocalPlugin::class, $package );
 
-		$this->assertSame( 'Basic, Inc.', $package->get_author() );
-		$this->assertSame( 'https://example.com/', $package->get_author_url() );
+
+
+		$this->assertSame( [
+			[
+				'name'     => 'Basic, Inc.',
+				'homepage' => 'https://example.com/',
+			],
+		], $package->get_authors() );
 		$this->assertSame( 'basic/basic.php', $package->get_basename() );
 		$this->assertSame( WP_PLUGIN_DIR . '/basic/', $package->get_directory() );
 		$this->assertSame( 'https://example.com/plugin/basic/', $package->get_homepage() );

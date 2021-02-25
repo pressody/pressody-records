@@ -3,28 +3,44 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Test\Unit\PackageType;
 
+use Composer\Semver\VersionParser;
+use PixelgradeLT\Records\ComposerVersionParser;
+use PixelgradeLT\Records\Logger;
+use PixelgradeLT\Records\PackageManager;
 use Psr\Log\NullLogger;
 use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
 use PixelgradeLT\Records\Exception\PackageNotInstalled;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\PackageBuilder;
+use PixelgradeLT\Records\PackageType\Builder\PackageBuilder;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
 class PackageReleasesTest extends TestCase {
+	protected $builder = null;
+
 	public function setUp(): void {
 		parent::setUp();
 
 		$archiver = new Archiver( new NullLogger() );
 		$storage  = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
-		$manager  = new ReleaseManager( $storage, $archiver );
 		$package  = new BasePackage();
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 
-		$this->builder = new PackageBuilder( $package, $manager );
+		$package_manager = $this->getMockBuilder( PackageManager::class )
+		                        ->disableOriginalConstructor()
+		                        ->getMock();
+
+		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser );
+
+		$logger = $this->getMockBuilder( Logger::class )
+		               ->disableOriginalConstructor()
+		               ->getMock();
+
+		$this->builder = new PackageBuilder( $package, $package_manager, $release_manager, $logger );
 	}
 
 	public function test_package_has_no_releases() {

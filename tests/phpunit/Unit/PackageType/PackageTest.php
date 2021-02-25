@@ -6,11 +6,11 @@ namespace PixelgradeLT\Records\Test\Unit\PackageType;
 use PixelgradeLT\Records\Exception\PackageNotInstalled;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\PackageBuilder;
-use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
 class PackageTest extends TestCase {
+	protected $package = null;
+
 	public function setUp(): void {
 		parent::setUp();
 
@@ -25,18 +25,18 @@ class PackageTest extends TestCase {
 		$this->assertInstanceOf( Package::class, $this->package );
 	}
 
-	public function test_author() {
-		$expected = 'Cedaro';
-		$this->package->author = $expected;
+	public function test_authors() {
+		$expected = [
+			[
+				'name'     => 'Pixelgrade',
+				'email'    => 'contact@pixelgrade.com',
+				'homepage' => 'https://pixelgrade.com',
+				'role'     => 'Maker',
+			]
+		];
+		$this->package->authors = $expected;
 
-		$this->assertSame( $expected, $this->package->get_author() );
-	}
-
-	public function test_author_url() {
-		$expected = 'https://www.cedaro.com/';
-		$this->package->author_url = $expected;
-
-		$this->assertSame( $expected, $this->package->get_author_url() );
+		$this->assertSame( $expected, $this->package->get_authors() );
 	}
 
 	public function test_description() {

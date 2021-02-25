@@ -3,12 +3,15 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Test\Integration\PackageType;
 
-use PixelgradeLT\Records\PackageType\Theme;
+use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
 use function PixelgradeLT\Records\plugin;
 
 class ThemeTest extends TestCase {
+	protected $original_theme_directories = null;
+	protected $factory = null;
+
 	public function setUp(): void {
 		parent::setUp();
 
@@ -29,7 +32,7 @@ class ThemeTest extends TestCase {
 			->from_source( 'ovation' )
 			->build();
 
-		$this->assertInstanceOf( Theme::class, $package );
+		$this->assertInstanceOf( LocalTheme::class, $package );
 
 		$this->assertSame( 'AudioTheme', $package->get_author() );
 		$this->assertSame( 'https://audiotheme.com/', $package->get_author_url() );

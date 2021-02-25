@@ -4,16 +4,22 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Test\Unit\PackageType;
 
 use Brain\Monkey\Functions;
+use Composer\Semver\VersionParser;
+use PixelgradeLT\Records\ComposerVersionParser;
+use PixelgradeLT\Records\Logger;
+use PixelgradeLT\Records\PackageManager;
 use Psr\Log\NullLogger;
 use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\PackageType\Plugin;
-use PixelgradeLT\Records\PackageType\PluginBuilder;
+use PixelgradeLT\Records\PackageType\LocalPlugin;
+use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
 class PluginReleasesTest extends TestCase {
+	protected $builder = null;
+
 	public function setUp(): void {
 		parent::setUp();
 
@@ -21,10 +27,21 @@ class PluginReleasesTest extends TestCase {
 
 		$archiver = new Archiver( new NullLogger() );
 		$storage  = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
-		$manager  = new ReleaseManager( $storage, $archiver );
-		$package  = new Plugin();
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 
-		$this->builder = ( new PluginBuilder( $package, $manager ) )
+		$package_manager = $this->getMockBuilder( PackageManager::class )
+		                        ->disableOriginalConstructor()
+		                        ->getMock();
+
+		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser );
+
+		$logger = $this->getMockBuilder( Logger::class )
+		               ->disableOriginalConstructor()
+		               ->getMock();
+
+		$package  = new LocalPlugin();
+
+		$this->builder = ( new LocalPluginBuilder( $package, $package_manager, $release_manager, $logger ) )
 			->set_basename( 'basic/basic.php' )
 			->set_slug( 'basic' );
 	}
