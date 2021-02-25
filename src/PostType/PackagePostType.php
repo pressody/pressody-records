@@ -701,7 +701,7 @@ class PackagePostType extends AbstractHookProvider {
 		$packages = $this->package_manager->fetch_external_package_remote_releases( $post_ID );
 
 		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
-		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\PackageBuilder::build() to do the work.
+		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\Builder\PackageBuilder::build() to do the work.
 		if ( ! empty( $packages ) ) {
 			update_post_meta( $post_ID, '_package_source_cached_release_packages', $packages );
 		}

@@ -9,7 +9,7 @@
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\PackageType;
+namespace PixelgradeLT\Records\PackageType\Builder;
 
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Logger;

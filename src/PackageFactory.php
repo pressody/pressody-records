@@ -13,13 +13,12 @@ namespace PixelgradeLT\Records;
 
 use PixelgradeLT\Records\PackageType\BasePackage;
 use PixelgradeLT\Records\PackageType\ExternalBasePackage;
-use PixelgradeLT\Records\PackageType\ExternalPackageBuilder;
-use PixelgradeLT\Records\PackageType\LocalBasePackage;
-use PixelgradeLT\Records\PackageType\PackageBuilder;
+use PixelgradeLT\Records\PackageType\Builder\ExternalPackageBuilder;
+use PixelgradeLT\Records\PackageType\Builder\PackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\LocalPluginBuilder;
+use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
 use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\PackageType\LocalThemeBuilder;
+use PixelgradeLT\Records\PackageType\Builder\LocalThemeBuilder;
 use Psr\Log\LoggerInterface;
 
 /**

@@ -9,9 +9,7 @@
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PackageType;
-
-use function Patchwork\Config\get;
+namespace PixelgradeLT\Records\PackageType\Builder;
 
 /**
  * Local theme builder class.
