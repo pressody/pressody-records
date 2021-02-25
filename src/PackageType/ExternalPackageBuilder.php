@@ -11,8 +11,9 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\PackageType;
 
+use Composer\Semver\Constraint\Constraint;
+use Composer\Semver\Constraint\ConstraintInterface;
 use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\Release;
 
 /**
  * External package builder class for packages with a source like Packagist.org, WPackagist.org, or a VCS url.
@@ -20,6 +21,18 @@ use PixelgradeLT\Records\Release;
  * @since 0.1.0
  */
 class ExternalPackageBuilder extends PackageBuilder {
+
+	/**
+	 * Set the package constraint for available releases by.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param ConstraintInterface $source_constraint
+	 * @return $this
+	 */
+	public function set_source_constraint( ConstraintInterface $source_constraint ): self {
+		return $this->set( 'source_constraint', $source_constraint );
+	}
 
 	/**
 	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
@@ -47,6 +60,26 @@ class ExternalPackageBuilder extends PackageBuilder {
 
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
+
+		if ( ! $this->package->has_source_constraint() && ! empty( $package_data['source_version_range'] ) && '*' !== $package_data['source_version_range'] ) {
+			// Merge the version range with the stability so we have a full constraint string.
+			$version_range = $package_data['source_version_range'];
+			if ( ! empty( $package_data['source_stability'] ) || 'stable' !== $package_data['source_stability'] ) {
+				$version_range .= '@' . $package_data['source_stability'];
+			}
+
+			try {
+				$this->set_source_constraint( $this->package_manager->get_composer_version_parser()->parseConstraints( $version_range ) );
+			} catch ( \Exception $e ) {
+				$this->logger->error(
+					'Error parsing source constraint for {package}.',
+					[
+						'exception' => $e,
+						'package'   => $this->package->get_name(),
+					]
+				);
+			}
+		}
 
 		// Write the package data here, so the following logic has the data it needs.
 		$this->from_package_data( $package_data );
@@ -85,6 +118,7 @@ class ExternalPackageBuilder extends PackageBuilder {
 		if ( empty( $this->package->get_description() )
 		     || empty( $this->package->get_homepage() )
 		     || empty( $this->package->get_authors() )
+		     || empty( $this->package->get_license() )
 		) {
 			/** @var \WP_Filesystem_Base $wp_filesystem */
 			global $wp_filesystem;
@@ -157,6 +191,26 @@ class ExternalPackageBuilder extends PackageBuilder {
 							$tmp_package_data['Tags'] = $this->get_tags_from_readme( $package_source_dir );
 						}
 
+						// Make sure that we don't end up doing the heavy lifting above on every request
+						// due to missing information in the package headers.
+						// Just fill missing header data with some default data.
+						if ( empty( $tmp_package_data['Description'] ) ) {
+							$tmp_package_data['Description'] = 'Just another package';
+						}
+						if ( empty( $tmp_package_data['ThemeURI'] ) && empty( $tmp_package_data['PluginURI'] ) ) {
+							$tmp_package_data['PluginURI'] = 'https://pixelgradelt.com';
+						}
+						if ( empty( $tmp_package_data['License'] ) ) {
+							$tmp_package_data['License'] = 'GPL-2.0-or-later';
+						}
+						if ( empty( $tmp_package_data['Author'] ) ) {
+							$tmp_package_data['Author'] = 'Pixelgrade';
+						}
+						if ( empty( $tmp_package_data['AuthorURI'] ) ) {
+							$tmp_package_data['AuthorURI'] = 'https://pixelgradelt.com';
+						}
+
+						// Now fill any missing package data from the headers data.
 						$this->from_header_data( $tmp_package_data );
 					}
 
@@ -169,6 +223,24 @@ class ExternalPackageBuilder extends PackageBuilder {
 					$wp_filesystem->delete( $source_filename );
 				}
 			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Set properties from an existing package.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param Package $package Package.
+	 * @return $this
+	 */
+	public function with_package( Package $package ): PackageBuilder {
+		parent::with_package( $package );
+
+		if ( $package->has_source_constraint() ) {
+			$this->set_source_constraint( $package->get_source_constraint() );
 		}
 
 		return $this;
@@ -201,6 +273,23 @@ class ExternalPackageBuilder extends PackageBuilder {
 		}
 
 		return $tags;
+	}
+
+	/**
+	 * Attempt to prune the releases by certain conditions (maybe constraints).
+	 *
+	 * @return $this
+	 */
+	public function prune_releases(): PackageBuilder {
+		/** @var ConstraintInterface $constraint */
+		$constraint = $this->package->get_source_constraint();
+		foreach ( $this->releases as $key => $release ) {
+			if ( ! $constraint->matches( new Constraint('==', $release->get_version() ) ) ) {
+				unset( $this->releases[ $key ] );
+			}
+		}
+
+		return $this;
 	}
 
 	/**

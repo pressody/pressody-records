@@ -12,6 +12,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records;
 
 use PixelgradeLT\Records\PackageType\BasePackage;
+use PixelgradeLT\Records\PackageType\ExternalBasePackage;
 use PixelgradeLT\Records\PackageType\ExternalPackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\PackageType\PackageBuilder;
@@ -89,7 +90,7 @@ final class PackageFactory {
 		}
 
 		if ( in_array( $source_type, [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
-			return new ExternalPackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager, $this->logger );
+			return new ExternalPackageBuilder( new ExternalBasePackage(), $this->package_manager, $this->release_manager, $this->logger );
 		}
 
 		return new PackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager, $this->logger );

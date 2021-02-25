@@ -239,6 +239,17 @@ class BasePackage implements \ArrayAccess, Package {
 	}
 
 	/**
+	 * Check if the package has a source constraint.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_source_constraint(): bool {
+		return false;
+	}
+
+	/**
 	 * Whether the package has any releases.
 	 *
 	 * @since 0.1.0

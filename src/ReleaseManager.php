@@ -39,16 +39,34 @@ class ReleaseManager {
 	protected $storage;
 
 	/**
+	 * Composer version parser.
+	 *
+	 * @var ComposerVersionParser
+	 */
+	protected $composer_version_parser;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Storage  $storage  Storage service.
-	 * @param Archiver $archiver Archiver.
+	 * @param Storage               $storage  Storage service.
+	 * @param Archiver              $archiver Archiver.
+	 * @param ComposerVersionParser $composer_version_parser
 	 */
-	public function __construct( Storage $storage, Archiver $archiver ) {
+	public function __construct(
+		Storage $storage,
+		Archiver $archiver,
+		ComposerVersionParser $composer_version_parser
+	) {
+
 		$this->archiver = $archiver;
 		$this->storage  = $storage;
+		$this->composer_version_parser  = $composer_version_parser;
+	}
+
+	public function get_composer_version_parser(): ComposerVersionParser {
+		return $this->composer_version_parser;
 	}
 
 	/**
@@ -61,7 +79,6 @@ class ReleaseManager {
 	 */
 	public function all_cached( Package $package ): array {
 		$releases = [];
-		$version_parser = new VersionParser();
 
 		foreach ( $this->storage->list_files( $package->get_source_name() ) as $filename ) {
 			$version = trim( str_replace( $package->get_slug() . '-', '', basename( $filename, '.zip' ) ) );
@@ -70,7 +87,7 @@ class ReleaseManager {
 			}
 			try {
 				// Check that the version is actually valid.
-				$tmp_version = $version_parser->normalize( $version );
+				$tmp_version = $this->composer_version_parser->normalize( $version );
 			} catch ( \Exception $e ) {
 				// If there was an exception it means that something is wrong with this version. So ignore it.
 				continue;

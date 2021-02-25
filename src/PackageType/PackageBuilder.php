@@ -105,6 +105,9 @@ class PackageBuilder {
 	 * @return Package
 	 */
 	public function build(): Package {
+		// Make sure that we enforce any conditions or constraints on the releases list before we set them in the package.
+		$this->prune_releases();
+
 		uasort(
 			$this->releases,
 			function( Release $a, Release $b ) {
@@ -114,23 +117,7 @@ class PackageBuilder {
 
 		$this->set( 'releases', $this->releases );
 
-		// Attempt to cache any releases not cached yet. But only for managed packages.
-		foreach ( $this->releases as $key => $release ) {
-			if ( $this->package->is_managed() ) {
-				try {
-					// Once the release is successfully archived (cached), it is transformed so we need to overwrite.
-					$this->package->set_release( $this->release_manager->archive( $release ) );
-				} catch ( PixelgradeltRecordsException $e ) {
-					$this->logger->error(
-						'Error archiving {package}.',
-						[
-							'exception' => $e,
-							'package'   => $this->package->get_name(),
-						]
-					);
-				}
-			}
-		}
+		$this->cache_releases();
 
 		return $this->package;
 	}
@@ -198,7 +185,7 @@ class PackageBuilder {
 	}
 
 	/**
-	 * Set is this package is managed by us.
+	 * Set if this package is managed by us.
 	 *
 	 * @since 0.1.0
 	 *
@@ -529,6 +516,64 @@ class PackageBuilder {
 		foreach ( $package->get_releases() as $release ) {
 			$this->add_release( $release->get_version(), $release->get_source_url() );
 		}
+
+		return $this;
+	}
+
+	/**
+	 * Attempt to cache any releases not cached yet. But only for managed packages.
+	 *
+	 * We will also prune cached releases that are no longer present in the releases list.
+	 *
+	 * @return $this
+	 */
+	public function cache_releases(): PackageBuilder {
+		if ( ! $this->package->is_managed() ) {
+			return $this;
+		}
+
+		$versions = [];
+		foreach ( $this->releases as $key => $release ) {
+
+				try {
+					$new_release = $this->release_manager->archive( $release );
+					// Once the release file (zip) is successfully archived (cached), it is transformed so we need to overwrite.
+					if ( $release !== $new_release ) {
+						$this->package->set_release( $new_release );
+					}
+
+					$versions[] = $release->get_version();
+				} catch ( PixelgradeltRecordsException $e ) {
+					$this->logger->error(
+						'Error archiving {package}.',
+						[
+							'exception' => $e,
+							'package'   => $this->package->get_name(),
+						]
+					);
+				}
+		}
+
+		// Prune the cache from extra releases.
+		if ( ! empty( $versions ) ) {
+			$all_cached = $this->release_manager->all_cached( $this->package );
+			foreach ( $all_cached as $cached_release ) {
+				if ( ! in_array( $cached_release->get_version(), $versions ) ) {
+					$this->release_manager->delete( $cached_release );
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Attempt to prune the releases by certain conditions (maybe constraints).
+	 *
+	 * @return $this
+	 */
+	public function prune_releases(): PackageBuilder {
+		// Nothing right now.
 
 		return $this;
 	}

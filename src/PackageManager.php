@@ -2,12 +2,12 @@
 /**
  * Package manager.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -31,7 +31,7 @@ class PackageManager {
 
 	/**
 	 * We will automatically register these if they are not present.The slugs will be transformed into the package types defined by composer/installers
-	 * @see \PixelgradeLT\Records\Transformer\ComposerPackageTransformer::WORDPRESS_TYPES
+	 * @see  \PixelgradeLT\Records\Transformer\ComposerPackageTransformer::WORDPRESS_TYPES
 	 * @link https://packagist.org/packages/composer/installers
 	 */
 	const PACKAGE_TYPE_TERMS = [
@@ -61,13 +61,6 @@ class PackageManager {
 	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpackage_keyword';
 
 	/**
-	 * Archiver.
-	 *
-	 * @var Archiver
-	 */
-	protected $archiver;
-
-	/**
 	 * External Composer repository client.
 	 *
 	 * @var ComposerClient
@@ -75,29 +68,35 @@ class PackageManager {
 	protected $composer_client;
 
 	/**
-	 * Storage.
+	 * Composer version parser.
 	 *
-	 * @var Storage
+	 * @var ComposerVersionParser
 	 */
-	protected $storage;
+	protected $composer_version_parser;
 
 	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Storage        $storage  Storage service.
-	 * @param Archiver       $archiver Archiver.
-	 * @param ComposerClient $composer_client
+	 * @param ComposerClient        $composer_client
+	 * @param ComposerVersionParser $composer_version_parser
 	 */
-	public function __construct( Storage $storage, Archiver $archiver, ComposerClient $composer_client ) {
-		$this->archiver = $archiver;
-		$this->storage  = $storage;
-		$this->composer_client  = $composer_client;
+	public function __construct(
+		ComposerClient $composer_client,
+		ComposerVersionParser $composer_version_parser
+	) {
+
+		$this->composer_client         = $composer_client;
+		$this->composer_version_parser = $composer_version_parser;
 	}
 
 	public function get_composer_client(): ComposerClient {
 		return $this->composer_client;
+	}
+
+	public function get_composer_version_parser(): ComposerVersionParser {
+		return $this->composer_version_parser;
 	}
 
 	/**
@@ -273,7 +272,7 @@ class PackageManager {
 		$data['description'] = get_post_meta( $post_ID, '_package_details_description', true );
 		$data['homepage']    = get_post_meta( $post_ID, '_package_details_homepage', true );
 		$data['license']     = get_post_meta( $post_ID, '_package_details_license', true );
-		$data['authors'] = $this->get_post_package_authors( $post_ID );
+		$data['authors']     = $this->get_post_package_authors( $post_ID );
 
 		$data['source_cached_release_packages'] = [];
 
@@ -292,7 +291,7 @@ class PackageManager {
 				break;
 			case 'vcs':
 				$data['source_name'] = 'vcs' . '/' . $data['slug'];
-				$data['vcs_url']       = get_post_meta( $post_ID, '_package_vcs_url', true );
+				$data['vcs_url']     = get_post_meta( $post_ID, '_package_vcs_url', true );
 				break;
 			case 'local.plugin':
 				$data['source_name'] = 'local-plugin' . '/' . $data['slug'];
@@ -301,18 +300,18 @@ class PackageManager {
 
 				// Determine if plugin is actually (still) installed.
 				$data['local_installed'] = false;
-				$installed_plugins = get_plugins();
+				$installed_plugins       = get_plugins();
 				if ( in_array( $data['local_plugin_file'], array_keys( $installed_plugins ) ) ) {
 					$data['local_installed'] = true;
 				}
 				break;
 			case 'local.theme':
-				$data['source_name'] = 'local-theme' . '/' . $data['slug'];
+				$data['source_name']      = 'local-theme' . '/' . $data['slug'];
 				$data['local_theme_slug'] = get_post_meta( $post_ID, '_package_local_theme_slug', true );
 
 				// Determine if theme is actually (still) installed.
 				$data['local_installed'] = false;
-				$installed_themes = search_theme_directories();
+				$installed_themes        = search_theme_directories();
 				if ( is_array( $installed_themes ) && in_array( $data['local_theme_slug'], array_keys( $installed_themes ) ) ) {
 					$data['local_installed'] = true;
 				}
@@ -327,7 +326,7 @@ class PackageManager {
 
 		if ( in_array( $data['source_type'], [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
 			$data['source_version_range'] = trim( get_post_meta( $post_ID, '_package_source_version_range', true ) );
-			$data['source_stability'] = trim( get_post_meta( $post_ID, '_package_source_stability', true ) );
+			$data['source_stability']     = trim( get_post_meta( $post_ID, '_package_source_stability', true ) );
 
 			// Get the source version/release packages data (fetched from the external repo) we have stored.
 			$data['source_cached_release_packages'] = get_post_meta( $post_ID, '_package_source_cached_release_packages', true );
@@ -339,7 +338,7 @@ class PackageManager {
 	/**
 	 * Identify a package post ID based on certain details about it and return all configured data about it.
 	 *
-	 * @param array  $args Array of package details to look for.
+	 * @param array $args Array of package details to look for.
 	 *
 	 * @return array The found package data.
 	 */
@@ -355,23 +354,99 @@ class PackageManager {
 		return $this->get_package_id_data( $found_package_id );
 	}
 
+	/**
+	 * Given a managed package post ID, fetch the remote releases data.
+	 *
+	 * @param int $post_ID
+	 *
+	 * @throws \Exception
+	 * @return array
+	 */
+	public function fetch_external_package_remote_releases( int $post_ID ): array {
+		$releases = [];
+
+		$post = get_post( $post_ID );
+		if ( empty( $post ) || 'publish' !== $post->post_status ) {
+			return [];
+		}
+
+		$package_data = $this->get_package_id_data( $post_ID );
+		if ( empty( $package_data['source_type'] ) || ! in_array( $package_data['source_type'], [
+				'packagist.org',
+				'wpackagist.org',
+				'vcs',
+			] ) ) {
+			return [];
+		}
+
+		$client = $this->get_composer_client();
+
+		$version_range = ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*';
+		$stability     = ! empty( $package_data['source_stability'] ) ? $package_data['source_stability'] : 'stable';
+		if ( ! empty( $stability ) || 'stable' !== $stability ) {
+			$version_range .= '@' . $stability;
+		}
+
+		switch ( $package_data['source_type'] ) {
+			case 'packagist.org':
+				// Nothing right now.
+				break;
+			case 'wpackagist.org':
+				$releases = $client->getPackages( [
+					'repositories' => [
+						[
+							// Disable the default packagist.org repo.
+							"packagist.org" => false,
+						],
+						[
+							'type' => 'composer',
+							'url'  => 'https://wpackagist.org',
+							'only' => [
+								'wpackagist-plugin/*',
+								'wpackagist-theme/*',
+							],
+						],
+					],
+					'require'      => [
+						$package_data['source_name'] => $version_range,
+					],
+				] );
+				break;
+			case 'vcs':
+				// Nothing right now.
+				break;
+			default:
+				break;
+		}
+
+		if ( ! empty( $releases ) ) {
+			$releases = $client->standardizePackagesForJson( $releases, $stability );
+
+			if ( ! empty( $releases[ $package_data['source_name'] ] ) ) {
+				$releases = $releases[ $package_data['source_name'] ];
+			}
+		}
+
+		return $releases;
+	}
+
 	public function get_managed_installed_plugins( array $query_args = [] ): array {
 		$all_plugins_files = array_keys( get_plugins() );
 
 		// Get all package posts that use installed plugins.
-		$query = new \WP_Query( array_merge( [
-			'post_type'  => static::PACKAGE_POST_TYPE,
-			'fields' => 'ids',
-			'post_status' => 'publish',
-			'meta_query' => [
+		$query       = new \WP_Query( array_merge( [
+			'post_type'        => static::PACKAGE_POST_TYPE,
+			'fields'           => 'ids',
+			'post_status'      => 'publish',
+			'meta_query'       => [
 				[
-					'key'   => '_package_source_type',
-					'value' => 'local.plugin',
+					'key'     => '_package_source_type',
+					'value'   => 'local.plugin',
 					'compare' => '=',
 				],
 			],
-			'nopaging' => true,
-			'no_found_rows' => true,
+			'nopaging'         => true,
+			'no_found_rows'    => true,
 			'suppress_filters' => true,
 		], $query_args ) );
 		$package_ids = $query->get_posts();
@@ -392,19 +467,19 @@ class PackageManager {
 		$all_theme_slugs = array_keys( wp_get_themes() );
 
 		// Get all package posts that use installed themes.
-		$query = new \WP_Query( array_merge( [
-			'post_type'  => PackageManager::PACKAGE_POST_TYPE,
-			'fields' => 'ids',
-			'post_status' => 'publish',
-			'meta_query' => [
+		$query       = new \WP_Query( array_merge( [
+			'post_type'        => PackageManager::PACKAGE_POST_TYPE,
+			'fields'           => 'ids',
+			'post_status'      => 'publish',
+			'meta_query'       => [
 				[
-					'key'   => '_package_source_type',
-					'value' => 'local.theme',
+					'key'     => '_package_source_type',
+					'value'   => 'local.theme',
 					'compare' => '=',
 				],
 			],
-			'nopaging' => true,
-			'no_found_rows' => true,
+			'nopaging'         => true,
+			'no_found_rows'    => true,
 			'suppress_filters' => true,
 		], $query_args ) );
 		$package_ids = $query->get_posts();
@@ -465,6 +540,15 @@ class PackageManager {
 			return [];
 		}
 
+		// We need to return the keywords slugs, not the WP_Term list.
+		$keywords = array_map( function( $term ) {
+			if ( $term instanceof \WP_Term ) {
+				$term = $term->slug;
+			}
+
+			return $term;
+		}, $keywords );
+
 		return $keywords;
 	}
 
@@ -481,7 +565,7 @@ class PackageManager {
 		$authors = carbon_get_post_meta( $post_ID, 'package_details_authors', $container_id );
 
 		// Make sure only the fields we are interested in are left.
-		$accepted_keys = array_fill_keys( ['name', 'email', 'homepage', 'role'], '');
+		$accepted_keys = array_fill_keys( [ 'name', 'email', 'homepage', 'role' ], '' );
 		foreach ( $authors as $key => $author ) {
 			$authors[ $key ] = array_replace( $accepted_keys, array_intersect_key( $author, $accepted_keys ) );
 		}
@@ -491,31 +575,5 @@ class PackageManager {
 
 	public function set_post_package_authors( int $post_ID, array $authors, string $container_id = '' ) {
 		carbon_set_post_meta( $post_ID, 'package_details_authors', $authors, $container_id );
-	}
-
-	public function get_post_installed_package_slug( int $post_ID ): string {
-		$package_slug = '';
-
-		$package_type = $this->get_post_package_type( $post_ID );
-		if ( empty( $package_type ) ) {
-			return $package_slug;
-		}
-
-		$package_source_type = $this->get_post_package_source_type( $post_ID );
-		if ( empty( $package_source_type ) ) {
-			return $package_slug;
-		}
-
-		if ( 'plugin' === $package_type && 'local.plugin' === $package_source_type  ) {
-			$package_slug = get_post_meta( $post_ID, '_package_local_plugin_file', true );
-		} else if ( 'theme' === $package_type && 'local.theme' === $package_source_type ) {
-			$package_slug = get_post_meta( $post_ID, '_package_local_theme_slug', true );
-		}
-
-		if ( ! is_string( $package_slug ) ) {
-			return '';
-		}
-
-		return $package_slug;
 	}
 }

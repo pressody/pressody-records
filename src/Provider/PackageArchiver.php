@@ -13,8 +13,8 @@ namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
+use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\Storage\Storage;
 use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
@@ -36,7 +36,7 @@ class PackageArchiver extends AbstractHookProvider {
 	protected $logger;
 
 	/**
-	 * Installed packages repository.
+	 * Managed packages repository.
 	 *
 	 * @var PackageRepository
 	 */
@@ -64,19 +64,11 @@ class PackageArchiver extends AbstractHookProvider {
 	protected $storage;
 
 	/**
-	 * Configured packages repository.
-	 *
-	 * @var PackageRepository
-	 */
-	protected $configured_installed_packages;
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param PackageRepository $packages                      Installed packages repository.
-	 * @param PackageRepository $configured_installed_packages Configured locally installed packages repository.
+	 * @param PackageRepository $packages                      Managed packages repository.
 	 * @param ReleaseManager    $release_manager               Release manager.
 	 * @param PackageManager    $package_manager               Packages manager.
 	 * @param Storage           $storage                       Storage service.
@@ -84,14 +76,12 @@ class PackageArchiver extends AbstractHookProvider {
 	 */
 	public function __construct(
 		PackageRepository $packages,
-		PackageRepository $configured_installed_packages,
 		ReleaseManager $release_manager,
 		PackageManager $package_manager,
 		Storage $storage,
 		LoggerInterface $logger
 	) {
 		$this->packages                      = $packages;
-		$this->configured_installed_packages = $configured_installed_packages;
 		$this->release_manager               = $release_manager;
 		$this->package_manager               = $package_manager;
 		$this->storage                       = $storage;
@@ -104,7 +94,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		add_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, [ $this, 'archive_on_ltpackage_post_save' ], 10, 3 );
+		add_action( 'save_post', [ $this, 'archive_on_ltpackage_post_save' ], 999, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'upgrader_post_install', [ $this, 'archive_on_upgrade' ], 10, 3 );
@@ -125,21 +115,21 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
 	public function archive_on_ltpackage_post_save( int $post_ID, \WP_Post $post, bool $update ) {
-		if ( 'publish' !== $post->post_status ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type || 'publish' !== $post->post_status ) {
 			return;
 		}
 
-		$package_type = $this->package_manager->get_post_package_type( $post_ID );
-		if ( empty( $package_type ) ) {
+		$package_data = $this->package_manager->get_package_id_data( $post_ID );
+		if ( empty( $package_data ) ) {
 			return;
 		}
 
-		$package_slug = $this->package_manager->get_post_installed_package_slug( $post_ID );
-		if ( empty( $package_slug ) ) {
+		$package = $this->packages->first_where( [ 'source_name' => $package_data['source_name'], 'type' => $package_data['type'], ] );
+		if ( empty( $package ) ) {
 			return;
 		}
 
-		$this->archive_package( $package_slug, $package_type );
+		$this->archive_package( $package );
 	}
 
 	/**
@@ -167,9 +157,9 @@ class PackageArchiver extends AbstractHookProvider {
 				continue;
 			}
 
-			$args = compact( 'slug', 'type' );
+			$args = ['slug' => $slug, 'type' => $type, 'source_type' => 'local.' . $type ];
 			// Bail if the package isn't whitelisted.
-			if ( ! $this->configured_installed_packages->contains( $args ) ) {
+			if ( ! $this->packages->contains( $args ) ) {
 				continue;
 			}
 
@@ -182,14 +172,14 @@ class PackageArchiver extends AbstractHookProvider {
 			);
 
 			try {
-				$this->release_manager->archive( $release );
+				$package->set_release( $this->release_manager->archive( $release ) );
 			} catch ( PixelgradeltRecordsException $e ) {
 				$this->logger->error(
-					'Error archiving update for {package}.',
+					'Error archiving "{package}" - release "{release}".',
 					[
 						'exception' => $e,
 						'package'   => $package->get_name(),
-						'version'   => $release->get_version(),
+						'release'   => $release->get_version(),
 					]
 				);
 			}
@@ -203,12 +193,11 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array  $slugs Array of package slugs.
-	 * @param string $type  Type of packages.
+	 * @param Package[]  $packages Array of packages.
 	 */
-	protected function archive_packages( array $slugs, string $type ) {
-		foreach ( $slugs as $slug ) {
-			$this->archive_package( $slug, $type );
+	protected function archive_packages( array $packages ) {
+		foreach ( $packages as $package ) {
+			$this->archive_package( $package );
 		}
 	}
 
@@ -223,11 +212,12 @@ class PackageArchiver extends AbstractHookProvider {
 	 */
 	public function archive_on_upgrade( bool $response, array $hook_extra, array $result ): bool {
 		$type = $hook_extra['type'] ?? '';
+		$source_type = 'local.' . $type;
 		$slug = $result['destination_name'] ?? '';
-		$args = compact( 'slug', 'type' );
+		$args = compact( 'slug', 'type', 'source_type' );
 
-		if ( $this->configured_installed_packages->contains( $args ) ) {
-			$this->archive_package( $slug, $type );
+		if ( $package = $this->packages->first_where( $args ) ) {
+			$this->archive_package( $package );
 		}
 
 		return $response;
@@ -238,27 +228,26 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $slug Package slug.
-	 * @param string $type Type of package.
+	 * @param Package $package Package.
 	 */
-	protected function archive_package( string $slug, string $type ) {
-		$package = $this->packages->first_where( compact( 'slug', 'type' ) );
-
-		try {
-			// Right now only for local installed packages.
-			if ( $package instanceof LocalBasePackage && $package->is_installed() ) {
-				// Once the release is successfully archived (cached), it is transformed so we need to overwrite.
-				$package->set_release( $this->release_manager->archive( $package->get_installed_release() ) );
-				$package->set_release( $this->release_manager->archive( $package->get_latest_release() ) );
+	protected function archive_package( Package $package ) {
+		foreach ( $package->get_releases() as $release ) {
+			try {
+				$new_release = $this->release_manager->archive( $release );
+				// Once the release file (zip) is successfully archived (cached), it is transformed so we need to overwrite.
+				if ( $release !== $new_release ) {
+					$package->set_release( $new_release );
+				}
+			} catch ( PixelgradeltRecordsException $e ) {
+				$this->logger->error(
+					'Error archiving "{package}" - release "{release}".',
+					[
+						'exception' => $e,
+						'package'   => $package->get_name(),
+						'release'   => $release->get_version(),
+					]
+				);
 			}
-		} catch ( PixelgradeltRecordsException $e ) {
-			$this->logger->error(
-				'Error archiving {package}.',
-				[
-					'exception' => $e,
-					'package'   => $package->get_name(),
-				]
-			);
 		}
 	}
 
@@ -267,12 +256,9 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $slug Package slug.
-	 * @param string $type Type of package.
+	 * @param Package $package Package.
 	 */
-	protected function clean_package( string $slug, string $type ) {
-		$package = $this->packages->first_where( compact( 'slug', 'type' ) );
-
+	protected function clean_package( Package $package ) {
 		try {
 			// Delete each release zip.
 			foreach ( $package->get_releases() as $release ) {
@@ -306,16 +292,16 @@ class PackageArchiver extends AbstractHookProvider {
 			return;
 		}
 
-		$type = $this->package_manager->get_post_package_type( $post_ID );
-		if ( empty( $type ) ) {
+		$package_data = $this->package_manager->get_package_id_data( $post_ID );
+		if ( empty( $package_data ) ) {
 			return;
 		}
 
-		$slug = $this->package_manager->get_post_installed_package_slug( $post_ID );
-		if ( empty( $slug ) ) {
+		$package = $this->packages->first_where( [ 'source_name' => $package_data['source_name'], 'type' => $package_data['type'], ] );
+		if ( empty( $package ) ) {
 			return;
 		}
 
-		$this->clean_package( $slug, $type );
+		$this->clean_package( $package );
 	}
 }

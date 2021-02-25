@@ -11,11 +11,13 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
+use Composer\Semver\Constraint\ConstraintInterface;
+
 /**
  * Version parser interface.
  *
- * @package PixelgradeLT
  * @since 0.1.0
+ *@package PixelgradeLT
  */
 interface VersionParser {
 	/**
@@ -30,4 +32,14 @@ interface VersionParser {
 	 * @return string Normalized version string.
 	 */
 	public function normalize( string $version, string $full_version = null ): string;
+
+	/**
+	 * Parses a constraint string into MultiConstraint and/or Constraint objects.
+	 *
+	 * @param string $constraints
+	 *
+	 * @throws \UnexpectedValueException Thrown when given an invalid constraint(s) string.
+	 * @return ConstraintInterface
+	 */
+	public function parseConstraints( string $constraints ): ConstraintInterface;
 }

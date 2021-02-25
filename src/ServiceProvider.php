@@ -133,8 +133,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['hooks.package_archiver'] = function( $container ) {
 			return new Provider\PackageArchiver(
-				$container['repository.installed'],
-				$container['repository.installed.managed'],
+				$container['repository.managed'],
 				$container['release.manager'],
 				$container['package.manager'],
 				$container['storage.packages'],
@@ -145,7 +144,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['hooks.package_post_type'] = function( $container ) {
 			return new PostType\PackagePostType(
 				$container['package.manager'],
-				$container['repository.installed']
+				$container['repository.managed']
 			);
 		};
 
@@ -212,9 +211,8 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['package.manager'] = function( $container ) {
 			return new PackageManager(
-				$container['storage.packages'],
-				$container['archiver'],
-				$container['client.composer']
+				$container['client.composer'],
+				$container['version.parser']
 			);
 		};
 
@@ -229,7 +227,8 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['release.manager'] = function( $container ) {
 			return new ReleaseManager(
 				$container['storage.packages'],
-				$container['archiver']
+				$container['archiver'],
+				$container['version.parser']
 			);
 		};
 

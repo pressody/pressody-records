@@ -96,8 +96,8 @@ class PackagePostType extends AbstractHookProvider {
 		$this->add_action( 'after_setup_theme', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 		// Fill empty package details from source.
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_local_package_config_details_on_post_save', 10, 2 );
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 10, 1 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 5, 1 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_empty_package_config_details_on_post_save', 10, 2 );
 	}
 
 	protected function register_post_type() {
@@ -654,23 +654,14 @@ class PackagePostType extends AbstractHookProvider {
 	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
-	protected function fill_local_package_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
-		$post = get_post( $post_ID );
-		if ( empty( $post ) || 'publish' !== $post->post_status ) {
+	protected function fill_empty_package_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+
+		$package_data = $this->package_manager->get_package_id_data( $post_ID );
+		if ( empty( $package_data ) ) {
 			return;
 		}
 
-		$package_type = $this->package_manager->get_post_package_type( $post_ID );
-		if ( empty( $package_type ) ) {
-			return;
-		}
-
-		$package_slug = $this->package_manager->get_post_installed_package_slug( $post_ID );
-		if ( empty( $package_slug ) ) {
-			return;
-		}
-
-		$package = $this->packages->first_where( [ 'slug' => $package_slug, 'type' => $package_type, ] );
+		$package = $this->packages->first_where( [ 'source_name' => $package_data['source_name'], 'type' => $package_data['type'], ] );
 		if ( empty( $package ) ) {
 			return;
 		}
@@ -703,72 +694,16 @@ class PackagePostType extends AbstractHookProvider {
 	 * Attempt to fetch external packages on post save.
 	 *
 	 * @param int $post_ID
+	 *
+	 * @throws \Exception
 	 */
 	protected function fetch_external_packages_on_post_save( int $post_ID ) {
-		$post = get_post( $post_ID );
-		if ( empty( $post ) || 'publish' !== $post->post_status ) {
-			return;
-		}
-
-		$package_data = $this->package_manager->get_package_id_data( $post_ID );
-		if ( empty( $package_data['source_type'] ) || ! in_array( $package_data['source_type'], [
-						'packagist.org',
-						'wpackagist.org',
-						'vcs',
-				] ) ) {
-			return;
-		}
-
-		$client = $this->package_manager->get_composer_client();
-
-		$packages = [];
-
-		$version_range = ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*';
-		$stability = ! empty( $package_data['source_stability'] ) ? $package_data['source_stability'] : 'stable';
-		if ( ! empty( $stability ) || 'stable' !== $stability ) {
-			$version_range .= '@' . $stability;
-		}
-
-		switch ( $package_data['source_type'] ) {
-			case 'packagist.org':
-				// Nothing right now.
-				break;
-			case 'wpackagist.org':
-				$packages = $client->getPackages( [
-						'repositories' => [
-								[
-									// Disable the default packagist.org repo.
-										"packagist.org" => false,
-								],
-								[
-										'type' => 'composer',
-										'url'  => 'https://wpackagist.org',
-										'only' => [
-												'wpackagist-plugin/*',
-												'wpackagist-theme/*',
-										],
-								],
-						],
-						'require'      => [
-								$package_data['source_name'] => $version_range,
-						],
-				] );
-				break;
-			case 'vcs':
-				// Nothing right now.
-				break;
-			default:
-				break;
-		}
+		$packages = $this->package_manager->fetch_external_package_remote_releases( $post_ID );
 
 		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
 		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\PackageBuilder::build() to do the work.
 		if ( ! empty( $packages ) ) {
-			$standardized_packages = $client->standardizePackagesForJson( $packages, $stability );
-
-			if ( ! empty( $standardized_packages[ $package_data['source_name'] ] ) ) {
-				update_post_meta( $post_ID, '_package_source_cached_release_packages', $standardized_packages[ $package_data['source_name'] ] );
-			}
+			update_post_meta( $post_ID, '_package_source_cached_release_packages', $packages );
 		}
 	}
 
