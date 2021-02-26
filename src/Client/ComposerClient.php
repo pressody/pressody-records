@@ -18,19 +18,12 @@ use Composer\Factory;
 use Composer\IO\BaseIO;
 use Composer\IO\BufferIO;
 use Composer\IO\IOInterface;
-use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
-use Composer\Json\JsonValidationException;
 use Composer\Package\BasePackage;
 use Composer\Package\Dumper\ArrayDumper;
 use Composer\Package\PackageInterface;
 use Composer\Semver\VersionParser;
-use JsonSchema\Validator;
 use PixelgradeLT\Records\Client\Builder\ComposerArchiveBuilder;
-use PixelgradeLT\Records\Client\Builder\ComposerPackagesBuilder;
-use Psr\Log\LoggerInterface;
-use Seld\JsonLint\JsonParser;
-use Seld\JsonLint\ParsingException;
 
 /**
  * Class for communicating with an external Composer repository.

@@ -3,10 +3,7 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Test\Integration\Repository;
 
-use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Repository\InstalledPlugins;
 use PixelgradeLT\Records\Test\Integration\TestCase;
 
 use function PixelgradeLT\Records\plugin;

@@ -10,14 +10,14 @@
  * Plugin Name: PixelgradeLT Records
  * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-records
  * Description: Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.
- * Version: 0.1.0
+ * Version: 0.5.0
  * Author: Pixelgrade
  * Author URI: https://pixelgrade.com/
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: pixelgradelt_records
  * Domain Path: /languages
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Network: false
  * GitHub Plugin URI: pixelgradelt/pixelgradelt-records
  * Release Asset: true

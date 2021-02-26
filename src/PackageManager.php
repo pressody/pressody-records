@@ -12,7 +12,6 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records;
 
 use PixelgradeLT\Records\Client\ComposerClient;
-use PixelgradeLT\Records\Storage\Storage;
 
 /**
  * Package manager class.

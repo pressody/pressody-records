@@ -272,6 +272,9 @@ class ExternalPackageBuilder extends PackageBuilder {
 			}
 		}
 
+		$tags = array_unique( array_values( $tags ) );
+		sort( $tags );
+
 		return $tags;
 	}
 

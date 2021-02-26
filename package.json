@@ -32,6 +32,7 @@
 		"{assets,languages,src,views}/**",
 		"vendor/autoload.php",
 		"vendor/composer/*.php",
+		"vendor/htmlburger/carbon-fields/**",
 		"vendor/{cedaro/wp-plugin,composer/semver,psr/container}/src/**",
 		"vendor/psr/log/Psr/**",
 		"vendor/pimple/pimple/src/Pimple/!(Tests){*.php,**/*.php}"

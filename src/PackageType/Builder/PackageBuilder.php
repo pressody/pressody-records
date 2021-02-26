@@ -185,18 +185,6 @@ class PackageBuilder {
 	}
 
 	/**
-	 * Set if this package is managed by us.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param bool $is_managed
-	 * @return $this
-	 */
-	public function set_is_managed( bool $is_managed ): self {
-		return $this->set( 'is_managed', $is_managed );
-	}
-
-	/**
 	 * Set the authors.
 	 *
 	 * @since 0.1.0
@@ -284,6 +272,12 @@ class PackageBuilder {
 			}
 		}
 
+		// We don't keep the array keys.
+		$keywords = array_values( $keywords );
+
+		// Sort the keywords alphabetically.
+		sort( $keywords );
+
 		return $keywords;
 	}
 
@@ -358,6 +352,18 @@ class PackageBuilder {
 		}
 
 		return $license;
+	}
+
+	/**
+	 * Set if this package is managed by us.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param bool $is_managed
+	 * @return $this
+	 */
+	public function set_is_managed( bool $is_managed ): self {
+		return $this->set( 'is_managed', $is_managed );
 	}
 
 	/**

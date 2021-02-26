@@ -3,6 +3,7 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Test\Unit\PackageType;
 
+use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
 use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\Logger;
@@ -36,9 +37,7 @@ class PackageReleasesTest extends TestCase {
 
 		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser );
 
-		$logger = $this->getMockBuilder( Logger::class )
-		               ->disableOriginalConstructor()
-		               ->getMock();
+		$logger = new NullIO();
 
 		$this->builder = new PackageBuilder( $package, $package_manager, $release_manager, $logger );
 	}

@@ -15,7 +15,6 @@ namespace PixelgradeLT\Records\Client\Builder;
 
 use Composer\Composer;
 use Composer\Downloader\DownloadManager;
-use Composer\Factory;
 use Composer\Package\Archiver\ArchiveManager;
 use Composer\Package\CompletePackage;
 use Composer\Package\PackageInterface;

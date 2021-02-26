@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Integration\Provider\Authentication;
+namespace PixelgradeLT\Records\Test\Integration\Provider;
 
 use Pimple\ServiceIterator;
 use PixelgradeLT\Records\Capabilities as Caps;

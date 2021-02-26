@@ -2,6 +2,9 @@
 	"name": "pixelgradelt/pixelgradelt-records",
 	"description": "Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.",
 	"keywords": [
+		"pixelgradelt",
+		"pixelgrade",
+		"infrastructure",
 		"wordpress",
 		"composer",
 		"satis"
@@ -60,7 +63,8 @@
 		"phpunit/phpunit": "^7.5",
 		"roave/security-advisories": "dev-master",
 		"squizlabs/php_codesniffer": "^3.3",
-		"wordpress/wordpress": "^5.1",
+		"vlucas/phpdotenv": "^5.3",
+		"wordpress/wordpress": "^5.6",
 		"wp-coding-standards/wpcs": "^1"
 	},
 	"autoload": {

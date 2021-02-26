@@ -4,6 +4,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Test\Unit\Transformer;
 
 use Brain\Monkey\Functions;
+use Composer\IO\NullIO;
 use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageManager;
@@ -26,9 +27,7 @@ class ComposerPackageTransformerTest extends TestCase {
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
 
-		$logger = $this->getMockBuilder( Logger::class )
-		               ->disableOriginalConstructor()
-		               ->getMock();
+		$logger = new NullIO();
 
 		$factory = new PackageFactory( $package_manager, $release_manager, $logger );
 

@@ -23,7 +23,6 @@ use PixelgradeLT\Records\Authentication\ApiKey;
 use PixelgradeLT\Records\Authentication;
 use PixelgradeLT\Records\HTTP\Request;
 use PixelgradeLT\Records\Integration;
-use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\Provider;
