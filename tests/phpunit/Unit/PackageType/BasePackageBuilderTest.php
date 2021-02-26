@@ -3,19 +3,23 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Test\Unit\PackageType;
 
+use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\Builder\PackageBuilder;
+use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
-class PackageBuilderTest extends TestCase {
+class BasePackageBuilderTest extends TestCase {
 	protected $builder = null;
 
 	public function setUp(): void {
 		parent::setUp();
+
+		// Mock the WordPress sanitize_text_field() function.
+		Functions\when( 'sanitize_text_field' )->returnArg( 1 );
 
 		// Provide direct getters.
 		$package = new class extends BasePackage {
@@ -35,7 +39,7 @@ class PackageBuilderTest extends TestCase {
 
 		$logger = new NullIO();
 
-		$this->builder = new PackageBuilder( $package, $package_manager, $release_manager, $logger );
+		$this->builder = new BasePackageBuilder( $package, $package_manager, $release_manager, $logger );
 	}
 
 	public function test_implements_package_interface() {

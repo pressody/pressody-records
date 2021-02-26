@@ -20,7 +20,7 @@ use PixelgradeLT\Records\Package;
  *
  * @since 0.1.0
  */
-class ExternalPackageBuilder extends PackageBuilder {
+class ExternalBasePackageBuilder extends BasePackageBuilder {
 
 	/**
 	 * Set the package constraint for available releases by.
@@ -42,9 +42,9 @@ class ExternalPackageBuilder extends PackageBuilder {
 	 * @param int   $post_id Optional. The package post ID to retrieve data for. Leave empty and provide $args to query.
 	 * @param array $args Optional. Args used to query for a managed package if the post ID failed to retrieve data.
 	 *
-	 * @return ExternalPackageBuilder
+	 * @return ExternalBasePackageBuilder
 	 */
-	public function from_manager( int $post_id = 0, array $args = [] ): PackageBuilder {
+	public function from_manager( int $post_id = 0, array $args = [] ): BasePackageBuilder {
 		$package_data = $this->package_manager->get_package_id_data( $post_id );
 		// If we couldn't fetch package data by the post ID, try via the args.
 		if ( empty( $package_data ) ) {
@@ -92,7 +92,7 @@ class ExternalPackageBuilder extends PackageBuilder {
 		return $this;
 	}
 
-	public function from_cached_release_packages( array $cached_release_packages ): PackageBuilder {
+	public function from_cached_release_packages( array $cached_release_packages ): BasePackageBuilder {
 
 		$latest_version_package = reset( $cached_release_packages );
 		foreach ( $cached_release_packages as $package ) {
@@ -236,7 +236,7 @@ class ExternalPackageBuilder extends PackageBuilder {
 	 * @param Package $package Package.
 	 * @return $this
 	 */
-	public function with_package( Package $package ): PackageBuilder {
+	public function with_package( Package $package ): BasePackageBuilder {
 		parent::with_package( $package );
 
 		if ( $package->has_source_constraint() ) {
@@ -283,7 +283,7 @@ class ExternalPackageBuilder extends PackageBuilder {
 	 *
 	 * @return $this
 	 */
-	public function prune_releases(): PackageBuilder {
+	public function prune_releases(): BasePackageBuilder {
 		/** @var ConstraintInterface $constraint */
 		$constraint = $this->package->get_source_constraint();
 		foreach ( $this->releases as $key => $release ) {
@@ -302,7 +302,7 @@ class ExternalPackageBuilder extends PackageBuilder {
 	 *
 	 * @return $this
 	 */
-	public function add_cached_releases(): PackageBuilder {
+	public function add_cached_releases(): BasePackageBuilder {
 		$releases = $this->release_manager->all_cached( $this->package );
 
 		foreach ( $releases as $release ) {

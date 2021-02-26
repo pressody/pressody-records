@@ -12,6 +12,8 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\PackageType\Builder;
 
 use PixelgradeLT\Records\Package;
+use PixelgradeLT\Records\PackageType\LocalPlugin;
+use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\Release;
 
 /**
@@ -19,7 +21,7 @@ use PixelgradeLT\Records\Release;
  *
  * @since 0.1.0
  */
-class LocalPackageBuilder extends PackageBuilder {
+class LocalBasePackageBuilder extends BasePackageBuilder {
 
 	/**
 	 * Set a package's directory.
@@ -63,9 +65,10 @@ class LocalPackageBuilder extends PackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param array $package_data Package data.
-	 * @return PackageBuilder
+	 *
+	 * @return BasePackageBuilder
 	 */
-	public function from_package_data( array $package_data ): PackageBuilder {
+	public function from_package_data( array $package_data ): BasePackageBuilder {
 		if ( ! empty( $package_data['local_installed'] ) ) {
 			$this->set_installed( $package_data['local_installed'] );
 		}
@@ -81,7 +84,7 @@ class LocalPackageBuilder extends PackageBuilder {
 	 * @param Package $package Package.
 	 * @return $this
 	 */
-	public function with_package( Package $package ): PackageBuilder {
+	public function with_package( Package $package ): BasePackageBuilder {
 		parent::with_package( $package );
 
 		if ( $package->is_installed() ) {
@@ -106,7 +109,7 @@ class LocalPackageBuilder extends PackageBuilder {
 	 *
 	 * @return $this
 	 */
-	public function add_cached_releases(): PackageBuilder {
+	public function add_cached_releases(): BasePackageBuilder {
 		$releases = $this->release_manager->all_cached( $this->package );
 
 		if ( $this->package->is_installed() ) {

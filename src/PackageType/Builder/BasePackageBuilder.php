@@ -1,6 +1,6 @@
 <?php
 /**
- * Package builder.
+ * Base package builder.
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
@@ -21,11 +21,13 @@ use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ReleaseManager;
 
 /**
- * Package builder class.
+ * Base package builder class.
+ *
+ * The base package is the simplest package we handle.
  *
  * @since 0.1.0
  */
-class PackageBuilder {
+class BasePackageBuilder {
 	/**
 	 * Reflection class instance.
 	 *
@@ -239,8 +241,14 @@ class PackageBuilder {
 					continue;
 				}
 
-				$keywords[ $key ] = trim( sanitize_text_field( $keyword ) );
+				$keywords[ $key ] = trim( \sanitize_text_field( $keyword ) );
 			}
+
+			// We don't keep the array keys.
+			$keywords = array_values( $keywords );
+
+			// Sort the keywords alphabetically.
+			sort( $keywords );
 
 			return $keywords;
 		}
@@ -260,12 +268,12 @@ class PackageBuilder {
 
 		// Return the whole string as an element if the delimiter is missing.
 		if ( false === strpos( $keywords, $delimiter ) ) {
-			return [ trim( sanitize_text_field( $keywords ) ) ];
+			return [ trim( \sanitize_text_field( $keywords ) ) ];
 		}
 
 		$keywords = explode( $delimiter, $keywords );
 		foreach ( $keywords as $key => $keyword ) {
-			$keywords[ $key ] = trim( sanitize_text_field( $keyword ) );
+			$keywords[ $key ] = trim( \sanitize_text_field( $keyword ) );
 
 			if ( empty( $keywords[ $key ] ) ) {
 				unset( $keywords[ $key ] );
@@ -533,7 +541,7 @@ class PackageBuilder {
 	 *
 	 * @return $this
 	 */
-	public function cache_releases(): PackageBuilder {
+	public function cache_releases(): BasePackageBuilder {
 		if ( ! $this->package->is_managed() ) {
 			return $this;
 		}
@@ -578,7 +586,7 @@ class PackageBuilder {
 	 *
 	 * @return $this
 	 */
-	public function prune_releases(): PackageBuilder {
+	public function prune_releases(): BasePackageBuilder {
 		// Nothing right now.
 
 		return $this;
@@ -591,7 +599,7 @@ class PackageBuilder {
 	 *
 	 * @return $this
 	 */
-	public function add_cached_releases(): PackageBuilder {
+	public function add_cached_releases(): BasePackageBuilder {
 		$releases = $this->release_manager->all_cached( $this->package );
 
 		foreach ( $releases as $release ) {

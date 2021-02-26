@@ -16,6 +16,8 @@ define( 'PIXELGRADELT_RECORDS_TESTS_DIR', __DIR__ );
 define( 'WP_PLUGIN_DIR', __DIR__ . '/Fixture/wp-content/plugins' );
 
 if ( 'Unit' === get_current_suite() ) {
+	// For the Unit suite we shouldn't need WordPress loaded.
+	// This keeps them fast.
 	return;
 }
 

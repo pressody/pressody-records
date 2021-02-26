@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records\PackageType\Builder;
 
 use PixelgradeLT\Records\Package;
 
+use PixelgradeLT\Records\PackageType\LocalPlugin;
 use function PixelgradeLT\Records\is_plugin_file;
 
 /**
@@ -22,7 +23,7 @@ use function PixelgradeLT\Records\is_plugin_file;
  *
  * @since 0.1.0
  */
-final class LocalPluginBuilder extends LocalPackageBuilder {
+final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	/**
 	 * Set the plugin basename.
 	 *
@@ -55,6 +56,8 @@ final class LocalPluginBuilder extends LocalPackageBuilder {
 			->set_basename( $plugin_file )
 			->set_directory( WP_PLUGIN_DIR . '/' . $directory )
 			->set_installed( true )
+			->set_source_name( 'local-plugin' . '/' . $slug )
+			->set_source_type( 'local.plugin' )
 			->set_slug( $slug )
 			->set_type( 'plugin' );
 	}
@@ -145,7 +148,7 @@ final class LocalPluginBuilder extends LocalPackageBuilder {
 	 * @throws \ReflectionException
 	 * @return $this
 	 */
-	public function with_package( Package $package ): PackageBuilder {
+	public function with_package( Package $package ): BasePackageBuilder {
 		parent::with_package( $package );
 
 		if ( $package instanceof LocalPlugin ) {

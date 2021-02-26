@@ -6,15 +6,16 @@ namespace PixelgradeLT\Records\Test\Unit\PackageType;
 use PixelgradeLT\Records\Exception\PackageNotInstalled;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageType\BasePackage;
+use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
-class PackageTest extends TestCase {
+class LocalBasePackageTest extends TestCase {
 	protected $package = null;
 
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->package = new class extends BasePackage {
+		$this->package = new class extends LocalBasePackage {
 			public function __set( $name, $value ) {
 				$this->$name = $value;
 			}
@@ -25,25 +26,9 @@ class PackageTest extends TestCase {
 		$this->assertInstanceOf( Package::class, $this->package );
 	}
 
-	public function test_authors() {
-		$expected = [
-			[
-				'name'     => 'Pixelgrade',
-				'email'    => 'contact@pixelgrade.com',
-				'homepage' => 'https://pixelgrade.com',
-				'role'     => 'Maker',
-			]
-		];
-		$this->package->authors = $expected;
+	public function test_extends_base_package() {
 
-		$this->assertSame( $expected, $this->package->get_authors() );
-	}
-
-	public function test_description() {
-		$expected = 'A package description.';
-		$this->package->description = $expected;
-
-		$this->assertSame( $expected, $this->package->get_description() );
+		$this->assertInstanceOf( BasePackage::class, $this->package );
 	}
 
 	public function test_directory() {
@@ -51,13 +36,6 @@ class PackageTest extends TestCase {
 		$this->package->directory = $expected;
 
 		$this->assertSame( $expected, $this->package->get_directory() );
-	}
-
-	public function test_homepage() {
-		$expected = 'https://www.cedaro.com/';
-		$this->package->homepage = $expected;
-
-		$this->assertSame( $expected, $this->package->get_homepage() );
 	}
 
 	public function test_is_installed() {
@@ -80,26 +58,5 @@ class PackageTest extends TestCase {
 
 		$this->package->installed_version = '1.0.0';
 		$this->package->get_installed_version();
-	}
-
-	public function test_name() {
-		$expected = 'PixelgradeLT Records';
-		$this->package->name = $expected;
-
-		$this->assertSame( $expected, $this->package->get_name() );
-	}
-
-	public function test_slug() {
-		$expected = 'pixelgradelt_records';
-		$this->package->slug = $expected;
-
-		$this->assertSame( $expected, $this->package->get_slug() );
-	}
-
-	public function test_type() {
-		$expected = 'plugin';
-		$this->package->type = $expected;
-
-		$this->assertSame( $expected, $this->package->get_type() );
 	}
 }

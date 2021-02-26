@@ -18,7 +18,7 @@ namespace PixelgradeLT\Records\PackageType\Builder;
  *
  * @since 0.1.0
  */
-final class LocalThemeBuilder extends LocalPackageBuilder {
+final class LocalThemeBuilder extends LocalBasePackageBuilder {
 
 	/**
 	 * Fill the basic theme package details that we can deduce from a given theme slug.
@@ -34,6 +34,8 @@ final class LocalThemeBuilder extends LocalPackageBuilder {
 		return $this
 			->set_directory( get_theme_root() . '/' . $slug )
 			->set_installed( true )
+			->set_source_name( 'local-theme' . '/' . $slug )
+			->set_source_type( 'local.theme' )
 			->set_slug( $slug )
 			->set_type( 'theme' );
 	}

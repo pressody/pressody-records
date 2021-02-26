@@ -7,7 +7,6 @@ use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
 use PixelgradeLT\Records\ComposerVersionParser;
-use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageManager;
 use Psr\Log\NullLogger;
 use PixelgradeLT\Records\Archiver;
@@ -18,7 +17,7 @@ use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\Test\Unit\TestCase;
 
-class PluginReleasesTest extends TestCase {
+class LocalPluginReleasesTest extends TestCase {
 	protected $builder = null;
 
 	public function setUp(): void {
@@ -41,8 +40,11 @@ class PluginReleasesTest extends TestCase {
 		$package  = new LocalPlugin();
 
 		$this->builder = ( new LocalPluginBuilder( $package, $package_manager, $release_manager, $logger ) )
+			->set_source_name( 'local-plugin' . '/' . 'basic' )
+			->set_source_type( 'local.plugin' )
 			->set_basename( 'basic/basic.php' )
-			->set_slug( 'basic' );
+			->set_slug( 'basic' )
+			->set_type( 'plugin' );
 	}
 
 	public function test_get_cached_releases_from_storage() {
