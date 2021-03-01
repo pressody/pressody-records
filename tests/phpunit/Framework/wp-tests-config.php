@@ -1,6 +1,6 @@
 <?php
 /**
- * Configuration for the WordPress testing suite.
+ * Default configuration for the WordPress testing suite.
  *
  * @package   PixelgradeLT\Records\Tests
  * @copyright Copyright (c) 2019 Cedaro, LLC
@@ -8,7 +8,7 @@
  */
 
 // Path to the WordPress codebase to test. Add a forward slash in the end.
-define( 'ABSPATH', realpath( dirname( __DIR__, 2 ) . '/vendor/wordpress/wordpress/src' ) . '/' );
+define( 'ABSPATH', realpath( 'vendor/wordpress/wordpress/src' ) . '/' );
 
 // Path to the theme to test with.
 define( 'WP_DEFAULT_THEME', 'default' );

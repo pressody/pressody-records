@@ -1,10 +1,10 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Integration\Repository;
+namespace PixelgradeLT\Records\Tests\Integration\Repository;
 
 use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\Test\Integration\TestCase;
+use PixelgradeLT\Records\Tests\Integration\TestCase;
 
 use function PixelgradeLT\Records\plugin;
 

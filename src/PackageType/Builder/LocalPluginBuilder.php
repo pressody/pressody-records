@@ -53,13 +53,13 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 		$directory = '.' === \dirname( $plugin_file ) ? '' : \dirname( $plugin_file );
 
 		return $this
-			->set_basename( $plugin_file )
-			->set_directory( WP_PLUGIN_DIR . '/' . $directory )
-			->set_installed( true )
+			->set_type( 'plugin' )
+			->set_slug( $slug )
 			->set_source_name( 'local-plugin' . '/' . $slug )
 			->set_source_type( 'local.plugin' )
-			->set_slug( $slug )
-			->set_type( 'plugin' );
+			->set_basename( $plugin_file )
+			->set_directory( WP_PLUGIN_DIR . '/' . $directory )
+			->set_installed( true );
 	}
 
 	/**

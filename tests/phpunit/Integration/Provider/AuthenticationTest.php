@@ -1,14 +1,14 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Integration\Provider;
+namespace PixelgradeLT\Records\Tests\Integration\Provider;
 
 use Pimple\ServiceIterator;
 use PixelgradeLT\Records\Capabilities as Caps;
 use PixelgradeLT\Records\Exception\AuthenticationException;
 use PixelgradeLT\Records\HTTP\Request;
 use PixelgradeLT\Records\Provider\Authentication;
-use PixelgradeLT\Records\Test\Integration\TestCase;
+use PixelgradeLT\Records\Tests\Integration\TestCase;
 use WP_Error;
 
 use function Patchwork\{always, redefine, restore};

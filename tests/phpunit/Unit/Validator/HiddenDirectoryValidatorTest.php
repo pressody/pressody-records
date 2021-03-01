@@ -1,11 +1,11 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Unit\Validator;
+namespace PixelgradeLT\Records\Tests\Unit\Validator;
 
 use PixelgradeLT\Records\Exception\InvalidPackageArtifact;
 use PixelgradeLT\Records\Release;
-use PixelgradeLT\Records\Test\Unit\TestCase;
+use PixelgradeLT\Records\Tests\Unit\TestCase;
 use PixelgradeLT\Records\Validator\HiddenDirectoryValidator;
 
 class HiddenDirectoryValidatorTest extends TestCase {

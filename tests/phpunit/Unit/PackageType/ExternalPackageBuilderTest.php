@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Test\Unit\PackageType;
+namespace PixelgradeLT\Records\Tests\Unit\PackageType;
 
 use Composer\IO\NullIO;
 use Composer\Semver\Constraint\MultiConstraint;
@@ -11,8 +11,8 @@ use PixelgradeLT\Records\PackageType\Builder\ExternalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\ExternalBasePackage;
 use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Test\PHPUnitUtil;
-use PixelgradeLT\Records\Test\Unit\TestCase;
+use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
+use PixelgradeLT\Records\Tests\Unit\TestCase;
 
 class ExternalPackageBuilderTest extends TestCase {
 	protected $builder = null;

@@ -1,11 +1,11 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Unit\PackageType;
+namespace PixelgradeLT\Records\Tests\Unit\PackageType;
 
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\Test\Unit\TestCase;
+use PixelgradeLT\Records\Tests\Unit\TestCase;
 
 class BasePackageTest extends TestCase {
 	protected $package = null;

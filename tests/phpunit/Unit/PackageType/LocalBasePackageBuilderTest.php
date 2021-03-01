@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Unit\PackageType;
+namespace PixelgradeLT\Records\Tests\Unit\PackageType;
 
 use Composer\IO\NullIO;
 use PixelgradeLT\Records\Package;
@@ -10,7 +10,7 @@ use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Test\Unit\TestCase;
+use PixelgradeLT\Records\Tests\Unit\TestCase;
 
 class LocalBasePackageBuilderTest extends TestCase {
 	protected $builder = null;

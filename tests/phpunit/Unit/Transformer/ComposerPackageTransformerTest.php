@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Unit\Transformer;
+namespace PixelgradeLT\Records\Tests\Unit\Transformer;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
@@ -10,7 +10,7 @@ use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Transformer\ComposerPackageTransformer;
-use PixelgradeLT\Records\Test\Unit\TestCase;
+use PixelgradeLT\Records\Tests\Unit\TestCase;
 
 class ComposerPackageTransformerTest extends TestCase {
 	protected $package = null;

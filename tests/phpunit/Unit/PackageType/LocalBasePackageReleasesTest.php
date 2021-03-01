@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Test\Unit\PackageType;
+namespace PixelgradeLT\Records\Tests\Unit\PackageType;
 
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
@@ -16,7 +16,7 @@ use PixelgradeLT\Records\Exception\PackageNotInstalled;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
-use PixelgradeLT\Records\Test\Unit\TestCase;
+use PixelgradeLT\Records\Tests\Unit\TestCase;
 
 class LocalBasePackageReleasesTest extends TestCase {
 	protected $builder = null;

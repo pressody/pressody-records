@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType;
+namespace PixelgradeLT\Records\Tests\Integration\PackageType;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
@@ -83,10 +83,10 @@ class LocalPluginTest extends TestCase {
 				'homepage' => 'https://example.com/',
 			],
 		], $package->get_authors() );
-		$this->assertSame( '', $package->get_description() );
+		$this->assertSame( 'A basic plugin description.', $package->get_description() );
 		$this->assertSame( 'https://example.com/plugin/basic/', $package->get_homepage() );
-		$this->assertSame( '', $package->get_license() );
-		$this->assertSame( [ 'tag0', 'tag1', 'tag2', 'tag3', ], $package->get_keywords() );
+		$this->assertSame( 'GPL-2.0-or-later', $package->get_license() );
+		$this->assertSame( [ 'admin', 'htaccess', 'post', 'redirect', ], $package->get_keywords() );
 		$this->assertFalse( $package->is_managed() );
 		$this->assertSame( WP_PLUGIN_DIR . '/basic/', $package->get_directory() );
 		$this->assertSame( '1.3.1', $package->get_installed_version() );
@@ -125,7 +125,6 @@ class LocalPluginTest extends TestCase {
 			'Name'        => 'Basic Plugin',
 			'Description' => '',
 			'Version'     => '1.3.1',
-			'Tags'        => 'tag2,tag0, tag3, tag3, tag1, tag3 ,   '
 		];
 	}
 }

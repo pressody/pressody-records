@@ -32,12 +32,12 @@ final class LocalThemeBuilder extends LocalBasePackageBuilder {
 	public function from_slug( string $slug ): self {
 
 		return $this
-			->set_directory( get_theme_root() . '/' . $slug )
-			->set_installed( true )
+			->set_type( 'theme' )
+			->set_slug( $slug )
 			->set_source_name( 'local-theme' . '/' . $slug )
 			->set_source_type( 'local.theme' )
-			->set_slug( $slug )
-			->set_type( 'theme' );
+			->set_directory( get_theme_root() . '/' . $slug )
+			->set_installed( true );
 	}
 
 	/**

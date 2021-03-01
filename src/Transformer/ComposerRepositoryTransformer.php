@@ -116,11 +116,6 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 		$data = [];
 
 		foreach ( $package->get_releases() as $release ) {
-			// Skip if the current user can't view this release.
-			if ( ! current_user_can( Capabilities::VIEW_PACKAGE, $package, $release ) ) {
-				continue;
-			}
-
 			$version = $release->get_version();
 
 			try {

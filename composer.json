@@ -56,7 +56,6 @@
 	},
 	"require-dev": {
 		"brain/monkey": "^2.2",
-		"cedaro/wp-test-suite": "dev-develop",
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
 		"pclzip/pclzip": "^2.8",
 		"phpcompatibility/phpcompatibility-wp": "^2",
@@ -77,8 +76,11 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"PixelgradeLT\\Records\\Test\\": "tests/phpunit/"
-		}
+			"PixelgradeLT\\Records\\Tests\\": "tests/phpunit/"
+		},
+		"files": [
+
+		]
 	},
 	"scripts": {
 		"install-codestandards": [

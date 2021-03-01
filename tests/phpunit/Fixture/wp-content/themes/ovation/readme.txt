@@ -1,31 +1,30 @@
-=== Twenty Nineteen ===
+=== Ovation ===
 Contributors: wordpressdotorg
-Tags: one-column, flexible-header, accessibility-ready, custom-colors, custom-menu, custom-logo, editor-style, featured-images, footer-widgets, rtl-language-support, sticky-post, threaded-comments, translation-ready, block-patterns
+Tags: one-column, flexible-header, accessibility-ready
 Requires at least: 4.9.6
 Tested up to: 5.6
 Stable tag: 1.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Our 2019 default theme is designed to show off the power of the block editor.
+Our test theme.
 
 == Description ==
-Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you'll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it's built to be beautiful on all screen sizes.
+Our test theme description.
 
-For more information about Twenty Nineteen please go to https://wordpress.org/support/article/twenty-nineteen/.
+For more information about Ovation please go to https://audiotheme.com/view/ovation/.
 
 == Installation ==
 
 1. In your admin panel, go to Appearance -> Themes and click the 'Add New' button.
-2. Type in Twenty Nineteen in the search form and press the 'Enter' key on your keyboard.
+2. Type in Ovation in the search form and press the 'Enter' key on your keyboard.
 3. Click on the 'Activate' button to use your new theme right away.
-4. Go to https://wordpress.org/support/article/twenty-nineteen/ for a guide on how to customize this theme.
 5. Navigate to Appearance > Customize in your admin panel and customize to taste.
 
 == Copyright ==
 
-Twenty Nineteen WordPress Theme, Copyright 2018-2020 WordPress.org
-Twenty Nineteen is distributed under the terms of the GNU GPL
+Ovation WordPress Theme, Copyright 2018-2020 WordPress.org
+Ovation is distributed under the terms of the GNU GPL
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
