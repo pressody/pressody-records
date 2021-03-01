@@ -8,7 +8,6 @@ use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
 use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\LocalTheme;
 use Psr\Log\NullLogger;
 use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\PackageType\LocalPlugin;

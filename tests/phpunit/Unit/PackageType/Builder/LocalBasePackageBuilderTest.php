@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType;
+namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 
 use Composer\IO\NullIO;
 use PixelgradeLT\Records\Package;
@@ -40,7 +40,6 @@ class LocalBasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_extends_package_builder() {
-
 		$this->assertInstanceOf( BasePackageBuilder::class, $this->builder );
 	}
 
@@ -70,5 +69,25 @@ class LocalBasePackageBuilderTest extends TestCase {
 		$package  = $this->builder->set_installed( true )->set_installed_version( $expected )->build();
 
 		$this->assertSame( $expected, $package->installed_version );
+	}
+
+	public function test_with_package() {
+		$expected = new class extends LocalBasePackage {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+			public function __set( $name, $value ) {
+				$this->$name = $value;
+			}
+		};
+		$expected->is_installed = true;
+		$expected->directory = 'directory/';
+		$expected->installed_version = '2.0.0';
+
+		$package = $this->builder->with_package( $expected )->build();
+
+		$this->assertSame( $expected->is_installed, $package->is_installed );
+		$this->assertSame( $expected->directory, $package->directory );
+		$this->assertSame( $expected->installed_version, $package->installed_version );
 	}
 }

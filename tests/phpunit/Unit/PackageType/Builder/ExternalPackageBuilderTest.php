@@ -1,9 +1,10 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType;
+namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 
 use Composer\IO\NullIO;
+use Composer\Semver\Constraint\MatchAllConstraint;
 use Composer\Semver\Constraint\MultiConstraint;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
@@ -60,6 +61,22 @@ class ExternalPackageBuilderTest extends TestCase {
 		$package = $this->builder->set_source_constraint( $expected )->build();
 
 		$this->assertSame( $expected, $package->source_constraint );
+	}
+
+	public function test_with_package() {
+		$expected = new class extends ExternalBasePackage {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+			public function __set( $name, $value ) {
+				$this->$name = $value;
+			}
+		};
+		$expected->source_constraint = new MatchAllConstraint();
+
+		$package = $this->builder->with_package( $expected )->build();
+
+		$this->assertSame( $expected->source_constraint, $package->source_constraint );
 	}
 
 	public function test_get_tags_from_readme() {
