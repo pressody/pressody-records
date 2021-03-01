@@ -43,6 +43,7 @@ class LocalThemeTest extends TestCase {
 	}
 
 	public function test_get_theme_from_source() {
+		/** @var LocalTheme $package */
 		$package = $this->factory->create( 'theme', 'local.theme' )
 		                         ->from_slug( 'ovation' )
 		                         ->from_source( 'ovation' )

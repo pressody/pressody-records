@@ -87,6 +87,8 @@
 			"Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
 		],
 		"phpcs": "./vendor/bin/phpcs",
-		"test": "./vendor/bin/phpunit --testsuite=Unit --colors=always"
+		"tests": "./vendor/bin/phpunit --colors=always",
+		"tests-unit": "./vendor/bin/phpunit --testsuite=Unit --colors=always",
+		"tests-integration": "./vendor/bin/phpunit --testsuite=Integration --colors=always"
 	}
 }

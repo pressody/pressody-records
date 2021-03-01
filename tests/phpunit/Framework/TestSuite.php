@@ -7,7 +7,7 @@
  * @license   MIT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Tests\Framework;
 
@@ -45,7 +45,7 @@ class TestSuite extends PHPUnitTestSuite {
 	 */
 	public function bootstrap() {
 		if ( ! defined( 'WP_TESTS_CONFIG_FILE_PATH' ) ) {
-			define( 'WP_TESTS_CONFIG_FILE_PATH', __DIR__ . '/wp-tests-config.php' );
+			define( 'WP_TESTS_CONFIG_FILE_PATH', dirname( __DIR__ ) . '/wp-tests-config.php' );
 		}
 
 		require $this->directory . '/includes/bootstrap.php';
@@ -58,6 +58,7 @@ class TestSuite extends PHPUnitTestSuite {
 	 * @param object|array $function_to_add The function/callback to execute on call.
 	 * @param int          $priority        The priority.
 	 * @param int          $accepted_args   The amount of accepted arguments.
+	 *
 	 * @return bool Always true.
 	 */
 	public static function addFilter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
@@ -72,6 +73,7 @@ class TestSuite extends PHPUnitTestSuite {
 				'accepted_args' => $accepted_args,
 			);
 		}
+
 		return true;
 	}
 
@@ -81,6 +83,7 @@ class TestSuite extends PHPUnitTestSuite {
 	 * @param string       $tag      Unused. The name of the filter to build ID for.
 	 * @param object|array $function The function to generate ID for.
 	 * @param int          $priority Unused. The priority.
+	 *
 	 * @return string Unique function ID.
 	 */
 	protected static function getUniqueFilterId( $tag, $function, $priority ) {
@@ -107,7 +110,7 @@ class TestSuite extends PHPUnitTestSuite {
 	 * Locate the WordPress test suite.
 	 *
 	 * - WP_TESTS_DIR environment variable
-	 * - Adjacent WordPress dependecy in the vendor directory
+	 * - Adjacent WordPress dependency in the vendor directory
 	 * - WP_DEVELOP_DIR environment variable
 	 * - Location WP CLI installs the tests
 	 *
@@ -118,11 +121,11 @@ class TestSuite extends PHPUnitTestSuite {
 	 * @return string Absolute path to the tests.
 	 */
 	protected function findSuite(): string {
-		$directories   = [ getenv( 'WP_TESTS_DIR' ) ];
+		$directories   = isset( $_ENV['WP_TESTS_DIR'] ) ? [ $_ENV['WP_TESTS_DIR'] ] : [];
 		$directories[] = realpath( 'vendor/wordpress/wordpress/tests/phpunit' );
 
-		if ( false !== getenv( 'WP_DEVELOP_DIR' ) ) {
-			$directories[] = getenv( 'WP_DEVELOP_DIR' ) . 'tests/phpunit';
+		if ( isset( $_ENV['WP_DEVELOP_DIR'] ) ) {
+			$directories[] = $_ENV['WP_DEVELOP_DIR'] . 'tests/phpunit';
 		}
 
 		$directories[] = '/tmp/wordpress-tests-lib';

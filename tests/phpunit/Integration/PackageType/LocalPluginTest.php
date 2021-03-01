@@ -23,12 +23,6 @@ class LocalPluginTest extends TestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Mock the WordPress sanitize_text_field() function.
-		Functions\when( 'sanitize_text_field' )->returnArg( 1 );
-
-		Functions\when( 'get_plugin_data' )->justReturn( $this->get_plugin_data() );
-		Functions\when( 'get_site_transient' )->justReturn( new \stdClass() );
-
 		$archiver                = new Archiver( new NullLogger() );
 		$storage                 = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
@@ -115,16 +109,5 @@ class LocalPluginTest extends TestCase {
 			->build();
 
 		$this->assertSame( 1, count( $package->get_files() ) );
-	}
-
-	protected function get_plugin_data() {
-		return [
-			'Author'      => 'Basic, Inc.',
-			'AuthorURI'   => 'https://example.com/',
-			'PluginURI'   => 'https://example.com/plugin/basic/',
-			'Name'        => 'Basic Plugin',
-			'Description' => '',
-			'Version'     => '1.3.1',
-		];
 	}
 }

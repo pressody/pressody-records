@@ -1,16 +1,13 @@
 <?php
 declare ( strict_types = 1 );
 
-use Dotenv\Dotenv;
 use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Framework\TestSuite;
 use Psr\Log\NullLogger;
 
 require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
+define( 'PIXELGRADELT_RECORDS_RUNNING_UNIT_TESTS', true );
 define( 'PIXELGRADELT_RECORDS_TESTS_DIR', __DIR__ );
 define( 'WP_PLUGIN_DIR', __DIR__ . '/Fixture/wp-content/plugins' );
 

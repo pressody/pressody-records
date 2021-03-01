@@ -247,6 +247,9 @@ class BasePackageBuilder {
 			// We don't keep the array keys.
 			$keywords = array_values( $keywords );
 
+			// We don't keep duplicates.
+			$keywords = array_unique( $keywords );
+
 			// Sort the keywords alphabetically.
 			sort( $keywords );
 

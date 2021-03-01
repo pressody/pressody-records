@@ -52,7 +52,7 @@ class PHPUnitUtil {
 		$value        = $property->getValue( new Command() );
 		$long_options = array_keys( $value );
 
-		// In PHPUnit 8, Getopt::getopt is renamed to Getopt::parse, and in PHPUnit 9 the whole is dropped for sebastian/cli-parser
+		// In PHPUnit 8, Getopt::getopt is renamed to Getopt::parse, and in PHPUnit 9 the whole class is dropped for sebastian/cli-parser
 		// @link https://github.com/sebastianbergmann/phpunit/commit/44cb2c424b5d0b46a20faa49146f32e3bef52083#diff-4936fc958b7ea691bb00730f69d2ff4a7c9dab9308e224c471441f3a153d6da9
 		// Since WordPress Unit Tests currently support only PHPUnit 7+, we will delay the update.
 		// @link https://core.trac.wordpress.org/ticket/46149

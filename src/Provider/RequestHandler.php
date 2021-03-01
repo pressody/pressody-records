@@ -92,7 +92,8 @@ class RequestHandler extends AbstractHookProvider {
 		} catch ( \Exception $e ) {
 			// Don't throw authentication exceptions in debug mode so challenge
 			// headers can be sent to display login prompts.
-			if ( $this->is_debug_mode() && ! $e instanceof AuthenticationException ) {
+			// But throw them when running PHPUnit tests.
+			if ( $this->is_running_unit_tests() || ( $this->is_debug_mode() && ! $e instanceof AuthenticationException ) ) {
 				throw $e;
 			}
 
@@ -184,5 +185,16 @@ class RequestHandler extends AbstractHookProvider {
 	 */
 	protected function is_debug_mode(): bool {
 		return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
+	}
+
+	/**
+	 * Whether we are running unit tests.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	protected function is_running_unit_tests(): bool {
+		return \defined( 'PIXELGRADELT_RECORDS_RUNNING_UNIT_TESTS' ) && true === PIXELGRADELT_RECORDS_RUNNING_UNIT_TESTS;
 	}
 }
