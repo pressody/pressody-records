@@ -142,8 +142,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['hooks.package_post_type'] = function( $container ) {
 			return new PostType\PackagePostType(
-				$container['package.manager'],
-				$container['repository.managed']
+				$container['package.manager']
 			);
 		};
 
@@ -355,6 +354,20 @@ class ServiceProvider implements ServiceProviderInterface {
 					'composer' => 'route.composer',
 					'download' => 'route.download',
 				]
+			);
+		};
+
+		$container['screen.edit_package'] = function( $container ) {
+			return new Screen\EditPackage(
+				$container['package.manager'],
+				$container['repository.managed'],
+				$container['hooks.package_post_type']
+			);
+		};
+
+		$container['screen.list_packages'] = function( $container ) {
+			return new Screen\ListPackages(
+				$container['package.manager']
 			);
 		};
 

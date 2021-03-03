@@ -20,7 +20,7 @@ use WP_User;
 use function PixelgradeLT\Records\get_edited_user_id;
 
 /**
- * Edit Usser screen provider class.
+ * Edit User screen provider class.
  *
  * @since 0.1.0
  */
