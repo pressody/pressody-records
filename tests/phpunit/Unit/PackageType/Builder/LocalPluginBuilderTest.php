@@ -10,7 +10,6 @@ use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
 
 class LocalPluginBuilderTest extends TestCase {

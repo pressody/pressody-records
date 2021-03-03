@@ -35,8 +35,8 @@ class BasePackageBuilderTest extends TestCase {
 			}
 		};
 
-		$archiver = new Archiver( new NullLogger() );
-		$storage  = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$archiver                = new Archiver( new NullLogger() );
+		$storage                 = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 
 		$package_manager = $this->getMockBuilder( PackageManager::class )
@@ -107,26 +107,33 @@ class BasePackageBuilderTest extends TestCase {
 
 	public function test_string_authors() {
 		$expected = [
-			[ 'name'     => 'Pixelgrade', ],
-			[ 'name'     => 'Wordpressorg', ],
+			[ 'name' => 'Pixelgrade', ],
+			[ 'name' => 'Wordpressorg', ],
 		];
 
 		$authors = [ 'Pixelgrade ', ' Wordpressorg', '' ];
 
-		$package  = $this->builder->set_authors( $authors )->build();
+		$package = $this->builder->set_authors( $authors )->build();
 
 		$this->assertSame( $expected, $package->authors );
 	}
 
 	public function test_clean_authors() {
 		$expected = [
-			[ 'name'     => 'Pixelgrade', ],
-			[ 'name'     => 'Wordpressorg', ],
+			[ 'name' => 'Pixelgrade', ],
+			[ 'name' => 'Wordpressorg', ],
 		];
 
-		$authors = [ 'Pixelgrade', [],  'Wordpressorg', '', [ 'name' => '' ], [ 'homepage' => 'https://pixelgrade.com' ] ];
+		$authors = [
+			'Pixelgrade',
+			[],
+			'Wordpressorg',
+			'',
+			[ 'name' => '' ],
+			[ 'homepage' => 'https://pixelgrade.com' ],
+		];
 
-		$package  = $this->builder->set_authors( $authors )->build();
+		$package = $this->builder->set_authors( $authors )->build();
 
 		$this->assertSame( $expected, $package->authors );
 	}
@@ -191,6 +198,14 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->license );
 	}
 
+	public function test_license_notknown() {
+		// This license won't be normalized in the SPDX format. It will be kept the same.
+		$expected = 'Some license 3.0';
+		$package  = $this->builder->set_license( $expected )->build();
+
+		$this->assertSame( $expected, $package->license );
+	}
+
 	public function test_is_managed() {
 		$expected = true;
 		$package  = $this->builder->set_is_managed( $expected )->build();
@@ -206,10 +221,10 @@ class BasePackageBuilderTest extends TestCase {
 		$expected['source_name'] = 'local-plugin/slug';
 		$expected['authors']     = [
 			[
-				'name' => 'Name',
-				'email' => 'email@example.com',
+				'name'     => 'Name',
+				'email'    => 'email@example.com',
 				'homepage' => 'https://pixelgrade.com',
-				'role' => 'Dev',
+				'role'     => 'Dev',
 			],
 		];
 		$expected['homepage']    = 'https://pixelgrade.com';
