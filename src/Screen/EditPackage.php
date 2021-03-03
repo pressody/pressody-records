@@ -15,13 +15,9 @@ use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Authentication\ApiKey\ApiKey;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PostType\PackagePostType;
 use PixelgradeLT\Records\Repository\PackageRepository;
-use WP_User;
-
-use function PixelgradeLT\Records\get_edited_user_id;
 
 /**
  * Edit Package screen provider class.
@@ -78,6 +74,11 @@ class EditPackage extends AbstractHookProvider {
 	 * @since 0.5.0
 	 */
 	public function register_hooks() {
+		// Assets.
+		add_action( 'load-post.php', [ $this, 'load_screen' ] );
+		add_action( 'load-post-new.php', [ $this, 'load_screen' ] );
+
+		// Logic.
 		// Make sure that the post has a title.
 		$this->add_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'prevent_post_save_without_title' );
 
@@ -89,6 +90,7 @@ class EditPackage extends AbstractHookProvider {
 		// Make sure that the slug and other metaboxes are never hidden.
 		$this->add_filter( 'hidden_meta_boxes', 'prevent_hidden_metaboxes', 10, 2 );
 		// Rearrange the core metaboxes.
+		$this->add_action( 'add_meta_boxes_' . $this->package_manager::PACKAGE_POST_TYPE, 'add_package_current_state_meta_box', 10 );
 		$this->add_action( 'add_meta_boxes_' . $this->package_manager::PACKAGE_POST_TYPE, 'adjust_core_metaboxes', 99 );
 
 		// ADD CUSTOM POST META VIA CARBON FIELDS.
@@ -100,6 +102,40 @@ class EditPackage extends AbstractHookProvider {
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'show_post_error_msgs' );
+	}
+
+	/**
+	 * Set up the screen.
+	 *
+	 * @since 0.5.0
+	 */
+	public function load_screen() {
+		$screen = get_current_screen();
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== $screen->post_type ) {
+			return;
+		}
+
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'admin_footer', [ $this, 'print_templates' ] );
+	}
+
+	/**
+	 * Enqueue assets.
+	 *
+	 * @since 0.5.0
+	 */
+	public function enqueue_assets() {
+		wp_enqueue_script( 'pixelgradelt_records-admin' );
+		wp_enqueue_style( 'pixelgradelt_records-admin' );
+	}
+
+	/**
+	 * Print Underscore.js templates.
+	 *
+	 * @since 0.5.0
+	 */
+	public function print_templates() {
+		include $this->plugin->get_path( 'views/templates.php' );
 	}
 
 	/**
@@ -226,7 +262,7 @@ class EditPackage extends AbstractHookProvider {
 
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the source details of the package.
-		Container::make( 'post_meta', 'Source Configuration' )
+		Container::make( 'post_meta', esc_html__( 'Source Configuration', 'pixelgradelt_records' ) )
 		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
@@ -378,6 +414,51 @@ class EditPackage extends AbstractHookProvider {
 			              ) ),
 
 		         ] );
+	}
+
+	public function add_package_current_state_meta_box() {
+		$post_type = $this->package_manager::PACKAGE_POST_TYPE;
+		$container_id = $post_type . '_current_state_details';
+		add_meta_box(
+				$container_id,
+				esc_html__( 'Current Package State Details', 'pixelgradelt_records' ),
+				array( $this, 'display_package_current_state_meta_box' ),
+				$this->package_manager::PACKAGE_POST_TYPE,
+				'normal',
+				'default'
+		);
+
+		add_filter( "postbox_classes_{$post_type}_{$container_id}", [ $this, 'add_package_current_state_box_classes' ] );
+	}
+
+	/**
+	 * Classes to add to the post meta box
+	 */
+	public function add_package_current_state_box_classes( $classes ) {
+		$classes[] = 'carbon-box';
+		return $classes;
+	}
+
+	/**
+	 * Display Package Current State meta box
+	 *
+	 * @param \WP_Post $post
+	 */
+	public function display_package_current_state_meta_box( \WP_Post $post ) {
+		$package_data = $this->package_manager->get_package_id_data( (int) $post->ID );
+		if ( empty( $package_data ) ) {
+			return;
+		}
+
+		$package = $this->packages->first_where( [
+				'source_name' => $package_data['source_name'],
+				'type'        => $package_data['type'],
+		] );
+		if ( empty( $package ) ) {
+			return;
+		}
+
+		require $this->plugin->get_path( 'views/package-details.php' );
 	}
 
 	/**
@@ -536,34 +617,5 @@ class EditPackage extends AbstractHookProvider {
 				sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
 			);
 		}
-	}
-
-	/**
-	 * Set up the screen.
-	 *
-	 * @since 0.5.0
-	 */
-	public function load_screen() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_footer', [ $this, 'print_templates' ] );
-	}
-
-	/**
-	 * Enqueue assets.
-	 *
-	 * @since 0.5.0
-	 */
-	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_records-admin' );
-		wp_enqueue_style( 'pixelgradelt_records-admin' );
-	}
-
-	/**
-	 * Print Underscore.js templates.
-	 *
-	 * @since 0.5.0
-	 */
-	public function print_templates() {
-		include $this->plugin->get_path( 'views/templates.php' );
 	}
 }

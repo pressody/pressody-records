@@ -12,13 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Authentication\ApiKey\ApiKey;
 use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PostType\PackagePostType;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use WP_User;
-
-use function PixelgradeLT\Records\get_edited_user_id;
 
 /**
  * List Packages screen provider class.
@@ -53,6 +47,10 @@ class ListPackages extends AbstractHookProvider {
 	 * @since 0.5.0
 	 */
 	public function register_hooks() {
+		// Assets.
+		add_action( 'load-edit.php', [ $this, 'load_screen' ] );
+
+		// Logic.
 		// Show a dropdown to filter the posts list by the custom taxonomy.
 		$this->add_action( 'restrict_manage_posts', 'output_admin_list_filters' );
 	}
@@ -89,6 +87,11 @@ class ListPackages extends AbstractHookProvider {
 	 * @since 0.5.0
 	 */
 	public function load_screen() {
+		$screen = get_current_screen();
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== $screen->post_type ) {
+			return;
+		}
+
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 

@@ -2,12 +2,12 @@
 /**
  * Views: Packages page
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -16,11 +16,11 @@ namespace PixelgradeLT\Records;
  */
 
 $allowed_tags = [
-	'a'  => [
-		'href' => true,
-	],
-	'em' => [],
-	'code' => [],
+		'a'    => [
+				'href' => true,
+		],
+		'em'   => [],
+		'code' => [],
 ];
 
 if ( ! empty( $packages ) ) { ?>
@@ -32,101 +32,13 @@ This view is primarily available to assist in <strong>double-checking that thing
 If you want to <strong>dig deeper,</strong> check <a href="%s" target="_blank">the actual JSON</a> of the PixelgradeLT Records repo.', 'pixelgradelt_records' ), esc_url( $permalink ) ); ?>
 		</p>
 	</div>
-<?php }
-
-/** @global Package[] $packages */
-foreach ( $packages as $package ) :
-	?>
-	<table class="pixelgradelt_records-package widefat">
-		<thead>
-		<tr>
-			<th colspan="2"><?php echo esc_html( $package->get_name() ); ?></th>
-		</tr>
-		</thead>
-		<tbody>
-		<?php
-		$description = $package->get_description();
-		if ( $description ) :
-			?>
-			<tr>
-				<td colspan="2"><?php echo esc_html( wp_strip_all_tags( $description ) ); ?></td>
-			</tr>
-		<?php endif; ?>
-
-		<?php
-		$homepage = $package->get_homepage();
-		if ( ! empty( $homepage ) ) { ?>
-			<tr>
-				<th><?php esc_html_e( 'Homepage', 'pixelgradelt_records' ); ?></th>
-				<td><a href="<?php echo esc_url( $homepage ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $homepage ); ?></a></td>
-			</tr>
-		<?php }
-
-		$authors = $package->get_authors();
-		if ( ! empty( $authors ) ) { ?>
-		<tr>
-			<th><?php esc_html_e( 'Authors', 'pixelgradelt_records' ); ?></th>
-			<?php foreach ( $authors as $author ) { ?>
-
-				<td><a href="<?php echo esc_url( $author['homepage'] ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $author['name'] ); ?></a></td>
-
-			<?php } ?>
-		</tr>
-		<?php } ?>
-
-		<tr>
-			<th><?php esc_html_e( 'Releases', 'pixelgradelt_records' ); ?></th>
-			<td class="pixelgradelt_records-releases">
-				<?php
-				if ( $package->has_releases() ) {
-					$versions = array_map(
-						function( $release ) {
-								return sprintf(
-									'<a href="%1$s" data-version="%2$s" class="button pixelgradelt_records-release">%3$s</a>',
-									esc_url( $release->get_download_url() ),
-									esc_attr( $release->get_version() ),
-									esc_html( $release->get_version() )
-								);
-						},
-						$package->get_releases()
-					);
-
-					// Prepend the latest release.
-					array_unshift(
-						$versions,
-						sprintf(
-							'<a href="%1$s" data-version="%2$s" class="button pixelgradelt_records-release">%3$s</a>',
-							esc_url( $package->get_latest_download_url() ),
-							esc_attr( $package->get_latest_release()->get_version() ),
-							esc_html_x( 'Latest', 'latest version', 'pixelgradelt_records' )
-						)
-					);
-
-					echo wp_kses(
-						implode( ' ', array_filter( $versions ) ),
-						[
-							'a' => [
-								'class'        => true,
-								'data-version' => true,
-								'href'         => true,
-							],
-						]
-					);
-				}
-				?>
-			</td>
-		</tr>
-		<tr>
-			<th><?php esc_html_e( 'Package Type', 'pixelgradelt_records' ); ?></th>
-			<td><code><?php echo esc_html( $package->get_type() ); ?></code></td>
-		</tr>
-		</tbody>
-	</table>
 	<?php
-endforeach;
 
-if ( empty( $packages ) ) :
-	?>
+	/** @global Package[] $packages */
+	foreach ( $packages as $package ) {
+		require $this->plugin->get_path( 'views/package-details.php' );
+	}
+} else { ?>
 	<div class="pixelgradelt_records-card">
 		<h3><?php esc_html_e( 'No packages defined', 'pixelgradelt_records' ); ?></h3>
 		<p>
@@ -137,4 +49,4 @@ if ( empty( $packages ) ) :
 		</p>
 	</div>
 	<?php
-endif;
+}
