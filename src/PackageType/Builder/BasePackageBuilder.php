@@ -199,6 +199,39 @@ class BasePackageBuilder {
 	 * @return $this
 	 */
 	public function set_authors( array $authors ): self {
+
+		$authors = array_map( function ( $author ) {
+			if ( is_string( $author ) && ! empty( $author ) ) {
+				return [ 'name' => trim( $author ) ];
+			}
+
+			if ( is_array( $author ) ) {
+				// Make sure only the fields we are interested in are left.
+				$accepted_keys = array_fill_keys( [ 'name', 'email', 'homepage', 'role' ], '' );
+				$author = array_replace( $accepted_keys, array_intersect_key( $author, $accepted_keys ) );
+
+				// Remove falsy author entries.
+				$author = array_filter( $author );
+
+				// We need the name not to be empty.
+				if ( empty( $author['name'] ) ) {
+					return false;
+				}
+
+				return $author;
+			}
+
+			// We have an invalid author.
+			return false;
+
+		}, $authors );
+
+		// Filter out falsy authors.
+		$authors = array_filter( $authors );
+
+		// We don't keep the array keys.
+		$authors = array_values( $authors );
+
 		return $this->set( 'authors', $authors );
 	}
 
@@ -243,7 +276,7 @@ class BasePackageBuilder {
 		if ( is_array( $keywords ) ) {
 			foreach ( $keywords as $key => $keyword ) {
 				// Reject non-string or empty entries.
-				if ( ! is_string( $keyword ) || empty( $keyword ) ) {
+				if ( ! is_string( $keyword ) ) {
 					unset( $keywords[ $key ] );
 					continue;
 				}
@@ -253,6 +286,9 @@ class BasePackageBuilder {
 
 			// We don't keep the array keys.
 			$keywords = array_values( $keywords );
+
+			// We don't keep the falsy keywords.
+			$keywords = array_filter( $keywords );
 
 			// We don't keep duplicates.
 			$keywords = array_unique( $keywords );
@@ -292,6 +328,9 @@ class BasePackageBuilder {
 
 		// We don't keep the array keys.
 		$keywords = array_values( $keywords );
+
+		// We don't keep the falsy keywords.
+		$keywords = array_filter( $keywords );
 
 		// We don't keep duplicates.
 		$keywords = array_unique( $keywords );

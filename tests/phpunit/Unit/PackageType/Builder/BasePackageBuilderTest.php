@@ -105,6 +105,32 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->authors );
 	}
 
+	public function test_string_authors() {
+		$expected = [
+			[ 'name'     => 'Pixelgrade', ],
+			[ 'name'     => 'Wordpressorg', ],
+		];
+
+		$authors = [ 'Pixelgrade ', ' Wordpressorg', '' ];
+
+		$package  = $this->builder->set_authors( $authors )->build();
+
+		$this->assertSame( $expected, $package->authors );
+	}
+
+	public function test_clean_authors() {
+		$expected = [
+			[ 'name'     => 'Pixelgrade', ],
+			[ 'name'     => 'Wordpressorg', ],
+		];
+
+		$authors = [ 'Pixelgrade', [],  'Wordpressorg', '', [ 'name' => '' ], [ 'homepage' => 'https://pixelgrade.com' ] ];
+
+		$package  = $this->builder->set_authors( $authors )->build();
+
+		$this->assertSame( $expected, $package->authors );
+	}
+
 	public function test_description() {
 		$expected = 'A package description.';
 		$package  = $this->builder->set_description( $expected )->build();
@@ -124,6 +150,16 @@ class BasePackageBuilderTest extends TestCase {
 
 	public function test_keywords_as_array() {
 		$keywords = [ 'first' => 'key2', 'key3 ', 'some' => 'key0', ' key1 ', ];
+
+		// We expect the keywords to be alphabetically sorted.
+		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
+		$package  = $this->builder->set_keywords( $keywords )->build();
+
+		$this->assertSame( $expected, $package->keywords );
+	}
+
+	public function test_clean_keywords() {
+		$keywords = [ 'first' => 'key2', '', 'key3 ', false, 'some' => 'key0', ' key1 ', ];
 
 		// We expect the keywords to be alphabetically sorted.
 		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
@@ -168,7 +204,14 @@ class BasePackageBuilderTest extends TestCase {
 		$expected['type']        = 'plugin';
 		$expected['source_type'] = 'local.plugin';
 		$expected['source_name'] = 'local-plugin/slug';
-		$expected['authors']     = [];
+		$expected['authors']     = [
+			[
+				'name' => 'Name',
+				'email' => 'email@example.com',
+				'homepage' => 'https://pixelgrade.com',
+				'role' => 'Dev',
+			],
+		];
 		$expected['homepage']    = 'https://pixelgrade.com';
 		$expected['description'] = 'Some description.';
 		$expected['keywords']    = [ 'keyword' ];

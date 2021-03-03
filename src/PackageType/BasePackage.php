@@ -2,12 +2,12 @@
 /**
  * Base package.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType;
 
@@ -57,7 +57,7 @@ class BasePackage implements \ArrayAccess, Package {
 	protected string $slug = '';
 
 	/**
-	 * Package authors.
+	 * Package authors, each, potentially, having: `name`, `email`, `homepage`, `role`.
 	 *
 	 * @var array
 	 */
@@ -320,6 +320,7 @@ class BasePackage implements \ArrayAccess, Package {
 	 * @since 0.1.0
 	 *
 	 * @param string $version Version string.
+	 *
 	 * @throws InvalidReleaseVersion If the version is invalid.
 	 * @return Release
 	 */
@@ -392,6 +393,7 @@ class BasePackage implements \ArrayAccess, Package {
 	public function get_latest_download_url(): string {
 		$url = $this->get_latest_release()->get_download_url();
 		$url = substr( $url, 0, strrpos( $url, '/' ) );
+
 		return $url . '/latest';
 	}
 
@@ -403,6 +405,7 @@ class BasePackage implements \ArrayAccess, Package {
 	 * @since 0.1.0
 	 *
 	 * @param string $name Property name.
+	 *
 	 * @return bool
 	 */
 	public function offsetExists( $name ): bool {
@@ -415,6 +418,7 @@ class BasePackage implements \ArrayAccess, Package {
 	 * @since 0.1.0
 	 *
 	 * @param string $name Property name.
+	 *
 	 * @return mixed
 	 */
 	public function offsetGet( $name ) {
