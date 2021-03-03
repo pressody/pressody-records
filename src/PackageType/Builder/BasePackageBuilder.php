@@ -199,7 +199,10 @@ class BasePackageBuilder {
 	 * @return $this
 	 */
 	public function set_authors( array $authors ): self {
+		return $this->set( 'authors', $this->normalize_authors( $authors ) );
+	}
 
+	protected function normalize_authors( array $authors ): array {
 		$authors = array_map( function ( $author ) {
 			if ( is_string( $author ) && ! empty( $author ) ) {
 				return [ 'name' => trim( $author ) ];
@@ -232,7 +235,7 @@ class BasePackageBuilder {
 		// We don't keep the array keys.
 		$authors = array_values( $authors );
 
-		return $this->set( 'authors', $authors );
+		return $authors;
 	}
 
 	/**
