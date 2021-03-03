@@ -64,14 +64,21 @@ class PackageManager {
 	 *
 	 * @var ComposerClient
 	 */
-	protected $composer_client;
+	protected ComposerClient $composer_client;
 
 	/**
 	 * Composer version parser.
 	 *
 	 * @var ComposerVersionParser
 	 */
-	protected $composer_version_parser;
+	protected ComposerVersionParser $composer_version_parser;
+
+	/**
+	 * WordPress readme parser.
+	 *
+	 * @var WordPressReadmeParser
+	 */
+	protected WordPressReadmeParser $wordpress_readme_parser;
 
 	/**
 	 * Constructor.
@@ -80,14 +87,17 @@ class PackageManager {
 	 *
 	 * @param ComposerClient        $composer_client
 	 * @param ComposerVersionParser $composer_version_parser
+	 * @param WordPressReadmeParser $wordpress_readme_parser
 	 */
 	public function __construct(
 		ComposerClient $composer_client,
-		ComposerVersionParser $composer_version_parser
+		ComposerVersionParser $composer_version_parser,
+		WordPressReadmeParser $wordpress_readme_parser
 	) {
 
 		$this->composer_client         = $composer_client;
 		$this->composer_version_parser = $composer_version_parser;
+		$this->wordpress_readme_parser = $wordpress_readme_parser;
 	}
 
 	public function get_composer_client(): ComposerClient {
@@ -96,6 +106,10 @@ class PackageManager {
 
 	public function get_composer_version_parser(): ComposerVersionParser {
 		return $this->composer_version_parser;
+	}
+
+	public function get_wordpress_readme_parser(): WordPressReadmeParser {
+		return $this->wordpress_readme_parser;
 	}
 
 	/**
@@ -540,7 +554,7 @@ class PackageManager {
 		}
 
 		// We need to return the keywords slugs, not the WP_Term list.
-		$keywords = array_map( function( $term ) {
+		$keywords = array_map( function ( $term ) {
 			if ( $term instanceof \WP_Term ) {
 				$term = $term->slug;
 			}

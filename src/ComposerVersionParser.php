@@ -2,20 +2,22 @@
 /**
  * Composer version parser.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
-use Composer\Semver\Constraint\ConstraintInterface;/**
+use Composer\Semver\Constraint\ConstraintInterface;
+
+/**
  * Composer version parser class.
  *
- * @since 0.1.0
- *@package PixelgradeLT
+ * @since   0.1.0
+ * @package PixelgradeLT
  */
 final class ComposerVersionParser implements VersionParser {
 	/**

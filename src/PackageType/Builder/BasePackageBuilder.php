@@ -2,12 +2,12 @@
 /**
  * Base package builder.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType\Builder;
 
@@ -112,7 +112,7 @@ class BasePackageBuilder {
 
 		uasort(
 			$this->releases,
-			function( Release $a, Release $b ) {
+			function ( Release $a, Release $b ) {
 				return version_compare( $b->get_version(), $a->get_version() );
 			}
 		);
@@ -130,6 +130,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $name Package name.
+	 *
 	 * @return $this
 	 */
 	public function set_name( string $name ): self {
@@ -142,6 +143,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $type Package type.
+	 *
 	 * @return $this
 	 */
 	public function set_type( string $type ): self {
@@ -180,6 +182,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $slug Slug.
+	 *
 	 * @return $this
 	 */
 	public function set_slug( string $slug ): self {
@@ -192,6 +195,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param array $authors Authors.
+	 *
 	 * @return $this
 	 */
 	public function set_authors( array $authors ): self {
@@ -204,6 +208,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $description Description.
+	 *
 	 * @return $this
 	 */
 	public function set_description( string $description ): self {
@@ -216,6 +221,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string|string[] $keywords
+	 *
 	 * @return $this
 	 */
 	public function set_keywords( $keywords ): self {
@@ -228,6 +234,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string|string[] $keywords
+	 *
 	 * @return array
 	 */
 	protected function normalize_keywords( $keywords ): array {
@@ -333,7 +340,7 @@ class BasePackageBuilder {
 	protected function normalize_license( string $license ): string {
 		$license = trim( $license );
 
-		$tmp_license = strtolower( $license);
+		$tmp_license = strtolower( $license );
 
 		if ( empty( $tmp_license ) ) {
 			// Default to the WordPress license.
@@ -369,11 +376,60 @@ class BasePackageBuilder {
 	}
 
 	/**
+	 * Set the requires at least WP version, but only if the given version string is valid.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param string $version Version.
+	 * @return $this
+	 */
+	public function set_requires_at_least_wp( string $version ): self {
+		if ( ! $this->check_version_validity( $version ) ) {
+			return $this;
+		}
+
+		return $this->set( 'requires_at_least_wp', $version );
+	}
+
+	/**
+	 * Set the tested up to WP version, but only if the given version string is valid.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param string $version Version.
+	 * @return $this
+	 */
+	public function set_tested_up_to_wp( string $version ): self {
+		if ( ! $this->check_version_validity( $version ) ) {
+			return $this;
+		}
+
+		return $this->set( 'tested_up_to_wp', $version );
+	}
+
+	/**
+	 * Set the the required PHP version, but only if the given version string is valid.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param string $version Version.
+	 * @return $this
+	 */
+	public function set_requires_php( string $version ): self {
+		if ( ! $this->check_version_validity( $version ) ) {
+			return $this;
+		}
+
+		return $this->set( 'requires_php', $version );
+	}
+
+	/**
 	 * Set if this package is managed by us.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param bool $is_managed
+	 *
 	 * @return $this
 	 */
 	public function set_is_managed( bool $is_managed ): self {
@@ -386,7 +442,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param int   $post_id Optional. The package post ID to retrieve data for. Leave empty and provide $args to query.
-	 * @param array $args Optional. Args used to query for a managed package if the post ID failed to retrieve data.
+	 * @param array $args    Optional. Args used to query for a managed package if the post ID failed to retrieve data.
 	 *
 	 * @return $this
 	 */
@@ -418,6 +474,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param array $package_data Package data.
+	 *
 	 * @return $this
 	 */
 	public function from_package_data( array $package_data ): self {
@@ -461,6 +518,18 @@ class BasePackageBuilder {
 			$this->set_keywords( $package_data['keywords'] );
 		}
 
+		if ( empty( $this->package->get_requires_at_least_wp() ) && ! empty( $package_data['requires_at_least_wp'] ) ) {
+			$this->set_requires_at_least_wp( $package_data['requires_at_least_wp'] );
+		}
+
+		if ( empty( $this->package->get_tested_up_to_wp() ) && ! empty( $package_data['tested_up_to_wp'] ) ) {
+			$this->set_tested_up_to_wp( $package_data['tested_up_to_wp'] );
+		}
+
+		if ( empty( $this->package->get_requires_php() ) && ! empty( $package_data['requires_php'] ) ) {
+			$this->set_requires_php( $package_data['requires_php'] );
+		}
+
 		return $this;
 	}
 
@@ -492,7 +561,7 @@ class BasePackageBuilder {
 			$this->set_authors( [
 				[
 					'name'     => $header_data['Author'],
-					'homepage' => $header_data[ 'AuthorURI'],
+					'homepage' => $header_data['AuthorURI'],
 				],
 			] );
 		}
@@ -509,6 +578,96 @@ class BasePackageBuilder {
 			$this->set_keywords( $header_data['Tags'] );
 		}
 
+		if ( empty( $this->package->get_requires_at_least_wp() ) && ! empty( $header_data['Requires at least'] ) ) {
+			$this->set_requires_at_least_wp( $header_data['Requires at least'] );
+		}
+
+		if ( empty( $this->package->get_tested_up_to_wp() ) && ! empty( $header_data['Tested up to'] ) ) {
+			$this->set_tested_up_to_wp( $header_data['Tested up to'] );
+		}
+
+		if ( empty( $this->package->get_requires_php() ) && ! empty( $header_data['Requires PHP'] ) ) {
+			$this->set_requires_php( $header_data['Requires PHP'] );
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Fill (missing) package details from the package's readme file (generally intended for WordPress.org display).
+	 *
+	 * If the readme file is missing, nothing is done.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param string $directory   The absolute path to the package files directory.
+	 * @param array  $readme_data Optional. Array of readme data.
+	 *
+	 * @throws \ReflectionException
+	 * @return LocalThemeBuilder
+	 */
+	public function from_readme( string $directory, array $readme_data = [] ): self {
+		if ( empty( $readme_data ) ) {
+			$readme_file = trailingslashit( $directory ) . 'readme.txt';
+			if ( ! file_exists( $readme_file ) ) {
+				// Try a readme.md.
+				$readme_file = trailingslashit( $directory ) . 'readme.md';
+			}
+			if ( file_exists( $readme_file ) ) {
+				$readme_data = $this->package_manager->get_wordpress_readme_parser()->parse_readme( $readme_file );
+			}
+		}
+
+		return $this->from_readme_data( $readme_data );
+	}
+
+	/**
+	 * Fill (missing) package details from readme data.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param array $readme_data The package (plugin or theme) readme data.
+	 *
+	 * @return $this
+	 */
+	public function from_readme_data( array $readme_data ): self {
+
+		if ( empty( $this->package->get_name() ) && ! empty( $readme_data['name'] ) ) {
+			$this->set_name( $readme_data['name'] );
+		}
+
+		if ( empty( $this->package->get_authors() ) && ! empty( $readme_data['contributors'] ) ) {
+			$converted = array_map( function ( $contributor ) {
+				return [ 'name' => $contributor ];
+			}, $readme_data['contributors'] );
+
+			$this->set_authors( $converted );
+		}
+
+		if ( empty( $this->package->get_description() ) && ! empty( $readme_data['short_description'] ) ) {
+			$this->set_description( $readme_data['short_description'] );
+		}
+
+		if ( empty( $this->package->get_license() ) && ! empty( $readme_data['license'] ) ) {
+			$this->set_license( $readme_data['license'] );
+		}
+
+		if ( empty( $this->package->get_keywords() ) && ! empty( $readme_data['tags'] ) ) {
+			$this->set_keywords( $readme_data['tags'] );
+		}
+
+		if ( empty( $this->package->get_requires_at_least_wp() ) && ! empty( $readme_data['requires_at_least'] ) ) {
+			$this->set_requires_at_least_wp( $readme_data['requires_at_least'] );
+		}
+
+		if ( empty( $this->package->get_tested_up_to_wp() ) && ! empty( $readme_data['tested_up_to'] ) ) {
+			$this->set_tested_up_to_wp( $readme_data['tested_up_to'] );
+		}
+
+		if ( empty( $this->package->get_requires_php() ) && ! empty( $readme_data['requires_php'] ) ) {
+			$this->set_requires_php( $readme_data['requires_php'] );
+		}
+
 		return $this;
 	}
 
@@ -518,6 +677,7 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param Package $package Package.
+	 *
 	 * @return $this
 	 */
 	public function with_package( Package $package ): self {
@@ -531,13 +691,68 @@ class BasePackageBuilder {
 			->set_homepage( $package->get_homepage() )
 			->set_description( $package->get_description() )
 			->set_keywords( $package->get_keywords() )
-			->set_license( $package->get_license() );
+			->set_license( $package->get_license() )
+			->set_requires_at_least_wp( $package->get_requires_at_least_wp() )
+			->set_tested_up_to_wp( $package->get_tested_up_to_wp() )
+			->set_requires_php( $package->get_requires_php() );
 
 		foreach ( $package->get_releases() as $release ) {
 			$this->add_release( $release->get_version(), $release->get_source_url() );
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Check a given package version string for validity.
+	 *
+	 * Validity means that the Composer version parser accepts the version string without throwing an exception.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param string $version
+	 *
+	 * @return bool
+	 */
+	protected function check_version_validity( string $version ): bool {
+		try {
+			$this->release_manager->get_composer_version_parser()->normalize( $version );
+		} catch ( \Exception $e ) {
+			// If there was an exception it means that something is wrong with this version.
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Normalize a given package version string.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param string $version
+	 *
+	 * @return string|null The normalized version string or null if invalid.
+	 */
+	protected function normalize_version( string $version ): ?string {
+		try {
+			$normalized_version = $this->release_manager->get_composer_version_parser()->normalize( $version );
+		} catch ( \Exception $e ) {
+			// If there was an exception it means that something is wrong with this version.
+
+			$this->logger->error(
+				'Error normalizing version: {version} for package {package}.',
+				[
+					'exception' => $e,
+					'version'   => $version,
+					'package'   => $this->package->get_name(),
+				]
+			);
+
+			return null;
+		}
+
+		return $normalized_version;
 	}
 
 	/**
@@ -555,23 +770,23 @@ class BasePackageBuilder {
 		$versions = [];
 		foreach ( $this->releases as $key => $release ) {
 
-				try {
-					$new_release = $this->release_manager->archive( $release );
-					// Once the release file (zip) is successfully archived (cached), it is transformed so we need to overwrite.
-					if ( $release !== $new_release ) {
-						$this->package->set_release( $new_release );
-					}
-
-					$versions[] = $release->get_version();
-				} catch ( PixelgradeltRecordsException $e ) {
-					$this->logger->error(
-						'Error archiving {package}.',
-						[
-							'exception' => $e,
-							'package'   => $this->package->get_name(),
-						]
-					);
+			try {
+				$new_release = $this->release_manager->archive( $release );
+				// Once the release file (zip) is successfully archived (cached), it is transformed so we need to overwrite.
+				if ( $release !== $new_release ) {
+					$this->package->set_release( $new_release );
 				}
+
+				$versions[] = $release->get_version();
+			} catch ( PixelgradeltRecordsException $e ) {
+				$this->logger->error(
+					'Error archiving {package}.',
+					[
+						'exception' => $e,
+						'package'   => $this->package->get_name(),
+					]
+				);
+			}
 		}
 
 		// Prune the cache from extra releases.
@@ -622,10 +837,12 @@ class BasePackageBuilder {
 	 *
 	 * @param string $version    Version.
 	 * @param string $source_url Optional. Release source URL.
+	 *
 	 * @return $this
 	 */
 	public function add_release( string $version, string $source_url = '' ): self {
 		$this->releases[ $version ] = new Release( $this->package, $version, $source_url );
+
 		return $this;
 	}
 
@@ -635,10 +852,12 @@ class BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $version Version.
+	 *
 	 * @return $this
 	 */
 	public function remove_release( string $version ): self {
 		unset( $this->releases[ $version ] );
+
 		return $this;
 	}
 
@@ -653,13 +872,14 @@ class BasePackageBuilder {
 	 * @param string $name  Property name.
 	 * @param mixed  $value Property value.
 	 *
-	 * @return $this
 	 * @throws \ReflectionException If no property exists by that name.
+	 * @return $this
 	 */
 	protected function set( $name, $value ): self {
 		$property = $this->class->getProperty( $name );
 		$property->setAccessible( true );
 		$property->setValue( $this->package, $value );
+
 		return $this;
 	}
 }

@@ -74,7 +74,7 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 		return $this->factory->create( 'plugin', 'local.plugin' )
 			// Fill package details in a cascade.
 			// First from just the plugin file.
-			->from_file( $plugin_file )
+			->from_basename( $plugin_file )
 			// Then from the managed data, if this plugin is managed.
 			->from_manager( 0, [ 'package_source_type' => 'local.plugin', 'local_plugin_file' => $plugin_file ] )
 			// Then from the plugin source files, if there is anything left to fill.

@@ -26,84 +26,105 @@ class BasePackage implements \ArrayAccess, Package {
 	 *
 	 * @var string
 	 */
-	protected $name = '';
+	protected string $name = '';
 
 	/**
 	 * Package type.
 	 *
 	 * @var string
 	 */
-	protected $type = '';
+	protected string $type = '';
 
 	/**
 	 * Package source type.
 	 *
 	 * @var string
 	 */
-	protected $source_type = '';
+	protected string $source_type = '';
 
 	/**
 	 * Package source name (in the form vendor/name).
 	 *
 	 * @var string
 	 */
-	protected $source_name = '';
+	protected string $source_name = '';
 
 	/**
 	 * Package slug.
 	 *
 	 * @var string
 	 */
-	protected $slug = '';
+	protected string $slug = '';
 
 	/**
 	 * Package authors.
 	 *
 	 * @var array
 	 */
-	protected $authors = [];
+	protected array $authors = [];
 
 	/**
 	 * Description.
 	 *
 	 * @var string
 	 */
-	protected $description = '';
+	protected string $description = '';
 
 	/**
 	 * Package homepage URL.
 	 *
 	 * @var string
 	 */
-	protected $homepage = '';
+	protected string $homepage = '';
 
 	/**
 	 * Package license.
 	 *
 	 * @var string
 	 */
-	protected $license = '';
+	protected string $license = '';
 
 	/**
 	 * Package keywords.
 	 *
 	 * @var string[]
 	 */
-	protected $keywords = [];
+	protected array $keywords = [];
+
+	/**
+	 * Package requires at least WordPress version (from the package headers/readme).
+	 *
+	 * @var string
+	 */
+	protected string $requires_at_least_wp = '';
+
+	/**
+	 * Package tested up to WordPress version (from the package headers/readme).
+	 *
+	 * @var string
+	 */
+	protected string $tested_up_to_wp = '';
+
+	/**
+	 * Package requires PHP version (from the package headers/readme).
+	 *
+	 * @var string
+	 */
+	protected string $requires_php = '';
 
 	/**
 	 * Is managed package?
 	 *
-	 * @var string
+	 * @var bool
 	 */
-	protected $is_managed = false;
+	protected bool $is_managed = false;
 
 	/**
 	 * Releases.
 	 *
 	 * @var Release[]
 	 */
-	protected $releases = [];
+	protected array $releases = [];
 
 	/**
 	 * Magic setter.
@@ -225,6 +246,39 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function get_keywords(): array {
 		return $this->keywords;
+	}
+
+	/**
+	 * Retrieve the requires at least WP version.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @return string
+	 */
+	public function get_requires_at_least_wp(): string {
+		return $this->requires_at_least_wp;
+	}
+
+	/**
+	 * Retrieve the tested up to WP version.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @return string
+	 */
+	public function get_tested_up_to_wp(): string {
+		return $this->tested_up_to_wp;
+	}
+
+	/**
+	 * Retrieve the required PHP version.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @return string
+	 */
+	public function get_requires_php(): string {
+		return $this->requires_php;
 	}
 
 	/**

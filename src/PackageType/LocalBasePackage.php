@@ -113,7 +113,7 @@ class LocalBasePackage extends BasePackage {
 	 * @throws PackageNotInstalled If the package is not installed.
 	 * @return string
 	 */
-	public function get_installed_version(): string {
+	public function get_installed_version():? string {
 		if ( ! $this->is_installed() ) {
 			throw PackageNotInstalled::forInvalidMethodCall( __FUNCTION__, $this );
 		}
@@ -133,6 +133,11 @@ class LocalBasePackage extends BasePackage {
 		if ( ! $this->is_installed() ) {
 			throw PackageNotInstalled::forInvalidMethodCall( __FUNCTION__, $this );
 		}
+
+		if ( null === $this->get_installed_version() || '' === $this->get_installed_version() ) {
+			throw PackageNotInstalled::forInvalidInstalledVersion( __FUNCTION__, $this );
+		}
+
 
 		return $this->get_release( $this->get_installed_version() );
 	}

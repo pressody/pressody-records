@@ -1,16 +1,23 @@
 <?php
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
+use Composer\Semver\VersionParser;
+use PixelgradeLT\Records\Archiver;
+use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\BasePackage;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
+use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\ReleaseManager;
+use PixelgradeLT\Records\Storage\Local as LocalStorage;
+use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Psr\Log\NullLogger;
 
 class BasePackageBuilderTest extends TestCase {
 	protected $builder = null;
@@ -28,14 +35,15 @@ class BasePackageBuilderTest extends TestCase {
 			}
 		};
 
+		$archiver = new Archiver( new NullLogger() );
+		$storage  = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 
 		$package_manager = $this->getMockBuilder( PackageManager::class )
-		                ->disableOriginalConstructor()
-		                ->getMock();
-
-		$release_manager = $this->getMockBuilder( ReleaseManager::class )
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
+
+		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser );
 
 		$logger = new NullIO();
 
@@ -90,7 +98,7 @@ class BasePackageBuilderTest extends TestCase {
 				'email'    => 'contact@pixelgrade.com',
 				'homepage' => 'https://pixelgrade.com',
 				'role'     => 'Maker',
-			]
+			],
 		];
 		$package  = $this->builder->set_authors( $expected )->build();
 
@@ -141,8 +149,8 @@ class BasePackageBuilderTest extends TestCase {
 	public function test_license_nonstandard() {
 		// Some widely used licenses should be normalized to the SPDX format.
 		$license_string = 'GNU GPLv2 or later';
-		$expected = 'GPL-2.0-or-later';
-		$package  = $this->builder->set_license( $license_string )->build();
+		$expected       = 'GPL-2.0-or-later';
+		$package        = $this->builder->set_license( $license_string )->build();
 
 		$this->assertSame( $expected, $package->license );
 	}
@@ -155,16 +163,16 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_from_package_data() {
-		$expected['name'] = 'Plugin Name';
-		$expected['slug'] = 'slug';
-		$expected['type'] = 'plugin';
+		$expected['name']        = 'Plugin Name';
+		$expected['slug']        = 'slug';
+		$expected['type']        = 'plugin';
 		$expected['source_type'] = 'local.plugin';
 		$expected['source_name'] = 'local-plugin/slug';
-		$expected['authors'] = [];
-		$expected['homepage'] = 'https://pixelgrade.com';
+		$expected['authors']     = [];
+		$expected['homepage']    = 'https://pixelgrade.com';
 		$expected['description'] = 'Some description.';
-		$expected['keywords'] = ['keyword'];
-		$expected['license'] = 'GPL-2.0-or-later';
+		$expected['keywords']    = [ 'keyword' ];
+		$expected['license']     = 'GPL-2.0-or-later';
 
 		$package = $this->builder->from_package_data( $expected )->build();
 
@@ -181,39 +189,40 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_from_package_data_do_not_overwrite() {
-		$expected = new class extends BasePackage {
+		$expected              = new class extends BasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
+
 			public function __set( $name, $value ) {
 				$this->$name = $value;
 			}
 		};
-		$expected->name = 'Theme';
-		$expected->slug = 'theme-slug';
-		$expected->type = 'theme';
+		$expected->name        = 'Theme';
+		$expected->slug        = 'theme-slug';
+		$expected->type        = 'theme';
 		$expected->source_type = 'local.theme';
 		$expected->source_name = 'local-theme/slug';
-		$expected->authors = [
+		$expected->authors     = [
 			[
 				'name' => 'Some Theme Author',
-			]
+			],
 		];
-		$expected->homepage = 'https://pixelgradelt.com';
+		$expected->homepage    = 'https://pixelgradelt.com';
 		$expected->description = 'Some awesome description.';
-		$expected->keywords = ['keyword1', 'keyword2'];
-		$expected->license = 'GPL-2.0-only';
+		$expected->keywords    = [ 'keyword1', 'keyword2' ];
+		$expected->license     = 'GPL-2.0-only';
 
-		$package_data['name'] = 'Plugin Name';
-		$package_data['slug'] = 'slug';
-		$package_data['type'] = 'plugin';
+		$package_data['name']        = 'Plugin Name';
+		$package_data['slug']        = 'slug';
+		$package_data['type']        = 'plugin';
 		$package_data['source_type'] = 'local.plugin';
 		$package_data['source_name'] = 'local-plugin/slug';
-		$package_data['authors'] = [];
-		$package_data['homepage'] = 'https://pixelgrade.com';
+		$package_data['authors']     = [];
+		$package_data['homepage']    = 'https://pixelgrade.com';
 		$package_data['description'] = 'Some description.';
-		$package_data['keywords'] = ['keyword'];
-		$package_data['license'] = 'GPL-2.0-or-later';
+		$package_data['keywords']    = [ 'keyword' ];
+		$package_data['license']     = 'GPL-2.0-or-later';
 
 		$package = $this->builder->with_package( $expected )->from_package_data( $package_data )->build();
 
@@ -231,13 +240,16 @@ class BasePackageBuilderTest extends TestCase {
 
 	public function test_from_header_data_plugin() {
 		$expected = [
-			'Name'        => 'Plugin Name',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'https://home.org',
-			'PluginURI'    => 'https://pixelgrade.com',
-			'Description' => 'Some description.',
-			'Tags'        => [ 'keyword1', 'keyword2' ],
-			'License'     => 'GPL-2.0-or-later',
+			'Name'              => 'Plugin Name',
+			'Author'            => 'Author',
+			'AuthorURI'         => 'https://home.org',
+			'PluginURI'         => 'https://pixelgrade.com',
+			'Description'       => 'Some description.',
+			'Tags'              => [ 'keyword1', 'keyword2' ],
+			'License'           => 'GPL-2.0-or-later',
+			'Requires at least' => '4.9.9',
+			'Tested up to'      => '4.9.9',
+			'Requires PHP'      => '8.0.0',
 		];
 
 		$package = $this->builder->from_header_data( $expected )->build();
@@ -247,22 +259,28 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( [
 			[
 				'name'     => $expected['Author'],
-				'homepage' => $expected[ 'AuthorURI'],
+				'homepage' => $expected['AuthorURI'],
 			],
 		], $package->authors );
 		$this->assertSame( $expected['Description'], $package->description );
 		$this->assertSame( $expected['Tags'], $package->keywords );
+		$this->assertSame( $expected['Requires at least'], $package->requires_at_least_wp );
+		$this->assertSame( $expected['Tested up to'], $package->tested_up_to_wp );
+		$this->assertSame( $expected['Requires PHP'], $package->requires_php );
 	}
 
 	public function test_from_header_data_theme() {
 		$expected = [
-			'Name'        => 'Plugin Name',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'https://home.org',
-			'ThemeURI'    => 'https://pixelgrade.com',
-			'Description' => 'Some description.',
-			'Tags'        => [ 'keyword1', 'keyword2' ],
-			'License'     => 'GPL-2.0-or-later',
+			'Name'              => 'Plugin Name',
+			'Author'            => 'Author',
+			'AuthorURI'         => 'https://home.org',
+			'ThemeURI'          => 'https://pixelgrade.com',
+			'Description'       => 'Some description.',
+			'Tags'              => [ 'keyword1', 'keyword2' ],
+			'License'           => 'GPL-2.0-or-later',
+			'Requires at least' => '4.9.9',
+			'Tested up to'      => '4.9.9',
+			'Requires PHP'      => '8.0.0',
 		];
 
 		$package = $this->builder->from_header_data( $expected )->build();
@@ -272,41 +290,51 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( [
 			[
 				'name'     => $expected['Author'],
-				'homepage' => $expected[ 'AuthorURI'],
+				'homepage' => $expected['AuthorURI'],
 			],
 		], $package->authors );
 		$this->assertSame( $expected['Description'], $package->description );
 		$this->assertSame( $expected['Tags'], $package->keywords );
+		$this->assertSame( $expected['Requires at least'], $package->requires_at_least_wp );
+		$this->assertSame( $expected['Tested up to'], $package->tested_up_to_wp );
+		$this->assertSame( $expected['Requires PHP'], $package->requires_php );
 	}
 
 	public function test_from_header_data_do_not_overwrite() {
-		$expected = new class extends BasePackage {
+		$expected                       = new class extends BasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
+
 			public function __set( $name, $value ) {
 				$this->$name = $value;
 			}
 		};
-		$expected->name = 'Plugin';
-		$expected->authors = [
+		$expected->name                 = 'Plugin';
+		$expected->authors              = [
 			[
 				'name' => 'Some Author',
-			]
+			],
 		];
-		$expected->homepage = 'https://pixelgradelt.com';
-		$expected->description = 'Some awesome description.';
-		$expected->keywords = ['keyword'];
-		$expected->license = 'GPL-2.0-only';
+		$expected->homepage             = 'https://pixelgradelt.com';
+		$expected->description          = 'Some awesome description.';
+		$expected->keywords             = [ 'keyword' ];
+		$expected->license              = 'GPL-2.0-only';
+		$expected->requires_at_least_wp = '5.0.0';
+		$expected->tested_up_to_wp      = '5.6.0';
+		$expected->requires_php         = '5.6.4';
 
 		$header_data = [
-			'Name'        => 'Plugin Name',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'https://home.org',
-			'ThemeURI'    => 'https://pixelgrade.com',
-			'Description' => 'Some description.',
-			'Tags'        => [ 'keyword1', 'keyword2' ],
-			'License'     => 'GPL-2.0-or-later',
+			'Name'              => 'Plugin Name',
+			'Author'            => 'Author',
+			'AuthorURI'         => 'https://home.org',
+			'ThemeURI'          => 'https://pixelgrade.com',
+			'Description'       => 'Some description.',
+			'Tags'              => [ 'keyword1', 'keyword2' ],
+			'License'           => 'GPL-2.0-or-later',
+			'Requires at least' => '4.9.9',
+			'Tested up to'      => '4.9.9',
+			'Requires PHP'      => '8.0.0',
 		];
 
 		$package = $this->builder->with_package( $expected )->from_header_data( $header_data )->build();
@@ -317,27 +345,111 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->description, $package->description );
 		$this->assertSame( $expected->keywords, $package->keywords );
 		$this->assertSame( $expected->license, $package->license );
+		$this->assertSame( $expected->requires_at_least_wp, $package->requires_at_least_wp );
+		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
+		$this->assertSame( $expected->requires_php, $package->requires_php );
 	}
 
-	public function test_with_package() {
-		$expected = new class extends BasePackage {
+	public function test_from_readme_data() {
+		$readme_data = [
+			'name'              => 'Plugin Name',
+			'contributors'      => [ 'wordpressdotorg', 'pixelgrade', ],
+			'short_description' => 'Some description.',
+			'tags'              => [ 'keyword1', 'keyword2' ],
+			'license'           => 'GPL-2.0-or-later',
+			'requires_at_least' => '4.9.9',
+			'tested_up_to'      => '5.7',
+			'requires_php'      => '7',
+			'stable_tag'        => '1.0.2',
+		];
+
+		$package = $this->builder->from_readme_data( $readme_data )->build();
+
+		$this->assertSame( $readme_data['name'], $package->name );
+		$this->assertSame( [
+			[ 'name' => 'wordpressdotorg', ],
+			[ 'name' => 'pixelgrade', ],
+		], $package->authors );
+		$this->assertSame( $readme_data['short_description'], $package->description );
+		$this->assertSame( $readme_data['tags'], $package->keywords );
+		$this->assertSame( $readme_data['license'], $package->license );
+		$this->assertSame( $readme_data['requires_at_least'], $package->requires_at_least_wp );
+		$this->assertSame( $readme_data['tested_up_to'], $package->tested_up_to_wp );
+		$this->assertSame( $readme_data['requires_php'], $package->requires_php );
+	}
+
+	public function test_from_readme_data_do_not_overwrite() {
+		$expected                       = new class extends BasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
+
 			public function __set( $name, $value ) {
 				$this->$name = $value;
 			}
 		};
-		$expected->name = 'Plugin Name';
-		$expected->slug = 'slug';
-		$expected->type = 'plugin';
-		$expected->source_type = 'local.plugin';
-		$expected->source_name = 'local-plugin/slug';
-		$expected->authors = [];
-		$expected->homepage = 'https://pixelgrade.com';
-		$expected->description = 'Some description.';
-		$expected->keywords = ['keyword'];
-		$expected->license = 'GPL-2.0-or-later';
+		$expected->name                 = 'Plugin';
+		$expected->authors              = [
+			[
+				'name' => 'Some Author',
+			],
+		];
+		$expected->homepage             = 'https://pixelgradelt.com';
+		$expected->description          = 'Some awesome description.';
+		$expected->keywords             = [ 'keyword' ];
+		$expected->license              = 'GPL-2.0-only';
+		$expected->requires_at_least_wp = '5.0.0';
+		$expected->tested_up_to_wp      = '5.6.0';
+		$expected->requires_php         = '5.6.4';
+
+		$readme_data = [
+			'name'              => 'Plugin Name',
+			'contributors'      => [ 'wordpressdotorg', 'pixelgrade', ],
+			'short_description' => 'Some description.',
+			'tags'              => [ 'keyword1', 'keyword2' ],
+			'license'           => 'GPL-2.0-or-later',
+			'requires_at_least' => '4.9.9',
+			'tested_up_to'      => '5.7',
+			'requires_php'      => '7',
+			'stable_tag'        => '1.0.2',
+		];
+
+		$package = $this->builder->with_package( $expected )->from_readme_data( $readme_data )->build();
+
+		$this->assertSame( $expected->name, $package->name );
+		$this->assertSame( $expected->authors, $package->authors );
+		$this->assertSame( $expected->homepage, $package->homepage );
+		$this->assertSame( $expected->description, $package->description );
+		$this->assertSame( $expected->keywords, $package->keywords );
+		$this->assertSame( $expected->license, $package->license );
+		$this->assertSame( $expected->requires_at_least_wp, $package->requires_at_least_wp );
+		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
+		$this->assertSame( $expected->requires_php, $package->requires_php );
+	}
+
+	public function test_with_package() {
+		$expected                       = new class extends BasePackage {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+
+			public function __set( $name, $value ) {
+				$this->$name = $value;
+			}
+		};
+		$expected->name                 = 'Plugin Name';
+		$expected->slug                 = 'slug';
+		$expected->type                 = 'plugin';
+		$expected->source_type          = 'local.plugin';
+		$expected->source_name          = 'local-plugin/slug';
+		$expected->authors              = [];
+		$expected->homepage             = 'https://pixelgrade.com';
+		$expected->description          = 'Some description.';
+		$expected->keywords             = [ 'keyword' ];
+		$expected->license              = 'GPL-2.0-or-later';
+		$expected->requires_at_least_wp = '5.0.0';
+		$expected->tested_up_to_wp      = '5.6.0';
+		$expected->requires_php         = '5.6.4';
 
 		$package = $this->builder->with_package( $expected )->build();
 
@@ -351,5 +463,8 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->description, $package->description );
 		$this->assertSame( $expected->keywords, $package->keywords );
 		$this->assertSame( $expected->license, $package->license );
+		$this->assertSame( $expected->requires_at_least_wp, $package->requires_at_least_wp );
+		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
+		$this->assertSame( $expected->requires_php, $package->requires_php );
 	}
 }

@@ -1,15 +1,14 @@
-=== Basic Plugin ===
-Contributors: johnny5, wordpressdotorg
+=== Plugin Name ===
+Contributors: johnny5, pixelgrade
 Donate link: https://redirection.me/donation/
 Tags: redirect, htaccess,post, admin
 Requires at least: 5.1
 Tested up to: 5.6
 Stable tag: trunk
-Requires PHP: 5.6.8
-License: GPLv2+
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Requires PHP: 5.6
+License: GPLv3
 
-A basic plugin description.
+Manage 301 redirections, keep track of 404 errors, and improve your site, with no knowledge of Apache or Nginx needed.
 
 == Description ==
 

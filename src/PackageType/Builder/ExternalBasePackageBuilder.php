@@ -2,12 +2,12 @@
 /**
  * External package builder.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType\Builder;
 
@@ -28,6 +28,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param ConstraintInterface $source_constraint
+	 *
 	 * @return $this
 	 */
 	public function set_source_constraint( ConstraintInterface $source_constraint ): self {
@@ -40,7 +41,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param int   $post_id Optional. The package post ID to retrieve data for. Leave empty and provide $args to query.
-	 * @param array $args Optional. Args used to query for a managed package if the post ID failed to retrieve data.
+	 * @param array $args    Optional. Args used to query for a managed package if the post ID failed to retrieve data.
 	 *
 	 * @return ExternalBasePackageBuilder
 	 */
@@ -125,12 +126,12 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 			include_once ABSPATH . 'wp-admin/includes/file.php';
 			WP_Filesystem();
 
-			$release         = $this->releases[ $latest_version_package['version'] ];
-			$source_filename = $this->release_manager->get_absolute_path( $release );
+			$release             = $this->releases[ $latest_version_package['version'] ];
+			$source_filename     = $this->release_manager->get_absolute_path( $release );
 			$delete_source_after = false;
 			if ( empty( $source_filename ) ) {
 				// This release is not cached, so we need to download.
-				$source_filename = \download_url( $release->get_source_url() );
+				$source_filename     = \download_url( $release->get_source_url() );
 				$delete_source_after = true;
 				if ( \is_wp_error( $source_filename ) ) {
 					$this->logger->error(
@@ -150,7 +151,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 				if ( true === unzip_file( $source_filename, $tempdir ) ) {
 					// First we must make sure that we are looking into the package directory
 					// (themes and plugins usually have their directory included in the zip).
-					$package_source_dir = $tempdir;
+					$package_source_dir   = $tempdir;
 					$package_source_files = array_keys( $wp_filesystem->dirlist( $package_source_dir ) );
 					if ( 1 == count( $package_source_files ) && $wp_filesystem->is_dir( trailingslashit( $package_source_dir ) . trailingslashit( $package_source_files[0] ) ) ) {
 						// Only one folder? Then we want its contents.
@@ -170,6 +171,10 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 								'AuthorURI'   => 'Author URI',
 								'License'     => 'License',
 								'Tags'        => 'Tags',
+								'Requires at least' => 'Requires at least',
+								'Tested up to' => 'Tested up to',
+								'Requires PHP' => 'Requires PHP',
+								'Stable tag' => 'Stable tag',
 							)
 						);
 					} else {
@@ -187,10 +192,6 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 					}
 
 					if ( ! empty( $tmp_package_data ) ) {
-						if ( empty( $tmp_package_data['Tags'] ) ) {
-							$tmp_package_data['Tags'] = $this->get_tags_from_readme( $package_source_dir );
-						}
-
 						// Make sure that we don't end up doing the heavy lifting above on every request
 						// due to missing information in the package headers.
 						// Just fill missing header data with some default data.
@@ -214,6 +215,9 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 						$this->from_header_data( $tmp_package_data );
 					}
 
+					// Now, go a second time and extract info from the readme and fill anything missing.
+					$this->from_readme( $package_source_dir );
+
 					// Cleanup the temporary directory, recursively.
 					$wp_filesystem->delete( $tempdir, true );
 				}
@@ -234,6 +238,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param Package $package Package.
+	 *
 	 * @return $this
 	 */
 	public function with_package( Package $package ): BasePackageBuilder {
@@ -247,38 +252,6 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 	}
 
 	/**
-	 * Attempt to extract plugin tags from its readme.txt or readme.md.
-	 *
-	 * @param string $directory The absolute path to the plugin directory.
-	 *
-	 * @return string[]
-	 */
-	protected function get_tags_from_readme( string $directory ): array {
-		$tags = [];
-
-		$readme_file = trailingslashit( $directory ) . 'readme.txt';
-		if ( ! file_exists( $readme_file ) ) {
-			// Try a readme.md.
-			$readme_file = trailingslashit( $directory ) . 'readme.md';
-		}
-		if ( file_exists( $readme_file ) ) {
-			$file_contents = file_get_contents( $readme_file );
-
-			if ( preg_match( '|Tags:(.*)|i', $file_contents, $_tags ) ) {
-				$tags = preg_split( '|,[\s]*?|', trim( $_tags[1] ) );
-				foreach ( array_keys( $tags ) as $t ) {
-					$tags[ $t ] = trim( strip_tags( $tags[ $t ] ) );
-				}
-			}
-		}
-
-		$tags = array_unique( array_values( $tags ) );
-		sort( $tags );
-
-		return $tags;
-	}
-
-	/**
 	 * Attempt to prune the releases by certain conditions (maybe constraints).
 	 *
 	 * @return $this
@@ -287,7 +260,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 		/** @var ConstraintInterface $constraint */
 		$constraint = $this->package->get_source_constraint();
 		foreach ( $this->releases as $key => $release ) {
-			if ( ! $constraint->matches( new Constraint('==', $release->get_version() ) ) ) {
+			if ( ! $constraint->matches( new Constraint( '==', $release->get_version() ) ) ) {
 				unset( $this->releases[ $key ] );
 			}
 		}

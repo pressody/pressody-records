@@ -4,7 +4,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\Tests\Integration\PackageType;
 
 use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
+use PixelgradeLT\Records\Tests\Integration\TestCase;
 
 use function PixelgradeLT\Records\plugin;
 
@@ -69,9 +69,40 @@ class LocalThemeTest extends TestCase {
 		$this->assertSame( 'https://audiotheme.com/view/ovation/', $package->get_homepage() );
 		$this->assertSame( 'GPL-2.0-or-later', $package->get_license() );
 		$this->assertSame( [ 'accessibility-ready', 'flexible-header', 'one-column', ], $package->get_keywords() );
+		$this->assertSame( '5.2', $package->get_requires_at_least_wp() );
+		$this->assertSame( '5.6.2', $package->get_tested_up_to_wp() );
+		$this->assertSame( '7.2.0', $package->get_requires_php() );
+
 		$this->assertFalse( $package->is_managed() );
-		$this->assertSame( get_theme_root() . '/ovation/', $package->get_directory() );
+		$this->assertSame( get_theme_root( 'ovation' ) . '/ovation/', $package->get_directory() );
 		$this->assertTrue( $package->is_installed() );
 		$this->assertSame( '1.1.1', $package->get_installed_version() );
+	}
+
+	public function test_get_plugin_from_readme() {
+		/** @var LocalTheme $package */
+		$package = $this->factory->create( 'theme', 'local.theme' )
+		                         ->from_slug( 'ovation' )
+		                         ->from_readme( 'ovation' )
+		                         ->build();
+
+		$this->assertInstanceOf( LocalTheme::class, $package );
+
+		$this->assertSame( 'Ovation', $package->get_name() );
+		$this->assertSame( 'theme', $package->get_type() );
+		$this->assertSame( 'local.theme', $package->get_source_type() );
+		$this->assertSame( 'local-theme/ovation', $package->get_source_name() );
+		$this->assertSame( 'ovation', $package->get_slug() );
+		$this->assertSame( [
+			[ 'name' => 'wordpressdotorg', ],
+		], $package->get_authors() );
+		$this->assertSame( 'Our test theme readme short description.', $package->get_description() );
+		$this->assertSame( 'GPL-2.0-or-later', $package->get_license() );
+		$this->assertSame( [ 'accessibility-ready', 'flexible-header', 'one-column' ], $package->get_keywords() );
+		$this->assertSame( '4.9.6', $package->get_requires_at_least_wp() );
+		$this->assertSame( '5.6', $package->get_tested_up_to_wp() );
+		$this->assertSame( '5.6', $package->get_requires_php() );
+
+		$this->assertFalse( $package->is_managed() );
 	}
 }

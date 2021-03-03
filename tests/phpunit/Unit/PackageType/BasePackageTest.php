@@ -100,4 +100,25 @@ class BasePackageTest extends TestCase {
 
 		$this->assertSame( $expected, $this->package->get_keywords() );
 	}
+
+	public function test_requires_at_least_wp() {
+		$expected = '5.6.2';
+		$this->package->requires_at_least_wp = $expected;
+
+		$this->assertSame( $expected, $this->package->get_requires_at_least_wp() );
+	}
+
+	public function test_tested_up_to_wp() {
+		$expected = '5.6.2';
+		$this->package->tested_up_to_wp = $expected;
+
+		$this->assertSame( $expected, $this->package->get_tested_up_to_wp() );
+	}
+
+	public function test_requires_php() {
+		$expected = '8.0.1';
+		$this->package->requires_php = $expected;
+
+		$this->assertSame( $expected, $this->package->get_requires_php() );
+	}
 }

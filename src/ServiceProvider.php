@@ -211,7 +211,8 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['package.manager'] = function( $container ) {
 			return new PackageManager(
 				$container['client.composer'],
-				$container['version.parser']
+				$container['version.parser'],
+				$container['wordpress.readme_parser']
 			);
 		};
 
@@ -442,6 +443,10 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['version.parser'] = function() {
 			return new ComposerVersionParser( new VersionParser() );
+		};
+
+		$container['wordpress.readme_parser'] = function() {
+			return new WordPressReadmeParser();
 		};
 	}
 }

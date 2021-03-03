@@ -78,15 +78,4 @@ class ExternalPackageBuilderTest extends TestCase {
 
 		$this->assertSame( $expected->source_constraint, $package->source_constraint );
 	}
-
-	public function test_get_tags_from_readme() {
-		$plugin_file = 'basic/basic.php';
-		$plugin_path = WP_PLUGIN_DIR . '/' . $plugin_file;
-		$expected    = [ 'admin', 'htaccess', 'post', 'redirect', ];
-
-		$method      = PHPUnitUtil::getProtectedMethod( $this->builder, 'get_tags_from_readme' );
-		$readme_tags = $method->invoke( $this->builder, dirname( $plugin_path ) );
-
-		$this->assertSame( $expected, $readme_tags );
-	}
 }

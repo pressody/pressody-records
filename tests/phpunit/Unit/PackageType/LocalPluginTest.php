@@ -45,11 +45,11 @@ class LocalPluginTest extends TestCase {
 		$this->builder = new LocalPluginBuilder( $package, $package_manager, $release_manager, $logger );
 	}
 
-	public function test_get_plugin_from_file() {
+	public function test_get_plugin_from_basename() {
 		/** @var LocalPlugin $package */
 		$package = $this->builder
-						->from_file( 'basic/basic.php' )
-						->build();
+			->from_basename( 'basic/basic.php' )
+			->build();
 
 		$this->assertInstanceOf( LocalPlugin::class, $package );
 
@@ -63,7 +63,7 @@ class LocalPluginTest extends TestCase {
 
 	public function test_get_plugin_from_source() {
 		$package = $this->builder
-			->from_file( 'basic/basic.php' )
+			->from_basename( 'basic/basic.php' )
 			->from_source( 'basic/basic.php' )
 			->build();
 
@@ -86,6 +86,9 @@ class LocalPluginTest extends TestCase {
 		$this->assertSame( 'https://example.com/plugin/basic/', $package->get_homepage() );
 		$this->assertSame( '', $package->get_license() );
 		$this->assertSame( [ 'tag0', 'tag1', 'tag2', 'tag3', ], $package->get_keywords() );
+		$this->assertSame( '4.9.9', $package->get_requires_at_least_wp() );
+		$this->assertSame( '5.2.1', $package->get_tested_up_to_wp() );
+		$this->assertSame( '8.0.0', $package->get_requires_php() );
 		$this->assertFalse( $package->is_managed() );
 		$this->assertSame( WP_PLUGIN_DIR . '/basic/', $package->get_directory() );
 		$this->assertSame( '1.3.1', $package->get_installed_version() );
@@ -93,14 +96,14 @@ class LocalPluginTest extends TestCase {
 
 	public function test_is_single_file_plugin() {
 		$package = $this->builder
-			->from_file( 'basic/basic.php' )
+			->from_basename( 'basic/basic.php' )
 			->from_source( 'basic/basic.php' )
 			->build();
 
 		$this->assertFalse( $package->is_single_file() );
 
 		$package = $this->builder
-			->from_file( 'hello.php' )
+			->from_basename( 'hello.php' )
 			->from_source( 'hello.php' )
 			->build();
 
@@ -109,7 +112,7 @@ class LocalPluginTest extends TestCase {
 
 	public function test_get_files_for_single_file_plugin() {
 		$package = $this->builder
-			->from_file( 'hello.php' )
+			->from_basename( 'hello.php' )
 			->from_source( 'hello.php' )
 			->build();
 
@@ -118,13 +121,16 @@ class LocalPluginTest extends TestCase {
 
 	protected function get_plugin_data() {
 		return [
-			'Author'      => 'Basic, Inc.',
-			'AuthorURI'   => 'https://example.com/',
-			'PluginURI'   => 'https://example.com/plugin/basic/',
-			'Name'        => 'Basic Plugin',
-			'Description' => '',
-			'Version'     => '1.3.1',
-			'Tags'        => 'tag2,tag0, tag3, tag3, tag1, tag3 ,   '
+			'Author'            => 'Basic, Inc.',
+			'AuthorURI'         => 'https://example.com/',
+			'PluginURI'         => 'https://example.com/plugin/basic/',
+			'Name'              => 'Basic Plugin',
+			'Description'       => '',
+			'Version'           => '1.3.1',
+			'Tags'              => 'tag2,tag0, tag3, tag3, tag1, tag3 ,   ',
+			'Requires at least' => '4.9.9',
+			'Tested up to'      => '5.2.1',
+			'Requires PHP'      => '8.0.0',
 		];
 	}
 }

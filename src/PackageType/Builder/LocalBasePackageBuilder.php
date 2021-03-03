@@ -48,7 +48,7 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	}
 
 	/**
-	 * Set the installed version.
+	 * Set the installed version, but only if the given version string is valid.
 	 *
 	 * @since 0.1.0
 	 *
@@ -56,6 +56,10 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 * @return $this
 	 */
 	public function set_installed_version( string $version ): self {
+		if ( ! $this->check_version_validity( $version ) ) {
+			return $this;
+		}
+
 		return $this->set( 'installed_version', $version );
 	}
 

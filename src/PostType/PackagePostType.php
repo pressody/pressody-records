@@ -643,7 +643,7 @@ class PackagePostType extends AbstractHookProvider {
 	}
 
 	protected function add_extra_installed_headers( array $extra_headers ): array {
-		$extra_headers = $extra_headers + [ 'License', 'Tags', ];
+		$extra_headers = $extra_headers + [ 'License', 'Tags', 'Requires at least', 'Tested up to', 'Requires PHP', 'Stable tag' ];
 
 		return array_unique( $extra_headers );
 	}

@@ -4,13 +4,18 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 
 use Composer\IO\NullIO;
+use Composer\Semver\VersionParser;
+use PixelgradeLT\Records\Archiver;
+use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\ReleaseManager;
+use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Psr\Log\NullLogger;
 
 class LocalBasePackageBuilderTest extends TestCase {
 	protected $builder = null;
@@ -26,13 +31,16 @@ class LocalBasePackageBuilderTest extends TestCase {
 		};
 
 
+		$archiver = new Archiver( new NullLogger() );
+		$storage  = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
+
+
 		$package_manager = $this->getMockBuilder( PackageManager::class )
 		                ->disableOriginalConstructor()
 		                ->getMock();
 
-		$release_manager = $this->getMockBuilder( ReleaseManager::class )
-		                        ->disableOriginalConstructor()
-		                        ->getMock();
+		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser );
 
 		$logger = new NullIO();
 
@@ -69,6 +77,13 @@ class LocalBasePackageBuilderTest extends TestCase {
 		$package  = $this->builder->set_installed( true )->set_installed_version( $expected )->build();
 
 		$this->assertSame( $expected, $package->installed_version );
+	}
+
+	public function test_invalid_installed_version() {
+		$invalid = '2-0-0';
+		$package  = $this->builder->set_installed( true )->set_installed_version( $invalid )->build();
+
+		$this->assertSame( '', $package->installed_version );
 	}
 
 	public function test_with_package() {

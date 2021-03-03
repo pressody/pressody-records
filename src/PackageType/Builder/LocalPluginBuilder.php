@@ -37,7 +37,7 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	}
 
 	/**
-	 * Fill the basic plugin package details that we can deduce from a given plugin file string.
+	 * Fill the basic plugin package details that we can deduce from a given plugin file string (not its contents).
 	 *
 	 * @since 0.1.0
 	 *
@@ -46,7 +46,7 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	 * @throws \ReflectionException
 	 * @return LocalPluginBuilder
 	 */
-	public function from_file( string $plugin_file ): self {
+	public function from_basename( string $plugin_file ): self {
 		$slug = $this->get_slug_from_plugin_file( $plugin_file );
 
 		// Account for single-file plugins.
@@ -63,7 +63,9 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	}
 
 	/**
-	 * Fill (missing) plugin package details from source.
+	 * Fill (missing) plugin package details from the source files (mainly the main plugin file header data).
+	 *
+	 * @see get_plugin_data()
 	 *
 	 * @since 0.1.0
 	 *
@@ -76,14 +78,6 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	public function from_source( string $plugin_file, array $plugin_data = [] ): self {
 		if ( empty( $plugin_data ) ) {
 			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_file, false, false );
-		}
-
-		// If we don't have 'Tags', attempt to get them from the plugin's readme.txt.
-		if ( empty( $plugin_data['Tags'] ) ) {
-			// Account for single-file plugins.
-			$directory = '.' === \dirname( $plugin_file ) ? '' : \dirname( $plugin_file );
-
-			$plugin_data['Tags'] = $this->get_tags_from_readme( $directory );
 		}
 
 		/*
@@ -110,32 +104,43 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	}
 
 	/**
-	 * Attempt to extract plugin tags from its readme.txt or readme.md.
+	 * Fill (missing) plugin package details from the plugin's readme file (generally intended for WordPress.org display).
 	 *
-	 * @param string $directory
+	 * If the readme file is missing, nothing is done.
 	 *
-	 * @return string[]
+	 * @since 0.5.0
+	 *
+	 * @param string $plugin_file Relative path to the main plugin file.
+	 * @param array  $readme_data Optional. Array of readme data.
+	 *
+	 * @throws \ReflectionException
+	 * @return LocalPluginBuilder
 	 */
-	protected function get_tags_from_readme( string $directory ): array {
-		$tags = [];
+	public function from_readme( string $plugin_file, array $readme_data = [] ): self {
+		/*
+		 * Start filling info.
+		 */
 
-		$readme_file = trailingslashit( WP_PLUGIN_DIR ) . trailingslashit( $directory ) . 'readme.txt';
-		if ( ! file_exists( $readme_file ) ) {
-			// Try a readme.md.
-			$readme_file = trailingslashit( WP_PLUGIN_DIR ) . trailingslashit( $directory ) . 'readme.md';
-		}
-		if ( file_exists( $readme_file ) ) {
-			$file_contents = file_get_contents( $readme_file );
-
-			if ( preg_match( '|Tags:(.*)|i', $file_contents, $_tags ) ) {
-				$tags = preg_split( '|,[\s]*?|', trim( $_tags[1] ) );
-				foreach ( array_keys( $tags ) as $t ) {
-					$tags[ $t ] = trim( strip_tags( $tags[ $t ] ) );
-				}
-			}
+		if ( empty( $this->package->get_type() ) ) {
+			$this->set_type( 'plugin' );
 		}
 
-		return $tags;
+		if ( empty( $this->package->get_basename() ) ) {
+			$this->set_basename( $plugin_file );
+		}
+
+		if ( empty( $this->package->get_slug() ) ) {
+			$this->set_slug( $this->get_slug_from_plugin_file( $plugin_file ) );
+		}
+
+		if ( ! empty( $readme_data ) ) {
+			return $this->from_readme_data( $readme_data );
+		}
+
+		// Account for single-file plugins.
+		$directory = '.' === \dirname( $plugin_file ) ? '' : \dirname( $plugin_file );
+
+		return parent::from_readme( trailingslashit( WP_PLUGIN_DIR ) . trailingslashit( $directory ) );
 	}
 
 	/**
