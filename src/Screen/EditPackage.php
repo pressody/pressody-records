@@ -317,7 +317,7 @@ class EditPackage extends AbstractHookProvider {
 			         Field::make( 'text', 'package_source_version_range', __( 'Package Source Version Range', 'pixelgradelt_records' ) )
 			              ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions/releases. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
  Specify a version range to <strong>limit the available versions/releases for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>
- Learn more about Composer <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) )
+ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) )
 			              ->set_width( 75 )
 			              ->set_conditional_logic( [
 				              'relation' => 'AND', // Optional, defaults to "AND"
@@ -447,7 +447,7 @@ class EditPackage extends AbstractHookProvider {
 	 */
 	public function display_package_current_state_meta_box( \WP_Post $post ) {
 		$package_data = $this->package_manager->get_package_id_data( (int) $post->ID );
-		if ( empty( $package_data ) ) {
+		if ( empty( $package_data ) || empty( $package_data['source_name'] ) || empty( $package_data['type'] ) ) {
 			return;
 		}
 

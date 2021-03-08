@@ -82,6 +82,34 @@ class ComposerClient implements Client {
 			$config['require'] = $args['require'];
 		}
 
+		if ( isset( $args['require-all'] ) ) {
+			$config['require-all'] = $args['require-all'];
+		}
+
+		if ( isset( $args['require-dependencies'] ) ) {
+			$config['require-dependencies'] = $args['require-dependencies'];
+		}
+
+		if ( isset( $args['require-dev-dependencies'] ) ) {
+			$config['require-dev-dependencies'] = $args['require-dev-dependencies'];
+		}
+
+		if ( isset( $args['only-dependencies'] ) ) {
+			$config['only-dependencies'] = $args['only-dependencies'];
+		}
+
+		if ( isset( $args['only-best-candidates'] ) ) {
+			$config['only-best-candidates'] = $args['only-best-candidates'];
+		}
+
+		if ( isset( $args['minimum-stability'] ) ) {
+			$config['minimum-stability'] = $args['minimum-stability'];
+		}
+
+		if ( isset( $args['minimum-stability-per-package'] ) ) {
+			$config['minimum-stability-per-package'] = $args['minimum-stability-per-package'];
+		}
+
 		$packagesFilter = ! empty( $args['packages'] ) ? $args['packages'] : [];
 		$repositoryUrl  = ! empty( $args['repository-url'] ) ? $args['repository-url'] : null;
 		$skipErrors     = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
@@ -90,6 +118,9 @@ class ComposerClient implements Client {
 		if ( null !== $repositoryUrl && count( $packagesFilter ) > 0 ) {
 			throw new \InvalidArgumentException( 'The arguments "package" and "repository-url" can not be used together.' );
 		}
+
+		// Allow others to filter this and add or modify the Composer client config (like adding OAuth tokens).
+		$config = apply_filters( 'pixelgradelt_records_composer_client_config', $config, $args );
 
 		$composer         = $this->getComposer( $config );
 		$packageSelection = new ComposerPackageSelection( $io, $outputDir, $config, $skipErrors );
@@ -195,7 +226,7 @@ class ComposerClient implements Client {
 			'name'                      => 'pixelgradelt_records/fake_project',
 			'repositories'              => [],
 			'require-all'               => false,
-			'require-dependencies'      => true,
+			'require-dependencies'      => false,
 			'require-dev-dependencies'  => false,
 			'require-dependency-filter' => true,
 			'minimum-stability'         => 'dev',

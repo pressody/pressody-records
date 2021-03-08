@@ -189,6 +189,14 @@ class Settings extends AbstractHookProvider {
 			'pixelgradelt_records',
 			'default'
 		);
+
+		add_settings_field(
+				'github-oauth-token',
+				'<label for="pixelgradelt_records-github-oauth-token">' . esc_html__( 'Github OAuth Token', 'pixelgradelt_records' ) . '</label>',
+				[ $this, 'render_field_github_oauth_token' ],
+				'pixelgradelt_records',
+				'default'
+		);
 	}
 
 	/**
@@ -202,6 +210,10 @@ class Settings extends AbstractHookProvider {
 	public function sanitize_settings( array $value ): array {
 		if ( ! empty( $value['vendor'] ) ) {
 			$value['vendor'] = preg_replace( '/[^a-z0-9_\-\.]+/i', '', $value['vendor'] );
+		}
+
+		if ( ! empty( $value['github-oauth-token'] ) ) {
+			$value['github-oauth-token'] = trim( $value['github-oauth-token'] );
 		}
 
 		return (array) apply_filters( 'pixelgradelt_records_sanitize_settings', $value );
@@ -253,8 +265,27 @@ class Settings extends AbstractHookProvider {
 		$value = $this->get_setting( 'vendor', '' );
 		?>
 		<p>
-			<input type="text" name="pixelgradelt_records[vendor]" id="pixelgradelt_records-vendor" value="<?php echo esc_attr( $value ); ?>"><br />
-			<span class="description">The default is <code>pixelgradelt_records</code></span>
+			<input type="text" name="pixelgradelt_records[vendor]" id="pixelgradelt_records-vendor" value="<?php echo esc_attr( $value ); ?>" placeholder="pixelgradelt_records" ><br />
+			<span class="description">The default is <code>pixelgradelt_records</code><br>
+			This is the general vendor that will be used when exposing all the packages for consumption.<br>
+				<strong>For example:</strong> you have a managed package with the source on Packagist.org (say <a href="https://packagist.org/packages/yoast/wordpress-seo"><code>yoast/wordpress-seo</code></a>). You will expose it under a package name in the form <code>vendor/post_slug</code> (say <code>pixelgradelt_records/yoast-wordpress-seo</code>).</span>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Display a field for defining the Github OAuth Token.
+	 *
+	 * @since 0.5.0
+	 */
+	public function render_field_github_oauth_token() {
+		$value = $this->get_setting( 'github-oauth-token', '' );
+		?>
+		<p>
+			<input type="password" size="80" name="pixelgradelt_records[github-oauth-token]" id="pixelgradelt_records-github-oauth-token" value="<?php echo esc_attr( $value ); ?>"><br />
+			<span class="description">Github has a rate limit of 60 requests/hour on their API for requests not using an OAuth Token.<br>
+				Since most packages on Packagist.org have their source on Github, and you may be using actual Github repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
+				Learn more about <strong>the steps to take <a href="https://getcomposer.org/doc/articles/authentication-for-private-packages.md#github-oauth">here</a>.</strong> <strong>Be careful about the permissions you grant on the generated token!</strong></span>
 		</p>
 		<?php
 	}

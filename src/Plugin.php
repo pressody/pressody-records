@@ -50,7 +50,9 @@ class Plugin extends BasePlugin implements Composable {
 			// Register the post type early.
 			->register_hooks( $container->get( 'hooks.package_post_type' ) )
 
-			->register_hooks( $container->get( 'hooks.package_archiver' ) );
+			->register_hooks( $container->get( 'hooks.package_archiver' ) )
+
+			->register_hooks( $container->get( 'client.composer.custom_token_auth' ) );
 
 
 		if ( is_admin() ) {

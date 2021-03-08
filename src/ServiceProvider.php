@@ -86,6 +86,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Client\ComposerClient();
 		};
 
+		$container['client.composer.custom_token_auth'] = function( $container ) {
+			return new Client\CustomTokenAuthentication();
+		};
+
 		$container['hooks.activation'] = function() {
 			return new Provider\Activation();
 		};

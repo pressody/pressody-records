@@ -368,7 +368,7 @@ class PackageManager {
 	}
 
 	/**
-	 * Given a managed package post ID, fetch the remote releases data.
+	 * Given an external (packagist.org, wpackagist.org, or vcs) managed package post ID, fetch the remote releases data.
 	 *
 	 * @param int $post_ID
 	 *
@@ -396,13 +396,18 @@ class PackageManager {
 
 		$version_range = ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*';
 		$stability     = ! empty( $package_data['source_stability'] ) ? $package_data['source_stability'] : 'stable';
-		if ( ! empty( $stability ) || 'stable' !== $stability ) {
-			$version_range .= '@' . $stability;
-		}
 
 		switch ( $package_data['source_type'] ) {
 			case 'packagist.org':
-				// Nothing right now.
+				$releases = $client->getPackages( [
+					// The packagist.org repository is available by default.
+					'require'      => [
+						$package_data['source_name'] => $version_range,
+					],
+					'minimum-stability-per-package' => [
+						$package_data['source_name'] => $stability,
+					],
+				] );
 				break;
 			case 'wpackagist.org':
 				$releases = $client->getPackages( [
@@ -422,6 +427,9 @@ class PackageManager {
 					],
 					'require'      => [
 						$package_data['source_name'] => $version_range,
+					],
+					'minimum-stability-per-package' => [
+						$package_data['source_name'] => $stability,
 					],
 				] );
 				break;
