@@ -18,6 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PostType\PackagePostType;
 use PixelgradeLT\Records\Repository\PackageRepository;
+use function PixelgradeLT\Records\get_packages_permalink;
 
 /**
  * Edit Package screen provider class.
@@ -458,7 +459,11 @@ class EditPackage extends AbstractHookProvider {
 			return;
 		}
 
+		// Wrap it for spacing.
+		echo '<div class="cf-container"><div class="cf-field">';
+		echo '<p>This is the same info shown in the full package-details list available <a href="wp-admin/options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages">here</a>. The real source of truth is the packages JSON available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/package-details.php' );
+		echo '</div></div>';
 	}
 
 	/**

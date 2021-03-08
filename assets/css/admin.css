@@ -318,3 +318,10 @@
 .pixelgradelt_records-dropdown-group.is-open .pixelgradelt_records-dropdown-group-items {
 	display: block;
 }
+
+/* Edit package screen
+----------------------------------------------------------------------------- */
+.package-authors__list .package-author {
+	float: left;
+	margin-right: 15px;
+}

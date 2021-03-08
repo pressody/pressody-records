@@ -46,11 +46,11 @@ namespace PixelgradeLT\Records;
 	if ( ! empty( $authors ) ) { ?>
 	<tr>
 		<th><?php esc_html_e( 'Authors', 'pixelgradelt_records' ); ?></th>
+		<td class="package-authors__list" >
 		<?php foreach ( $authors as $author ) { ?>
-
-			<td><a href="<?php echo esc_url( $author['homepage'] ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $author['name'] ); ?></a></td>
-
+			<a class="package-author" href="<?php echo esc_url( $author['homepage'] ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $author['name'] ); ?></a>
 		<?php } ?>
+		</td>
 	</tr>
 	<?php } ?>
 
