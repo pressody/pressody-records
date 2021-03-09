@@ -215,7 +215,8 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new PackageManager(
 				$container['client.composer'],
 				$container['version.parser'],
-				$container['wordpress.readme_parser']
+				$container['wordpress.readme_parser'],
+				$container['logger']
 			);
 		};
 

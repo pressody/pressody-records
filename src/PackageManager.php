@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records;
 
 use PixelgradeLT\Records\Client\ComposerClient;
+use Psr\Log\LoggerInterface;
 
 /**
  * Package manager class.
@@ -88,16 +89,19 @@ class PackageManager {
 	 * @param ComposerClient        $composer_client
 	 * @param ComposerVersionParser $composer_version_parser
 	 * @param WordPressReadmeParser $wordpress_readme_parser
+	 * @param LoggerInterface       $logger Logger.
 	 */
 	public function __construct(
 		ComposerClient $composer_client,
 		ComposerVersionParser $composer_version_parser,
-		WordPressReadmeParser $wordpress_readme_parser
+		WordPressReadmeParser $wordpress_readme_parser,
+		LoggerInterface $logger
 	) {
 
 		$this->composer_client         = $composer_client;
 		$this->composer_version_parser = $composer_version_parser;
 		$this->wordpress_readme_parser = $wordpress_readme_parser;
+		$this->logger                  = $logger;
 	}
 
 	public function get_composer_client(): ComposerClient {
@@ -303,7 +307,9 @@ class PackageManager {
 				$data['source_name'] = $vendor . '/' . get_post_meta( $post_ID, '_package_source_project_name', true );
 				break;
 			case 'vcs':
-				$data['source_name'] = 'vcs' . '/' . $data['slug'];
+				// Since we need to use the package name from the project's composer.json file,
+				// we expect to be given the right package name. Usually it's the same as the repo name (username/project-name).
+				$data['source_name'] = get_post_meta( $post_ID, '_package_source_name', true );
 				$data['vcs_url']     = get_post_meta( $post_ID, '_package_vcs_url', true );
 				break;
 			case 'local.plugin':
@@ -397,71 +403,81 @@ class PackageManager {
 		$version_range = ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*';
 		$stability     = ! empty( $package_data['source_stability'] ) ? $package_data['source_stability'] : 'stable';
 
-		switch ( $package_data['source_type'] ) {
-			case 'packagist.org':
-				// Pass along a Satis configuration to get packages.
-				$releases = $client->getPackages( [
-					// The packagist.org repository is available by default.
-					'require'      => [
-						$package_data['source_name'] => $version_range,
-					],
-					'minimum-stability-per-package' => [
-						$package_data['source_name'] => $stability,
-					],
-				] );
-				break;
-			case 'wpackagist.org':
-				// Pass along a Satis configuration to get packages.
-				$releases = $client->getPackages( [
-					'repositories' => [
-						[
-							// Disable the default packagist.org repo.
-							"packagist.org" => false,
+		try {
+			switch ( $package_data['source_type'] ) {
+				case 'packagist.org':
+					// Pass along a Satis configuration to get packages.
+					$releases = $client->getPackages( [
+						// The packagist.org repository is available by default.
+						'require'                       => [
+							$package_data['source_name'] => $version_range,
 						],
-						[
-							'type' => 'composer',
-							'url'  => 'https://wpackagist.org',
-							'only' => [
-								'wpackagist-plugin/*',
-								'wpackagist-theme/*',
+						'minimum-stability-per-package' => [
+							$package_data['source_name'] => $stability,
+						],
+					] );
+					break;
+				case 'wpackagist.org':
+					// Pass along a Satis configuration to get packages.
+					$releases = $client->getPackages( [
+						'repositories'                  => [
+							[
+								// Disable the default packagist.org repo.
+								"packagist.org" => false,
+							],
+							[
+								'type' => 'composer',
+								'url'  => 'https://wpackagist.org',
+								'only' => [
+									'wpackagist-plugin/*',
+									'wpackagist-theme/*',
+								],
 							],
 						],
-					],
-					'require'      => [
-						$package_data['source_name'] => $version_range,
-					],
-					'minimum-stability-per-package' => [
-						$package_data['source_name'] => $stability,
-					],
-				] );
-				break;
-			case 'vcs':
-				// Pass along a Satis configuration to get packages.
-				$releases = $client->getPackages( [
-					'repositories' => [
-						[
-							// Disable the default packagist.org repo.
-							"packagist.org" => false,
+						'require'                       => [
+							$package_data['source_name'] => $version_range,
 						],
-						[
-							'type' => 'composer',
-							'url'  => 'https://wpackagist.org',
-							'only' => [
-								'wpackagist-plugin/*',
-								'wpackagist-theme/*',
+						'minimum-stability-per-package' => [
+							$package_data['source_name'] => $stability,
+						],
+					] );
+					break;
+				case 'vcs':
+					if ( empty( $package_data['vcs_url'] ) ) {
+						break;
+					}
+					// Pass along a Satis configuration to get packages.
+					$releases = $client->getPackages( [
+						'repositories'                  => [
+							[
+								// Disable the default packagist.org repo.
+								"packagist.org" => false,
+							],
+							[
+								'type' => 'vcs',
+								'url'  => $package_data['vcs_url'],
 							],
 						],
-					],
-					'require'      => [
-						$package_data['source_name'] => $version_range,
-					],
-					'minimum-stability-per-package' => [
-						$package_data['source_name'] => $stability,
-					],
-				] );
-				break;
-			default:
-				break;
+						'require'                       => [
+							$package_data['source_name'] => $version_range,
+						],
+						'minimum-stability-per-package' => [
+							$package_data['source_name'] => $stability,
+						],
+					] );
+					break;
+				default:
+					break;
+			}
+		} catch ( \Exception $e ) {
+			$this->logger->error(
+				'Error fetching external packages with the Composer Client for {package} (source type {source_type}).',
+				[
+					'exception'   => $e,
+					'package'     => $package_data['source_name'],
+					'source_type' => $package_data['source_type'],
+				]
+			);
 		}
 
 		if ( ! empty( $releases ) ) {
