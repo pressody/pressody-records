@@ -252,7 +252,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 	}
 
 	/**
-	 * Attempt to prune the releases by certain conditions (maybe constraints).
+	 * Attempt to prune the package releases by certain conditions (maybe constraints).
 	 *
 	 * @return $this
 	 */
@@ -260,7 +260,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 		/** @var ConstraintInterface $constraint */
 		$constraint = $this->package->get_source_constraint();
 		foreach ( $this->releases as $key => $release ) {
-			if ( ! $constraint->matches( new Constraint( '==', $release->get_version() ) ) ) {
+			if ( ! $constraint->matches( new Constraint( '==', $this->normalize_version( $release->get_version() ) ) ) ) {
 				unset( $this->releases[ $key ] );
 			}
 		}

@@ -399,6 +399,7 @@ class PackageManager {
 
 		switch ( $package_data['source_type'] ) {
 			case 'packagist.org':
+				// Pass along a Satis configuration to get packages.
 				$releases = $client->getPackages( [
 					// The packagist.org repository is available by default.
 					'require'      => [
@@ -410,6 +411,7 @@ class PackageManager {
 				] );
 				break;
 			case 'wpackagist.org':
+				// Pass along a Satis configuration to get packages.
 				$releases = $client->getPackages( [
 					'repositories' => [
 						[

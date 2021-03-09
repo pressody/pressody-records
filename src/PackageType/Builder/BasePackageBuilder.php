@@ -554,6 +554,7 @@ class BasePackageBuilder {
 
 		if ( empty( $this->package->get_license() ) && ! empty( $package_data['license'] ) ) {
 			// Make sure that the license is a single string, not an array of strings.
+			// Packagist.org offers a list of license in case a project is dual or triple licensed.
 			if ( is_array( $package_data['license'] ) ) {
 				$package_data['license'] = reset( $package_data['license'] );
 			}
