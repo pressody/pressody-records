@@ -422,7 +422,7 @@ class PackageManager {
 					$releases = $client->getPackages( [
 						'repositories'                  => [
 							[
-								// Disable the default packagist.org repo.
+								// Disable the default packagist.org repo so we don't mistakenly fetch from there.
 								"packagist.org" => false,
 							],
 							[
@@ -450,7 +450,7 @@ class PackageManager {
 					$releases = $client->getPackages( [
 						'repositories'                  => [
 							[
-								// Disable the default packagist.org repo.
+								// Disable the default packagist.org repo so we don't mistakenly fetch from there.
 								"packagist.org" => false,
 							],
 							[
