@@ -140,13 +140,16 @@ final class Logger extends BaseIO {
 	 * @return string
 	 */
 	protected function format_exception( Exception $e ): string {
+		// Since the trace may contain in a step's args circular references, we need to replace such references with a string.
+		// This is to avoid infinite recursion when attempting to json_encode().
+		$trace = JsonCleaner::clean( $e->getTrace() );
 		return wp_json_encode(
 			[
 				'message' => $e->getMessage(),
 				'code'    => $e->getCode(),
 				'file'    => $e->getFile(),
 				'line'    => $e->getLine(),
-				'trace'   => $e->getTrace(),
+				'trace'   => $trace,
 			],
 			\JSON_UNESCAPED_SLASHES
 		);
@@ -166,7 +169,7 @@ final class Logger extends BaseIO {
 		} elseif ( is_object( $value ) && method_exists( '__toString', $value ) ) {
 			$value = (string) $value;
 		} elseif ( ! is_scalar( $value ) ) {
-			$value = wp_json_encode( $value, \JSON_UNESCAPED_SLASHES );
+			$value = wp_json_encode( $value, \JSON_UNESCAPED_SLASHES, 128 );
 		}
 
 		return $value;
