@@ -18,7 +18,6 @@ use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Provider\HealthCheck;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
-use WP_Theme;
 
 use function PixelgradeLT\Records\get_packages_permalink;
 
@@ -227,6 +226,8 @@ class Settings extends AbstractHookProvider {
 	public function render_screen() {
 		$permalink = esc_url( get_packages_permalink() );
 		$packages  = array_map( [ $this->composer_transformer, 'transform' ], $this->packages->all() );
+		$system_checks = [];
+
 		include $this->plugin->get_path( 'views/screen-settings.php' );
 		include $this->plugin->get_path( 'views/templates.php' );
 	}

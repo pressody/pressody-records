@@ -1,6 +1,6 @@
 <?php
 /**
- * Views: Packages page
+ * Views: Packages tab
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later

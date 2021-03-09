@@ -294,7 +294,7 @@ class EditPackage extends AbstractHookProvider {
 				              [
 					              'field'   => 'package_source_type',
 					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => [ 'packagist.org', ],
+					              'value'   => [ 'packagist.org', 'vcs', ],
 					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 					              'compare' => 'IN',
 				              ],

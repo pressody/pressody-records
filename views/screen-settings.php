@@ -21,6 +21,7 @@ namespace PixelgradeLT\Records;
 	<h2 class="nav-tab-wrapper">
 		<a href="#pixelgradelt_records-settings" class="nav-tab nav-tab-active"><?php esc_html_e( 'Settings', 'pixelgradelt_records' ); ?></a>
 		<a href="#pixelgradelt_records-packages" class="nav-tab"><?php esc_html_e( 'Packages', 'pixelgradelt_records' ); ?></a>
+		<a href="#pixelgradelt_records-status" class="nav-tab"><?php esc_html_e( 'Status', 'pixelgradelt_records' ); ?></a>
 	</h2>
 
 	<div id="pixelgradelt_records-settings" class="pixelgradelt_records-tab-panel is-active">
@@ -59,5 +60,9 @@ namespace PixelgradeLT\Records;
 
 	<div id="pixelgradelt_records-packages" class="pixelgradelt_records-tab-panel">
 		<?php require $this->plugin->get_path( 'views/packages.php' ); ?>
+	</div>
+
+	<div id="pixelgradelt_records-status" class="pixelgradelt_records-tab-panel">
+		<?php require $this->plugin->get_path( 'views/status.php' ); ?>
 	</div>
 </div>
