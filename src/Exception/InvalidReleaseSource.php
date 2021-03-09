@@ -42,4 +42,27 @@ class InvalidReleaseSource extends \LogicException implements PixelgradeltRecord
 
 		return new static( $message, $code, $previous );
 	}
+
+	/**
+	 * Create an exception when we don't have a source cached package data for the release originating on an external Composer Repo (Packagist, VCS).
+	 *
+	 * @since 0.1.0.
+	 *
+	 * @param Release        $release  Release instance.
+	 * @param int            $code     Optional. The Exception code.
+	 * @param Throwable|null $previous Optional. The previous throwable used for the exception chaining.
+	 *
+	 * @return InvalidReleaseSource
+	 */
+	public static function missingSourceCachedPackage(
+		Release $release,
+		int $code = 0,
+		Throwable $previous = null
+	): InvalidReleaseSource {
+		$name = $release->get_package()->get_name();
+
+		$message = "Unable to create release artifact for {$name}; source cached package data could not be found.";
+
+		return new static( $message, $code, $previous );
+	}
 }

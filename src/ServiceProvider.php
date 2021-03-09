@@ -231,7 +231,8 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new ReleaseManager(
 				$container['storage.packages'],
 				$container['archiver'],
-				$container['version.parser']
+				$container['version.parser'],
+				$container['client.composer']
 			);
 		};
 

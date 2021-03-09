@@ -24,6 +24,7 @@ use Composer\Package\Dumper\ArrayDumper;
 use Composer\Package\PackageInterface;
 use Composer\Semver\VersionParser;
 use PixelgradeLT\Records\Client\Builder\ComposerArchiveBuilder;
+use PixelgradeLT\Records\Client\Builder\ComposerBuilder;
 
 /**
  * Class for communicating with an external Composer repository.
@@ -71,44 +72,8 @@ class ComposerClient implements Client {
 		$io->loadConfiguration( $this->getConfiguration() );
 
 		$verbose = false;
-		// Allow the passing of a full composer config.
-		$config = ! empty( $args['config'] ) ? $args['config'] : $this->getDefaultConfig();
 
-		if ( ! empty( $args['repositories'] ) ) {
-			$config['repositories'] = $args['repositories'];
-		}
-
-		if ( ! empty( $args['require'] ) ) {
-			$config['require'] = $args['require'];
-		}
-
-		if ( isset( $args['require-all'] ) ) {
-			$config['require-all'] = $args['require-all'];
-		}
-
-		if ( isset( $args['require-dependencies'] ) ) {
-			$config['require-dependencies'] = $args['require-dependencies'];
-		}
-
-		if ( isset( $args['require-dev-dependencies'] ) ) {
-			$config['require-dev-dependencies'] = $args['require-dev-dependencies'];
-		}
-
-		if ( isset( $args['only-dependencies'] ) ) {
-			$config['only-dependencies'] = $args['only-dependencies'];
-		}
-
-		if ( isset( $args['only-best-candidates'] ) ) {
-			$config['only-best-candidates'] = $args['only-best-candidates'];
-		}
-
-		if ( isset( $args['minimum-stability'] ) ) {
-			$config['minimum-stability'] = $args['minimum-stability'];
-		}
-
-		if ( isset( $args['minimum-stability-per-package'] ) ) {
-			$config['minimum-stability-per-package'] = $args['minimum-stability-per-package'];
-		}
+		$config = $this->getDynamicConfig( $args );
 
 		$packagesFilter = ! empty( $args['packages'] ) ? $args['packages'] : [];
 		$repositoryUrl  = ! empty( $args['repository-url'] ) ? $args['repository-url'] : null;
@@ -118,9 +83,6 @@ class ComposerClient implements Client {
 		if ( null !== $repositoryUrl && count( $packagesFilter ) > 0 ) {
 			throw new \InvalidArgumentException( 'The arguments "package" and "repository-url" can not be used together.' );
 		}
-
-		// Allow others to filter this and add or modify the Composer client config (like adding OAuth tokens).
-		$config = apply_filters( 'pixelgradelt_records_composer_client_config', $config, $args );
 
 		$composer         = $this->getComposer( $config );
 		$packageSelection = new ComposerPackageSelection( $io, $outputDir, $config, $skipErrors );
@@ -192,21 +154,12 @@ class ComposerClient implements Client {
 		$io = $this->getIO();
 		$io->loadConfiguration( $this->getConfiguration() );
 
-		// Allow the passing of a full composer config.
-		$config = ! empty( $args['config'] ) ? $args['config'] : $this->getDefaultConfig();
-
-		if ( ! empty( $args['repositories'] ) ) {
-			$config['repositories'] = $args['repositories'];
-		}
-
-		if ( ! empty( $args['require'] ) ) {
-			$config['require'] = $args['require'];
-		}
+		$config = $this->getDynamicConfig( $args );
 
 		$packagesFilter = ! empty( $args['packages'] ) ? $args['packages'] : [];
 		$repositoryUrl  = ! empty( $args['repository-url'] ) ? $args['repository-url'] : null;
 		$skipErrors     = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
-		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : false;
+		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : get_temp_dir();
 
 		if ( null !== $repositoryUrl && count( $packagesFilter ) > 0 ) {
 			throw new \InvalidArgumentException( 'The arguments "package" and "repository-url" can not be used together.' );
@@ -221,7 +174,113 @@ class ComposerClient implements Client {
 		}
 	}
 
-	public function getDefaultConfig(): array {
+	/**
+	 * @param PackageInterface $package
+	 * @param array $args Composer config args.
+	 *
+	 * @throws \Exception
+	 * @return string The patch to the package archive.
+	 */
+	public function archivePackage( PackageInterface $package, array $args = [] ): string {
+		// load auth.json authentication information and pass it to the io interface
+		$io = $this->getIO();
+		$io->loadConfiguration( $this->getConfiguration() );
+
+		$config = $this->getDynamicConfig( $args );
+
+		if ( ! isset( $config['archive'] ) ) {
+			$config['archive'] = [
+				'directory' => '',
+			];
+		}
+
+		$skipErrors     = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
+		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : get_temp_dir();
+
+		$composer = $this->getComposer( $config );
+
+		$downloads = new ComposerArchiveBuilder( $io, $outputDir, $config, $skipErrors );
+		$downloads->setComposer( $composer );
+		return $downloads->dumpPackage( $package );
+	}
+
+	/**
+	 * Determine the dynamic configuration depending on the received args.
+	 *
+	 * This is not the same as a local (file-based) Composer config. That is taken in to account,
+	 * but this one will overwrite that one.
+	 *
+	 * @param array $args
+	 *
+	 * @return array
+	 */
+	protected function getDynamicConfig( array $args ): array {
+		// Start with the default config.
+		$config = $this->getDefaultDynamicConfig();
+
+		// Depending on the received args, make the config modifications.
+		$config = $this->parseDynamicConfigArgs( $config, $args );
+
+		// Allow others to filter this and add or modify the Composer client config (like adding OAuth tokens).
+		return apply_filters( 'pixelgradelt_records_composer_client_config', $config, $args );
+	}
+
+	/**
+	 * Given a config and a set of arguments, make the necessary config modifications.
+	 *
+	 * @param array $config The initial config.
+	 * @param array $args
+	 *
+	 * @return array The modified config.
+	 */
+	protected function parseDynamicConfigArgs( array $config, array $args ): array {
+		$originalConfig = $config;
+
+		// Allow the passing of a full composer config.
+		if ( ! empty( $args['config'] ) ) {
+			$config = $args['config'];
+		}
+
+		if ( ! empty( $args['repositories'] ) ) {
+			$config['repositories'] = $args['repositories'];
+		}
+
+		if ( ! empty( $args['require'] ) ) {
+			$config['require'] = $args['require'];
+		}
+
+		if ( isset( $args['require-all'] ) ) {
+			$config['require-all'] = $args['require-all'];
+		}
+
+		if ( isset( $args['require-dependencies'] ) ) {
+			$config['require-dependencies'] = $args['require-dependencies'];
+		}
+
+		if ( isset( $args['require-dev-dependencies'] ) ) {
+			$config['require-dev-dependencies'] = $args['require-dev-dependencies'];
+		}
+
+		if ( isset( $args['only-dependencies'] ) ) {
+			$config['only-dependencies'] = $args['only-dependencies'];
+		}
+
+		if ( isset( $args['only-best-candidates'] ) ) {
+			$config['only-best-candidates'] = $args['only-best-candidates'];
+		}
+
+		if ( isset( $args['minimum-stability'] ) ) {
+			$config['minimum-stability'] = $args['minimum-stability'];
+		}
+
+		if ( isset( $args['minimum-stability-per-package'] ) ) {
+			$config['minimum-stability-per-package'] = $args['minimum-stability-per-package'];
+		}
+
+		return apply_filters( 'pixelgradelt_records_composer_client_config_parse_args', $config, $args, $originalConfig );
+	}
+
+	public function getDefaultDynamicConfig(): array {
 		return [
 			'name'                      => 'pixelgradelt_records/fake_project',
 			'repositories'              => [],

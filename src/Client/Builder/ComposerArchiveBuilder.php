@@ -83,6 +83,49 @@ class ComposerArchiveBuilder extends ComposerBuilder {
 		}
 	}
 
+	/**
+	 * @param PackageInterface $package
+	 *
+	 * @throws \Exception
+	 * @return string The path to the package archive.
+	 */
+	public function dumpPackage( PackageInterface $package ): string {
+		$helper  = new ComposerArchiveBuilderHelper( $this->output, $this->config['archive'] );
+		$basedir = $helper->getDirectory( $this->outputDir );
+		$this->output->write( sprintf( "<info>Creating local downloads in '%s'</info>", $basedir ) );
+		$downloadManager        = $this->composer->getDownloadManager();
+		$archiveManager         = $this->composer->getArchiveManager();
+		$archiveManager->setOverwriteFiles( false );
+
+		$this->output->write(
+			sprintf(
+				"<info>Dumping package '%s' in version '%s'.</info>",
+				$package->getName(),
+				$package->getPrettyVersion()
+			)
+		);
+
+		try {
+
+			$intermediatePath = preg_replace( '#[^a-z0-9-_/]#i', '-', $package->getName() );
+
+			if ( 'pear-library' === $package->getType() ) {
+				/** @see https://github.com/composer/composer/commit/44a4429978d1b3c6223277b875762b2930e83e8c */
+				throw new \RuntimeException( 'The PEAR repository has been removed from Composer 2.0' );
+			}
+
+			$targetDir     = sprintf( '%s/%s', $basedir, $intermediatePath );
+			$path          = $this->archive( $downloadManager, $archiveManager, $package, $targetDir );
+		} catch ( \Exception $exception ) {
+			if ( ! $this->skipErrors ) {
+				throw $exception;
+			}
+			$this->output->write( sprintf( "<error>Skipping Exception '%s'.</error>", $exception->getMessage() ) );
+		}
+
+		return $path;
+	}
+
 	public function setComposer( Composer $composer ): self {
 		$this->composer = $composer;
 

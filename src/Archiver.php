@@ -195,7 +195,14 @@ class Archiver {
 
 		$filename     = $this->get_absolute_path( $release->get_file() );
 		$download_url = apply_filters( 'pixelgradelt_records_package_download_url', $release->get_source_url(), $release );
+
+		// Allow others to hook-in just before the download.
+		do_action( 'pixelgradelt_records_archive_from_url_before', $release, $this );
+
 		$tmpfname     = download_url( $download_url );
+
+		// Allow others to hook-in just after the download.
+		do_action( 'pixelgradelt_records_archive_from_url_after', $release, $this );
 
 		if ( is_wp_error( $tmpfname ) ) {
 			$this->logger->error(

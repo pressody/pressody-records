@@ -120,6 +120,13 @@ class BasePackage implements \ArrayAccess, Package {
 	protected bool $is_managed = false;
 
 	/**
+	 * Managed package post ID if this is a managed package.
+	 *
+	 * @var int
+	 */
+	protected int $managed_post_id = 0;
+
+	/**
 	 * Releases.
 	 *
 	 * @var Release[]
@@ -290,6 +297,17 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function is_managed(): bool {
 		return $this->is_managed;
+	}
+
+	/**
+	 * Retrieve the managed post ID.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @return int
+	 */
+	public function get_managed_post_id(): int {
+		return $this->managed_post_id;
 	}
 
 	/**

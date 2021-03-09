@@ -436,7 +436,29 @@ class PackageManager {
 				] );
 				break;
 			case 'vcs':
-				// Nothing right now.
+				// Pass along a Satis configuration to get packages.
+				$releases = $client->getPackages( [
+					'repositories' => [
+						[
+							// Disable the default packagist.org repo.
+							"packagist.org" => false,
+						],
+						[
+							'type' => 'composer',
+							'url'  => 'https://wpackagist.org',
+							'only' => [
+								'wpackagist-plugin/*',
+								'wpackagist-theme/*',
+							],
+						],
+					],
+					'require'      => [
+						$package_data['source_name'] => $version_range,
+					],
+					'minimum-stability-per-package' => [
+						$package_data['source_name'] => $stability,
+					],
+				] );
 				break;
 			default:
 				break;

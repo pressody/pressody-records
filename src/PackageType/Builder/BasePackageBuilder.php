@@ -479,6 +479,19 @@ class BasePackageBuilder {
 	}
 
 	/**
+	 * Set the managed post ID if this package is managed by us.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @param int $managed_post_id
+	 *
+	 * @return $this
+	 */
+	public function set_managed_post_id( int $managed_post_id ): self {
+		return $this->set( 'managed_post_id', $managed_post_id );
+	}
+
+	/**
 	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
 	 *
 	 * @since 0.1.0
@@ -504,6 +517,7 @@ class BasePackageBuilder {
 
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
+		$this->set_managed_post_id( $post_id );
 
 		$this->from_package_data( $package_data );
 
@@ -741,7 +755,9 @@ class BasePackageBuilder {
 			->set_license( $package->get_license() )
 			->set_requires_at_least_wp( $package->get_requires_at_least_wp() )
 			->set_tested_up_to_wp( $package->get_tested_up_to_wp() )
-			->set_requires_php( $package->get_requires_php() );
+			->set_requires_php( $package->get_requires_php() )
+			->set_is_managed( $package->is_managed() )
+			->set_managed_post_id( $package->get_managed_post_id() );
 
 		foreach ( $package->get_releases() as $release ) {
 			$this->add_release( $release->get_version(), $release->get_source_url() );
