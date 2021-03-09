@@ -6,6 +6,7 @@ namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
 use PixelgradeLT\Records\Archiver;
+use PixelgradeLT\Records\Client\ComposerClient;
 use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
@@ -34,13 +35,13 @@ class LocalBasePackageBuilderTest extends TestCase {
 		$archiver = new Archiver( new NullLogger() );
 		$storage  = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
-
+		$composer_client = new ComposerClient();
 
 		$package_manager = $this->getMockBuilder( PackageManager::class )
 		                ->disableOriginalConstructor()
 		                ->getMock();
 
-		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser );
+		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client );
 
 		$logger = new NullIO();
 
