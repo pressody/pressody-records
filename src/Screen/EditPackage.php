@@ -103,6 +103,9 @@ class EditPackage extends AbstractHookProvider {
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'show_post_error_msgs' );
+
+		// Add a message to the post publish metabox.
+		$this->add_action( 'post_submitbox_start', 'show_publish_message' );
 	}
 
 	/**
@@ -287,7 +290,7 @@ class EditPackage extends AbstractHookProvider {
 			              ->set_width( 50 ),
 
 			         Field::make( 'text', 'package_source_name', __( 'Package Source Name', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket<code>)!</strong>', 'pixelgradelt_records' ) )
+			              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>. Most often you will find the correct project name in the project\'s <code>composer.json</code> file, under the <code>"name"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket<code>)!</strong>', 'pixelgradelt_records' ) )
 			              ->set_width( 50 )
 			              ->set_conditional_logic( [
 				              'relation' => 'AND', // Optional, defaults to "AND"
@@ -622,5 +625,21 @@ class EditPackage extends AbstractHookProvider {
 				sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
 			);
 		}
+	}
+
+	/**
+	 * Display a message above the post publish actions.
+	 *
+	 * @param \WP_Post The current post object.
+	 */
+	protected function show_publish_message( \WP_Post $post ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) ) {
+			return;
+		}
+
+		printf(
+				'<div class="message patience"><p>%s</p></div>',
+				esc_html__( 'Please bear in mind that Publish/Update may take a minute or two since we do some heavy lifting behind the scenes. Patience is advised.', 'pixelgradelt_records' )
+		);
 	}
 }
