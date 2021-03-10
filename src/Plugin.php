@@ -2,12 +2,12 @@
 /**
  * Main plugin class
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -49,9 +49,7 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'hooks.request_handler' ) )
 			// Register the post type early.
 			->register_hooks( $container->get( 'hooks.package_post_type' ) )
-
 			->register_hooks( $container->get( 'hooks.package_archiver' ) )
-
 			->register_hooks( $container->get( 'client.composer.custom_token_auth' ) );
 
 
@@ -72,6 +70,10 @@ class Plugin extends BasePlugin implements Composable {
 
 		if ( \function_exists( 'members_plugin' ) ) {
 			$this->register_hooks( $container->get( 'plugin.members' ) );
+		}
+
+		if ( \function_exists( 'gv_api_manager' ) ) {
+			$this->register_hooks( $container->get( 'plugin.gpl_vault' ) );
 		}
 
 		/**

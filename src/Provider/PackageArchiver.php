@@ -2,12 +2,12 @@
 /**
  * Package archiver.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Provider;
 
@@ -68,11 +68,11 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param PackageRepository $packages                      Managed packages repository.
-	 * @param ReleaseManager    $release_manager               Release manager.
-	 * @param PackageManager    $package_manager               Packages manager.
-	 * @param Storage           $storage                       Storage service.
-	 * @param LoggerInterface   $logger                        Logger.
+	 * @param PackageRepository $packages        Managed packages repository.
+	 * @param ReleaseManager    $release_manager Release manager.
+	 * @param PackageManager    $package_manager Packages manager.
+	 * @param Storage           $storage         Storage service.
+	 * @param LoggerInterface   $logger          Logger.
 	 */
 	public function __construct(
 		PackageRepository $packages,
@@ -81,11 +81,11 @@ class PackageArchiver extends AbstractHookProvider {
 		Storage $storage,
 		LoggerInterface $logger
 	) {
-		$this->packages                      = $packages;
-		$this->release_manager               = $release_manager;
-		$this->package_manager               = $package_manager;
-		$this->storage                       = $storage;
-		$this->logger                        = $logger;
+		$this->packages        = $packages;
+		$this->release_manager = $release_manager;
+		$this->package_manager = $package_manager;
+		$this->storage         = $storage;
+		$this->logger          = $logger;
 	}
 
 	/**
@@ -100,6 +100,9 @@ class PackageArchiver extends AbstractHookProvider {
 		add_filter( 'upgrader_post_install', [ $this, 'archive_on_upgrade' ], 10, 3 );
 
 		add_action( 'before_delete_post', [ $this, 'clean_on_ltpackage_post_delete' ], 10, 2 );
+
+		$this->add_action( 'pixelgradelt_records_archive_from_url_before', 'hook_before_download_url' );
+		$this->add_action( 'pixelgradelt_records_archive_from_url_after', 'remove_hooks_after_download_url' );
 	}
 
 	/**
@@ -124,7 +127,10 @@ class PackageArchiver extends AbstractHookProvider {
 			return;
 		}
 
-		$package = $this->packages->first_where( [ 'source_name' => $package_data['source_name'], 'type' => $package_data['type'], ] );
+		$package = $this->packages->first_where( [
+			'source_name' => $package_data['source_name'],
+			'type'        => $package_data['type'],
+		] );
 		if ( empty( $package ) ) {
 			return;
 		}
@@ -138,6 +144,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @since 0.1.0
 	 *
 	 * @param object $value Update transient value.
+	 *
 	 * @return object
 	 */
 	public function archive_updates( $value ) {
@@ -148,7 +155,7 @@ class PackageArchiver extends AbstractHookProvider {
 		$type = 'pre_set_site_transient_update_plugins' === current_filter() ? 'plugin' : 'theme';
 
 		// The $id will be a theme slug or the plugin file.
-		foreach ( $value->response as $slug => $update_data ) {
+		foreach ( $value->response as $id => $update_data ) {
 			// Plugin data is stored as an object. Coerce to an array.
 			$update_data = (array) $update_data;
 
@@ -157,7 +164,17 @@ class PackageArchiver extends AbstractHookProvider {
 				continue;
 			}
 
-			$args = ['slug' => $slug, 'type' => $type, 'source_type' => 'local.' . $type ];
+			$args = [
+				'type'        => $type,
+				'source_type' => 'local.' . $type,
+				'is_managed'  => true,
+			];
+			if ( 'theme' === $type ) {
+				$args['slug'] = $id;
+			} else {
+				$args['basename'] = $id;
+			}
+
 			// Bail if the package isn't whitelisted.
 			if ( ! $this->packages->contains( $args ) ) {
 				continue;
@@ -193,7 +210,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Package[]  $packages Array of packages.
+	 * @param Package[] $packages Array of packages.
 	 */
 	protected function archive_packages( array $packages ) {
 		foreach ( $packages as $package ) {
@@ -207,15 +224,16 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @since 0.6.0
 	 *
 	 * @param bool|\WP_Error $result     Installation result.
-	 * @param array         $hook_extra Extra arguments passed to hooked filters.
-	 * @param array         $data       Installation result data.
+	 * @param array          $hook_extra Extra arguments passed to hooked filters.
+	 * @param array          $data       Installation result data.
+	 *
 	 * @return bool|\WP_Error
 	 */
 	public function archive_on_upgrade( $result, array $hook_extra, array $data ): bool {
-		$type = $hook_extra['type'] ?? '';
+		$type        = $hook_extra['type'] ?? '';
 		$source_type = 'local.' . $type;
-		$slug = $data['destination_name'] ?? '';
-		$args = compact( 'slug', 'type', 'source_type' );
+		$slug        = $data['destination_name'] ?? '';
+		$args        = compact( 'slug', 'type', 'source_type' );
 
 		if ( $package = $this->packages->first_where( $args ) ) {
 			$this->archive_package( $package );
@@ -286,8 +304,8 @@ class PackageArchiver extends AbstractHookProvider {
 	/**
 	 * Clean packages before a ltpackage post is deleted from the database.
 	 *
-	 * @param int     $post_ID Post ID.
-	 * @param \WP_Post $post   Post object.
+	 * @param int      $post_ID Post ID.
+	 * @param \WP_Post $post    Post object.
 	 */
 	public function clean_on_ltpackage_post_delete( int $post_ID, \WP_Post $post ) {
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
@@ -299,11 +317,80 @@ class PackageArchiver extends AbstractHookProvider {
 			return;
 		}
 
-		$package = $this->packages->first_where( [ 'source_name' => $package_data['source_name'], 'type' => $package_data['type'], ] );
+		$package = $this->packages->first_where( [
+			'source_name' => $package_data['source_name'],
+			'type'        => $package_data['type'],
+		] );
 		if ( empty( $package ) ) {
 			return;
 		}
 
 		$this->clean_package( $package );
+	}
+
+	protected function hook_before_download_url() {
+		$this->add_filter( 'http_request_args', 'maybe_relax_wp_http_settings', 10, 2 );
+	}
+
+	protected function remove_hooks_after_download_url() {
+		$this->remove_filter( 'http_request_args', 'maybe_relax_wp_http_settings', 10, 2 );
+	}
+
+	/**
+	 * Filters the arguments used in an HTTP request.
+	 *
+	 * @param array  $parsed_args An array of HTTP request arguments.
+	 * @param string $url         The request URL.
+	 */
+	protected function maybe_relax_wp_http_settings( $parsed_args, $url ) {
+		// Increase the timeout so there is plenty of time to download.
+		$parsed_args['timeout'] = 300;
+
+		// If we are in a local/development environment, relax further.
+		if ( $this->is_debug_mode() && $this->is_dev_url( $url ) ) {
+			// Skip SSL verification since we may be using self-signed certificates.
+			$parsed_args['sslverify'] = false;
+		}
+
+		return $parsed_args;
+	}
+
+	/**
+	 * Test if a given URL is one that we identify as a local/development site.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @return bool
+	 */
+	protected function is_dev_url( string $url ): bool {
+		// Local/development url parts to match for
+		$devsite_needles = array(
+			'localhost',
+			':8888',
+			'.local',
+			'pixelgrade.dev',
+			'.dev',
+			':8082',
+			'staging.',
+		);
+
+		foreach ( $devsite_needles as $needle ) {
+			if ( false !== strpos( $url, $needle ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether debug mode is enabled.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @return bool
+	 */
+	protected function is_debug_mode(): bool {
+		return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
 	}
 }

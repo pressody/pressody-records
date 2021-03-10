@@ -3,14 +3,14 @@
  * PixelgradeLT Records
  *
  * @package PixelgradeLT
- * @author Vlad Olaru <vlad@pixelgrade.com>
+ * @author  Vlad Olaru <vlad@pixelgrade.com>
  * @license GPL-2.0-or-later
  *
  * @wordpress-plugin
  * Plugin Name: PixelgradeLT Records
  * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-records
  * Description: Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.
- * Version: 0.5.0
+ * Version: 0.6.0
  * Author: Pixelgrade
  * Author URI: https://pixelgrade.com/
  * License: GPL-2.0-or-later
@@ -23,7 +23,7 @@
  * Release Asset: true
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -37,7 +37,7 @@ if ( ! \defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-const VERSION = '0.1.0';
+const VERSION = '0.6.0';
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
@@ -48,6 +48,7 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 if ( ! function_exists( __NAMESPACE__ . '\autoloader_classmap' ) ) {
 	require_once __DIR__ . '/src/functions.php';
 	add_action( 'admin_notices', __NAMESPACE__ . '\display_missing_dependencies_notice' );
+
 	return;
 }
 

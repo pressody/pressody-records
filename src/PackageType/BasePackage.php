@@ -300,6 +300,17 @@ class BasePackage implements \ArrayAccess, Package {
 	}
 
 	/**
+	 * Alias for self::is_managed().
+	 *
+	 * @since 0.5.0
+	 *
+	 * @return bool
+	 */
+	public function get_is_managed(): bool {
+		return $this->is_managed();
+	}
+
+	/**
 	 * Retrieve the managed post ID.
 	 *
 	 * @since 0.5.0

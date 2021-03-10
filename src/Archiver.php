@@ -6,12 +6,12 @@
  * the absolute path to the artifact. Code making use of this class should move
  * or delete the artifacts as necessary.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -22,7 +22,6 @@ use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Exception\FileDownloadFailed;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
 use PixelgradeLT\Records\Exception\InvalidPackageArtifact;
-use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
 use PixelgradeLT\Records\Exception\PackageNotInstalled;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\Validator\ArtifactValidator;
@@ -62,10 +61,12 @@ class Archiver {
 	 * @since 0.1.0
 	 *
 	 * @param ServiceIterator $validators Artifact validators.
+	 *
 	 * @return $this
 	 */
 	public function register_validators( ServiceIterator $validators ): Archiver {
 		$this->validators = $validators;
+
 		return $this;
 	}
 
@@ -76,6 +77,7 @@ class Archiver {
 	 *
 	 * @param Package $package Installed package instance.
 	 * @param string  $version Release version.
+	 *
 	 * @throws PackageNotInstalled If the package is not installed.
 	 * @throws FileOperationFailed If a temporary working directory can't be created.
 	 * @throws FileOperationFailed If zip creation fails.
@@ -132,6 +134,7 @@ class Archiver {
 	 *
 	 * @param Package $package Installed package instance.
 	 * @param Release $release Release instance.
+	 *
 	 * @return string[] Array of files to exclude.
 	 */
 	protected function get_excluded_files( Package $package, Release $release ): array {
@@ -156,6 +159,7 @@ class Archiver {
 	 * @since 0.1.0
 	 *
 	 * @param string $dist_ignore_path Path to the .distignore file. File must already exist.
+	 *
 	 * @return string[]
 	 */
 	private function get_dist_ignored_files( string $dist_ignore_path ): array {
@@ -183,6 +187,7 @@ class Archiver {
 	 * @since 0.1.0
 	 *
 	 * @param Release $release Release instance.
+	 *
 	 * @throws FileDownloadFailed  If the artifact can't be downloaded.
 	 * @throws FileOperationFailed If a temporary working directory can't be created.
 	 * @throws LogicException If a registered server doesn't implement the server interface.
@@ -199,7 +204,7 @@ class Archiver {
 		// Allow others to hook-in just before the download.
 		do_action( 'pixelgradelt_records_archive_from_url_before', $release, $this );
 
-		$tmpfname     = download_url( $download_url );
+		$tmpfname = download_url( $download_url );
 
 		// Allow others to hook-in just after the download.
 		do_action( 'pixelgradelt_records_archive_from_url_after', $release, $this );
@@ -251,6 +256,7 @@ class Archiver {
 	 * @since 0.1.0
 	 *
 	 * @param string $path Optional. Relative path.
+	 *
 	 * @return string
 	 */
 	protected function get_absolute_path( string $path = '' ): string {

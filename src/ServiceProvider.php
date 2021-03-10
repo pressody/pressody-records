@@ -228,6 +228,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Integration\Members();
 		};
 
+		$container['plugin.gpl_vault'] = function() {
+			return new Integration\GPLVault();
+		};
+
 		$container['release.manager'] = function( $container ) {
 			return new ReleaseManager(
 				$container['storage.packages'],

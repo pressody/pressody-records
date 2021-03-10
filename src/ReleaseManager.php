@@ -2,12 +2,12 @@
 /**
  * Release manager.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -92,6 +92,7 @@ class ReleaseManager {
 	 * @since 0.1.0
 	 *
 	 * @param Package $package Package instance.
+	 *
 	 * @return Release[]
 	 */
 	public function all_cached( Package $package ): array {
@@ -122,6 +123,7 @@ class ReleaseManager {
 	 * @since 0.1.0
 	 *
 	 * @param Release $release Release instance.
+	 *
 	 * @throws InvalidReleaseSource If a source URL is not available or the
 	 *                              version doesn't match the currently installed version.
 	 * @throws FileOperationFailed  If the release artifact can't be moved to storage.
@@ -146,9 +148,9 @@ class ReleaseManager {
 				// Get the source version/release packages data (fetched from the external repo) we have stored.
 				$source_cached_release_packages = get_post_meta( $managed_post_id, '_package_source_cached_release_packages', true );
 				if ( ! empty( $source_cached_release_packages[ $release->get_version() ] ) ) {
-					$loader     = new ArrayLoader();
+					$loader           = new ArrayLoader();
 					$composer_package = $loader->load( $source_cached_release_packages[ $release->get_version() ] );
-					$filename = $client->archivePackage( $composer_package );
+					$filename         = $client->archivePackage( $composer_package );
 				} else {
 					throw InvalidReleaseSource::missingSourceCachedPackage( $release );
 				}
@@ -227,6 +229,7 @@ class ReleaseManager {
 	 *
 	 * @param string  $algorithm Algorithm.
 	 * @param Release $release   Release instance.
+	 *
 	 * @return string
 	 */
 	public function checksum( string $algorithm, Release $release ): string {
@@ -237,6 +240,7 @@ class ReleaseManager {
 	 * Whether an artifact exists for a given release.
 	 *
 	 * @param Release $release Release instance.
+	 *
 	 * @return bool
 	 */
 	public function exists( Release $release ): bool {
@@ -247,6 +251,7 @@ class ReleaseManager {
 	 * Retrieve the absolute file path for an artifact.
 	 *
 	 * @param Release $release Release instance.
+	 *
 	 * @return string|false The absolute file path or false if it doesn't exist.
 	 */
 	public function get_absolute_path( Release $release ) {
@@ -263,10 +268,12 @@ class ReleaseManager {
 	 * @since 0.1.0
 	 *
 	 * @param Release $release Release instance.
+	 *
 	 * @return Response
 	 */
 	public function send( Release $release ): Response {
 		do_action( 'pixelgradelt_records_send_release', $release );
+
 		return $this->storage->send( $release->get_file_path() );
 	}
 }
