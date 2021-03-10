@@ -1,9 +1,22 @@
 <?php
+/**
+ * JSON cleaner for json_encode().
+ *
+ * @since   0.5.0
+ * @license GPL-2.0-or-later
+ * @package PixelgradeLT
+ */
 
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
-
+/**
+ * JSON cleaner class.
+ *
+ * @since   0.5.0
+ * @package PixelgradeLT
+ */
 class JsonCleaner {
 	private static $_objects;
 	private static $_depth;
@@ -11,10 +24,15 @@ class JsonCleaner {
 	/**
 	 * Cleans a variable for JSON encoding.
 	 *
-	 * Does the same thing as _wp_json_sanity_check(), but it does a really important thing extra: removes circular references.
+	 * Does the same thing as _wp_json_sanity_check(), but it does a really important extra thing: removes circular references.
 	 *
-	 * @param mixed $var       variable to be clean
-	 * @param int   $depth     maximum depth that the dumper should go into the variable. Defaults to 10.
+	 * @see _wp_json_sanity_check()
+	 *
+	 * @see wp_json_encode()
+	 *
+	 * @param mixed $var   Variable to be clean for json encoding.
+	 * @param int   $depth Maximum depth that the cleaner should allow into the variable. Defaults to 10.
+	 *                     Data beyond the maximum depth will be replaces with a string representation (like 'array(...)').
 	 *
 	 * @return mixed
 	 */
@@ -34,6 +52,7 @@ class JsonCleaner {
 			case 'unknown type':
 				return '{unknown}';
 			case 'array':
+				// Reached the max depth. Replace with a string representation.
 				if ( self::$_depth <= $level ) {
 					return 'array(...)';
 				}
@@ -60,27 +79,30 @@ class JsonCleaner {
 						$output[ $clean_key ] = $value;
 					}
 				}
+
 				return $output;
 			case 'object':
+				// This object reference was seen before. Replace it with a string representation.
 				if ( ( $id = array_search( $var, self::$_objects, true ) ) !== false ) {
 					return get_class( $var ) . '#' . ( $id + 1 ) . '(...)';
 				}
 
+				// Reached the max depth. Replace with a string representation.
 				if ( self::$_depth <= $level ) {
 					return get_class( $var ) . '(...)';
 				}
 
-				$output = new \stdClass();
+				$output                        = new \stdClass();
 				$output->__original_class_name = get_class( $var );
 				array_push( self::$_objects, $var );
-				$members       = (array) $var;
+				$members = (array) $var;
 				foreach ( $members as $key => $value ) {
 					if ( is_string( $key ) ) {
 						// Since the array cast will prepend an * guarded by null bytes, we need to clean.
-						if ( false !== strpos( $key,"\0*\0") ) {
+						if ( false !== strpos( $key, "\0*\0" ) ) {
 							$key = trim( str_replace( "\0*\0", '', $key ) );
 						}
-						if ( false !== strpos( $key,"\0") ) {
+						if ( false !== strpos( $key, "\0" ) ) {
 							$key = trim( str_replace( "\0", '*', $key ) );
 						}
 						$clean_key = _wp_json_convert_string( $key );
@@ -96,10 +118,13 @@ class JsonCleaner {
 						$output->$clean_key = $value;
 					}
 				}
+
 				return $output;
 			default:
-				return $var;
+				break;
 		}
+
+		return $var;
 	}
 }
 
