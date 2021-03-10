@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\Utils\ArrayHelpers;
 
 /**
  * List Packages screen provider class.
@@ -53,6 +54,10 @@ class ListPackages extends AbstractHookProvider {
 		// Logic.
 		// Show a dropdown to filter the posts list by the custom taxonomy.
 		$this->add_action( 'restrict_manage_posts', 'output_admin_list_filters' );
+
+		// Add custom columns to post list.
+		$this->add_action( 'manage_' . $this->package_manager::PACKAGE_POST_TYPE . '_posts_columns', 'add_custom_columns' );
+		$this->add_action( 'manage_' . $this->package_manager::PACKAGE_POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2);
 	}
 
 	/**
@@ -103,5 +108,59 @@ class ListPackages extends AbstractHookProvider {
 	public function enqueue_assets() {
 		wp_enqueue_script( 'pixelgradelt_records-admin' );
 		wp_enqueue_style( 'pixelgradelt_records-admin' );
+	}
+
+	protected function add_custom_columns( array $columns ): array {
+		$screen = get_current_screen();
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== $screen->post_type ) {
+			return $columns;
+		}
+
+		// Insert after the title a column for package source details.
+		$columns = ArrayHelpers::insertAfterKey( $columns, 'title', [ 'package_source' => esc_html__( 'Package Source', 'pixelgradelt_records' ) ] );
+
+		return $columns;
+	}
+
+	protected function populate_custom_columns( string $column, int $post_id ): void {
+		// Package Source column
+		if ( 'package_source' === $column ) {
+			$source_output = '—';
+			// Add details to the title regarding the package configured source.
+			$package_data = $this->package_manager->get_package_id_data( $post_id );
+			if ( ! empty( $package_data ) && ! empty( $package_data['source_type'] ) ) {
+				switch ( $package_data['source_type'] ) {
+					case 'packagist.org':
+						$source_output = 'Packagist.org - ' . $package_data['source_name'];
+						break;
+					case 'wpackagist.org':
+						$source_output = 'WPackagist.org - ' . $package_data['source_name'];
+						break;
+					case 'vcs':
+						if ( false !== strpos( $package_data['vcs_url'], 'github.com' ) ) {
+							$source_output = 'Github - ';
+						} else {
+							$source_output = 'VCS - ';
+						}
+
+						$source_output .= $package_data['source_name'];
+						break;
+					case 'local.plugin':
+						$source_output = 'Local Plugin - ' . $package_data['slug'];
+						break;
+					case 'local.theme':
+						$source_output = 'Local Theme - ' . $package_data['slug'];
+						break;
+					case 'local.manual':
+						$source_output = 'Manual - ' . $package_data['slug'];
+						break;
+					default:
+						// Nothing
+						break;
+				}
+			}
+
+			echo $source_output;
+		}
 	}
 }

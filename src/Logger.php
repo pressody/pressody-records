@@ -15,6 +15,7 @@ namespace PixelgradeLT\Records;
 
 use Composer\IO\BaseIO;
 use Exception;
+use PixelgradeLT\Records\Utils\JSONCleaner;
 use Psr\Log\LogLevel;
 
 /**
@@ -142,7 +143,7 @@ final class Logger extends BaseIO {
 	protected function format_exception( Exception $e ): string {
 		// Since the trace may contain in a step's args circular references, we need to replace such references with a string.
 		// This is to avoid infinite recursion when attempting to json_encode().
-		$trace = JsonCleaner::clean( $e->getTrace() );
+		$trace = JSONCleaner::clean( $e->getTrace() );
 		return wp_json_encode(
 			[
 				'message' => $e->getMessage(),

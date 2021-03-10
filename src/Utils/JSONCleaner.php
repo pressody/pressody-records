@@ -9,7 +9,7 @@
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace PixelgradeLT\Records\Utils;
 
 /**
  * JSON cleaner class.
@@ -17,7 +17,7 @@ namespace PixelgradeLT\Records;
  * @since   0.5.0
  * @package PixelgradeLT
  */
-class JsonCleaner {
+class JSONCleaner {
 	private static $_objects;
 	private static $_depth;
 
