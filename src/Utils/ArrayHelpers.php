@@ -268,12 +268,14 @@ class ArrayHelpers {
 	 * Numeric entries are appended, not replaced, but only if they are
 	 * unique
 	 *
-	 * @param array $base Initial array to merge.
+	 * @link   http://www.php.net/manual/en/function.array-merge-recursive.php#96201
+	 *
 	 * @param array ...     Variable list of arrays to recursively merge.
+	 *
+	 * @param array $base Initial array to merge.
 	 *
 	 * @return array
 	 *
-	 * @link   http://www.php.net/manual/en/function.array-merge-recursive.php#96201
 	 * @author Mark Roduner <mark.roduner@gmail.com>
 	 */
 	public static function array_merge_recursive_distinct() {

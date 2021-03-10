@@ -60,9 +60,9 @@ class EditPackage extends AbstractHookProvider {
 	 * @param PackagePostType   $package_post_type Packages post type.
 	 */
 	public function __construct(
-		PackageManager $package_manager,
-		PackageRepository $packages,
-		PackagePostType $package_post_type
+			PackageManager $package_manager,
+			PackageRepository $packages,
+			PackagePostType $package_post_type
 	) {
 		$this->package_manager   = $package_manager;
 		$this->packages          = $packages;
@@ -169,8 +169,8 @@ class EditPackage extends AbstractHookProvider {
 			$this->remove_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'prevent_post_save_without_title' );
 
 			$postdata = array(
-				'ID'          => $post_id,
-				'post_status' => 'draft',
+					'ID'          => $post_id,
+					'post_status' => 'draft',
 			);
 			wp_update_post( $postdata );
 
@@ -271,157 +271,216 @@ class EditPackage extends AbstractHookProvider {
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-			         Field::make( 'html', 'source_configuration_html', __( 'Section Description', 'pixelgradelt_records' ) )
-			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'First, configure details about <strong>where from should we get package/versions</strong> for this package.', 'pixelgradelt_records' ) ) ),
+				         Field::make( 'html', 'source_configuration_html', __( 'Section Description', 'pixelgradelt_records' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'First, configure details about <strong>where from should we get package/versions</strong> for this package.', 'pixelgradelt_records' ) ) ),
 
-			         Field::make( 'select', 'package_source_type', __( 'Set the package source type', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Composer works with packages and repositories to find the core to use for the defined dependencies. We will strive to keep as close to that in terms of concepts. Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">here</a>.', 'pixelgradelt_records' ) )
-			              ->set_options( [
-				              null             => esc_html__( 'Pick your package source, carefully..', 'pixelgradelt_records' ),
-				              'packagist.org'  => esc_html__( 'A Packagist.org public repo', 'pixelgradelt_records' ),
-				              'wpackagist.org' => esc_html__( 'A WPackagist.org repo (mirror of wordpress.org)', 'pixelgradelt_records' ),
-				              'vcs'            => esc_html__( 'A VCS repo (git, SVN, fossil or hg)', 'pixelgradelt_records' ),
-				              'local.plugin'   => esc_html__( 'A plugin installed on this WordPress installation', 'pixelgradelt_records' ),
-				              'local.theme'    => esc_html__( 'A theme installed on this WordPress installation', 'pixelgradelt_records' ),
-				              'local.manual'   => esc_html__( 'A local repo: package releases/versions are managed here, manually', 'pixelgradelt_records' ),
-			              ] )
-			              ->set_default_value( null )
-			              ->set_required( true )
-			              ->set_width( 50 ),
+				         Field::make( 'select', 'package_source_type', __( 'Set the package source type', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Composer works with packages and repositories to find the core to use for the defined dependencies. We will strive to keep as close to that in terms of concepts. Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				              ->set_options( [
+						              null             => esc_html__( 'Pick your package source, carefully..', 'pixelgradelt_records' ),
+						              'packagist.org'  => esc_html__( 'A Packagist.org public repo', 'pixelgradelt_records' ),
+						              'wpackagist.org' => esc_html__( 'A WPackagist.org repo (mirror of wordpress.org)', 'pixelgradelt_records' ),
+						              'vcs'            => esc_html__( 'A VCS repo (git, SVN, fossil or hg)', 'pixelgradelt_records' ),
+						              'local.plugin'   => esc_html__( 'A plugin installed on this WordPress installation', 'pixelgradelt_records' ),
+						              'local.theme'    => esc_html__( 'A theme installed on this WordPress installation', 'pixelgradelt_records' ),
+						              'local.manual'   => esc_html__( 'A local repo: package releases/versions are managed here, manually', 'pixelgradelt_records' ),
+				              ] )
+				              ->set_default_value( null )
+				              ->set_required( true )
+				              ->set_width( 50 ),
 
-			         Field::make( 'text', 'package_source_name', __( 'Package Source Name', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>. Most often you will find the correct project name in the project\'s <code>composer.json</code> file, under the <code>"name"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket<code>)!</strong>', 'pixelgradelt_records' ) )
-			              ->set_width( 50 )
-			              ->set_conditional_logic( [
-				              'relation' => 'AND', // Optional, defaults to "AND"
-				              [
-					              'field'   => 'package_source_type',
-					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => [ 'packagist.org', 'vcs', ],
-					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-					              'compare' => 'IN',
-				              ],
-			              ] ),
+				         Field::make( 'text', 'package_source_name', __( 'Package Source Name', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>. Most often you will find the correct project name in the project\'s <code>composer.json</code> file, under the <code>"name"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket<code>)!</strong>', 'pixelgradelt_records' ) )
+				              ->set_width( 50 )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'value'   => [ 'packagist.org', 'vcs', ],
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 
-			         Field::make( 'text', 'package_source_project_name', __( 'Package Source Project Name', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Composer identifies a certain package by its project name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide only the project name (e.g. <code>akismet</code>), not the whole package name (e.g. <code>wpackagist-plugin/akismet</code>)!</strong>', 'pixelgradelt_records' ) )
-			              ->set_width( 50 )
-			              ->set_conditional_logic( [
-				              'relation' => 'AND', // Optional, defaults to "AND"
-				              [
-					              'field'   => 'package_source_type',
-					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => [ 'wpackagist.org', ],
-					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-					              'compare' => 'IN',
-				              ],
-			              ] ),
+				         Field::make( 'text', 'package_source_project_name', __( 'Package Source Project Name', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Composer identifies a certain package by its project name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide only the project name (e.g. <code>akismet</code>), not the whole package name (e.g. <code>wpackagist-plugin/akismet</code>)!</strong>', 'pixelgradelt_records' ) )
+				              ->set_width( 50 )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'value'   => [ 'wpackagist.org', ],
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 
-			         Field::make( 'text', 'package_source_version_range', __( 'Package Source Version Range', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions/releases. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
+				         Field::make( 'text', 'package_source_version_range', __( 'Package Source Version Range', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions/releases. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
  Specify a version range to <strong>limit the available versions/releases for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>
  Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) )
-			              ->set_width( 75 )
-			              ->set_conditional_logic( [
-				              'relation' => 'AND', // Optional, defaults to "AND"
-				              [
-					              'field'   => 'package_source_type',
-					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
-					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-					              'compare' => 'IN',
-				              ],
-			              ] ),
-			         Field::make( 'select', 'package_source_stability', __( 'Package Source Stability', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Limit the minimum stability required for versions. <code>Stable</code> is the most restrictive one, while <code>dev</code> the most all encompassing.<br><code>Stable</code> is the recommended (and default) one.', 'pixelgradelt_records' ) )
-			              ->set_width( 25 )
-			              ->set_options( [
-				              'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
-				              'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
-				              'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
-				              'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
-				              'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
-			              ] )
-			              ->set_default_value( 'stable' )
-			              ->set_conditional_logic( [
-				              'relation' => 'AND', // Optional, defaults to "AND"
-				              [
-					              'field'   => 'package_source_type',
-					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
-					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-					              'compare' => 'IN',
-				              ],
-			              ] ),
+				              ->set_width( 75 )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'compare' => 'IN',
+						              ],
+				              ] ),
+				         Field::make( 'select', 'package_source_stability', __( 'Package Source Stability', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Limit the minimum stability required for versions. <code>Stable</code> is the most restrictive one, while <code>dev</code> the most all encompassing.<br><code>Stable</code> is the recommended (and default) one.', 'pixelgradelt_records' ) )
+				              ->set_width( 25 )
+				              ->set_options( [
+						              'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
+						              'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
+						              'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
+						              'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
+						              'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+				              ] )
+				              ->set_default_value( 'stable' )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 
-			         Field::make( 'text', 'package_vcs_url', __( 'Package VCS URL', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pixelgradelt/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pixelgradelt_records' ) )
-			              ->set_conditional_logic( [
-				              'relation' => 'AND', // Optional, defaults to "AND"
-				              [
-					              'field'   => 'package_source_type',
-					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => 'vcs',
-					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-					              'compare' => '=',
-				              ],
-			              ] ),
+				         Field::make( 'text', 'package_vcs_url', __( 'Package VCS URL', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pixelgradelt/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'value'   => 'vcs',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'compare' => '=',
+						              ],
+				              ] ),
 
-			         Field::make( 'select', 'package_local_plugin_file', __( 'Choose one of the installed plugins', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Installed plugins that are already attached to a package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
-			              ->set_options( [ $this, 'get_available_installed_plugins_options' ] )
-			              ->set_default_value( null )
-			              ->set_required( true )
-			              ->set_width( 50 )
-			              ->set_conditional_logic( [
-				              'relation' => 'AND', // Optional, defaults to "AND"
-				              [
-					              'field'   => 'package_source_type',
-					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => 'local.plugin',
-					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-					              'compare' => '=',
-				              ],
-			              ] ),
-			         Field::make( 'select', 'package_local_theme_slug', __( 'Choose one of the installed themes', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'Installed themes that are already attached to a package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
-			              ->set_options( [ $this, 'get_available_installed_themes_options' ] )
-			              ->set_default_value( null )
-			              ->set_required( true )
-			              ->set_width( 50 )
-			              ->set_conditional_logic( [
-				              'relation' => 'AND', // Optional, defaults to "AND"
-				              [
-					              'field'   => 'package_source_type',
-					              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-					              'value'   => 'local.theme',
-					              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-					              'compare' => '=',
-				              ],
-			              ] ),
+				         Field::make( 'select', 'package_local_plugin_file', __( 'Choose one of the installed plugins', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Installed plugins that are already attached to a package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
+				              ->set_options( [ $this, 'get_available_installed_plugins_options' ] )
+				              ->set_default_value( null )
+				              ->set_required( true )
+				              ->set_width( 50 )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'value'   => 'local.plugin',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'compare' => '=',
+						              ],
+				              ] ),
+				         Field::make( 'select', 'package_local_theme_slug', __( 'Choose one of the installed themes', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Installed themes that are already attached to a package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
+				              ->set_options( [ $this, 'get_available_installed_themes_options' ] )
+				              ->set_default_value( null )
+				              ->set_required( true )
+				              ->set_width( 50 )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+								              'value'   => 'local.theme',
+							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+								              'compare' => '=',
+						              ],
+				              ] ),
+
+				         Field::make( 'complex', 'package_manual_releases', __( 'Package Releases', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'The manually uploaded package releases (zips).', 'pixelgradelt_records' ) )
+				              ->add_fields( [
+						              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )->set_required( true )->set_width( 25 ),
+						              Field::make( 'file', 'file', __( 'Archive', 'pixelgradelt_records' ) )
+						                   ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
+						                   ->set_value_type( 'id' ), // Change to 'url' to store the file URL instead of the attachment ID.
+				              ] )
+				              ->set_conditional_logic( [
+						              'relation' => 'AND', // Optional, defaults to "AND"
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => 'local.manual',
+								              'compare' => '=',
+						              ],
+				              ] ),
 
 
-			         Field::make( 'separator', 'package_details_separator', '' ),
-			         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pixelgradelt_records' ) )
-			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pixelgradelt_records' ) ) ),
-			         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) ),
-			         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) ),
-			         Field::make( 'text', 'package_details_license', __( 'Package License', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pixelgradelt_records' ) ),
-			         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pixelgradelt_records' ) )
-			              ->set_help_text( __( 'The package authors details. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#authors" target="_blank">here</a>.', 'pixelgradelt_records' ) )
-			              ->add_fields( array(
-				              Field::make( 'text', 'name', __( 'Author Name', 'pixelgradelt_records' ) )->set_required( true )->set_width( 50 ),
-				              Field::make( 'text', 'email', __( 'Author Email', 'pixelgradelt_records' ) )->set_width( 50 ),
-				              Field::make( 'text', 'homepage', __( 'Author Homepage', 'pixelgradelt_records' ) )->set_width( 50 ),
-				              Field::make( 'text', 'role', __( 'Author Role', 'pixelgradelt_records' ) )->set_width( 50 ),
-			              ) ),
+				         Field::make( 'separator', 'package_details_separator', '' )
+						         ->set_conditional_logic( [
+								         [
+										         'field'   => 'package_source_type',
+										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
+										         'compare' => 'IN',
+								         ],
+						         ] ),
+				         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pixelgradelt_records' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pixelgradelt_records' ) ) )
+						         ->set_conditional_logic( [
+								         [
+										         'field'   => 'package_source_type',
+										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
+										         'compare' => 'IN',
+								         ],
+						         ] ),
+				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
+						         ->set_conditional_logic( [
+								         [
+										         'field'   => 'package_source_type',
+										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
+										         'compare' => 'IN',
+								         ],
+						         ] ),
+				         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) )
+						         ->set_conditional_logic( [
+								         [
+										         'field'   => 'package_source_type',
+										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
+										         'compare' => 'IN',
+								         ],
+						         ] ),
+				         Field::make( 'text', 'package_details_license', __( 'Package License', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+						         ->set_conditional_logic( [
+								         [
+										         'field'   => 'package_source_type',
+										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
+										         'compare' => 'IN',
+								         ],
+						         ] ),
+				         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'The package authors details. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#authors" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				              ->add_fields( [
+						              Field::make( 'text', 'name', __( 'Author Name', 'pixelgradelt_records' ) )->set_required( true )->set_width( 50 ),
+						              Field::make( 'text', 'email', __( 'Author Email', 'pixelgradelt_records' ) )->set_width( 50 ),
+						              Field::make( 'text', 'homepage', __( 'Author Homepage', 'pixelgradelt_records' ) )->set_width( 50 ),
+						              Field::make( 'text', 'role', __( 'Author Role', 'pixelgradelt_records' ) )->set_width( 50 ),
+				              ] )
+				              ->set_conditional_logic( [
+								         [
+										         'field'   => 'package_source_type',
+										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
+										         'compare' => 'IN',
+								         ],
+						         ] ),
 
 		         ] );
 	}
 
 	public function add_package_current_state_meta_box() {
-		$post_type = $this->package_manager::PACKAGE_POST_TYPE;
+		$post_type    = $this->package_manager::PACKAGE_POST_TYPE;
 		$container_id = $post_type . '_current_state_details';
 		add_meta_box(
 				$container_id,
@@ -432,7 +491,10 @@ class EditPackage extends AbstractHookProvider {
 				'default'
 		);
 
-		add_filter( "postbox_classes_{$post_type}_{$container_id}", [ $this, 'add_package_current_state_box_classes' ] );
+		add_filter( "postbox_classes_{$post_type}_{$container_id}", [
+				$this,
+				'add_package_current_state_box_classes',
+		] );
 	}
 
 	/**
@@ -440,6 +502,7 @@ class EditPackage extends AbstractHookProvider {
 	 */
 	public function add_package_current_state_box_classes( $classes ) {
 		$classes[] = 'carbon-box';
+
 		return $classes;
 	}
 
@@ -483,8 +546,8 @@ class EditPackage extends AbstractHookProvider {
 		}
 
 		$package = $this->packages->first_where( [
-			'source_name' => $package_data['source_name'],
-			'type'        => $package_data['type'],
+				'source_name' => $package_data['source_name'],
+				'type'        => $package_data['type'],
 		] );
 		if ( empty( $package ) ) {
 			return;
@@ -608,21 +671,21 @@ class EditPackage extends AbstractHookProvider {
 		// Display an error regarding that the package title is required.
 		if ( empty( $post->post_title ) ) {
 			printf(
-				'<div class="error below-h2"><p>%s</p></div>',
-				esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pixelgradelt_records' )
+					'<div class="error below-h2"><p>%s</p></div>',
+					esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pixelgradelt_records' )
 			);
 		}
 
 		// Display an error regarding that the package type is required.
 		$package_type = wp_get_object_terms( $post->ID, $this->package_manager::PACKAGE_TYPE_TAXONOMY, array(
-			'orderby' => 'term_id',
-			'order'   => 'ASC',
+				'orderby' => 'term_id',
+				'order'   => 'ASC',
 		) );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
 			$taxonomy_args = $this->package_post_type->get_package_type_taxonomy_args();
 			printf(
-				'<div class="error below-h2"><p>%s</p></div>',
-				sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
+					'<div class="error below-h2"><p>%s</p></div>',
+					sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
 			);
 		}
 	}
