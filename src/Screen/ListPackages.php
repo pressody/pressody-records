@@ -152,7 +152,11 @@ class ListPackages extends AbstractHookProvider {
 						$source_output = 'Local Theme - ' . $package_data['slug'];
 						break;
 					case 'local.manual':
-						$source_output = 'Manual - ' . $package_data['slug'];
+						if ( 'theme' === $package_data['type'] ) {
+							$source_output = 'Manual Theme - ' . $package_data['slug'];
+						} else {
+							$source_output = 'Manual Plugin - ' . $package_data['slug'];
+						}
 						break;
 					default:
 						// Nothing
