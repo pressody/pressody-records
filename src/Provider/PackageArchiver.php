@@ -101,8 +101,8 @@ class PackageArchiver extends AbstractHookProvider {
 
 		add_action( 'before_delete_post', [ $this, 'clean_on_ltpackage_post_delete' ], 10, 2 );
 
-		$this->add_action( 'pixelgradelt_records_archive_from_url_before', 'hook_before_download_url' );
-		$this->add_action( 'pixelgradelt_records_archive_from_url_after', 'remove_hooks_after_download_url' );
+		$this->add_action( 'pixelgradelt_records_download_url_before', 'hook_before_download_url' );
+		$this->add_action( 'pixelgradelt_records_download_url_after', 'remove_hooks_after_download_url' );
 	}
 
 	/**

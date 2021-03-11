@@ -98,7 +98,7 @@ class Archiver {
 			$remove_path = $package->get_directory();
 		}
 
-		$filename = $this->get_absolute_path( $release->get_file() );
+		$filename = $this->get_absolute_path_to_tmpdir( $release->get_file() );
 
 		if ( ! wp_mkdir_p( \dirname( $filename ) ) ) {
 			throw FileOperationFailed::unableToCreateTemporaryDirectory( $filename );
@@ -198,28 +198,8 @@ class Archiver {
 	public function archive_from_url( Release $release ): string {
 		include_once ABSPATH . 'wp-admin/includes/file.php';
 
-		$filename     = $this->get_absolute_path( $release->get_file() );
-		$download_url = apply_filters( 'pixelgradelt_records_package_download_url', $release->get_source_url(), $release );
-
-		// Allow others to hook-in just before the download.
-		do_action( 'pixelgradelt_records_archive_from_url_before', $release, $this );
-
-		$tmpfname = download_url( $download_url );
-
-		// Allow others to hook-in just after the download.
-		do_action( 'pixelgradelt_records_archive_from_url_after', $release, $this );
-
-		if ( is_wp_error( $tmpfname ) ) {
-			$this->logger->error(
-				'Download failed.',
-				[
-					'error' => $tmpfname,
-					'url'   => $release->get_source_url(),
-				]
-			);
-
-			throw FileDownloadFailed::forFileName( $filename );
-		}
+		$filename = $this->get_absolute_path_to_tmpdir( $release->get_file() );
+		$tmpfname = $this->download_url( $release->get_source_url() );
 
 		if ( ! wp_mkdir_p( \dirname( $filename ) ) ) {
 			throw FileOperationFailed::unableToCreateTemporaryDirectory( $filename );
@@ -251,6 +231,129 @@ class Archiver {
 	}
 
 	/**
+	 * Given an URL download it to a temporary location and provide the path to the resulting file.
+	 *
+	 * @param string $url
+	 *
+	 * @throws FileOperationFailed
+	 * @return string The temporary file path.
+	 */
+	public function download_url( string $url ): string {
+		$url = apply_filters( 'pixelgradelt_records_package_download_url', $url );
+
+		if ( $this->is_local_url( $url ) ) {
+			// Since this is a local URL to a file, we don't need to download, just to create a temporary copy.
+			$path = $this->local_url_to_path( $url );
+			if ( ! empty( $path ) ) {
+				$url_filename = basename( $path );
+				$tmpfname = wp_tempnam( $url_filename );
+				if ( ! $tmpfname ) {
+					$this->logger->error(
+						'Could not create Temporary file for file {filename} from URL {url}.',
+						[
+							'filename' => $url_filename,
+							'url'   => $url,
+						]
+					);
+
+					throw FileDownloadFailed::forUrl( $url );
+				}
+
+				if ( false === copy( $path, $tmpfname ) ) {
+					$this->logger->error(
+						'Could not copy file {path} to the Temporary file {tmpfname}.',
+						[
+							'path' => $path,
+							'tmpfname'   => $tmpfname,
+						]
+					);
+
+					throw FileDownloadFailed::forUrl( $url );
+				}
+
+				// Return the path to the temporary file.
+				return $tmpfname;
+			}
+		}
+
+		// Allow others to hook-in just before the download.
+		do_action( 'pixelgradelt_records_download_url_before', $url );
+
+		$tmpfname = download_url( $url );
+
+		// Allow others to hook-in just after the download.
+		do_action( 'pixelgradelt_records_download_url_after', $url );
+
+		if ( is_wp_error( $tmpfname ) ) {
+			$this->logger->error(
+				'Download failed.',
+				[
+					'error' => $tmpfname,
+					'url'   => $url,
+				]
+			);
+
+			throw FileDownloadFailed::forUrl( $url );
+		}
+
+		// Return the path to the temporary file.
+		return $tmpfname;
+	}
+
+	/**
+	 * Given an URL determine if it is a local one (has the same host as the WP install).
+	 *
+	 * @see wp_http_validate_url()
+	 *
+	 * @param string $url
+	 *
+	 * @return bool
+	 */
+	protected function is_local_url( string $url ): bool {
+		$original_url = $url;
+		$url          = wp_kses_bad_protocol( $url, array( 'http', 'https' ) );
+		if ( ! $url || strtolower( $url ) !== strtolower( $original_url ) ) {
+			return false;
+		}
+
+		$parsed_url = parse_url( $url );
+		if ( ! $parsed_url || empty( $parsed_url['host'] ) ) {
+			return false;
+		}
+
+		$parsed_home = parse_url( get_option( 'home' ) );
+		if ( isset( $parsed_home['host'] ) ) {
+			return strtolower( $parsed_home['host'] ) === strtolower( $parsed_url['host'] );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Given a local file URL convert it to an absolute path.
+	 *
+	 * @see wp_http_validate_url()
+	 *
+	 * @param string $url
+	 *
+	 * @return string
+	 */
+	protected function local_url_to_path( string $url ): string {
+		$parsed_url = parse_url( $url );
+
+		if ( empty( $parsed_url['path'] ) ) {
+			return '';
+		}
+
+		$file = ABSPATH . ltrim( $parsed_url['path'], '/' );
+		if ( file_exists( $file ) ) {
+			return $file;
+		}
+
+		return '';
+	}
+
+	/**
 	 * Retrieve the absolute path to a file.
 	 *
 	 * @since 0.1.0
@@ -259,7 +362,7 @@ class Archiver {
 	 *
 	 * @return string
 	 */
-	protected function get_absolute_path( string $path = '' ): string {
+	protected function get_absolute_path_to_tmpdir( string $path = '' ): string {
 		return get_temp_dir() . 'pixelgradelt_records/' . ltrim( $path, '/' );
 	}
 }

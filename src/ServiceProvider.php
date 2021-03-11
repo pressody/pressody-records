@@ -207,6 +207,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new PackageFactory(
 				$container['package.manager'],
 				$container['release.manager'],
+				$container['archiver'],
 				$container['logger']
 			);
 		};
@@ -269,6 +270,24 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['repository.external.themes'] = function( $container ) {
 			return new Repository\CachedRepository(
 				new Repository\ExternalThemes(
+					$container['package.factory'],
+					$container['package.manager']
+				)
+			);
+		};
+
+		$container['repository.manual.plugins'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ManualPlugins(
+					$container['package.factory'],
+					$container['package.manager']
+				)
+			);
+		};
+
+		$container['repository.manual.themes'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ManualThemes(
 					$container['package.factory'],
 					$container['package.manager']
 				)
@@ -339,6 +358,8 @@ class ServiceProvider implements ServiceProviderInterface {
 					$container['repository.installed.managed'],
 					$container['repository.external.plugins'],
 					$container['repository.external.themes'],
+					$container['repository.manual.plugins'],
+					$container['repository.manual.themes'],
 				]
 			);
 		};

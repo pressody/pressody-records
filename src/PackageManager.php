@@ -292,6 +292,7 @@ class PackageManager {
 		$data['authors']     = $this->get_post_package_authors( $post_ID );
 
 		$data['source_cached_release_packages'] = [];
+		$data['manual_releases'] = [];
 
 		switch ( $data['source_type'] ) {
 			case 'packagist.org':
@@ -337,6 +338,7 @@ class PackageManager {
 				break;
 			case 'local.manual':
 				$data['source_name'] = 'local-manual' . '/' . $data['slug'];
+				$data['manual_releases'] = $this->get_post_package_manual_releases( $post_ID );
 				break;
 			default:
 				// Nothing
@@ -636,5 +638,54 @@ class PackageManager {
 
 	public function set_post_package_authors( int $post_ID, array $authors, string $container_id = '' ) {
 		carbon_set_post_meta( $post_ID, 'package_details_authors', $authors, $container_id );
+	}
+
+	public function get_post_package_manual_releases( int $post_ID, string $container_id = '' ): array {
+		$published_releases = carbon_get_post_meta( $post_ID, 'package_manual_releases', $container_id );
+
+		$releases = [];
+		foreach ( $published_releases as $release_data ) {
+			$release_data['version'] = trim( $release_data['version'] );
+			if ( empty( $release_data['version'] ) || empty( $release_data['file'] ) ) {
+				continue;
+			}
+
+			// Try to normalize the version string.
+			try {
+				$normalized_version = $this->composer_version_parser->normalize( $release_data['version'] );
+			} catch ( \UnexpectedValueException $e ) {
+				// This means that something is wrong with the version string. Skip it.
+				$this->logger->error(
+					'Invalid version string {version} for manually uploaded release in post ID {post_id}.',
+					[
+						'exception' => $e,
+						'version'   => $release_data['version'],
+						'post_id'   => $post_ID,
+					]
+				);
+				continue;
+			}
+
+			// Get the attachment URL.
+			$url = wp_get_attachment_url( $release_data['file'] );
+			if ( false === $url ) {
+				continue;
+			}
+
+			$releases[ $normalized_version ] = [
+				'version' => $release_data['version'],
+				'normalized_version' => $normalized_version,
+				'source_url' => $url,
+			];
+		}
+
+		uasort(
+			$releases,
+			function ( $a, $b ) {
+				return version_compare( $b['normalized_version'], $a['normalized_version'] );
+			}
+		);
+
+		return $releases;
 	}
 }

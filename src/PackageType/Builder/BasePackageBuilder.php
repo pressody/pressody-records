@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType\Builder;
 
+use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageManager;
@@ -64,6 +65,13 @@ class BasePackageBuilder {
 	protected $release_manager;
 
 	/**
+	 * Archiver.
+	 *
+	 * @var Archiver
+	 */
+	protected $archiver;
+
+	/**
 	 * Logger.
 	 *
 	 * @var Logger
@@ -78,12 +86,14 @@ class BasePackageBuilder {
 	 * @param Package         $package         Package instance to build.
 	 * @param PackageManager  $package_manager Packages manager.
 	 * @param ReleaseManager  $release_manager Release manager.
+	 * @param Archiver        $archiver        Archiver.
 	 * @param LoggerInterface $logger          Logger.
 	 */
 	public function __construct(
 		Package $package,
 		PackageManager $package_manager,
 		ReleaseManager $release_manager,
+		Archiver $archiver,
 		LoggerInterface $logger
 	) {
 		$this->package = $package;
@@ -96,6 +106,7 @@ class BasePackageBuilder {
 
 		$this->package_manager = $package_manager;
 		$this->release_manager = $release_manager;
+		$this->archiver        = $archiver;
 		$this->logger          = $logger;
 	}
 
@@ -211,7 +222,7 @@ class BasePackageBuilder {
 			if ( is_array( $author ) ) {
 				// Make sure only the fields we are interested in are left.
 				$accepted_keys = array_fill_keys( [ 'name', 'email', 'homepage', 'role' ], '' );
-				$author = array_replace( $accepted_keys, array_intersect_key( $author, $accepted_keys ) );
+				$author        = array_replace( $accepted_keys, array_intersect_key( $author, $accepted_keys ) );
 
 				// Remove falsy author entries.
 				$author = array_filter( $author );
@@ -423,6 +434,7 @@ class BasePackageBuilder {
 	 * @since 0.5.0
 	 *
 	 * @param string $version Version.
+	 *
 	 * @return $this
 	 */
 	public function set_requires_at_least_wp( string $version ): self {
@@ -439,6 +451,7 @@ class BasePackageBuilder {
 	 * @since 0.5.0
 	 *
 	 * @param string $version Version.
+	 *
 	 * @return $this
 	 */
 	public function set_tested_up_to_wp( string $version ): self {
@@ -455,6 +468,7 @@ class BasePackageBuilder {
 	 * @since 0.5.0
 	 *
 	 * @param string $version Version.
+	 *
 	 * @return $this
 	 */
 	public function set_requires_php( string $version ): self {
@@ -502,6 +516,8 @@ class BasePackageBuilder {
 	 * @return $this
 	 */
 	public function from_manager( int $post_id = 0, array $args = [] ): self {
+		$this->set_managed_post_id( $post_id );
+
 		$package_data = $this->package_manager->get_package_id_data( $post_id );
 		// If we couldn't fetch package data by the post ID, try via the args.
 		if ( empty( $package_data ) ) {
@@ -517,7 +533,6 @@ class BasePackageBuilder {
 
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
-		$this->set_managed_post_id( $post_id );
 
 		$this->from_package_data( $package_data );
 
@@ -595,6 +610,122 @@ class BasePackageBuilder {
 	}
 
 	/**
+	 * Fill (missing) package details from a given release file (zip).
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param Release $release
+	 *
+	 * @return $this
+	 */
+	public function from_release_file( Release $release ): self {
+
+		/** @var \WP_Filesystem_Base $wp_filesystem */
+		global $wp_filesystem;
+		include_once ABSPATH . 'wp-admin/includes/file.php';
+		WP_Filesystem();
+
+		$source_filename     = $this->release_manager->get_absolute_path( $release );
+		$delete_source_after = false;
+		if ( empty( $source_filename ) ) {
+			// This release is not cached, so we need to download.
+			try {
+				$source_filename = $this->archiver->download_url( $release->get_source_url() );
+			} catch ( \Exception $e ) {
+				// Something went wrong with the download. Bail.
+				return $this;
+			}
+
+			// Since the download succeeded, we need to clean-up after us.
+			$delete_source_after = true;
+		}
+
+		if ( ! empty( $source_filename ) && file_exists( $source_filename ) ) {
+			$tempdir = \trailingslashit( get_temp_dir() ) . 'lt_tmp_' . \wp_generate_password( 6, false );
+			if ( true === unzip_file( $source_filename, $tempdir ) ) {
+				// First we must make sure that we are looking into the package directory
+				// (themes and plugins usually have their directory included in the zip).
+				$package_source_dir   = $tempdir;
+				$package_source_files = array_keys( $wp_filesystem->dirlist( $package_source_dir ) );
+				if ( 1 == count( $package_source_files ) && $wp_filesystem->is_dir( trailingslashit( $package_source_dir ) . trailingslashit( $package_source_files[0] ) ) ) {
+					// Only one folder? Then we want its contents.
+					$package_source_dir = trailingslashit( $package_source_dir ) . trailingslashit( $package_source_files[0] );
+				}
+
+				// Depending on the package type (plugin or theme), extract the data accordingly.
+				$tmp_package_data = [];
+				if ( 'theme' === $this->package->get_type() ) {
+					$tmp_package_data = get_file_data(
+						\trailingslashit( $package_source_dir ) . 'style.css',
+						array(
+							'Name'              => 'Theme Name',
+							'ThemeURI'          => 'Theme URI',
+							'Description'       => 'Description',
+							'Author'            => 'Author',
+							'AuthorURI'         => 'Author URI',
+							'License'           => 'License',
+							'Tags'              => 'Tags',
+							'Requires at least' => 'Requires at least',
+							'Tested up to'      => 'Tested up to',
+							'Requires PHP'      => 'Requires PHP',
+							'Stable tag'        => 'Stable tag',
+						)
+					);
+				} else {
+					// Assume it's a plugin, of some sort.
+					$files = glob( \trailingslashit( $package_source_dir ) . '*.php' );
+					if ( $files ) {
+						foreach ( $files as $file ) {
+							$info = \get_plugin_data( $file, false, false );
+							if ( ! empty( $info['Name'] ) ) {
+								$tmp_package_data = $info;
+								break;
+							}
+						}
+					}
+				}
+
+				if ( ! empty( $tmp_package_data ) ) {
+					// Make sure that we don't end up doing the heavy lifting above on every request
+					// due to missing information in the package headers.
+					// Just fill missing header data with some default data.
+					if ( empty( $tmp_package_data['Description'] ) ) {
+						$tmp_package_data['Description'] = 'Just another package';
+					}
+					if ( empty( $tmp_package_data['ThemeURI'] ) && empty( $tmp_package_data['PluginURI'] ) ) {
+						$tmp_package_data['PluginURI'] = 'https://pixelgradelt.com';
+					}
+					if ( empty( $tmp_package_data['License'] ) ) {
+						$tmp_package_data['License'] = 'GPL-2.0-or-later';
+					}
+					if ( empty( $tmp_package_data['Author'] ) ) {
+						$tmp_package_data['Author'] = 'Pixelgrade';
+					}
+					if ( empty( $tmp_package_data['AuthorURI'] ) ) {
+						$tmp_package_data['AuthorURI'] = 'https://pixelgradelt.com';
+					}
+
+					// Now fill any missing package data from the headers data.
+					$this->from_header_data( $tmp_package_data );
+				}
+
+				// Now, go a second time and extract info from the readme and fill anything missing.
+				$this->from_readme( $package_source_dir );
+
+				// Cleanup the temporary directory, recursively.
+				$wp_filesystem->delete( $tempdir, true );
+			}
+
+			// If we have been instructed to delete the source file, do so.
+			if ( true === $delete_source_after ) {
+				$wp_filesystem->delete( $source_filename );
+			}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Fill (missing) package details from header data.
 	 *
 	 * @since 0.1.0
@@ -664,7 +795,6 @@ class BasePackageBuilder {
 	 * @param string $directory   The absolute path to the package files directory.
 	 * @param array  $readme_data Optional. Array of readme data.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalThemeBuilder
 	 */
 	public function from_readme( string $directory, array $readme_data = [] ): self {

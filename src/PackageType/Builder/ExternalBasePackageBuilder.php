@@ -98,15 +98,13 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 
 		$latest_version_package = reset( $cached_release_packages );
 		foreach ( $cached_release_packages as $package ) {
-			if ( empty( $package['version'] )
-			     || empty( $package['dist']['url'] )
-			) {
+			if ( empty( $package['version'] ) || empty( $package['dist']['url'] ) ) {
 				continue;
 			}
 
 			$this->add_release( $package['version'], $package['dist']['url'] );
 
-			if ( version_compare( $latest_version_package['version'], $package['version'], '<' ) ) {
+			if ( \version_compare( $latest_version_package['version'], $package['version'], '<' ) ) {
 				$latest_version_package = $package;
 			}
 		}
@@ -122,111 +120,9 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 		     || empty( $this->package->get_authors() )
 		     || empty( $this->package->get_license() )
 		) {
-			/** @var \WP_Filesystem_Base $wp_filesystem */
-			global $wp_filesystem;
-			include_once ABSPATH . 'wp-admin/includes/file.php';
-			WP_Filesystem();
 
-			$release             = $this->releases[ $latest_version_package['version'] ];
-			$source_filename     = $this->release_manager->get_absolute_path( $release );
-			$delete_source_after = false;
-			if ( empty( $source_filename ) ) {
-				// This release is not cached, so we need to download.
-				$source_filename     = \download_url( $release->get_source_url() );
-				$delete_source_after = true;
-				if ( \is_wp_error( $source_filename ) ) {
-					$this->logger->error(
-						'Download failed.',
-						[
-							'error' => $source_filename,
-							'url'   => $release->get_source_url(),
-						]
-					);
-
-					$source_filename = false;
-				}
-			}
-
-			if ( ! empty( $source_filename ) && file_exists( $source_filename ) ) {
-				$tempdir = \trailingslashit( get_temp_dir() ) . 'lt_tmp_' . \wp_generate_password( 6, false );
-				if ( true === unzip_file( $source_filename, $tempdir ) ) {
-					// First we must make sure that we are looking into the package directory
-					// (themes and plugins usually have their directory included in the zip).
-					$package_source_dir   = $tempdir;
-					$package_source_files = array_keys( $wp_filesystem->dirlist( $package_source_dir ) );
-					if ( 1 == count( $package_source_files ) && $wp_filesystem->is_dir( trailingslashit( $package_source_dir ) . trailingslashit( $package_source_files[0] ) ) ) {
-						// Only one folder? Then we want its contents.
-						$package_source_dir = trailingslashit( $package_source_dir ) . trailingslashit( $package_source_files[0] );
-					}
-
-					// Depending on the package type (plugin or theme), extract the data accordingly.
-					$tmp_package_data = [];
-					if ( 'theme' === $this->package->get_type() ) {
-						$tmp_package_data = get_file_data(
-							\trailingslashit( $package_source_dir ) . 'style.css',
-							array(
-								'Name'        => 'Theme Name',
-								'ThemeURI'    => 'Theme URI',
-								'Description' => 'Description',
-								'Author'      => 'Author',
-								'AuthorURI'   => 'Author URI',
-								'License'     => 'License',
-								'Tags'        => 'Tags',
-								'Requires at least' => 'Requires at least',
-								'Tested up to' => 'Tested up to',
-								'Requires PHP' => 'Requires PHP',
-								'Stable tag' => 'Stable tag',
-							)
-						);
-					} else {
-						// Assume it's a plugin, of some sort.
-						$files = glob( \trailingslashit( $package_source_dir ) . '*.php' );
-						if ( $files ) {
-							foreach ( $files as $file ) {
-								$info = \get_plugin_data( $file, false, false );
-								if ( ! empty( $info['Name'] ) ) {
-									$tmp_package_data = $info;
-									break;
-								}
-							}
-						}
-					}
-
-					if ( ! empty( $tmp_package_data ) ) {
-						// Make sure that we don't end up doing the heavy lifting above on every request
-						// due to missing information in the package headers.
-						// Just fill missing header data with some default data.
-						if ( empty( $tmp_package_data['Description'] ) ) {
-							$tmp_package_data['Description'] = 'Just another package';
-						}
-						if ( empty( $tmp_package_data['ThemeURI'] ) && empty( $tmp_package_data['PluginURI'] ) ) {
-							$tmp_package_data['PluginURI'] = 'https://pixelgradelt.com';
-						}
-						if ( empty( $tmp_package_data['License'] ) ) {
-							$tmp_package_data['License'] = 'GPL-2.0-or-later';
-						}
-						if ( empty( $tmp_package_data['Author'] ) ) {
-							$tmp_package_data['Author'] = 'Pixelgrade';
-						}
-						if ( empty( $tmp_package_data['AuthorURI'] ) ) {
-							$tmp_package_data['AuthorURI'] = 'https://pixelgradelt.com';
-						}
-
-						// Now fill any missing package data from the headers data.
-						$this->from_header_data( $tmp_package_data );
-					}
-
-					// Now, go a second time and extract info from the readme and fill anything missing.
-					$this->from_readme( $package_source_dir );
-
-					// Cleanup the temporary directory, recursively.
-					$wp_filesystem->delete( $tempdir, true );
-				}
-
-				// If we have been instructed to delete the source file, do so.
-				if ( true === $delete_source_after ) {
-					$wp_filesystem->delete( $source_filename );
-				}
+			if ( ! empty( $this->releases[ $latest_version_package['version'] ] ) ) {
+				$this->from_release_file( $this->releases[ $latest_version_package['version'] ] );
 			}
 		}
 
@@ -264,23 +160,6 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 			if ( ! $constraint->matches( new Constraint( '==', $this->normalize_version( $release->get_version() ) ) ) ) {
 				unset( $this->releases[ $key ] );
 			}
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Add cached releases to a package.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return $this
-	 */
-	public function add_cached_releases(): BasePackageBuilder {
-		$releases = $this->release_manager->all_cached( $this->package );
-
-		foreach ( $releases as $release ) {
-			$this->add_release( $release->get_version(), $release->get_source_url() );
 		}
 
 		return $this;

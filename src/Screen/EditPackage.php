@@ -401,16 +401,19 @@ class EditPackage extends AbstractHookProvider {
 				              ] ),
 
 				         Field::make( 'complex', 'package_manual_releases', __( 'Package Releases', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'The manually uploaded package releases (zips).', 'pixelgradelt_records' ) )
-				              ->add_fields( [
-						              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )
-						                    ->set_required( true )
-						                    ->set_width( 25 ),
-						              Field::make( 'file', 'file', __( 'Archive', 'pixelgradelt_records' ) )
-						                    ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
-						                    ->set_value_type( 'id' ) // Change to 'url' to store the file URL instead of the attachment ID.
-							                ->set_required( true )
-							                ->set_width( 50 ),
+				              ->set_help_text( __( 'The manually uploaded package releases (zips).<br> <strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br><strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit "Update" for the post and them add a new release.<br>Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can\'t stand some mess.', 'pixelgradelt_records' ) )
+					          ->set_classes( 'package-manual-releases' )
+					          ->set_collapsed( true )
+					          ->add_fields( [
+					              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )
+					                    ->set_help_text( __( 'Semver-formatted version string. Bear in mind that we currently don\'t do any check regarding the version. It is up to you to <strong>make sure that the zip file matches the version specified.</strong>', 'pixelgradelt_records' ) )
+					                    ->set_required( true )
+					                    ->set_width( 25 ),
+					              Field::make( 'file', 'file', __( 'Zip File', 'pixelgradelt_records' ) )
+					                    ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
+					                    ->set_value_type( 'id' ) // Change to 'url' to store the file/attachment URL instead of the attachment ID.
+						                ->set_required( true )
+						                ->set_width( 50 ),
 				              ] )
 				              ->set_header_template( '
 								    <% if (version) { %>
@@ -538,7 +541,7 @@ class EditPackage extends AbstractHookProvider {
 
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
-		echo '<p>This is the same info shown in the full package-details list available <a href="wp-admin/options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages">here</a>. The real source of truth is the packages JSON available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
+		echo '<p>This is the same info shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages') ) . '">here</a>. The real source of truth is the packages JSON available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/package-details.php' );
 		echo '</div></div>';
 	}

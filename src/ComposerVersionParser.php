@@ -46,6 +46,7 @@ final class ComposerVersionParser implements VersionParser {
 	 * @param string      $version      Version string.
 	 * @param string|null $full_version Optional complete version string to give more context.
 	 *
+	 * @throws \UnexpectedValueException
 	 * @return string Normalized version string.
 	 */
 	public function normalize( string $version, string $full_version = null ): string {
@@ -54,6 +55,8 @@ final class ComposerVersionParser implements VersionParser {
 
 	/**
 	 * Parses a constraint string into MultiConstraint and/or Constraint objects.
+	 *
+	 * @since 0.5.0
 	 *
 	 * @param string $constraints
 	 *

@@ -325,3 +325,12 @@
 	float: left;
 	margin-right: 15px;
 }
+
+.cf-complex__group--collapsed .cf-complex__group-head {
+	border-bottom: 1px solid #e2e4e7;
+}
+
+.package-manual-releases .cf-complex__group-body .cf-field__body .cf-file__inner {
+	width: auto;
+	height: 100px;
+}
