@@ -95,7 +95,7 @@ class EditPackage extends AbstractHookProvider {
 		$this->add_action( 'add_meta_boxes_' . $this->package_manager::PACKAGE_POST_TYPE, 'adjust_core_metaboxes', 99 );
 
 		// ADD CUSTOM POST META VIA CARBON FIELDS.
-		$this->add_action( 'after_setup_theme', 'carbonfields_load' );
+		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 		// Fill empty package details from source.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 5, 1 );
@@ -403,11 +403,20 @@ class EditPackage extends AbstractHookProvider {
 				         Field::make( 'complex', 'package_manual_releases', __( 'Package Releases', 'pixelgradelt_records' ) )
 				              ->set_help_text( __( 'The manually uploaded package releases (zips).', 'pixelgradelt_records' ) )
 				              ->add_fields( [
-						              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )->set_required( true )->set_width( 25 ),
+						              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )
+						                    ->set_required( true )
+						                    ->set_width( 25 ),
 						              Field::make( 'file', 'file', __( 'Archive', 'pixelgradelt_records' ) )
-						                   ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
-						                   ->set_value_type( 'id' ), // Change to 'url' to store the file URL instead of the attachment ID.
+						                    ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
+						                    ->set_value_type( 'id' ) // Change to 'url' to store the file URL instead of the attachment ID.
+							                ->set_required( true )
+							                ->set_width( 50 ),
 				              ] )
+				              ->set_header_template( '
+								    <% if (version) { %>
+								        Version: <%- version %>
+								    <% } %>
+								' )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
@@ -514,6 +523,7 @@ class EditPackage extends AbstractHookProvider {
 	public function display_package_current_state_meta_box( \WP_Post $post ) {
 		$package_data = $this->package_manager->get_package_id_data( (int) $post->ID );
 		if ( empty( $package_data ) || empty( $package_data['source_name'] ) || empty( $package_data['type'] ) ) {
+			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
 			return;
 		}
 
@@ -522,6 +532,7 @@ class EditPackage extends AbstractHookProvider {
 				'type'        => $package_data['type'],
 		] );
 		if ( empty( $package ) ) {
+			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
 			return;
 		}
 
