@@ -1,0 +1,18 @@
+{
+    "name": "htmlburger/carbon-field-Upload_Zip",
+    "description": "Carbon Fields extension, that adds a Upload_Zip field type.",
+    "keywords": ["wordpress", "carbon-field", "carbon-field-Upload_Zip"],
+    "homepage": "http://yourhomepage.example.com",
+    "type": "library",
+    "license": "GPL-2.0+",
+    "authors": [],
+    "require": {},
+    "autoload": {
+        "files": [
+            "field.php"
+        ],
+        "psr-4": {
+            "Carbon_Field_Upload_Zip\\": "core/"
+        }
+    }
+}
