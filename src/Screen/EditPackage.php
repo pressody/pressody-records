@@ -413,7 +413,10 @@ class EditPackage extends AbstractHookProvider {
 				              ] ),
 
 				         Field::make( 'complex', 'package_manual_releases', __( 'Package Releases', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'The manually uploaded package releases (zips).<br> <strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br><strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit "Update" for the post and them add a new release.<br>Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can\'t stand some mess.', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'The manually uploaded package releases (zips).<br>
+<strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br>
+<strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit "Update" for the post and them add a new release.<br>
+Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can\'t stand some mess.', 'pixelgradelt_records' ) )
 				              ->set_classes( 'package-manual-releases' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
@@ -541,7 +544,50 @@ class EditPackage extends AbstractHookProvider {
 								              'compare' => 'IN',
 						              ],
 				              ] ),
+		         ] );
 
+		// Register the metabox for managing the packages the current package depends on (dependencies that will translate in composer `require`s).
+		Container::make( 'post_meta', esc_html__( 'Dependencies Configuration', 'pixelgradelt_records' ) )
+		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
+		         ->set_context( 'normal' )
+		         ->set_priority( 'core' )
+		         ->add_fields( [
+				         Field::make( 'html', 'dependencies_configuration_html', __( 'Dependencies Description', 'pixelgradelt_records' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of other managed packages</strong> the current package depends on (required packages that translate into entries in Composer\'s <code>require</code> entries).<br>
+For each required package you can <strong>specify a version range</strong> to better control the package releases/versions required. Set to <code>*</code> to <strong>use the latest available required-package release that matches all constraints</strong> (other packages in a module might impose stricter limits).<br>
+Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) ) ),
+
+				         Field::make( 'complex', 'package_required_packages', __( 'Required Packages', 'pixelgradelt_records' ) )
+				              ->set_classes( 'package-required-packages' )
+				              ->set_collapsed( true )
+				              ->add_fields( [
+						              Field::make( 'select', 'package_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
+						                   ->set_help_text( __( 'Packages that are already required by this package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
+						                   ->set_options( [ $this, 'get_available_installed_plugins_options' ] )
+						                   ->set_default_value( null )
+						                   ->set_required( true )
+						                   ->set_width( 50 ),
+						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_records' ) )
+							               ->set_default_value( '*' )
+							               ->set_required( true )
+						                   ->set_width( 25 ),
+						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_records' ) )
+						                   ->set_options( [
+								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
+								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
+								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
+								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
+								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+						                   ] )
+						                   ->set_required( true )
+						                   ->set_default_value( 'stable' )
+						                   ->set_width( 25 ),
+				              ] )
+				              ->set_header_template( '
+								    <% if (version_range) { %>
+								        Version: <%- version_range %>
+								    <% } %>
+								' ),
 		         ] );
 	}
 
@@ -554,7 +600,7 @@ class EditPackage extends AbstractHookProvider {
 				array( $this, 'display_package_current_state_meta_box' ),
 				$this->package_manager::PACKAGE_POST_TYPE,
 				'normal',
-				'default'
+				'core'
 		);
 
 		add_filter( "postbox_classes_{$post_type}_{$container_id}", [
@@ -590,18 +636,18 @@ class EditPackage extends AbstractHookProvider {
 				'type'        => $package_data['type'],
 		] );
 
-		// Transform the package in the Composer format.
-		$package = $this->composer_transformer->transform( $package );
-
 		if ( empty( $package ) ) {
 			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
 
 			return;
 		}
 
+		// Transform the package in the Composer format.
+		$package = $this->composer_transformer->transform( $package );
+
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
-		echo '<p>This is the same info shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages' ) ) . '">here</a>. The real source of truth is the packages JSON available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
+		echo '<p>This is <strong>the same info</strong> shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/package-details.php' );
 		echo '</div></div>';
 	}
@@ -613,6 +659,11 @@ class EditPackage extends AbstractHookProvider {
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
 	protected function fill_empty_package_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+		// At the moment, we are only interested in the source_configuration container.
+		// This way we avoid running this logic unnecessarily for other containers.
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration' !== $meta_container->get_id() ) {
+			return;
+		}
 
 		$package_data = $this->package_manager->get_package_id_data( $post_ID );
 		if ( empty( $package_data ) ) {

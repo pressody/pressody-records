@@ -47,7 +47,7 @@ class ManualBasePackageBuilder extends BasePackageBuilder {
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
 
-		// Write the package data here, so the following logic has the data it needs.
+		// Write the current package data here, so the following logic has the data it needs.
 		$this->from_package_data( $package_data );
 
 		// If we have manually uploaded releases (in the database), add them.

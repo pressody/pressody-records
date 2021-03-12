@@ -83,7 +83,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 			}
 		}
 
-		// Write the package data here, so the following logic has the data it needs.
+		// Write the package current data here, so the following logic has the data it needs.
 		$this->from_package_data( $package_data );
 
 		// If we have cached external releases (in the database, not from a zip files point of view), add them.
