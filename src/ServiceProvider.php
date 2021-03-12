@@ -392,7 +392,8 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Screen\EditPackage(
 				$container['package.manager'],
 				$container['repository.managed'],
-				$container['hooks.package_post_type']
+				$container['hooks.package_post_type'],
+				$container['transformer.composer_package']
 			);
 		};
 

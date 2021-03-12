@@ -18,6 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PostType\PackagePostType;
 use PixelgradeLT\Records\Repository\PackageRepository;
+use PixelgradeLT\Records\Transformer\PackageTransformer;
 use function PixelgradeLT\Records\get_packages_permalink;
 
 /**
@@ -51,22 +52,33 @@ class EditPackage extends AbstractHookProvider {
 	protected $package_post_type;
 
 	/**
+	 * Composer package transformer.
+	 *
+	 * @var PackageTransformer
+	 */
+	protected $composer_transformer;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.5.0
 	 *
-	 * @param PackageManager    $package_manager   Packages manager.
-	 * @param PackageRepository $packages          Packages repository.
-	 * @param PackagePostType   $package_post_type Packages post type.
+	 * @param PackageManager     $package_manager      Packages manager.
+	 * @param PackageRepository  $packages             Packages repository.
+	 * @param PackagePostType    $package_post_type    Packages post type.
+	 * @param PackageTransformer $composer_transformer Package transformer.
 	 */
 	public function __construct(
 			PackageManager $package_manager,
 			PackageRepository $packages,
-			PackagePostType $package_post_type
+			PackagePostType $package_post_type,
+			PackageTransformer $composer_transformer
 	) {
-		$this->package_manager   = $package_manager;
-		$this->packages          = $packages;
-		$this->package_post_type = $package_post_type;
+
+		$this->package_manager      = $package_manager;
+		$this->packages             = $packages;
+		$this->package_post_type    = $package_post_type;
+		$this->composer_transformer = $composer_transformer;
 	}
 
 	/**
@@ -402,18 +414,18 @@ class EditPackage extends AbstractHookProvider {
 
 				         Field::make( 'complex', 'package_manual_releases', __( 'Package Releases', 'pixelgradelt_records' ) )
 				              ->set_help_text( __( 'The manually uploaded package releases (zips).<br> <strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br><strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit "Update" for the post and them add a new release.<br>Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can\'t stand some mess.', 'pixelgradelt_records' ) )
-					          ->set_classes( 'package-manual-releases' )
-					          ->set_collapsed( true )
-					          ->add_fields( [
-					              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )
-					                    ->set_help_text( __( 'Semver-formatted version string. Bear in mind that we currently don\'t do any check regarding the version. It is up to you to <strong>make sure that the zip file matches the version specified.</strong>', 'pixelgradelt_records' ) )
-					                    ->set_required( true )
-					                    ->set_width( 25 ),
-					              Field::make( 'file', 'file', __( 'Zip File', 'pixelgradelt_records' ) )
-					                    ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
-					                    ->set_value_type( 'id' ) // Change to 'url' to store the file/attachment URL instead of the attachment ID.
-						                ->set_required( true )
-						                ->set_width( 50 ),
+				              ->set_classes( 'package-manual-releases' )
+				              ->set_collapsed( true )
+				              ->add_fields( [
+						              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )
+						                   ->set_help_text( __( 'Semver-formatted version string. Bear in mind that we currently don\'t do any check regarding the version. It is up to you to <strong>make sure that the zip file matches the version specified.</strong>', 'pixelgradelt_records' ) )
+						                   ->set_required( true )
+						                   ->set_width( 25 ),
+						              Field::make( 'file', 'file', __( 'Zip File', 'pixelgradelt_records' ) )
+						                   ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
+						                   ->set_value_type( 'id' ) // Change to 'url' to store the file/attachment URL instead of the attachment ID.
+						                   ->set_required( true )
+						                   ->set_width( 50 ),
 				              ] )
 				              ->set_header_template( '
 								    <% if (version) { %>
@@ -431,47 +443,82 @@ class EditPackage extends AbstractHookProvider {
 
 
 				         Field::make( 'separator', 'package_details_separator', '' )
-						         ->set_conditional_logic( [
-								         [
-										         'field'   => 'package_source_type',
-										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
-										         'compare' => 'IN',
-								         ],
-						         ] ),
+				              ->set_conditional_logic( [
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [
+										              'packagist.org',
+										              'wpackagist.org',
+										              'vcs',
+										              'local.plugin',
+										              'local.theme',
+										              'local.manual',
+								              ],
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 				         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pixelgradelt_records' ) )
 				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pixelgradelt_records' ) ) )
-						         ->set_conditional_logic( [
-								         [
-										         'field'   => 'package_source_type',
-										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
-										         'compare' => 'IN',
-								         ],
-						         ] ),
+				              ->set_conditional_logic( [
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [
+										              'packagist.org',
+										              'wpackagist.org',
+										              'vcs',
+										              'local.plugin',
+										              'local.theme',
+										              'local.manual',
+								              ],
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
-						         ->set_conditional_logic( [
-								         [
-										         'field'   => 'package_source_type',
-										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
-										         'compare' => 'IN',
-								         ],
-						         ] ),
+				              ->set_conditional_logic( [
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [
+										              'packagist.org',
+										              'wpackagist.org',
+										              'vcs',
+										              'local.plugin',
+										              'local.theme',
+										              'local.manual',
+								              ],
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 				         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) )
-						         ->set_conditional_logic( [
-								         [
-										         'field'   => 'package_source_type',
-										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
-										         'compare' => 'IN',
-								         ],
-						         ] ),
+				              ->set_conditional_logic( [
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [
+										              'packagist.org',
+										              'wpackagist.org',
+										              'vcs',
+										              'local.plugin',
+										              'local.theme',
+										              'local.manual',
+								              ],
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 				         Field::make( 'text', 'package_details_license', __( 'Package License', 'pixelgradelt_records' ) )
 				              ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pixelgradelt_records' ) )
-						         ->set_conditional_logic( [
-								         [
-										         'field'   => 'package_source_type',
-										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
-										         'compare' => 'IN',
-								         ],
-						         ] ),
+				              ->set_conditional_logic( [
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [
+										              'packagist.org',
+										              'wpackagist.org',
+										              'vcs',
+										              'local.plugin',
+										              'local.theme',
+										              'local.manual',
+								              ],
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 				         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pixelgradelt_records' ) )
 				              ->set_help_text( __( 'The package authors details. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#authors" target="_blank">here</a>.', 'pixelgradelt_records' ) )
 				              ->add_fields( [
@@ -481,12 +528,19 @@ class EditPackage extends AbstractHookProvider {
 						              Field::make( 'text', 'role', __( 'Author Role', 'pixelgradelt_records' ) )->set_width( 50 ),
 				              ] )
 				              ->set_conditional_logic( [
-								         [
-										         'field'   => 'package_source_type',
-										         'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs', 'local.plugin', 'local.theme', 'local.manual' ],
-										         'compare' => 'IN',
-								         ],
-						         ] ),
+						              [
+								              'field'   => 'package_source_type',
+								              'value'   => [
+										              'packagist.org',
+										              'wpackagist.org',
+										              'vcs',
+										              'local.plugin',
+										              'local.theme',
+										              'local.manual',
+								              ],
+								              'compare' => 'IN',
+						              ],
+				              ] ),
 
 		         ] );
 	}
@@ -527,6 +581,7 @@ class EditPackage extends AbstractHookProvider {
 		$package_data = $this->package_manager->get_package_id_data( (int) $post->ID );
 		if ( empty( $package_data ) || empty( $package_data['source_name'] ) || empty( $package_data['type'] ) ) {
 			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
+
 			return;
 		}
 
@@ -534,14 +589,19 @@ class EditPackage extends AbstractHookProvider {
 				'source_name' => $package_data['source_name'],
 				'type'        => $package_data['type'],
 		] );
+
+		// Transform the package in the Composer format.
+		$package = $this->composer_transformer->transform( $package );
+
 		if ( empty( $package ) ) {
 			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
+
 			return;
 		}
 
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
-		echo '<p>This is the same info shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages') ) . '">here</a>. The real source of truth is the packages JSON available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
+		echo '<p>This is the same info shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages' ) ) . '">here</a>. The real source of truth is the packages JSON available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/package-details.php' );
 		echo '</div></div>';
 	}
