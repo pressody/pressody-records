@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\Screen;
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
+use Carbon_Fields\Toolset\Key_Toolset;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PostType\PackagePostType;
@@ -530,6 +531,11 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 						              Field::make( 'text', 'homepage', __( 'Author Homepage', 'pixelgradelt_records' ) )->set_width( 50 ),
 						              Field::make( 'text', 'role', __( 'Author Role', 'pixelgradelt_records' ) )->set_width( 50 ),
 				              ] )
+				              ->set_header_template( '
+							    <% if (name) { %>
+							        <%- name %>
+							    <% } %>
+							  ' )
 				              ->set_conditional_logic( [
 						              [
 								              'field'   => 'package_source_type',
@@ -558,18 +564,20 @@ For each required package you can <strong>specify a version range</strong> to be
 Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) ) ),
 
 				         Field::make( 'complex', 'package_required_packages', __( 'Required Packages', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same required package multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
+<strong>FYI:</strong> Each required package label is comprised of the standardized <code>source_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
 				              ->set_classes( 'package-required-packages' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'package_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
 						                   ->set_help_text( __( 'Packages that are already required by this package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
-						                   ->set_options( [ $this, 'get_available_installed_plugins_options' ] )
+						                   ->set_options( [ $this, 'get_available_required_packages_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
 						                   ->set_width( 50 ),
 						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_records' ) )
-							               ->set_default_value( '*' )
-							               ->set_required( true )
+						                   ->set_default_value( '*' )
+						                   ->set_required( true )
 						                   ->set_width( 25 ),
 						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_records' ) )
 						                   ->set_options( [
@@ -584,8 +592,8 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 						                   ->set_width( 25 ),
 				              ] )
 				              ->set_header_template( '
-								    <% if (version_range) { %>
-								        Version: <%- version_range %>
+								    <% if (pseudo_id) { %>
+								        <%- pseudo_id %> (version range: <%- version_range %><% if ("stable" !== stability) { %>@<%- stability %><% } %>)
 								    <% } %>
 								' ),
 		         ] );
@@ -611,8 +619,12 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 	/**
 	 * Classes to add to the post meta box
+	 *
+	 * @param array $classes
+	 *
+	 * @return array
 	 */
-	public function add_package_current_state_box_classes( $classes ) {
+	public function add_package_current_state_box_classes( array $classes ): array {
 		$classes[] = 'carbon-box';
 
 		return $classes;
@@ -738,6 +750,107 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		$options = [ null => esc_html__( 'Pick your installed plugin, carefully..', 'pixelgradelt_records' ) ] + $options;
 
 		return $options;
+	}
+
+	/**
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return array
+	 */
+	public function get_available_required_packages_options(): array {
+		$options = [];
+
+		$pseudo_id_delimiter = ' #';
+
+		// We exclude the current package post ID, of course.
+		$exclude_post_ids = [ get_the_ID(), ];
+		// We can't exclude the currently required packages because if we use carbon_get_post_meta()
+		// to fetch the current complex field value, we enter an infinite loop since that requires the field options.
+		// And to replicate the Carbon Fields logic to parse complex fields datastore is not fun.
+		$package_ids = $this->package_manager->get_package_ids_by( [ 'exclude_post_ids' => $exclude_post_ids, ] );
+
+		foreach ( $package_ids as $post_id ) {
+			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $pseudo_id_delimiter . $post_id;
+
+			$options[ $package_pseudo_id ] = sprintf( __( '%s - %s', 'pixelgradelt_records' ), $this->package_manager->get_post_package_name( $post_id ), $package_pseudo_id );
+		}
+
+		ksort( $options );
+
+		// Prepend an empty option.
+		$options = [ null => esc_html__( 'Pick your required package, carefully..', 'pixelgradelt_records' ) ] + $options;
+
+		return $options;
+	}
+
+	/**
+	 * Since Carbon Fields turns multi-select values into individual key-pairs, lets build an array out of the values
+	 * This method is meant to be run before CF fields are registered. Use carbon_the_post_meta() when appropriate.
+	 * See for Upgrade: https://github.com/htmlburger/carbon-fields/issues/822
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param int    $post_id
+	 * @param string $field_key
+	 * @param bool   $values_only
+	 *
+	 * @return array
+	 */
+	protected function get_complex_cf_fields( $post_id, $field_key, $values_only = true ): array {
+
+		global $wpdb;
+
+		$results = $wpdb->get_results(
+				"SELECT meta_key,meta_value
+            FROM {$wpdb->prefix}postmeta
+            WHERE meta_key
+            LIKE '_{$field_key}%'
+            AND post_id='{$post_id}'",
+				ARRAY_N
+		);
+
+		/* CF will store an empty placeholder for a multiselect. ignore it */
+		if ( count( $results ) == 1 && substr( $results[0][0], - 6 ) == "_empty" ) {
+			return array();
+		}
+
+		if ( $values_only ) {
+			return $results;
+		}
+
+		/* parse piped array keys and set nested values  */
+		$filtered = array();
+		foreach ( $results as $result ) {
+			$key_parsed = explode( Key_Toolset::SEGMENT_GLUE, $result[0] );
+			$this->set_nested_value( $filtered, $key_parsed, $result[1] );
+		}
+
+		return $filtered;
+
+	}
+
+	/**
+	 * StackOverflow: https://stackoverflow.com/questions/7116796/convert-flat-php-array-to-nested-array-based-on-array-keys
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param array $arr
+	 * @param array $ancestors
+	 * @param       $value
+	 */
+	protected function set_nested_value( array &$arr, array $ancestors, $value ) {
+		$current = &$arr;
+		foreach ( $ancestors as $key ) {
+			if ( ! is_array( $current ) ) {
+				$current = array( $current );
+			}
+			if ( ! array_key_exists( $key, $current ) ) {
+				$current[ $key ] = array();
+			}
+			$current = &$current[ $key ];
+		}
+		$current = $value;
 	}
 
 	/**

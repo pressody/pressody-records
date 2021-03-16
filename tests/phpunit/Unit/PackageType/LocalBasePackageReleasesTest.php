@@ -39,7 +39,7 @@ class LocalBasePackageReleasesTest extends TestCase {
 
 		$logger = new NullIO();
 
-		$this->builder = new LocalBasePackageBuilder( $package, $package_manager, $release_manager, $logger );
+		$this->builder = new LocalBasePackageBuilder( $package, $package_manager, $release_manager, $archiver, $logger );
 	}
 
 	public function test_package_has_no_releases() {

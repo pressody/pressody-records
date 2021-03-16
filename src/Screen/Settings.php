@@ -230,7 +230,7 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function render_screen() {
-		$permalink     = esc_url( get_packages_permalink() );
+		$packages_permalink     = esc_url( get_packages_permalink() );
 		$packages      = array_map( [ $this->composer_transformer, 'transform' ], $this->packages->all() );
 		$system_checks = [];
 

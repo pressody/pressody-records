@@ -39,7 +39,7 @@ class BasePackageBuilderTest extends TestCase {
 		$archiver                = new Archiver( new NullLogger() );
 		$storage                 = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
-		$composer_client = new ComposerClient();
+		$composer_client         = new ComposerClient();
 
 		$package_manager = $this->getMockBuilder( PackageManager::class )
 		                        ->disableOriginalConstructor()
@@ -49,7 +49,7 @@ class BasePackageBuilderTest extends TestCase {
 
 		$logger = new NullIO();
 
-		$this->builder = new BasePackageBuilder( $package, $package_manager, $release_manager, $logger );
+		$this->builder = new BasePackageBuilder( $package, $package_manager, $release_manager, $archiver, $logger );
 	}
 
 	public function test_implements_package_interface() {
@@ -223,12 +223,12 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_from_package_data() {
-		$expected['name']        = 'Plugin Name';
-		$expected['slug']        = 'slug';
-		$expected['type']        = 'plugin';
-		$expected['source_type'] = 'local.plugin';
-		$expected['source_name'] = 'local-plugin/slug';
-		$expected['authors']     = [
+		$expected['name']                 = 'Plugin Name';
+		$expected['slug']                 = 'slug';
+		$expected['type']                 = 'plugin';
+		$expected['source_type']          = 'local.plugin';
+		$expected['source_name']          = 'local-plugin/slug';
+		$expected['authors']              = [
 			[
 				'name'     => 'Name',
 				'email'    => 'email@example.com',
@@ -236,10 +236,25 @@ class BasePackageBuilderTest extends TestCase {
 				'role'     => 'Dev',
 			],
 		];
-		$expected['homepage']    = 'https://pixelgrade.com';
-		$expected['description'] = 'Some description.';
-		$expected['keywords']    = [ 'keyword' ];
-		$expected['license']     = 'GPL-2.0-or-later';
+		$expected['homepage']             = 'https://pixelgrade.com';
+		$expected['description']          = 'Some description.';
+		$expected['keywords']             = [ 'keyword' ];
+		$expected['license']              = 'GPL-2.0-or-later';
+		$expected['requires_at_least_wp'] = '6.0.0';
+		$expected['tested_up_to_wp']      = '6.6.0';
+		$expected['requires_php']         = '6.6.4';
+		$expected['is_managed']           = true;
+		$expected['managed_post_id']      = 234;
+		$expected['required_packages']    = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
 
 		$package = $this->builder->from_package_data( $expected )->build();
 
@@ -253,10 +268,16 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected['description'], $package->description );
 		$this->assertSame( $expected['keywords'], $package->keywords );
 		$this->assertSame( $expected['license'], $package->license );
+		$this->assertSame( $expected['requires_at_least_wp'], $package->requires_at_least_wp );
+		$this->assertSame( $expected['tested_up_to_wp'], $package->tested_up_to_wp );
+		$this->assertSame( $expected['requires_php'], $package->requires_php );
+		$this->assertSame( $expected['is_managed'], $package->is_managed );
+		$this->assertSame( $expected['managed_post_id'], $package->managed_post_id );
+		$this->assertSame( $expected['required_packages'], $package->required_packages );
 	}
 
 	public function test_from_package_data_do_not_overwrite() {
-		$expected              = new class extends BasePackage {
+		$expected                       = new class extends BasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
@@ -265,31 +286,59 @@ class BasePackageBuilderTest extends TestCase {
 				$this->$name = $value;
 			}
 		};
-		$expected->name        = 'Theme';
-		$expected->slug        = 'theme-slug';
-		$expected->type        = 'theme';
-		$expected->source_type = 'local.theme';
-		$expected->source_name = 'local-theme/slug';
-		$expected->authors     = [
+		$expected->name                 = 'Theme';
+		$expected->slug                 = 'theme-slug';
+		$expected->type                 = 'theme';
+		$expected->source_type          = 'local.theme';
+		$expected->source_name          = 'local-theme/slug';
+		$expected->authors              = [
 			[
 				'name' => 'Some Theme Author',
 			],
 		];
-		$expected->homepage    = 'https://pixelgradelt.com';
-		$expected->description = 'Some awesome description.';
-		$expected->keywords    = [ 'keyword1', 'keyword2' ];
-		$expected->license     = 'GPL-2.0-only';
+		$expected->homepage             = 'https://pixelgradelt.com';
+		$expected->description          = 'Some awesome description.';
+		$expected->keywords             = [ 'keyword1', 'keyword2' ];
+		$expected->license              = 'GPL-2.0-only';
+		$expected->requires_at_least_wp = '5.0.0';
+		$expected->tested_up_to_wp      = '5.6.0';
+		$expected->requires_php         = '5.6.4';
+		$expected->managed_post_id      = 123;
+		$expected->required_packages    = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
 
-		$package_data['name']        = 'Plugin Name';
-		$package_data['slug']        = 'slug';
-		$package_data['type']        = 'plugin';
-		$package_data['source_type'] = 'local.plugin';
-		$package_data['source_name'] = 'local-plugin/slug';
-		$package_data['authors']     = [];
-		$package_data['homepage']    = 'https://pixelgrade.com';
-		$package_data['description'] = 'Some description.';
-		$package_data['keywords']    = [ 'keyword' ];
-		$package_data['license']     = 'GPL-2.0-or-later';
+		$package_data['name']                 = 'Plugin Name';
+		$package_data['slug']                 = 'slug';
+		$package_data['type']                 = 'plugin';
+		$package_data['source_type']          = 'local.plugin';
+		$package_data['source_name']          = 'local-plugin/slug';
+		$package_data['authors']              = [];
+		$package_data['homepage']             = 'https://pixelgrade.com';
+		$package_data['description']          = 'Some description.';
+		$package_data['keywords']             = [ 'keyword' ];
+		$package_data['license']              = 'GPL-2.0-or-later';
+		$package_data['requires_at_least_wp'] = '6.0.0';
+		$package_data['tested_up_to_wp']      = '6.6.0';
+		$package_data['requires_php']         = '6.6.4';
+		$package_data['managed_post_id']      = 234;
+		$package_data['required_packages']    = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
 
 		$package = $this->builder->with_package( $expected )->from_package_data( $package_data )->build();
 
@@ -303,6 +352,138 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->description, $package->description );
 		$this->assertSame( $expected->keywords, $package->keywords );
 		$this->assertSame( $expected->license, $package->license );
+		$this->assertSame( $expected->requires_at_least_wp, $package->requires_at_least_wp );
+		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
+		$this->assertSame( $expected->requires_php, $package->requires_php );
+		$this->assertSame( $expected->managed_post_id, $package->managed_post_id );
+	}
+
+	public function test_from_package_data_merge_required_packages() {
+		$initial_package                       = new class extends BasePackage {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+
+			public function __set( $name, $value ) {
+				$this->$name = $value;
+			}
+		};
+		$initial_package->name                 = 'Theme';
+		$initial_package->slug                 = 'theme-slug';
+		$initial_package->required_packages    = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		$package_data['name']                 = 'Plugin Name';
+		$package_data['slug']                 = 'slug';
+		$package_data['required_packages']    = [
+			'some_pseudo_id2' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id2',
+			],
+		];
+
+		$expected = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+			'some_pseudo_id2' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id2',
+			],
+		];
+
+		$package = $this->builder->with_package( $initial_package )->from_package_data( $package_data )->build();
+
+		$this->assertSame( $expected, $package->required_packages );
+	}
+
+	public function test_from_package_data_merge_overwrite_required_packages() {
+		$initial_package                       = new class extends BasePackage {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+
+			public function __set( $name, $value ) {
+				$this->$name = $value;
+			}
+		};
+		$initial_package->name                 = 'Theme';
+		$initial_package->slug                 = 'theme-slug';
+		$initial_package->required_packages    = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		$package_data['name']                 = 'Plugin Name';
+		$package_data['slug']                 = 'slug';
+		$package_data['required_packages']    = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+			'some_pseudo_id3' => [
+				'composer_package_name' => 'pixelgrade/test3',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test3',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id3',
+			],
+		];
+
+		$expected = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+			'some_pseudo_id3' => [
+				'composer_package_name' => 'pixelgrade/test3',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test3',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id3',
+			],
+		];
+
+		$package = $this->builder->with_package( $initial_package )->from_package_data( $package_data )->build();
+
+		$this->assertSame( $expected, $package->required_packages );
 	}
 
 	public function test_from_header_data_plugin() {
@@ -517,6 +698,18 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->requires_at_least_wp = '5.0.0';
 		$expected->tested_up_to_wp      = '5.6.0';
 		$expected->requires_php         = '5.6.4';
+		$expected->is_managed           = true;
+		$expected->managed_post_id      = 123;
+		$expected->required_packages    = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
 
 		$package = $this->builder->with_package( $expected )->build();
 
@@ -533,5 +726,7 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->requires_at_least_wp, $package->requires_at_least_wp );
 		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
 		$this->assertSame( $expected->requires_php, $package->requires_php );
+		$this->assertSame( $expected->is_managed, $package->is_managed );
+		$this->assertSame( $expected->required_packages, $package->required_packages );
 	}
 }

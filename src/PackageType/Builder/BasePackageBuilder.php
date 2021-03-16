@@ -15,6 +15,7 @@ use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use PixelgradeLT\Records\Package;
@@ -506,6 +507,19 @@ class BasePackageBuilder {
 	}
 
 	/**
+	 * Set the managed required packages if this package is managed by us.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param array $required_packages
+	 *
+	 * @return $this
+	 */
+	public function set_required_packages( array $required_packages ): self {
+		return $this->set( 'required_packages', $this->normalize_required_packages( $required_packages ) );
+	}
+
+	/**
 	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
 	 *
 	 * @since 0.1.0
@@ -606,7 +620,117 @@ class BasePackageBuilder {
 			$this->set_requires_php( $package_data['requires_php'] );
 		}
 
+		if ( isset( $package_data['is_managed'] ) ) {
+			$this->set_is_managed( $package_data['is_managed'] );
+		}
+
+		if ( empty( $this->package->get_managed_post_id() ) && ! empty( $package_data['managed_post_id'] ) ) {
+			$this->set_managed_post_id( $package_data['managed_post_id'] );
+		}
+
+		if ( ! empty( $package_data['required_packages'] ) ) {
+			// We need to normalize before the merge since we need the keys to be in the same format.
+			$package_data['required_packages'] = $this->normalize_required_packages( $package_data['required_packages'] );
+			// We will merge the required packages into the existing ones.
+			$this->set_required_packages(
+				ArrayHelpers::array_merge_recursive_distinct(
+					$this->package->get_required_packages(),
+					$package_data['required_packages']
+				)
+			);
+		}
+
 		return $this;
+	}
+
+	/**
+	 * Make sure that the managed required packages are in a format expected by BasePackage.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param array $required_packages
+	 *
+	 * @return array
+	 */
+	protected function normalize_required_packages( array $required_packages ): array {
+		if ( empty( $required_packages ) ) {
+			return [];
+		}
+
+		$normalized = [];
+		// The pseudo_id is completely unique to a package since it encloses the source_name (source_type or vendor and package name/slug),
+		// and the post ID. Totally unique.
+		// We will rely on this uniqueness to make sure the only one required package remains of each entity.
+		// Subsequent required package data referring to the same managed package post will overwrite previous ones.
+		foreach ( $required_packages as $required_package ) {
+			if ( empty( $required_package['pseudo_id'] )
+			     || empty( $required_package['source_name'] )
+			     || empty( $required_package['managed_post_id'] )
+			) {
+				$this->logger->error(
+					'Invalid required package details for package {package}.',
+					[
+						'package' => $this->package->get_name(),
+						'required_package' => $required_package,
+					]
+				);
+
+				continue;
+			}
+
+			$normalized[ $required_package['pseudo_id'] ] = [
+				'composer_package_name' => ! empty( $required_package['composer_package_name'] ) ? $required_package['composer_package_name'] : false,
+				'version_range'         => ! empty( $required_package['version_range'] ) ? $required_package['version_range'] : '*',
+				'stability'             => ! empty( $required_package['stability'] ) ? $required_package['stability'] : 'stable',
+				'source_name'           => $required_package['source_name'],
+				'managed_post_id'       => $required_package['managed_post_id'],
+				'pseudo_id'             => $required_package['pseudo_id'],
+			];
+
+			if ( ! empty( $required_package['composer_package_name'] ) ) {
+				continue;
+			}
+
+			$package_data = $this->package_manager->get_package_id_data( $required_package['managed_post_id'] );
+			if ( empty( $package_data ) ) {
+				// Something is wrong. We will not include this required package.
+				$this->logger->error(
+					'Error getting managed required package data with post ID #{managed_post_id} for package {package}.',
+					[
+						'managed_post_id'   => $required_package['managed_post_id'],
+						'package' => $this->package->get_name(),
+					]
+				);
+
+				unset( $normalized[ $required_package['pseudo_id'] ] );
+				continue;
+			}
+
+			// Construct the Composer-like package name (the same way @see ComposerPackageTransformer::transform() does it).
+			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt_records' );
+			$name   = $this->normalize_package_name( $package_data['slug'] );
+
+			$normalized[ $required_package['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Normalize a package name for packages.json.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @link  https://github.com/composer/composer/blob/79af9d45afb6bcaac8b73ae6a8ae24414ddf8b4b/src/Composer/Package/Loader/ValidatingArrayLoader.php#L339-L369
+	 *
+	 * @param string $name Package name.
+	 *
+	 * @return string
+	 */
+	protected function normalize_package_name( $name ): string {
+		$name = strtolower( $name );
+
+		return preg_replace( '/[^a-z0-9_\-\.]+/i', '', $name );
 	}
 
 	/**
@@ -887,7 +1011,8 @@ class BasePackageBuilder {
 			->set_tested_up_to_wp( $package->get_tested_up_to_wp() )
 			->set_requires_php( $package->get_requires_php() )
 			->set_is_managed( $package->is_managed() )
-			->set_managed_post_id( $package->get_managed_post_id() );
+			->set_managed_post_id( $package->get_managed_post_id() )
+			->set_required_packages( $package->get_required_packages() );
 
 		foreach ( $package->get_releases() as $release ) {
 			$this->add_release( $release->get_version(), $release->get_source_url() );
@@ -932,7 +1057,6 @@ class BasePackageBuilder {
 			$normalized_version = $this->release_manager->get_composer_version_parser()->normalize( $version );
 		} catch ( \Exception $e ) {
 			// If there was an exception it means that something is wrong with this version.
-
 			$this->logger->error(
 				'Error normalizing version: {version} for package {package}.',
 				[

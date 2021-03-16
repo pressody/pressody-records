@@ -4,6 +4,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 
 use Composer\IO\NullIO;
+use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
@@ -11,6 +12,7 @@ use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Psr\Log\NullLogger;
 
 class LocalPluginBuilderTest extends TestCase {
 	protected $builder = null;
@@ -25,10 +27,10 @@ class LocalPluginBuilderTest extends TestCase {
 		$release_manager = $this->getMockBuilder( ReleaseManager::class )
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
-
+		$archiver                = new Archiver( new NullLogger() );
 		$logger = new NullIO();
 
-		$this->builder = new LocalPluginBuilder( new LocalPlugin(), $package_manager, $release_manager, $logger );
+		$this->builder = new LocalPluginBuilder( new LocalPlugin(), $package_manager, $release_manager, $archiver, $logger );
 	}
 
 	public function test_extends_package_builder() {

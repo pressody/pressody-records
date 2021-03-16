@@ -127,6 +127,13 @@ class BasePackage implements \ArrayAccess, Package {
 	protected int $managed_post_id = 0;
 
 	/**
+	 * Other managed required packages.
+	 *
+	 * @var array
+	 */
+	protected array $required_packages = [];
+
+	/**
 	 * Releases.
 	 *
 	 * @var Release[]
@@ -319,6 +326,28 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function get_managed_post_id(): int {
 		return $this->managed_post_id;
+	}
+
+	/**
+	 * Retrieve the managed required packages.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return array
+	 */
+	public function get_required_packages(): array {
+		return $this->required_packages;
+	}
+
+	/**
+	 * Whether the package has any managed required packages.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return bool
+	 */
+	public function has_required_packages(): bool {
+		return ! empty( $this->required_packages );
 	}
 
 	/**

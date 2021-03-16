@@ -11,8 +11,12 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
+use PixelgradeLT\Records\PackageType\BasePackage;
+
 /**
- * @global $permalink
+ * @global BasePackage[] $packages
+ * @global string $packages_permalink
+ * @global array $system_checks
  */
 
 ?>
@@ -27,7 +31,7 @@ namespace PixelgradeLT\Records;
 	<div id="pixelgradelt_records-settings" class="pixelgradelt_records-tab-panel is-active">
 		<p>
 			<?php esc_html_e( 'Your PixelgradeLT Records repository is available at:', 'pixelgradelt_records' ); ?>
-			<a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $permalink ); ?></a>
+			<a href="<?php echo esc_url( $packages_permalink ); ?>"><?php echo esc_html( $packages_permalink ); ?></a>
 		</p>
 		<p>
 			<?php

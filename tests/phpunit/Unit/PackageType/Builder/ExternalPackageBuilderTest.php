@@ -6,6 +6,7 @@ namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 use Composer\IO\NullIO;
 use Composer\Semver\Constraint\MatchAllConstraint;
 use Composer\Semver\Constraint\MultiConstraint;
+use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\ExternalBasePackageBuilder;
@@ -14,6 +15,7 @@ use PixelgradeLT\Records\PackageType\ExternalBasePackage;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Psr\Log\NullLogger;
 
 class ExternalPackageBuilderTest extends TestCase {
 	protected $builder = null;
@@ -37,9 +39,10 @@ class ExternalPackageBuilderTest extends TestCase {
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
 
+		$archiver = new Archiver( new NullLogger() );
 		$logger = new NullIO();
 
-		$this->builder = new ExternalBasePackageBuilder( $package, $package_manager, $release_manager, $logger );
+		$this->builder = new ExternalBasePackageBuilder( $package, $package_manager, $release_manager, $archiver, $logger );
 	}
 
 	public function test_extends_package_builder() {

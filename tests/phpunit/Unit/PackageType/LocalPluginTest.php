@@ -44,7 +44,7 @@ class LocalPluginTest extends TestCase {
 
 		$package = new LocalPlugin();
 
-		$this->builder = new LocalPluginBuilder( $package, $package_manager, $release_manager, $logger );
+		$this->builder = new LocalPluginBuilder( $package, $package_manager, $release_manager, $archiver, $logger );
 	}
 
 	public function test_get_plugin_from_basename() {

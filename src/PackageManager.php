@@ -281,10 +281,14 @@ class PackageManager {
 			return $data;
 		}
 
+		$data['is_managed']      = true;
+		$data['managed_post_id'] = $post_ID;
+
 		$data['name']        = $this->get_post_package_name( $post_ID );
 		$data['type']        = $this->get_post_package_type( $post_ID );
 		$data['slug']        = $this->get_post_package_slug( $post_ID );
 		$data['source_type'] = $this->get_post_package_source_type( $post_ID );
+		$data['source_name'] = $this->get_post_package_source_name( $post_ID );
 		$data['keywords']    = $this->get_post_package_keywords( $post_ID );
 		$data['description'] = get_post_meta( $post_ID, '_package_details_description', true );
 		$data['homepage']    = get_post_meta( $post_ID, '_package_details_homepage', true );
@@ -292,30 +296,16 @@ class PackageManager {
 		$data['authors']     = $this->get_post_package_authors( $post_ID );
 
 		$data['source_cached_release_packages'] = [];
-		$data['manual_releases'] = [];
+		$data['manual_releases']                = [];
 
 		switch ( $data['source_type'] ) {
 			case 'packagist.org':
-				// For packagist we expect a complete package name (in the form vendor/name).
-				$data['source_name'] = get_post_meta( $post_ID, '_package_source_name', true );
-				break;
 			case 'wpackagist.org':
-				// WPackagist.org used special vendor names.
-				$vendor = 'wpackagist-plugin';
-				if ( 'theme' === $data['type'] ) {
-					$vendor = 'wpackagist-theme';
-				}
-				$data['source_name'] = $vendor . '/' . get_post_meta( $post_ID, '_package_source_project_name', true );
 				break;
 			case 'vcs':
-				// Since we need to use the package name from the project's composer.json file,
-				// we expect to be given the right package name. Usually it's the same as the repo name (username/project-name).
-				$data['source_name'] = get_post_meta( $post_ID, '_package_source_name', true );
 				$data['vcs_url']     = get_post_meta( $post_ID, '_package_vcs_url', true );
 				break;
 			case 'local.plugin':
-				$data['source_name'] = 'local-plugin' . '/' . $data['slug'];
-
 				$data['local_plugin_file'] = get_post_meta( $post_ID, '_package_local_plugin_file', true );
 
 				// Determine if plugin is actually (still) installed.
@@ -326,7 +316,6 @@ class PackageManager {
 				}
 				break;
 			case 'local.theme':
-				$data['source_name']      = 'local-theme' . '/' . $data['slug'];
 				$data['local_theme_slug'] = get_post_meta( $post_ID, '_package_local_theme_slug', true );
 
 				// Determine if theme is actually (still) installed.
@@ -337,7 +326,6 @@ class PackageManager {
 				}
 				break;
 			case 'local.manual':
-				$data['source_name'] = 'local-manual' . '/' . $data['slug'];
 				$data['manual_releases'] = $this->get_post_package_manual_releases( $post_ID );
 				break;
 			default:
@@ -352,6 +340,8 @@ class PackageManager {
 			// Get the source version/release packages data (fetched from the external repo) we have stored.
 			$data['source_cached_release_packages'] = get_post_meta( $post_ID, '_package_source_cached_release_packages', true );
 		}
+
+		$data['required_packages'] = $this->get_post_package_required_packages( $post_ID );
 
 		return $data;
 	}
@@ -588,6 +578,37 @@ class PackageManager {
 		return $source_type;
 	}
 
+	public function get_post_package_source_name( int $post_ID ): string {
+		$source_type = $this->get_post_package_source_type( $post_ID );
+		switch ( $source_type ) {
+			case 'packagist.org':
+				// For packagist we expect a complete package name (in the form vendor/name).
+				return get_post_meta( $post_ID, '_package_source_name', true );
+			case 'wpackagist.org':
+				// WPackagist.org used special vendor names.
+				$vendor = 'wpackagist-plugin';
+				if ( 'theme' === $this->get_post_package_type( $post_ID ) ) {
+					$vendor = 'wpackagist-theme';
+				}
+				return $vendor . '/' . get_post_meta( $post_ID, '_package_source_project_name', true );
+			case 'vcs':
+				// Since we need to use the package name from the project's composer.json file,
+				// we expect to be given the right package name. Usually it's the same as the repo name (username/project-name).
+				return get_post_meta( $post_ID, '_package_source_name', true );
+			case 'local.plugin':
+				return 'local-plugin' . '/' . $this->get_post_package_slug( $post_ID );
+			case 'local.theme':
+				return 'local-theme' . '/' . $this->get_post_package_slug( $post_ID );
+			case 'local.manual':
+				return 'local-manual' . '/' . $this->get_post_package_slug( $post_ID );
+			default:
+				// Nothing
+				break;
+		}
+
+		return  '';
+	}
+
 	public function get_post_package_slug( int $post_ID ): string {
 		$post = get_post( $post_ID );
 		if ( empty( $post ) ) {
@@ -673,9 +694,9 @@ class PackageManager {
 			}
 
 			$releases[ $normalized_version ] = [
-				'version' => $release_data['version'],
+				'version'            => $release_data['version'],
 				'normalized_version' => $normalized_version,
-				'source_url' => $url,
+				'source_url'         => $url,
 			];
 		}
 
@@ -687,5 +708,39 @@ class PackageManager {
 		);
 
 		return $releases;
+	}
+
+	public function get_post_package_required_packages( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		$required_packages = carbon_get_post_meta( $post_ID, 'package_required_packages', $container_id );
+		if ( empty( $required_packages ) || ! is_array( $required_packages ) ) {
+			return [];
+		}
+
+		// Make sure only the fields we are interested in are left.
+		$accepted_keys = array_fill_keys( [ 'pseudo_id', 'version_range', 'stability' ], '' );
+		foreach ( $required_packages as $key => $required_package ) {
+			$required_packages[ $key ] = array_replace( $accepted_keys, array_intersect_key( $required_package, $accepted_keys ) );
+
+			if ( empty( $required_package['pseudo_id'] ) || false === strpos( $required_package['pseudo_id'], $pseudo_id_delimiter ) ) {
+				unset( $required_packages[ $key ] );
+				continue;
+			}
+
+			// We will now split the pseudo_id in its components (source_name and post_id with the delimiter in between).
+			[ $source_name, $post_id ] = explode( $pseudo_id_delimiter, $required_package['pseudo_id'] );
+			if ( empty( $post_id ) ) {
+				unset( $required_packages[ $key ] );
+				continue;
+			}
+
+			$required_packages[ $key ]['source_name']     = $source_name;
+			$required_packages[ $key ]['managed_post_id'] = intval( $post_id );
+		}
+
+		return $required_packages;
+	}
+
+	public function set_post_package_required_packages( int $post_ID, array $required_packages, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'package_required_packages', $required_packages, $container_id );
 	}
 }

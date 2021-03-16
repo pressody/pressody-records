@@ -11,8 +11,11 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
+use PixelgradeLT\Records\PackageType\BasePackage;
+
 /**
- * @global $permalink
+ * @global BasePackage[] $packages
+ * @global string $packages_permalink
  */
 
 $allowed_tags = [
@@ -29,12 +32,11 @@ if ( ! empty( $packages ) ) { ?>
 			<?php
 			printf( __( 'These are <strong>all the packages</strong> that PixelgradeLT Records makes available as Composer packages, regardless of their configuration.<br>
 This view is primarily available to assist in <strong>double-checking that things work properly.</strong><br>
-If you want to <strong>dig deeper,</strong> check <a href="%s" target="_blank">the actual JSON</a> of the PixelgradeLT Records repo.', 'pixelgradelt_records' ), esc_url( $permalink ) ); ?>
+If you want to <strong>dig deeper,</strong> check <a href="%s" target="_blank">the actual JSON</a> of the PixelgradeLT Records repo.', 'pixelgradelt_records' ), esc_url( $packages_permalink ) ); ?>
 		</p>
 	</div>
 	<?php
 
-	/** @global Package[] $packages */
 	foreach ( $packages as $package ) {
 		require $this->plugin->get_path( 'views/package-details.php' );
 	}

@@ -5,6 +5,7 @@ namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
+use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
@@ -12,6 +13,7 @@ use PixelgradeLT\Records\PackageType\Builder\LocalThemeBuilder;
 use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Psr\Log\NullLogger;
 
 class LocalThemeBuilderTest extends TestCase {
 	protected $builder = null;
@@ -30,9 +32,10 @@ class LocalThemeBuilderTest extends TestCase {
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
 
+		$archiver                = new Archiver( new NullLogger() );
 		$logger = new NullIO();
 
-		$this->builder = new LocalThemeBuilder( new LocalTheme(), $package_manager, $release_manager, $logger );
+		$this->builder = new LocalThemeBuilder( new LocalTheme(), $package_manager, $release_manager, $archiver, $logger );
 	}
 
 	public function test_extends_package_builder() {

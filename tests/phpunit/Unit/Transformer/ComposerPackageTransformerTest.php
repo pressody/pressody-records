@@ -5,12 +5,14 @@ namespace PixelgradeLT\Records\Tests\Unit\Transformer;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
+use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Psr\Log\NullLogger;
 
 class ComposerPackageTransformerTest extends TestCase {
 	protected $package = null;
@@ -27,9 +29,10 @@ class ComposerPackageTransformerTest extends TestCase {
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
 
+		$archiver                = new Archiver( new NullLogger() );
 		$logger = new NullIO();
 
-		$factory = new PackageFactory( $package_manager, $release_manager, $logger );
+		$factory = new PackageFactory( $package_manager, $release_manager, $archiver, $logger );
 
 		$this->package = $factory->create( 'plugin' )
 			->set_slug( 'AcmeCode' )

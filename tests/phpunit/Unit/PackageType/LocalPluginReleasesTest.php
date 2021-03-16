@@ -41,7 +41,7 @@ class LocalPluginReleasesTest extends TestCase {
 
 		$package  = new LocalPlugin();
 
-		$this->builder = ( new LocalPluginBuilder( $package, $package_manager, $release_manager, $logger ) )
+		$this->builder = ( new LocalPluginBuilder( $package, $package_manager, $release_manager, $archiver, $logger ) )
 			->set_source_name( 'local-plugin' . '/' . 'basic' )
 			->set_source_type( 'local.plugin' )
 			->set_basename( 'basic/basic.php' )

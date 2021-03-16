@@ -87,7 +87,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	public function transform( PackageRepository $repository ): array {
 		$items = [];
 
-		foreach ( $repository->all() as $slug => $package ) {
+		foreach ( $repository->all() as $package ) {
 			if ( ! $package->has_releases() ) {
 				continue;
 			}
@@ -118,6 +118,27 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 		foreach ( $package->get_releases() as $release ) {
 			$version = $release->get_version();
 
+			// Start with the default requires.
+			$require = [
+				'composer/installers' => '^1.0',
+			];
+			// Merge the managed required packages, if any.
+			if ( $package->has_required_packages() ) {
+				// Convert the managed required packages to the simple Composer format.
+				$composer_require = [];
+				foreach ( $package->get_required_packages() as $required_package ) {
+					$composer_require[ $required_package['composer_package_name'] ] = $required_package['version_range'];
+
+					if ( 'stable' !== $required_package['stability'] ) {
+						$composer_require[ $required_package['composer_package_name'] ] .= '@' . $required_package['stability'];
+					}
+				}
+
+				$require = array_merge( $require, $composer_require );
+			}
+			// Finally, allow others to have a say.
+			$require = apply_filters( 'pixelgradelt_records_composer_package_require', $require, $package, $release );
+
 			try {
 				$data[ $version ] = [
 					'name'               => $package->get_name(),
@@ -128,9 +149,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 						'url'    => $release->get_download_url(),
 						'shasum' => $this->release_manager->checksum( 'sha1', $release ),
 					],
-					'require'            => [
-						'composer/installers' => '^1.0',
-					],
+					'require'            => $require,
 					'type'               => $package->get_type(),
 					'authors'            => $package->get_authors(),
 					'description'        => $package->get_description(),
