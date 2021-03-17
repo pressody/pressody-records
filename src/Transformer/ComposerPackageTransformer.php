@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records\Transformer;
 
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
+use PixelgradeLT\Records\PackageType\BasePackage;
 
 /**
  * Composer package transformer class.
@@ -70,6 +71,30 @@ class ComposerPackageTransformer implements PackageTransformer {
 		}
 
 		return $builder->build();
+	}
+
+	/**
+	 * Transform a package's required packages into a Composer require list.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param Package $package Package.
+	 * @return array
+	 */
+	public function transform_required_packages( Package $package ): array {
+		$composer_require = [];
+		if ( $package->has_required_packages() ) {
+			// Convert the managed required packages to the simple Composer format.
+			foreach ( $package->get_required_packages() as $required_package ) {
+				$composer_require[ $required_package['composer_package_name'] ] = $required_package['version_range'];
+
+				if ( 'stable' !== $required_package['stability'] ) {
+					$composer_require[ $required_package['composer_package_name'] ] .= '@' . $required_package['stability'];
+				}
+			}
+		}
+
+		return $composer_require;
 	}
 
 	/**

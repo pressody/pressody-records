@@ -303,7 +303,7 @@ class PackageManager {
 			case 'wpackagist.org':
 				break;
 			case 'vcs':
-				$data['vcs_url']     = get_post_meta( $post_ID, '_package_vcs_url', true );
+				$data['vcs_url'] = get_post_meta( $post_ID, '_package_vcs_url', true );
 				break;
 			case 'local.plugin':
 				$data['local_plugin_file'] = get_post_meta( $post_ID, '_package_local_plugin_file', true );
@@ -590,6 +590,7 @@ class PackageManager {
 				if ( 'theme' === $this->get_post_package_type( $post_ID ) ) {
 					$vendor = 'wpackagist-theme';
 				}
+
 				return $vendor . '/' . get_post_meta( $post_ID, '_package_source_project_name', true );
 			case 'vcs':
 				// Since we need to use the package name from the project's composer.json file,
@@ -606,7 +607,7 @@ class PackageManager {
 				break;
 		}
 
-		return  '';
+		return '';
 	}
 
 	public function get_post_package_slug( int $post_ID ): string {
@@ -742,5 +743,71 @@ class PackageManager {
 
 	public function set_post_package_required_packages( int $post_ID, array $required_packages, string $container_id = '' ) {
 		carbon_set_post_meta( $post_ID, 'package_required_packages', $required_packages, $container_id );
+	}
+
+	/**
+	 * Given a package, dry-run a composer require of it (including its required packages) and see if all goes well.
+	 *
+	 * @param Package $package
+	 *
+	 * @throws \Exception
+	 * @return array
+	 */
+	public function dry_run_package_require( Package $package ): bool {
+		$client = $this->get_composer_client();
+
+		try {
+			$client->getPackages( [
+				'repositories'                  => [
+					[
+						// Disable the default packagist.org repo so we don't mistakenly fetch from there.
+						"packagist.org" => false,
+					],
+					[
+						// Our very own Composer repo.
+						'type'    => 'composer',
+						'url'     => get_packages_permalink( [ 'base' => true ] ),
+						"options" => [
+							"ssl"  => [
+								"verify_peer" => ! $this->is_debug_mode(),
+							],
+						],
+					],
+				],
+				'require-dependencies'          => true,
+				'require'                       => [
+					// Any package version.
+					$package->get_name() => '*',
+				],
+				'minimum-stability-per-package' => [
+					// The loosest stability.
+					$package->get_name() => 'dev',
+				],
+			] );
+		} catch ( \Exception $e ) {
+			$this->logger->error(
+				'Error during Composer require dry-run for {package} (type {type}).',
+				[
+					'exception' => $e,
+					'package'   => $package->get_name(),
+					'type'      => $package->get_type(),
+				]
+			);
+
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether debug mode is enabled.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return bool
+	 */
+	protected function is_debug_mode(): bool {
+		return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
 	}
 }

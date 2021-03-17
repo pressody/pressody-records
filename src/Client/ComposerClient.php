@@ -281,7 +281,7 @@ class ComposerClient implements Client {
 	}
 
 	public function getDefaultDynamicConfig(): array {
-		return [
+		$default_config = [
 			'name'                      => 'pixelgradelt_records/fake_project',
 			'repositories'              => [],
 			'require-all'               => false,
@@ -291,6 +291,15 @@ class ComposerClient implements Client {
 			'minimum-stability'         => 'dev',
 			'providers'                 => false,
 		];
+
+		// If we are in a local/development environment, relax further.
+		if ( $this->is_debug_mode() ) {
+			// Skip SSL verification since we may be using self-signed certificates.
+			$default_config['disable-tls'] = true;
+			$default_config['secure-http'] = false;
+		}
+
+		return apply_filters( 'pixelgradelt_records_composer_client_default_config', $default_config );
 	}
 
 	/**
@@ -362,5 +371,16 @@ class ComposerClient implements Client {
 		}
 
 		return $home;
+	}
+
+	/**
+	 * Whether debug mode is enabled.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return bool
+	 */
+	protected function is_debug_mode(): bool {
+		return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
 	}
 }

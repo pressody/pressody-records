@@ -144,7 +144,7 @@ final class Logger extends BaseIO {
 		// Since the trace may contain in a step's args circular references, we need to replace such references with a string.
 		// This is to avoid infinite recursion when attempting to json_encode().
 		$trace = JSONCleaner::clean( $e->getTrace() );
-		return wp_json_encode(
+		$encoded_exception = wp_json_encode(
 			[
 				'message' => $e->getMessage(),
 				'code'    => $e->getCode(),
@@ -154,6 +154,12 @@ final class Logger extends BaseIO {
 			],
 			\JSON_UNESCAPED_SLASHES
 		);
+
+		if ( ! is_string( $encoded_exception ) ) {
+			return 'failed-to-encode-exception';
+		}
+
+		return $encoded_exception;
 	}
 
 	/**

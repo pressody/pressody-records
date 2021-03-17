@@ -110,9 +110,12 @@ class EditPackage extends AbstractHookProvider {
 		// ADD CUSTOM POST META VIA CARBON FIELDS.
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
-		// Fill empty package details from source.
+		// Fetch external packages releases and cache them (the artifacts will not be cached here).
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 5, 1 );
+		// Fill empty package details from source.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_empty_package_config_details_on_post_save', 10, 2 );
+		// Check that the package can be resolved with the required packages.
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required_packages', 20, 2 );
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'show_post_error_msgs' );
@@ -279,7 +282,7 @@ class EditPackage extends AbstractHookProvider {
 
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the source details of the package.
-		Container::make( 'post_meta', esc_html__( 'Source Configuration', 'pixelgradelt_records' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_source_configuration', esc_html__( 'Source Configuration', 'pixelgradelt_records' ) )
 		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
@@ -553,7 +556,7 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 		         ] );
 
 		// Register the metabox for managing the packages the current package depends on (dependencies that will translate in composer `require`s).
-		Container::make( 'post_meta', esc_html__( 'Dependencies Configuration', 'pixelgradelt_records' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_dependencies_configuration', esc_html__( 'Dependencies Configuration', 'pixelgradelt_records' ) )
 		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
@@ -655,6 +658,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		}
 
 		// Transform the package in the Composer format.
+		// This variable will be available to the view.
 		$package = $this->composer_transformer->transform( $package );
 
 		// Wrap it for spacing.
@@ -662,6 +666,23 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		echo '<p>This is <strong>the same info</strong> shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/package-details.php' );
 		echo '</div></div>';
+	}
+
+	/**
+	 * Attempt to fetch external packages on post save.
+	 *
+	 * @param int $post_ID
+	 *
+	 * @throws \Exception
+	 */
+	protected function fetch_external_packages_on_post_save( int $post_ID ) {
+		$packages = $this->package_manager->fetch_external_package_remote_releases( $post_ID );
+
+		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
+		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\Builder\PackageBuilder::build() to do the work.
+		if ( ! empty( $packages ) ) {
+			update_post_meta( $post_ID, '_package_source_cached_release_packages', $packages );
+		}
 	}
 
 	/**
@@ -677,14 +698,8 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 			return;
 		}
 
-		$package_data = $this->package_manager->get_package_id_data( $post_ID );
-		if ( empty( $package_data ) ) {
-			return;
-		}
-
 		$package = $this->packages->first_where( [
-				'source_name' => $package_data['source_name'],
-				'type'        => $package_data['type'],
+				'managed_post_id' => $post_ID,
 		] );
 		if ( empty( $package ) ) {
 			return;
@@ -715,20 +730,29 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	}
 
 	/**
-	 * Attempt to fetch external packages on post save.
+	 * Check if the package can be resolved by Composer with the required packages. Show a warning message if it can't be.
 	 *
-	 * @param int $post_ID
-	 *
-	 * @throws \Exception
+	 * @param int                           $post_ID
+	 * @param Container\Post_Meta_Container $meta_container
 	 */
-	protected function fetch_external_packages_on_post_save( int $post_ID ) {
-		$packages = $this->package_manager->fetch_external_package_remote_releases( $post_ID );
-
-		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
-		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\Builder\PackageBuilder::build() to do the work.
-		if ( ! empty( $packages ) ) {
-			update_post_meta( $post_ID, '_package_source_cached_release_packages', $packages );
+	protected function check_required_packages( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+		// At the moment, we are only interested in the source_configuration container.
+		// This way we avoid running this logic unnecessarily for other containers.
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration' !== $meta_container->get_id() ) {
+			return;
 		}
+
+		$package = $this->packages->first_where( [
+				'managed_post_id' => $post_ID,
+		] );
+		if ( empty( $package ) ) {
+			return;
+		}
+
+		// Transform the package in the Composer format.
+		$package = $this->composer_transformer->transform( $package );
+
+		$this->package_manager->dry_run_package_require( $package );
 	}
 
 	public function get_available_installed_plugins_options(): array {

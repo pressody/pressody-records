@@ -123,19 +123,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 				'composer/installers' => '^1.0',
 			];
 			// Merge the managed required packages, if any.
-			if ( $package->has_required_packages() ) {
-				// Convert the managed required packages to the simple Composer format.
-				$composer_require = [];
-				foreach ( $package->get_required_packages() as $required_package ) {
-					$composer_require[ $required_package['composer_package_name'] ] = $required_package['version_range'];
-
-					if ( 'stable' !== $required_package['stability'] ) {
-						$composer_require[ $required_package['composer_package_name'] ] .= '@' . $required_package['stability'];
-					}
-				}
-
-				$require = array_merge( $require, $composer_require );
-			}
+			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package ) );
 			// Finally, allow others to have a say.
 			$require = apply_filters( 'pixelgradelt_records_composer_package_require', $require, $package, $release );
 
