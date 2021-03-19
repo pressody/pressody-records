@@ -28,40 +28,41 @@ use PixelgradeLT\Records\Repository\PackageRepository;
  * @since 0.1.0
  */
 class PackageArchiver extends AbstractHookProvider {
-	/**
-	 * Logger.
-	 *
-	 * @var LoggerInterface
-	 */
-	protected $logger;
 
 	/**
 	 * Managed packages repository.
 	 *
 	 * @var PackageRepository
 	 */
-	protected $packages;
+	protected PackageRepository $packages;
 
 	/**
 	 * Release manager.
 	 *
 	 * @var ReleaseManager
 	 */
-	protected $release_manager;
+	protected ReleaseManager $release_manager;
 
 	/**
 	 * Package manager.
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Storage.
 	 *
 	 * @var Storage
 	 */
-	protected $storage;
+	protected Storage $storage;
+
+	/**
+	 * Logger.
+	 *
+	 * @var LoggerInterface
+	 */
+	protected LoggerInterface $logger;
 
 	/**
 	 * Constructor.

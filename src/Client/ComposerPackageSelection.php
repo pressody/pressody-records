@@ -24,6 +24,8 @@ use Composer\Composer;
 use Composer\DependencyResolver\DefaultPolicy;
 use Composer\DependencyResolver\Pool;
 use Composer\DependencyResolver\Request;
+use Composer\DependencyResolver\Solver;
+use Composer\DependencyResolver\SolverProblemsException;
 use Composer\IO\IOInterface;
 use Composer\Json\JsonFile;
 use Composer\Package\AliasPackage;
@@ -43,7 +45,8 @@ use Composer\Util\Filesystem;
 
 class ComposerPackageSelection {
 	/** @var IOInterface The output Interface. */
-	protected $output;	    protected $io;
+	protected $output;
+	protected $io;
 
 	/** @var bool Skips Exceptions if true. */
 	protected $skipErrors;
@@ -78,6 +81,12 @@ class ComposerPackageSelection {
 	/** @var array Minimum stability accepted by Package. */
 	private $minimumStabilityPerPackage;
 
+	/** @var bool https://getcomposer.org/doc/04-schema.md#prefer-stable */
+	private $preferStable;
+
+	/** @var bool This is useful for testing purposes when you want to select the lowest possible packages that match the requirements. */
+	private $preferLowest;
+
 	/** @var array The active package filter to merge. */
 	private $packagesFilter = [];
 
@@ -111,8 +120,8 @@ class ComposerPackageSelection {
 	/** @var string The homepage - needed to get the relative paths of the providers */
 	private $homepage;
 
-	public function __construct(IOInterface $io, string $outputDir, array $config, bool $skipErrors) {
-		$this->io = $io;
+	public function __construct( IOInterface $io, string $outputDir, array $config, bool $skipErrors ) {
+		$this->io         = $io;
 		$this->skipErrors = $skipErrors;
 		$this->filename   = $outputDir . '/packages.json';
 
@@ -153,7 +162,7 @@ class ComposerPackageSelection {
 	 */
 	public function select( Composer $composer, bool $verbose ): array {
 		// run over all packages and store matching ones
-		$this->io->write('<info>Scanning packages</info>');
+		$this->io->write( '<info>Scanning packages</info>' );
 
 		$repos = $initialRepos = $composer->getRepositoryManager()->getRepositories();
 
@@ -161,7 +170,7 @@ class ComposerPackageSelection {
 			return BasePackage::$stabilities[ $value ];
 		}, $this->minimumStabilityPerPackage );
 
-		$repositorySet = new RepositorySet($this->minimumStability, $stabilityFlags);
+		$repositorySet = new RepositorySet( $this->minimumStability, $stabilityFlags );
 
 		if ( $this->hasRepositoryFilter() ) {
 			$repos = $this->filterRepositories( $repos );
@@ -183,8 +192,8 @@ class ComposerPackageSelection {
 			}
 		}
 
-		foreach ($repos as $repo) {
-			$repositorySet->addRepository($repo);
+		foreach ( $repos as $repo ) {
+			$repositorySet->addRepository( $repo );
 		}
 
 		// determine the required packages
@@ -193,14 +202,31 @@ class ComposerPackageSelection {
 		// creating requirements request
 		$request = new Request();
 		// Add the root links to the list of required packages.
-		foreach ($rootLinks as $link) {
-			$request->requireName($link->getTarget(), $link->getConstraint());
+		foreach ( $rootLinks as $link ) {
+			$request->requireName( $link->getTarget(), $link->getConstraint() );
 		}
 		// Create the pool of required packages.
-		$pool = $repositorySet->createPool($request, $this->io);
+		$pool = $repositorySet->createPool( $request, $this->io );
+
+		// We will try and solve the dependencies to see if all is well.
+		if ( $this->requireDependencies || $this->requireDevDependencies ) {
+			$policy = new DefaultPolicy( $this->preferStable, $this->preferLowest );
+			// solve dependencies
+			$solver = new Solver( $policy, $pool, $this->io );
+			try {
+				$lockTransaction = $solver->solve( $request );
+				$solver          = null;
+				// @todo Investigate if we could be much more elegant by using the solver result instead of the selecting links for root and deps.
+			} catch ( SolverProblemsException $e ) {
+				$message = 'Could not solve root package dependencies. Here are the reasons: ' . PHP_EOL;
+				$message .= $e->getPrettyString( $repositorySet, $request, $pool, $this->io->isVerbose() );
+
+				throw new \Exception( $message, 0, $e );
+			}
+		}
 
 		// select the required packages and determine dependencies
-		$depsLinks = $this->selectLinks( $pool, $rootLinks, true, $verbose );
+		$depsLinks = $this->selectLinks( $pool, $repositorySet, $rootLinks, true, $verbose );
 
 		if ( $this->requireDependencies || $this->requireDevDependencies ) {
 			// dependencies of required packages might have changed and be part of filtered repos
@@ -216,7 +242,7 @@ class ComposerPackageSelection {
 			}
 
 			// select dependencies
-			$this->selectLinks( $pool, $depsLinks, false, $verbose );
+			$this->selectLinks( $pool, $repositorySet, $depsLinks, false, $verbose );
 		}
 
 		$this->setSelectedAsAbandoned();
@@ -280,7 +306,7 @@ class ComposerPackageSelection {
 			$includedJsonFile = new JsonFile( $dirname . '/' . $file );
 
 			if ( ! $includedJsonFile->exists() ) {
-				$this->io->write(sprintf(
+				$this->io->write( sprintf(
 					'<error>File \'%s\' does not exist, defined in "includes" in \'%s\'</error>',
 					$includedJsonFile->getPath(),
 					$rootJsonFile->getPath()
@@ -336,12 +362,14 @@ class ComposerPackageSelection {
 		$this->requireDependencyFilter = (bool) ( $config['require-dependency-filter'] ?? true );
 
 		if ( ! $this->requireAll && ! isset( $config['require'] ) ) {
-			$this->io->write('No explicit requires defined, enabling require-all');
+			$this->io->write( 'No explicit requires defined, enabling require-all' );
 			$this->requireAll = true;
 		}
 
 		$this->minimumStability           = $config['minimum-stability'] ?? 'dev';
 		$this->minimumStabilityPerPackage = $config['minimum-stability-per-package'] ?? [];
+		$this->preferStable               = $config['prefer-stable'] ?? true;
+		$this->preferLowest               = $config['prefer-lowest'] ?? false;
 		$this->abandoned                  = $config['abandoned'] ?? [];
 		$this->blacklist                  = $config['blacklist'] ?? [];
 		$this->includeTypes               = $config['include-types'] ?? null;
@@ -376,7 +404,7 @@ class ComposerPackageSelection {
 			} elseif ( false !== strpos( $entry, ':' ) ) {
 				$type = 'ipv6';
 				if ( ! defined( 'AF_INET6' ) ) {
-					$this->io->write('<error>Unable to use IPv6.</error>');
+					$this->io->write( '<error>Unable to use IPv6.</error>' );
 					continue;
 				}
 			} elseif ( 0 === preg_match( '#[^/.\\d]#', $entry ) ) {
@@ -393,7 +421,7 @@ class ComposerPackageSelection {
 			$host = @inet_pton( $host );
 
 			if ( false === $host || (int) $mask != $mask ) {
-				$this->io->write(sprintf('<error>Invalid subnet "%s"</error>', $entry));
+				$this->io->write( sprintf( '<error>Invalid subnet "%s"</error>', $entry ) );
 				continue;
 			}
 
@@ -697,13 +725,14 @@ class ComposerPackageSelection {
 
 	/**
 	 * @param Pool                      $pool
+	 * @param RepositorySet             $repositorySet
 	 * @param Link[]|PackageInterface[] $links
 	 * @param bool                      $isRoot
 	 * @param bool                      $verbose
 	 *
 	 * @return Link[]
 	 */
-	private function selectLinks( Pool $pool, array $links, bool $isRoot, bool $verbose ): array {
+	private function selectLinks( Pool $pool, RepositorySet $repositorySet, array $links, bool $isRoot, bool $verbose ): array {
 		$depsLinks = $isRoot ? [] : $links;
 
 		$policies = [
@@ -723,7 +752,7 @@ class ComposerPackageSelection {
 			} elseif ( is_a( $link, Link::class ) ) {
 				$name = $link->getTarget();
 				if ( ! $isRoot && $this->onlyBestCandidates ) {
-					$selector = new VersionSelector( $pool );
+					$selector = new VersionSelector( $repositorySet );
 					$matches  = [ $selector->findBestCandidate( $name, $link->getConstraint()->getPrettyString() ) ];
 				} else {
 					$matches = $pool->whatProvides( $name, $link->getConstraint() );
@@ -741,7 +770,7 @@ class ComposerPackageSelection {
 				} );
 				$m = [];
 				foreach ( $policies as $policy ) {
-					$pm = $policy->selectPreferredPackages( $pool, [], $matches );
+					$pm = $policy->selectPreferredPackages( $pool, $matches );
 					if ( isset( $pm[0] ) ) {
 						$m[] = $pool->packageById( $pm[0] );
 					}

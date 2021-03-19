@@ -11,6 +11,8 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
+use PixelgradeLT\Records\Authentication\ApiKey\Repository;
+use PixelgradeLT\Records\Authentication\ApiKey\Server;
 use PixelgradeLT\Records\Client\ComposerClient;
 use Psr\Log\LoggerInterface;
 
@@ -80,6 +82,13 @@ class PackageManager {
 	 * @var WordPressReadmeParser
 	 */
 	protected WordPressReadmeParser $wordpress_readme_parser;
+
+	/**
+	 * Logger.
+	 *
+	 * @var LoggerInterface
+	 */
+	protected LoggerInterface $logger;
 
 	/**
 	 * Constructor.
@@ -760,21 +769,23 @@ class PackageManager {
 			$client->getPackages( [
 				'repositories'                  => [
 					[
-						// Disable the default packagist.org repo so we don't mistakenly fetch from there.
-						"packagist.org" => false,
-					],
-					[
 						// Our very own Composer repo.
 						'type'    => 'composer',
 						'url'     => get_packages_permalink( [ 'base' => true ] ),
-						"options" => [
-							"ssl"  => [
-								"verify_peer" => ! $this->is_debug_mode(),
+						'options' => [
+							'ssl'  => [
+								'verify_peer' => ! $this->is_debug_mode(),
+							],
+							'http' => [
+								'header' => ! empty( $_ENV['PHP_AUTH_USER'] ) ? [
+									'Authorization: Basic ' . base64_encode( $_ENV['PHP_AUTH_USER'] . ':' . Server::AUTH_PWD ),
+								] : [],
 							],
 						],
 					],
 				],
 				'require-dependencies'          => true,
+				'only-best-candidates'          => true,
 				'require'                       => [
 					// Any package version.
 					$package->get_name() => '*',
@@ -786,7 +797,7 @@ class PackageManager {
 			] );
 		} catch ( \Exception $e ) {
 			$this->logger->error(
-				'Error during Composer require dry-run for {package} (type {type}).',
+				'Error during Composer require dry-run for {package} (type {type}).' . PHP_EOL . $e->getMessage(),
 				[
 					'exception' => $e,
 					'package'   => $package->get_name(),

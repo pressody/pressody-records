@@ -93,7 +93,7 @@ class PackagePostType extends AbstractHookProvider {
 				'description'        => __( 'Composer packages to be used in the PixelgradeLT modules delivered to PixelgradeLT users.', 'pixelgradelt_records' ),
 				'hierarchical'       => false,
 				'public'             => false,
-				'publicly_queryable' => true,
+				'publicly_queryable' => false,
 				'has_archive'        => false,
 				'rest_base'          => $this->package_manager::PACKAGE_POST_TYPE_PLURAL,
 				'show_ui'            => true,

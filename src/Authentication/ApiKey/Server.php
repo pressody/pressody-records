@@ -23,6 +23,9 @@ use WP_Http as HTTP;
  * @since 0.1.0
  */
 class Server implements ServerInterface {
+
+	const AUTH_PWD = 'pixelgradelt_records';
+
 	/**
 	 * API Key repository.
 	 *
@@ -61,7 +64,7 @@ class Server implements ServerInterface {
 		$realm = $request->get_header( 'PHP_AUTH_PW' );
 
 		// Bail if this isn't a PixelgradeLT Records authentication request.
-		if ( 'pixelgradelt_records' !== $realm ) {
+		if ( self::AUTH_PWD !== $realm ) {
 			return false;
 		}
 

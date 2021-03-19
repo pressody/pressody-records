@@ -290,6 +290,9 @@ class ComposerClient implements Client {
 			'require-dependency-filter' => true,
 			'minimum-stability'         => 'dev',
 			'providers'                 => false,
+
+			'prefer-stable'             => true,
+			'prefer-lowest'             => false,
 		];
 
 		// If we are in a local/development environment, relax further.

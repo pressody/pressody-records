@@ -60,6 +60,17 @@ class EditPackage extends AbstractHookProvider {
 	protected $composer_transformer;
 
 	/**
+	 * User messages to display in the WP admin.
+	 *
+	 * @var array
+	 */
+	protected $user_messages = [
+			'error'   => [],
+			'warning' => [],
+			'info'  => [],
+	];
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.5.0
@@ -118,7 +129,8 @@ class EditPackage extends AbstractHookProvider {
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required_packages', 20, 2 );
 
 		// Show edit post screen error messages.
-		$this->add_action( 'edit_form_top', 'show_post_error_msgs' );
+		$this->add_action( 'edit_form_top', 'check_package_post', 5 );
+		$this->add_action( 'edit_form_top', 'show_user_messages', 50 );
 
 		// Add a message to the post publish metabox.
 		$this->add_action( 'post_submitbox_start', 'show_publish_message' );
@@ -536,7 +548,7 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 				              ] )
 				              ->set_header_template( '
 							    <% if (name) { %>
-							        <%- name %>
+							        <%= name %>
 							    <% } %>
 							  ' )
 				              ->set_conditional_logic( [
@@ -596,7 +608,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 				              ] )
 				              ->set_header_template( '
 								    <% if (pseudo_id) { %>
-								        <%- pseudo_id %> (version range: <%- version_range %><% if ("stable" !== stability) { %>@<%- stability %><% } %>)
+								        <%- pseudo_id %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
 								    <% } %>
 								' ),
 		         ] );
@@ -752,7 +764,14 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		// Transform the package in the Composer format.
 		$package = $this->composer_transformer->transform( $package );
 
-		$this->package_manager->dry_run_package_require( $package );
+		if ( false === $this->package_manager->dry_run_package_require( $package ) ) {
+			update_post_meta( $post_ID, '_package_require_dry_run_result', [
+					'type'    => 'error',
+					'message' => '<p>We could not resolve the package dependencies. <strong>You should give the required packages a further look and then hit Update!</strong><br>There should be additional information in the error logs.</p>',
+			] );
+		} else {
+			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
+		}
 	}
 
 	public function get_available_installed_plugins_options(): array {
@@ -919,23 +938,21 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	}
 
 	/**
-	 * Display error messages at the top of the post edit screen.
-	 *
-	 * Doing this prevents users from getting confused when their new posts aren't published.
+	 * Check the package post for possible issues, so the user is aware of them.
 	 *
 	 * @param \WP_Post The current post object.
 	 */
-	protected function show_post_error_msgs( \WP_Post $post ) {
+	protected function check_package_post( \WP_Post $post ) {
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
 			return;
 		}
 
 		// Display an error regarding that the package title is required.
 		if ( empty( $post->post_title ) ) {
-			printf(
-					'<div class="error below-h2"><p>%s</p></div>',
+			$this->add_user_message( 'error', sprintf(
+					'<p>%s</p>',
 					esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pixelgradelt_records' )
-			);
+			) );
 		}
 
 		// Display an error regarding that the package type is required.
@@ -945,10 +962,64 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		) );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
 			$taxonomy_args = $this->package_post_type->get_package_type_taxonomy_args();
-			printf(
-					'<div class="error below-h2"><p>%s</p></div>',
+			$this->add_user_message( 'error', sprintf(
+					'<p>%s</p>',
 					sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
-			);
+			) );
+		}
+
+		$dry_run_results = get_post_meta( $post->ID, '_package_require_dry_run_result', true );
+		if ( ! empty( $dry_run_results ) ) {
+			if ( is_string( $dry_run_results ) ) {
+				$dry_run_results = [
+						'type'    => 'warning',
+						'message' => $dry_run_results,
+				];
+			}
+
+			if ( is_array( $dry_run_results ) && ! empty( $dry_run_results['type'] ) && ! empty( $dry_run_results['message'] ) ) {
+				$this->add_user_message( $dry_run_results['type'], $dry_run_results['message'] );
+			}
+		}
+	}
+
+	/**
+	 * Display user messages at the top of the post edit screen.
+	 *
+	 * @param \WP_Post The current post object.
+	 */
+	protected function show_user_messages( \WP_Post $post ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+			return;
+		}
+
+		$messages = apply_filters( 'pixelgradelt_records_editpackage_show_user_messages', $this->user_messages, $post );
+		if ( empty( $messages ) ) {
+			return;
+		}
+
+		if ( ! empty( $messages['error'] ) ) {
+			foreach ( $messages['error'] as $message ) {
+				if ( ! empty( $message ) ) {
+					printf( '<div class="%1$s">%2$s</div>', 'notice notice-error below-h2', $message );
+				}
+			}
+		}
+
+		if ( ! empty( $messages['warning'] ) ) {
+			foreach ( $messages['warning'] as $message ) {
+				if ( ! empty( $message ) ) {
+					printf( '<div class="%1$s">%2$s</div>', 'notice notice-warning below-h2', $message );
+				}
+			}
+		}
+
+		if ( ! empty( $messages['info'] ) ) {
+			foreach ( $messages['info'] as $message ) {
+				if ( ! empty( $message ) ) {
+					printf( '<div class="%1$s">%2$s</div>', 'notice notice-info below-h2', $message );
+				}
+			}
 		}
 	}
 
@@ -966,5 +1037,24 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 				'<div class="message patience"><p>%s</p></div>',
 				esc_html__( 'Please bear in mind that Publish/Update may take a minute or two since we do some heavy lifting behind the scenes. Patience is advised.', 'pixelgradelt_records' )
 		);
+	}
+
+	/**
+	 * Add a certain user message type to the list for later display.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param $type
+	 * @param $message
+	 */
+	protected function add_user_message( $type, $message ) {
+		if ( ! in_array( $type, [ 'error', 'warning', 'info' ] ) ) {
+			return;
+		}
+
+		if ( empty( $this->user_messages[ $type ] ) ) {
+			$this->user_messages[ $type ] = [];
+		}
+		$this->user_messages[ $type ][] = $message;
 	}
 }

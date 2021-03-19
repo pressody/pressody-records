@@ -12,7 +12,7 @@
  */
 require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 // We use immutable since we don't want to overwrite variables already set.
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 $dotenv->required(['WP_TESTS_DB_NAME', 'WP_TESTS_DB_USER', 'WP_TESTS_DB_PASSWORD', 'WP_TESTS_DB_HOST']);
 
