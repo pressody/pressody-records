@@ -56,14 +56,14 @@ class DBLogHandler extends LogHandler {
 	 * Add a log entry to chosen file.
 	 *
 	 * @param int    $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
-	 * @param string $message Log message.
-	 * @param string $source Log source. Useful for filtering and sorting.
-	 * @param array  $context Context will be serialized and stored in database.
+	 * @param string $level     emergency|alert|critical|error|warning|notice|info|debug.
+	 * @param string $message   Log message.
+	 * @param string $source    Log source. Useful for filtering and sorting.
+	 * @param array  $context   Context will be serialized and stored in database.
 	 *
 	 * @return bool True if write was successful.
 	 */
-	protected static function add( $timestamp, $level, $message, $source, $context ) {
+	protected static function add( int $timestamp, string $level, string $message, string $source, array $context ): bool {
 		global $wpdb;
 
 		$insert = [
@@ -93,7 +93,7 @@ class DBLogHandler extends LogHandler {
 	 *
 	 * @return bool True if flush was successful.
 	 */
-	public static function flush() {
+	public static function flush(): bool {
 		global $wpdb;
 
 		return $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}pixelgradelt_records_log" );
@@ -103,9 +103,10 @@ class DBLogHandler extends LogHandler {
 	 * Clear entries for a chosen handle/source.
 	 *
 	 * @param string $source Log source.
+	 *
 	 * @return bool
 	 */
-	public function clear( $source ) {
+	public function clear( string $source ): bool {
 		global $wpdb;
 
 		return $wpdb->query(
@@ -123,7 +124,7 @@ class DBLogHandler extends LogHandler {
 	 *
 	 * @return bool
 	 */
-	public static function delete( $log_ids ) {
+	public static function delete( $log_ids ): bool {
 		global $wpdb;
 
 		if ( ! is_array( $log_ids ) ) {
@@ -138,7 +139,6 @@ class DBLogHandler extends LogHandler {
 	/**
 	 * Delete all logs older than a defined timestamp.
 	 *
-	 * @since 3.4.0
 	 * @param integer $timestamp Timestamp to delete logs before.
 	 */
 	public static function delete_logs_before_timestamp( $timestamp = 0 ) {
@@ -163,7 +163,7 @@ class DBLogHandler extends LogHandler {
 	 *
 	 * @return string Text to use as log source. "" (empty string) if none is found.
 	 */
-	protected static function get_log_source() {
+	protected static function get_log_source(): string {
 		static $ignore_files = array( 'DBLogHandler', 'Logger' );
 
 		/**

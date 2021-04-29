@@ -60,13 +60,6 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-if ( ! defined( 'GV_UPDATER_LOG_DIR' ) ) {
-	$up_dir = wp_upload_dir();
-
-	define( 'GV_UPDATER_LOG_DIR', $up_dir['basedir'] . '/gplvault-logs/' );
-}
-define( 'DB_NAME', isset( $_ENV['WP_TESTS_DB_NAME'] ) ? $_ENV['WP_TESTS_DB_NAME'] : 'wordpress_test' );
-
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 

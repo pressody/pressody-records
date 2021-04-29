@@ -19,6 +19,7 @@ use Pimple\ServiceProviderInterface;
 use Pimple\Psr11\ServiceLocator;
 use PixelgradeLT\Records\Logging\Handler\FileLogHandler;
 use PixelgradeLT\Records\Logging\Logger;
+use PixelgradeLT\Records\Logging\LogsManager;
 use PixelgradeLT\Records\PostType\PackagePostType;
 use Psr\Log\LogLevel;
 use PixelgradeLT\Records\Authentication\ApiKey;
@@ -58,7 +59,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['archiver'] = function( $container ) {
-			return ( new Archiver( $container['logger'] ) )
+			return ( new Archiver( $container['logs.logger'] ) )
 				->register_validators( $container['validators.artifact'] );
 		};
 
@@ -142,7 +143,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['release.manager'],
 				$container['package.manager'],
 				$container['storage.packages'],
-				$container['logger']
+				$container['logs.logger']
 			);
 		};
 
@@ -169,7 +170,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['release.manager'],
 				$container['storage.packages'],
 				$container['htaccess.handler'],
-				$container['logger']
+				$container['logs.logger']
 			);
 		};
 
@@ -192,16 +193,16 @@ class ServiceProvider implements ServiceProviderInterface {
 			return $request;
 		};
 
-		$container['logger'] = function( $container ) {
+		$container['logs.logger'] = function( $container ) {
 			return new Logger(
-				$container['logger.level'],
+				$container['logs.level'],
 				[
-					$container['logger.handlers.file'],
+					$container['logs.handlers.file'],
 				]
 			);
 		};
 
-		$container['logger.level'] = function( $container ) {
+		$container['logs.level'] = function( $container ) {
 			// Log warnings and above when WP_DEBUG is enabled.
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				$level = LogLevel::WARNING;
@@ -210,8 +211,12 @@ class ServiceProvider implements ServiceProviderInterface {
 			return $level ?? '';
 		};
 
-		$container['logger.handlers.file'] = function() {
+		$container['logs.handlers.file'] = function() {
 			return new FileLogHandler();
+		};
+
+		$container['logs.manager'] = function( $container ) {
+			return new LogsManager( $container['logs.logger'] );
 		};
 
 		$container['package.factory'] = function( $container ) {
@@ -219,7 +224,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['package.manager'],
 				$container['release.manager'],
 				$container['archiver'],
-				$container['logger']
+				$container['logs.logger']
 			);
 		};
 
@@ -228,7 +233,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['client.composer'],
 				$container['version.parser'],
 				$container['wordpress.readme_parser'],
-				$container['logger']
+				$container['logs.logger']
 			);
 		};
 
@@ -473,7 +478,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['transformer.composer_package'],
 				$container['release.manager'],
 				$container['version.parser'],
-				$container['logger']
+				$container['logs.logger']
 			);
 		};
 

@@ -12,7 +12,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Capabilities;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class to activate the plugin.
@@ -20,6 +20,10 @@ use PixelgradeLT\Records\Capabilities;
  * @since 0.1.0
  */
 class Activation extends AbstractHookProvider {
+
+	// use this in case you need to update the table structures
+	const DB_VERSION = '0.9.0';
+
 	/**
 	 * Register hooks.
 	 *
@@ -42,5 +46,67 @@ class Activation extends AbstractHookProvider {
 	 */
 	public function activate() {
 		update_option( 'pixelgradelt_records_flush_rewrite_rules', 'yes' );
+
+		$this->create_cron_jobs();
+		$this->create_or_update_tables();
+	}
+
+	/**
+	 * Create cron jobs (clear them first).
+	 */
+	private function create_cron_jobs() {
+		wp_clear_scheduled_hook( 'pixelgradelt_records_cleanup_logs' );
+
+		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'pixelgradelt_records_cleanup_logs' );
+	}
+
+	private function create_or_update_tables() {
+		global $wpdb;
+
+		// We only do something if the DB version is different
+		if ( self::DB_VERSION !== get_option( 'pixelgradelt_records_dbversion' ) ) {
+
+			// Create/update the log table
+			$log_table = "
+CREATE TABLE {$wpdb->prefix}pixelgradelt_records_log (
+  log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  timestamp datetime NOT NULL,
+  level smallint(4) NOT NULL,
+  source varchar(200) NOT NULL,
+  message longtext NOT NULL,
+  context longtext NULL,
+  PRIMARY KEY (log_id),
+  KEY level (level)
+)";
+			$this->dbdelta( $log_table );
+
+			// Remember the current DB version
+			update_option( 'pixelgradelt_records_dbversion', self::DB_VERSION );
+		}
+	}
+
+	protected function dbdelta( $sql ) {
+		global $wpdb;
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+		$charset_collate = '';
+		if ( $wpdb->has_cap( 'collation' ) ) {
+			$charset_collate = $wpdb->get_charset_collate();
+		}
+
+		$sql .= " $charset_collate;";
+
+		dbDelta( $sql );
+	}
+
+	/**
+	 * Drop tables.
+	 *
+	 * @return void
+	 */
+	public static function drop_tables() {
+		global $wpdb;
+
+		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}pixelgradelt_records_log" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }

@@ -12,8 +12,6 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Logging;
 
 use Composer\IO\BaseIO;
-use Exception;
-use PixelgradeLT\Records\Utils\JSONCleaner;
 use Psr\Log\LogLevel;
 use function PixelgradeLT\Records\doing_it_wrong;
 
@@ -130,104 +128,6 @@ final class Logger extends BaseIO {
 //				$this->format( $message, $context )
 //			)
 //		);
-	}
-
-	/**
-	 * Format a message.
-	 *
-	 * - Interpolates context values into message placeholders.
-	 * - Appends additional context data as JSON.
-	 * - Appends exception data.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $message Log message.
-	 * @param array  $context Additional data.
-	 * @return string
-	 */
-	protected function format( string $message, array $context = [] ): string {
-		$search  = [];
-		$replace = [];
-
-		// Extract exceptions from the context array.
-		$exception = $context['exception'] ?? null;
-		unset( $context['exception'] );
-
-		foreach ( $context as $key => $value ) {
-			$placeholder = '{' . $key . '}';
-
-			if ( false === strpos( $message, $placeholder ) ) {
-				continue;
-			}
-
-			array_push( $search, '{' . $key . '}' );
-			array_push( $replace, $this->to_string( $value ) );
-			unset( $context[ $key ] );
-		}
-
-		$line = str_replace( $search, $replace, $message );
-
-		// Append additional context data.
-		if ( ! empty( $context ) ) {
-			$line .= ' ' . wp_json_encode( $context, \JSON_UNESCAPED_SLASHES );
-		}
-
-		// Append an exception.
-		if ( ! empty( $exception ) && $exception instanceof Exception ) {
-			$line .= ' ' . $this->format_exception( $exception );
-		}
-
-		return $line;
-	}
-
-	/**
-	 * Format an exception.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param Exception $e Exception.
-	 * @return string
-	 */
-	protected function format_exception( Exception $e ): string {
-		// Since the trace may contain in a step's args circular references, we need to replace such references with a string.
-		// This is to avoid infinite recursion when attempting to json_encode().
-		$trace = JSONCleaner::clean( $e->getTrace(), 6 );
-		$encoded_exception = wp_json_encode(
-			[
-				'message' => $e->getMessage(),
-				'code'    => $e->getCode(),
-				'file'    => $e->getFile(),
-				'line'    => $e->getLine(),
-				'trace'   => $trace,
-			],
-			\JSON_UNESCAPED_SLASHES
-		);
-
-		if ( ! is_string( $encoded_exception ) ) {
-			return 'failed-to-encode-exception';
-		}
-
-		return $encoded_exception;
-	}
-
-	/**
-	 * Convert a value to a string.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param mixed $value Message.
-	 * @return string
-	 */
-	protected function to_string( $value ): string {
-		if ( is_wp_error( $value ) ) {
-			$value = $value->get_error_message();
-		} elseif ( is_object( $value ) && method_exists( '__toString', $value ) ) {
-			$value = (string) $value;
-		} elseif ( ! is_scalar( $value ) ) {
-			$value = wp_json_encode( $value, \JSON_UNESCAPED_SLASHES, 128 );
-		}
-
-		return $value;
 	}
 
 	/**

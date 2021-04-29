@@ -14,6 +14,8 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Logging\Handler;
 
 use Automattic\Jetpack\Constants;
+use Exception;
+use PixelgradeLT\Records\Utils\JSONCleaner;
 use function PixelgradeLT\Records\doing_it_wrong;
 use const PixelgradeLT\Records\LOG_DIR;
 
@@ -100,13 +102,17 @@ class FileLogHandler extends LogHandler {
 			$handle = 'log';
 		}
 
-		$entry = self::format_entry( $timestamp, $level, $message, $context );
+		$entry = $this->format_entry( $timestamp, $level, $message, $context );
 
 		return $this->add( $entry, $handle );
 	}
 
 	/**
 	 * Builds a log entry text from timestamp, level and message.
+	 *
+	 * - Interpolates context values into message placeholders.
+	 * - Appends additional context data as JSON.
+	 * - Appends exception data.
 	 *
 	 * @param int    $timestamp Log timestamp.
 	 * @param string $level     emergency|alert|critical|error|warning|notice|info|debug.
@@ -115,22 +121,50 @@ class FileLogHandler extends LogHandler {
 	 *
 	 * @return string Formatted log entry.
 	 */
-	protected static function format_entry( int $timestamp, string $level, string $message, array $context ): string {
+	protected function format_entry( int $timestamp, string $level, string $message, array $context ): string {
+		// Extract exceptions from the context array.
+		$exception = $context['exception'] ?? null;
+		unset( $context['exception'] );
 
-		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
-			if ( isset( $context['source'] ) && $context['source'] ) {
-				$handle = $context['source'];
-			} else {
-				$handle = 'log';
-			}
-			$message = apply_filters( 'pixelgradelt_records_logger_add_message', $message, $handle );
-			$time    = date_i18n( 'm-d-Y @ H:i:s' );
-			$entry   = "{$time} - {$message}";
-		} else {
-			$entry = parent::format_entry( $timestamp, $level, $message, $context );
+		// First, let the general logic generate the entry.
+		$entry = parent::format_entry( $timestamp, $level, $message, $context );
+
+		// Now attach an exception, if provided.
+		if ( ! empty( $exception ) && $exception instanceof Exception ) {
+			$entry .= ' THROWN_EXCEPTION: ' . $this->format_exception( $exception );
 		}
 
 		return $entry;
+	}
+
+	/**
+	 * Format an exception.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param Exception $e Exception.
+	 * @return string
+	 */
+	protected function format_exception( Exception $e ): string {
+		// Since the trace may contain in a step's args circular references, we need to replace such references with a string.
+		// This is to avoid infinite recursion when attempting to json_encode().
+		$trace = JSONCleaner::clean( $e->getTrace(), 6 );
+		$encoded_exception = wp_json_encode(
+			[
+				'message' => $e->getMessage(),
+				'code'    => $e->getCode(),
+				'file'    => $e->getFile(),
+				'line'    => $e->getLine(),
+				'trace'   => $trace,
+			],
+			\JSON_UNESCAPED_SLASHES
+		);
+
+		if ( ! is_string( $encoded_exception ) ) {
+			return 'failed-to-encode-exception';
+		}
+
+		return $encoded_exception;
 	}
 
 	/**
