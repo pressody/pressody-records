@@ -17,6 +17,8 @@ use Pimple\Container as PimpleContainer;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
 use Pimple\Psr11\ServiceLocator;
+use PixelgradeLT\Records\Logging\Handler\FileLogHandler;
+use PixelgradeLT\Records\Logging\Logger;
 use PixelgradeLT\Records\PostType\PackagePostType;
 use Psr\Log\LogLevel;
 use PixelgradeLT\Records\Authentication\ApiKey;
@@ -191,7 +193,12 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['logger'] = function( $container ) {
-			return new Logger( $container['logger.level'] );
+			return new Logger(
+				$container['logger.level'],
+				[
+					$container['logger.handlers.file'],
+				]
+			);
 		};
 
 		$container['logger.level'] = function( $container ) {
@@ -201,6 +208,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			}
 
 			return $level ?? '';
+		};
+
+		$container['logger.handlers.file'] = function() {
+			return new FileLogHandler();
 		};
 
 		$container['package.factory'] = function( $container ) {

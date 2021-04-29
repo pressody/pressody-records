@@ -42,6 +42,7 @@
 	},
 	"require": {
 		"php": "^7.4",
+		"automattic/jetpack-constants": "^1.6",
 		"cedaro/wp-plugin": "^0.4.0",
 		"chamilo/pclzip": "^2.8",
 		"composer/composer": "^2.0",
@@ -52,8 +53,9 @@
 		"knplabs/packagist-api": "^2.0@dev",
 		"pimple/pimple": "^3.2",
 		"psr/container": "^1.0",
-		"psr/log": "^1.0"
-	},
+		"psr/log": "^1.0",
+      	"ext-json": "*"
+    },
 	"require-dev": {
 		"brain/monkey": "^2.2",
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",

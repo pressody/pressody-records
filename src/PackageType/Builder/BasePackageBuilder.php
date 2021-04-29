@@ -13,7 +13,7 @@ namespace PixelgradeLT\Records\PackageType\Builder;
 
 use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
-use PixelgradeLT\Records\Logger;
+use PixelgradeLT\Records\Logging\Logger;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;

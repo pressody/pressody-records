@@ -87,4 +87,14 @@ class Plugin extends BasePlugin implements Composable {
 		 */
 		do_action( 'pixelgradelt_records_composed', $this, $container );
 	}
+
+	public function define_constants(): Plugin {
+		$upload_dir = wp_upload_dir( null, false );
+
+		if ( ! defined( 'PixelgradeLT\Records\LOG_DIR' ) ) {
+			define( 'PixelgradeLT\Records\LOG_DIR', $upload_dir['basedir'] . '/pixelgradelt-records-logs/' );
+		}
+
+		return $this;
+	}
 }

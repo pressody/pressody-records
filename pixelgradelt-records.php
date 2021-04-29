@@ -17,7 +17,7 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: pixelgradelt_records
  * Domain Path: /languages
- * Requires PHP: 7.2
+ * Requires PHP: 7.4
  * Network: false
  * GitHub Plugin URI: pixelgradelt/pixelgradelt-records
  * Release Asset: true
@@ -60,6 +60,13 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+if ( ! defined( 'GV_UPDATER_LOG_DIR' ) ) {
+	$up_dir = wp_upload_dir();
+
+	define( 'GV_UPDATER_LOG_DIR', $up_dir['basedir'] . '/gplvault-logs/' );
+}
+define( 'DB_NAME', isset( $_ENV['WP_TESTS_DB_NAME'] ) ? $_ENV['WP_TESTS_DB_NAME'] : 'wordpress_test' );
+
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
@@ -74,6 +81,7 @@ $pixelgradelt_records = plugin()
 	->set_file( __DIR__ . '/pixelgradelt-records.php' )
 	->set_slug( 'pixelgradelt-records' )
 	->set_url( plugin_dir_url( __FILE__ ) )
+	->define_constants()
 	->set_container( $pixelgradelt_records_container )
 	->register_hooks( $pixelgradelt_records_container->get( 'hooks.activation' ) )
 	->register_hooks( $pixelgradelt_records_container->get( 'hooks.deactivation' ) )

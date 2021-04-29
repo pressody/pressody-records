@@ -174,3 +174,26 @@ function display_missing_dependencies_notice() {
 		)
 	);
 }
+
+function doing_it_wrong( $function, $message, $version ) {
+	// @codingStandardsIgnoreStart
+	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
+
+	if ( wp_doing_ajax() || is_rest_request() ) {
+		do_action( 'doing_it_wrong_run', $function, $message, $version );
+		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
+	} else {
+		_doing_it_wrong( $function, $message, $version );
+	}
+}
+
+function is_rest_request() {
+	if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+		return false;
+	}
+
+	$rest_prefix         = trailingslashit( rest_get_url_prefix() );
+	$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+	return apply_filters( 'pixelgradelt_records_is_rest_api_request', $is_rest_api_request );
+}
