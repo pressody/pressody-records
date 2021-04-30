@@ -92,6 +92,8 @@ use PixelgradeLT\Records\PackageType\BasePackage;
 						],
 					]
 				);
+			} else {
+				echo '<span class="error-message">' . esc_html__( 'No releases! This package will not be available for use since there is nothing to use!', 'pixelgradelt_records' ) . '</span>';
 			}
 			?>
 		</td>

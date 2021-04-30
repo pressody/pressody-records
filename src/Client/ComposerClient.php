@@ -41,6 +41,15 @@ class ComposerClient implements Client {
 	protected $composer;
 
 	/**
+	 * The Composer config used to instantiate.
+	 *
+	 * We will use this to determine if we need to reinstantiate.
+	 *
+	 * @var array
+	 */
+	protected $composer_config = [];
+
+	/**
 	 *
 	 * @var BaseIO
 	 */
@@ -51,8 +60,7 @@ class ComposerClient implements Client {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $working_directory
-	 * @param BaseIO $io
+	 * @param BaseIO|null $io
 	 */
 	public function __construct(
 		BaseIO $io = null
@@ -311,13 +319,15 @@ class ComposerClient implements Client {
 	 * @return Composer
 	 */
 	public function getComposer( $config = null ): Composer {
-		if ( null === $this->composer ) {
+		if ( null === $this->composer || $this->composer_config !== $config ) {
 			try {
 				$this->composer = Factory::create( $this->io, $config );
 			} catch ( \InvalidArgumentException $e ) {
 				$this->io->error( $e->getMessage() );
 				exit( 1 );
 			}
+
+			$this->composer_config = $config;
 		}
 
 		return $this->composer;

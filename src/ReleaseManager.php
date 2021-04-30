@@ -147,9 +147,9 @@ class ReleaseManager {
 				$managed_post_id = $package->get_managed_post_id();
 				// Get the source version/release packages data (fetched from the external repo) we have stored.
 				$source_cached_release_packages = get_post_meta( $managed_post_id, '_package_source_cached_release_packages', true );
-				if ( ! empty( $source_cached_release_packages[ $release->get_version() ] ) ) {
+				if ( ! empty( $source_cached_release_packages[ $package->get_source_name() ][ $release->get_version() ] ) ) {
 					$loader           = new ArrayLoader();
-					$composer_package = $loader->load( $source_cached_release_packages[ $release->get_version() ] );
+					$composer_package = $loader->load( $source_cached_release_packages[ $package->get_source_name() ][ $release->get_version() ] );
 					$filename         = $client->archivePackage( $composer_package );
 				} else {
 					throw InvalidReleaseSource::missingSourceCachedPackage( $release );

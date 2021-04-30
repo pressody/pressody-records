@@ -55,6 +55,10 @@
 	margin-top: 20px;
 }
 
+.pixelgradelt_records-package .error-message {
+	color: #ff0000;
+}
+
 .pixelgradelt_records-package tbody th,
 .pixelgradelt_records-package tbody td {
 	word-break: break-all;

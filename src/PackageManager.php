@@ -347,7 +347,10 @@ class PackageManager {
 			$data['source_stability']     = trim( get_post_meta( $post_ID, '_package_source_stability', true ) );
 
 			// Get the source version/release packages data (fetched from the external repo) we have stored.
-			$data['source_cached_release_packages'] = get_post_meta( $post_ID, '_package_source_cached_release_packages', true );
+			$source_cached_release_packages = get_post_meta( $post_ID, '_package_source_cached_release_packages', true );
+			if ( ! empty( $source_cached_release_packages[ $data['source_name'] ] ) ) {
+				$data['source_cached_release_packages'] = $source_cached_release_packages[ $data['source_name'] ];
+			}
 		}
 
 		$data['required_packages'] = $this->get_post_package_required_packages( $post_ID );
@@ -424,7 +427,7 @@ class PackageManager {
 						'repositories'                  => [
 							[
 								// Disable the default packagist.org repo so we don't mistakenly fetch from there.
-								"packagist.org" => false,
+								'packagist.org' => false,
 							],
 							[
 								'type' => 'composer',
@@ -452,7 +455,7 @@ class PackageManager {
 						'repositories'                  => [
 							[
 								// Disable the default packagist.org repo so we don't mistakenly fetch from there.
-								"packagist.org" => false,
+								'packagist.org' => false,
 							],
 							[
 								'type' => 'vcs',
@@ -483,10 +486,6 @@ class PackageManager {
 
 		if ( ! empty( $releases ) ) {
 			$releases = $client->standardizePackagesForJson( $releases, $stability );
-
-			if ( ! empty( $releases[ $package_data['source_name'] ] ) ) {
-				$releases = $releases[ $package_data['source_name'] ];
-			}
 		}
 
 		return $releases;
@@ -782,6 +781,11 @@ class PackageManager {
 								] : [],
 							],
 						],
+					],
+					[
+						// We want the packagist.org repo since we are checking for package dependencies also.
+						'type' => 'composer',
+						'url' => 'https://repo.packagist.org',
 					],
 				],
 				'require-dependencies'          => true,
