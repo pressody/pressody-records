@@ -24,21 +24,21 @@ class CachedRepository extends AbstractRepository implements PackageRepository {
 	 *
 	 * @var bool
 	 */
-	protected $initialized = false;
+	protected bool $initialized = false;
 
 	/**
 	 * Items in the repository.
 	 *
 	 * @var Package[]
 	 */
-	protected $items = [];
+	protected array $items = [];
 
 	/**
 	 * Package repository.
 	 *
 	 * @var PackageRepository
 	 */
-	protected $repository;
+	protected PackageRepository $repository;
 
 	/**
 	 * Create a repository.

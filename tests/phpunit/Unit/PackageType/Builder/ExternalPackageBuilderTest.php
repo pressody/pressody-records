@@ -39,8 +39,8 @@ class ExternalPackageBuilderTest extends TestCase {
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
 
-		$archiver = new Archiver( new NullLogger() );
 		$logger = new NullIO();
+		$archiver = new Archiver( new NullLogger() );
 
 		$this->builder = new ExternalBasePackageBuilder( $package, $package_manager, $release_manager, $archiver, $logger );
 	}

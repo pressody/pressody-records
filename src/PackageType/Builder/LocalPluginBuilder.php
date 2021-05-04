@@ -29,7 +29,6 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	 *
 	 * @param string $basename Relative path from the main plugin directory.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalPluginBuilder
 	 */
 	public function set_basename( string $basename ): self {
@@ -43,7 +42,6 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	 *
 	 * @param string $plugin_file Relative path to the main plugin file.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalPluginBuilder
 	 */
 	public function from_basename( string $plugin_file ): self {
@@ -72,7 +70,6 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	 * @param string $plugin_file Relative path to the main plugin file.
 	 * @param array  $plugin_data Optional. Array of plugin data.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalPluginBuilder
 	 */
 	public function from_source( string $plugin_file, array $plugin_data = [] ): self {
@@ -113,7 +110,6 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 	 * @param string $plugin_file Relative path to the main plugin file.
 	 * @param array  $readme_data Optional. Array of readme data.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalPluginBuilder
 	 */
 	public function from_readme( string $plugin_file, array $readme_data = [] ): self {

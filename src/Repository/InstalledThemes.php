@@ -65,7 +65,6 @@ class InstalledThemes extends AbstractRepository implements PackageRepository {
 	 * @param string   $slug  Theme slug.
 	 * @param WP_Theme $theme WP theme instance.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalTheme|Package
 	 */
 	protected function build( string $slug, WP_Theme $theme ): LocalTheme {

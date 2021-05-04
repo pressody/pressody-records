@@ -12,8 +12,6 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\PackageType\Builder;
 
 use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
-use PixelgradeLT\Records\Logging\Logger;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
@@ -35,49 +33,49 @@ class BasePackageBuilder {
 	 *
 	 * @var ReflectionClass
 	 */
-	protected $class;
+	protected ReflectionClass $class;
 
 	/**
 	 * Package instance.
 	 *
 	 * @var Package
 	 */
-	protected $package;
+	protected Package $package;
 
 	/**
 	 * Package releases.
 	 *
 	 * @var Release[]
 	 */
-	protected $releases = [];
+	protected array $releases = [];
 
 	/**
 	 * Package manager.
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Release manager.
 	 *
 	 * @var ReleaseManager
 	 */
-	protected $release_manager;
+	protected ReleaseManager $release_manager;
 
 	/**
 	 * Archiver.
 	 *
 	 * @var Archiver
 	 */
-	protected $archiver;
+	protected Archiver $archiver;
 
 	/**
 	 * Logger.
 	 *
-	 * @var Logger
+	 * @var LoggerInterface
 	 */
-	protected $logger;
+	protected LoggerInterface $logger;
 
 	/**
 	 * Create a builder for installed packages.
@@ -630,6 +628,7 @@ class BasePackageBuilder {
 
 		if ( ! empty( $package_data['required_packages'] ) ) {
 			// We need to normalize before the merge since we need the keys to be in the same format.
+			// A bit inefficient, I know.
 			$package_data['required_packages'] = $this->normalize_required_packages( $package_data['required_packages'] );
 			// We will merge the required packages into the existing ones.
 			$this->set_required_packages(
@@ -670,7 +669,7 @@ class BasePackageBuilder {
 				$this->logger->error(
 					'Invalid required package details for package {package}.',
 					[
-						'package' => $this->package->get_name(),
+						'package'          => $this->package->get_name(),
 						'required_package' => $required_package,
 					]
 				);
@@ -697,8 +696,8 @@ class BasePackageBuilder {
 				$this->logger->error(
 					'Error getting managed required package data with post ID #{managed_post_id} for package {package}.',
 					[
-						'managed_post_id'   => $required_package['managed_post_id'],
-						'package' => $this->package->get_name(),
+						'managed_post_id' => $required_package['managed_post_id'],
+						'package'         => $this->package->get_name(),
 					]
 				);
 
@@ -706,8 +705,10 @@ class BasePackageBuilder {
 				continue;
 			}
 
-			// Construct the Composer-like package name (the same way @see ComposerPackageTransformer::transform() does it).
-			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt_records' );
+			/**
+			 * Construct the Composer-like package name (the same way @see ComposerPackageTransformer::transform() does it).
+			 */
+			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt_records', $required_package, $package_data );
 			$name   = $this->normalize_package_name( $package_data['slug'] );
 
 			$normalized[ $required_package['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;
@@ -1015,7 +1016,7 @@ class BasePackageBuilder {
 			->set_required_packages( $package->get_required_packages() );
 
 		foreach ( $package->get_releases() as $release ) {
-			$this->add_release( $release->get_version(), $release->get_source_url() );
+			$this->add_release( $release->get_version(), $release->get_meta() );
 		}
 
 		return $this;
@@ -1089,15 +1090,18 @@ class BasePackageBuilder {
 
 			try {
 				$new_release = $this->release_manager->archive( $release );
-				// Once the release file (zip) is successfully archived (cached), it is transformed so we need to overwrite.
+				// Once the release file (.zip) is successfully archived (cached), it is transformed so we need to overwrite.
 				if ( $release !== $new_release ) {
 					$this->package->set_release( $new_release );
 				}
 
-				$versions[] = $release->get_version();
-			} catch ( PixelgradeltRecordsException $e ) {
+				// Now dump/cache the release meta data in a JSON file (if the meta data has changed).
+				$this->release_manager->dump_meta( $new_release );
+
+				$versions[] = $new_release->get_version();
+			} catch ( \Exception $e ) {
 				$this->logger->error(
-					'Error archiving {package}.',
+					'Error archiving package {package}.',
 					[
 						'exception' => $e,
 						'package'   => $this->package->get_name(),
@@ -1141,7 +1145,7 @@ class BasePackageBuilder {
 		$releases = $this->release_manager->all_cached( $this->package );
 
 		foreach ( $releases as $release ) {
-			$this->add_release( $release->get_version(), $release->get_source_url() );
+			$this->add_release( $release->get_version(), $release->get_meta() );
 		}
 
 		return $this;
@@ -1152,13 +1156,13 @@ class BasePackageBuilder {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $version    Version.
-	 * @param string $source_url Optional. Release source URL.
+	 * @param string $version Version.
+	 * @param array  $meta    Optional. Release meta data.
 	 *
 	 * @return $this
 	 */
-	public function add_release( string $version, string $source_url = '' ): self {
-		$this->releases[ $version ] = new Release( $this->package, $version, $source_url );
+	public function add_release( string $version, array $meta = [] ): self {
+		$this->releases[ $version ] = new Release( $this->package, $version, $meta );
 
 		return $this;
 	}
@@ -1189,13 +1193,16 @@ class BasePackageBuilder {
 	 * @param string $name  Property name.
 	 * @param mixed  $value Property value.
 	 *
-	 * @throws \ReflectionException If no property exists by that name.
 	 * @return $this
 	 */
-	protected function set( $name, $value ): self {
-		$property = $this->class->getProperty( $name );
-		$property->setAccessible( true );
-		$property->setValue( $this->package, $value );
+	protected function set( string $name, $value ): self {
+		try {
+			$property = $this->class->getProperty( $name );
+			$property->setAccessible( true );
+			$property->setValue( $this->package, $value );
+		} catch ( \ReflectionException $e ) {
+			// Nothing right now. We should really make sure that we are setting properties that exist.
+		}
 
 		return $this;
 	}

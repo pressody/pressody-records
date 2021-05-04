@@ -127,7 +127,16 @@ class BasePackage implements \ArrayAccess, Package {
 	protected int $managed_post_id = 0;
 
 	/**
-	 * Other managed required packages.
+	 * A Composer config `require` entry.
+	 *
+	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
+	 *
+	 * @var array
+	 */
+	protected array $composer_require = [];
+
+	/**
+	 * Managed packages required by this package.
 	 *
 	 * @var array
 	 */
@@ -326,6 +335,17 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function get_managed_post_id(): int {
 		return $this->managed_post_id;
+	}
+
+	/**
+	 * Retrieve the Composer config `require` entry.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return array
+	 */
+	public function get_composer_require(): array {
+		return $this->composer_require;
 	}
 
 	/**

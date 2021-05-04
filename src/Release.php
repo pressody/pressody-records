@@ -2,12 +2,12 @@
 /**
  * Package release.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -18,39 +18,86 @@ namespace PixelgradeLT\Records;
  */
 class Release {
 	/**
-	 * Package.
+	 * The package this release belongs to.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @var Package
 	 */
-	protected $package;
+	protected Package $package;
 
 	/**
-	 * Source URL.
+	 * The release Semver version.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @var string
 	 */
-	protected $source_url;
+	protected string $version;
 
 	/**
-	 * Version.
+	 * The release meta data.
 	 *
-	 * @var string
+	 * @since 0.9.0
+	 *
+	 * This is (Composer) data that is specific to this release.
+	 * This data is likely to be cached so that, once published, a release doesn't change in behavior over time (like changing requirements).
+	 * We aim to make published releases non-editable (of-course one can delete the cache and force a rebuild,
+	 * but that is nuclear and you should be wearing protective equipment :) ).
+	 * This way we can be sure that any changes made to a parent package are only applied to future releases,
+	 * not existing ones. To do such a thing is dangerous since it would possibly break existing uses,
+	 * and hinder our ability to change a package's behavior since we would always need to account for backwards compatibility.
+	 *
+	 * @var array
 	 */
-	protected $version;
+	protected array $meta;
 
 	/**
 	 * Create a release.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Package $package    Package.
-	 * @param string  $version    Version.
-	 * @param string  $source_url Optional. Release source URL.
+	 * @param Package $package The package this release belongs to.
+	 * @param string  $version The release Semver version.
+	 * @param array   $meta    Optional. The release meta data.
 	 */
-	public function __construct( Package $package, string $version, string $source_url = '' ) {
-		$this->package    = $package;
-		$this->version    = $version;
-		$this->source_url = $source_url;
+	public function __construct( Package $package, string $version, array $meta = [] ) {
+		$this->package = $package;
+		$this->version = $version;
+
+		$this->fill_meta( $meta );
+	}
+
+	/**
+	 * Fill a releases meta data from the package and the provided meta
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param array $meta Optional. Meta data to take precedence over the general one extracted from the release's parent package.
+	 */
+	protected function fill_meta( array $meta = [] ) {
+		$meta_package_props = [
+			'source_type',
+			'source_name',
+			'authors',
+			'description',
+			'homepage',
+			'license',
+			'keywords',
+			'requires_at_least_wp',
+			'tested_up_to_wp',
+			'requires_php',
+			'required_packages',
+			'composer_require',
+		];
+
+		foreach ( $meta_package_props as $prop ) {
+			if ( ! isset( $meta[ $prop ] ) ) {
+				$meta[ $prop ] = $this->package[ $prop ];
+			}
+		}
+
+		$this->meta = $meta;
 	}
 
 	/**
@@ -59,6 +106,7 @@ class Release {
 	 * @since 0.1.0
 	 *
 	 * @param array $args Query parameters to add to the URL.
+	 *
 	 * @return string
 	 */
 	public function get_download_url( array $args = [] ): string {
@@ -103,6 +151,36 @@ class Release {
 	}
 
 	/**
+	 * Retrieve the relative path to a release meta JSON file.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return string
+	 */
+	public function get_meta_file_path(): string {
+		return sprintf(
+			'%1$s/%2$s',
+			$this->get_package()->get_source_name(),
+			$this->get_meta_file()
+		);
+	}
+
+	/**
+	 * Retrieve the name of the meta JSON file.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return string
+	 */
+	public function get_meta_file(): string {
+		return sprintf(
+			'%1$s-%2$s.json',
+			$this->get_package()->get_slug(),
+			$this->get_version()
+		);
+	}
+
+	/**
 	 * Retrieve the package.
 	 *
 	 * @since 0.1.0
@@ -114,17 +192,6 @@ class Release {
 	}
 
 	/**
-	 * Retrieve the source URL for a release.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string
-	 */
-	public function get_source_url(): string {
-		return $this->source_url;
-	}
-
-	/**
 	 * Retrieve the version number for the release.
 	 *
 	 * @since 0.1.0
@@ -133,5 +200,27 @@ class Release {
 	 */
 	public function get_version(): string {
 		return $this->version;
+	}
+
+	/**
+	 * Retrieve the release's meta data.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return array
+	 */
+	public function get_meta(): array {
+		return $this->meta;
+	}
+
+	/**
+	 * Retrieve the source URL for a release.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_source_url(): string {
+		return $this->meta['source_url'] ?? '';
 	}
 }

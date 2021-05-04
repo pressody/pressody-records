@@ -144,7 +144,7 @@ class Download implements Route {
 		try {
 			// Cache the release if an artifact doesn't already exist.
 			$release = $this->release_manager->archive( $release );
-		} catch ( PixelgradeltRecordsException $e ) {
+		} catch ( \Exception $e ) {
 			// Send a 404 if the release isn't available.
 			throw HttpException::forMissingRelease( $release );
 		}

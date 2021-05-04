@@ -254,7 +254,8 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['storage.packages'],
 				$container['archiver'],
 				$container['version.parser'],
-				$container['client.composer']
+				$container['client.composer'],
+				$container['logs.logger']
 			);
 		};
 

@@ -131,7 +131,7 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 		}
 
 		foreach ( $releases as $release ) {
-			$this->add_release( $release->get_version(), $release->get_source_url() );
+			$this->add_release( $release->get_version(), $release->get_meta() );
 		}
 
 		return $this;
@@ -152,13 +152,17 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 			$updates = get_site_transient( 'update_plugins' );
 			if ( ! empty( $updates->response[ $package->get_basename() ]->package ) ) {
 				$update  = $updates->response[ $package->get_basename() ];
-				$release = new Release( $package, $update->new_version, (string) $update->package );
+				$release = new Release( $package, $update->new_version, [
+					'source_url' => (string) $update->package,
+				] );
 			}
 		} elseif ( $package instanceof LocalTheme ) {
 			$updates = get_site_transient( 'update_themes' );
 			if ( ! empty( $updates->response[ $package->get_slug() ]['package'] ) ) {
 				$update  = $updates->response[ $package->get_slug() ];
-				$release = new Release( $package, $update['new_version'], (string) $update['package'] );
+				$release = new Release( $package, $update['new_version'], [
+					'source_url' => (string) $update['package'],
+				] );
 			}
 		}
 

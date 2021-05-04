@@ -11,7 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
-use Composer\Package\CompletePackage;
+use Composer\Json\JsonFile;
 use Composer\Package\Loader\ArrayLoader;
 use PixelgradeLT\Records\Client\ComposerClient;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
@@ -20,6 +20,7 @@ use PixelgradeLT\Records\HTTP\Response;
 use PixelgradeLT\Records\PackageType\BasePackage;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\Storage\Storage;
+use Psr\Log\LoggerInterface;
 
 /**
  * Release manager class.
@@ -32,21 +33,21 @@ class ReleaseManager {
 	 *
 	 * @var Archiver
 	 */
-	protected $archiver;
+	protected Archiver $archiver;
 
 	/**
 	 * Storage.
 	 *
 	 * @var Storage
 	 */
-	protected $storage;
+	protected Storage $storage;
 
 	/**
 	 * Composer version parser.
 	 *
 	 * @var ComposerVersionParser
 	 */
-	protected $composer_version_parser;
+	protected ComposerVersionParser $composer_version_parser;
 
 	/**
 	 * External Composer repository client.
@@ -54,6 +55,13 @@ class ReleaseManager {
 	 * @var ComposerClient
 	 */
 	protected ComposerClient $composer_client;
+
+	/**
+	 * Logger.
+	 *
+	 * @var LoggerInterface
+	 */
+	protected LoggerInterface $logger;
 
 	/**
 	 * Constructor.
@@ -64,18 +72,21 @@ class ReleaseManager {
 	 * @param Archiver              $archiver Archiver.
 	 * @param ComposerVersionParser $composer_version_parser
 	 * @param ComposerClient        $composer_client
+	 * @param LoggerInterface       $logger   Logger.
 	 */
 	public function __construct(
 		Storage $storage,
 		Archiver $archiver,
 		ComposerVersionParser $composer_version_parser,
-		ComposerClient $composer_client
+		ComposerClient $composer_client,
+		LoggerInterface $logger
 	) {
 
 		$this->archiver                = $archiver;
 		$this->storage                 = $storage;
 		$this->composer_version_parser = $composer_version_parser;
 		$this->composer_client         = $composer_client;
+		$this->logger                  = $logger;
 	}
 
 	public function get_composer_version_parser(): ComposerVersionParser {
@@ -111,7 +122,30 @@ class ReleaseManager {
 				continue;
 			}
 
-			$releases[ $version ] = new Release( $package, $version );
+			// We have a valid .zip file.
+			// Now we search for a .json file with the release meta data.
+			// This is the data that will take precedence over everything else.
+			// Missing meta data will get filled with parent package data.
+			$meta           = [];
+			$meta_file_path = basename( $filename, '.zip' ) . '.json';
+			if ( $this->storage->exists( $meta_file_path ) ) {
+				try {
+					$meta_file = new JsonFile( $meta_file_path );
+					$meta      = array_merge( $meta, $meta_file->read() );
+				} catch ( \Exception $e ) {
+					$this->logger->error(
+						'Error getting meta data from file {file} for package {package}: release version {version}.',
+						[
+							'exception' => $e,
+							'package'   => $package->get_source_name(),
+							'version'   => $version,
+							'file'      => $meta_file_path,
+						]
+					);
+				}
+			}
+
+			$releases[ $version ] = new Release( $package, $version, $meta );
 		}
 
 		return $releases;
@@ -168,8 +202,33 @@ class ReleaseManager {
 			throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
 		}
 
-		// We have safely cached the release. This means we should remove the source URL so from now on, so the cached zip is used instead.
-		return new Release( $package, $release->get_version() );
+		// We have safely cached the release.
+		// This means we should create a release without the source URL from now on, so the cached zip file is used as the source instead.
+		$meta = $release->get_meta();
+		if ( isset(  $meta['source_url'] ) ) {
+			unset ( $meta['source_url'] );
+		}
+		return new Release( $package, $release->get_version(), $meta );
+	}
+
+	/**
+	 * Dump (write) a release's meta data to file.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param Release $release Release instance.
+	 *
+	 * @return Release
+	 */
+	public function dump_meta( Release $release ): Release {
+		try {
+			$meta_file = new JsonFile( $release->get_meta_file_path() );
+			$meta_file->write( $release->get_meta() );
+		} catch ( \UnexpectedValueException | \Exception $e ) {
+			throw FileOperationFailed::unableToWriteReleaseMetaFileToStorage( $release->get_meta_file_path() );
+		}
+
+		return $release;
 	}
 
 	/**
@@ -217,6 +276,10 @@ class ReleaseManager {
 
 		if ( ! $this->storage->delete( $release->get_file_path() ) ) {
 			throw FileOperationFailed::unableToDeleteReleaseArtifactFromStorage( $release->get_file_path() );
+		}
+
+		if ( ! $this->storage->delete( $release->get_meta_file_path() ) ) {
+			throw FileOperationFailed::unableToDeleteReleaseMetaFileFromStorage( $release->get_meta_file_path() );
 		}
 
 		return $release;

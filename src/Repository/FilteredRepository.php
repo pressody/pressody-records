@@ -31,7 +31,7 @@ class FilteredRepository extends AbstractRepository implements PackageRepository
 	 *
 	 * @var PackageRepository
 	 */
-	protected $repository;
+	protected PackageRepository $repository;
 
 	/**
 	 * Create the repository.

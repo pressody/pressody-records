@@ -95,25 +95,23 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 	}
 
 	public function from_cached_release_packages( array $cached_release_packages ): BasePackageBuilder {
-
+		// Determine the latest version.
 		$latest_version_package = reset( $cached_release_packages );
-		foreach ( $cached_release_packages as $package ) {
-			if ( empty( $package['version'] ) || empty( $package['dist']['url'] ) ) {
+		foreach ( $cached_release_packages as $release_package ) {
+			if ( empty( $release_package['version'] ) || empty( $release_package['dist']['url'] ) ) {
 				continue;
 			}
 
-			$this->add_release( $package['version'], $package['dist']['url'] );
-
-			if ( \version_compare( $latest_version_package['version'], $package['version'], '<' ) ) {
-				$latest_version_package = $package;
+			if ( \version_compare( $latest_version_package['version'], $release_package['version'], '<' ) ) {
+				$latest_version_package = $release_package;
 			}
 		}
 
-		// We will use the latest version package to fill package details that may be missing.
+		// We will use the latest version's release package to fill package details that may be missing.
 		// We will first try and use the version package data itself.
 		$this->from_package_data( $latest_version_package );
 
-		// Next, we want to extract the latest version zip (a theme or a plugin) and read certain details.
+		// Next, we want to extract the latest version's release zip file (a theme or a plugin zip) and read certain details.
 		// But only if the manager didn't supply them first.
 		if ( empty( $this->package->get_description() )
 		     || empty( $this->package->get_homepage() )
@@ -124,6 +122,18 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 			if ( ! empty( $this->releases[ $latest_version_package['version'] ] ) ) {
 				$this->from_release_file( $this->releases[ $latest_version_package['version'] ] );
 			}
+		}
+
+		foreach ( $cached_release_packages as $release_package ) {
+			if ( empty( $release_package['version'] ) || empty( $release_package['dist']['url'] ) ) {
+				continue;
+			}
+
+			$this->add_release( $release_package['version'], [
+				'source_url' => $release_package['dist']['url'],
+				'composer_require' => $release_package['require'],
+				// We don't need more data since we prefer to use the details provided by the parent package (like description, authors).
+			] );
 		}
 
 		return $this;

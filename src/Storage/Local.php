@@ -85,7 +85,7 @@ class Local implements Storage {
 	}
 
 	/**
-	 * List files.
+	 * List (.zip) files.
 	 *
 	 * @since 0.1.0
 	 *

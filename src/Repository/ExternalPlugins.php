@@ -26,14 +26,14 @@ class ExternalPlugins extends AbstractRepository implements PackageRepository {
 	 *
 	 * @var PackageFactory
 	 */
-	protected $factory;
+	protected PackageFactory $factory;
 
 	/**
 	 * Package manager.
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Create a repository.

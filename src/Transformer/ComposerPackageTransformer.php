@@ -38,7 +38,7 @@ class ComposerPackageTransformer implements PackageTransformer {
 	 *
 	 * @var PackageFactory
 	 */
-	protected $factory;
+	protected PackageFactory $factory;
 
 	/**
 	 * Create a Composer package transformer.
@@ -57,6 +57,7 @@ class ComposerPackageTransformer implements PackageTransformer {
 	 * @since 0.1.0
 	 *
 	 * @param Package $package Package.
+	 *
 	 * @return Package
 	 */
 	public function transform( Package $package ): Package {
@@ -105,9 +106,10 @@ class ComposerPackageTransformer implements PackageTransformer {
 	 * @link https://github.com/composer/composer/blob/79af9d45afb6bcaac8b73ae6a8ae24414ddf8b4b/src/Composer/Package/Loader/ValidatingArrayLoader.php#L339-L369
 	 *
 	 * @param string $name Package name.
+	 *
 	 * @return string
 	 */
-	protected function normalize_package_name( $name ): string {
+	protected function normalize_package_name( string $name ): string {
 		$name = strtolower( $name );
 		return preg_replace( '/[^a-z0-9_\-\.]+/i', '', $name );
 	}

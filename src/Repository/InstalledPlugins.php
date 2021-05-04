@@ -67,7 +67,6 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 	 * @param string $plugin_file Relative path to a plugin file.
 	 * @param array  $plugin_data Plugin data.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalPlugin|Package
 	 */
 	protected function build( string $plugin_file, array $plugin_data ): LocalPlugin {

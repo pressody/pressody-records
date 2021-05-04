@@ -59,14 +59,12 @@ class ManualBasePackageBuilder extends BasePackageBuilder {
 	}
 
 	public function from_manual_releases( array $releases ): BasePackageBuilder {
-
+		// Determine the latest release.
 		$latest_release = reset( $releases );
 		foreach ( $releases as $release ) {
-			if ( empty( $release['version'] ) || empty( $release['source_url'] ) ) {
+			if ( empty( $release['version'] ) ) {
 				continue;
 			}
-
-			$this->add_release( $release['version'], $release['source_url'] );
 
 			if ( \version_compare( $latest_release['version'], $release['version'], '<' ) ) {
 				$latest_release = $release;
@@ -84,6 +82,14 @@ class ManualBasePackageBuilder extends BasePackageBuilder {
 			if ( ! empty( $this->releases[ $latest_release['version'] ] ) ) {
 				$this->from_release_file( $this->releases[ $latest_release['version'] ] );
 			}
+		}
+
+		foreach ( $releases as $release ) {
+			if ( empty( $release['version'] ) || empty( $release['meta'] ) ) {
+				continue;
+			}
+
+			$this->add_release( $release['version'], $release['meta'] );
 		}
 
 		return $this;

@@ -34,7 +34,7 @@ class EditPackage extends AbstractHookProvider {
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Packages repository.
@@ -43,28 +43,28 @@ class EditPackage extends AbstractHookProvider {
 	 *
 	 * @var PackageRepository
 	 */
-	protected $packages;
+	protected PackageRepository $packages;
 
 	/**
 	 * Package Post Type.
 	 *
 	 * @var PackagePostType
 	 */
-	protected $package_post_type;
+	protected PackagePostType $package_post_type;
 
 	/**
 	 * Composer package transformer.
 	 *
 	 * @var PackageTransformer
 	 */
-	protected $composer_transformer;
+	protected PackageTransformer $composer_transformer;
 
 	/**
 	 * User messages to display in the WP admin.
 	 *
 	 * @var array
 	 */
-	protected $user_messages = [
+	protected array $user_messages = [
 			'error'   => [],
 			'warning' => [],
 			'info'  => [],

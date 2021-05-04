@@ -51,7 +51,7 @@ interface Storage {
 	public function exists( string $file ): bool;
 
 	/**
-	 * List files.
+	 * List (.zip) files.
 	 *
 	 * @since 0.1.0
 	 *

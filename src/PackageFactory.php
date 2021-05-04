@@ -34,28 +34,28 @@ final class PackageFactory {
 	 *
 	 * @var PackageManager
 	 */
-	private $package_manager;
+	private PackageManager $package_manager;
 
 	/**
 	 * Release manager.
 	 *
 	 * @var ReleaseManager
 	 */
-	private $release_manager;
+	private ReleaseManager $release_manager;
 
 	/**
 	 * Archiver.
 	 *
 	 * @var Archiver
 	 */
-	protected $archiver;
+	protected Archiver $archiver;
 
 	/**
 	 * Logger.
 	 *
-	 * @var Logger
+	 * @var LoggerInterface
 	 */
-	protected $logger;
+	protected LoggerInterface $logger;
 
 	/**
 	 * Constructor.

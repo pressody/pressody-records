@@ -33,14 +33,13 @@ class LocalPluginTest extends TestCase {
 		$storage                 = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 		$composer_client = new ComposerClient();
+		$logger = new NullIO();
 
 		$package_manager = $this->getMockBuilder( PackageManager::class )
 		                        ->disableOriginalConstructor()
 		                        ->getMock();
 
-		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client );
-
-		$logger = new NullIO();
+		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client, $logger );
 
 		$package = new LocalPlugin();
 

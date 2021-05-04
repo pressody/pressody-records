@@ -102,7 +102,6 @@ final class LocalThemeBuilder extends LocalBasePackageBuilder {
 	 * @param string $slug        Theme slug.
 	 * @param array  $readme_data Optional. Array of readme data.
 	 *
-	 * @throws \ReflectionException
 	 * @return LocalThemeBuilder
 	 */
 	public function from_readme( string $slug, array $readme_data = [] ): self {

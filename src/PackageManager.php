@@ -11,7 +11,6 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
-use PixelgradeLT\Records\Authentication\ApiKey\Repository;
 use PixelgradeLT\Records\Authentication\ApiKey\Server;
 use PixelgradeLT\Records\Client\ComposerClient;
 use Psr\Log\LoggerInterface;
@@ -705,7 +704,9 @@ class PackageManager {
 			$releases[ $normalized_version ] = [
 				'version'            => $release_data['version'],
 				'normalized_version' => $normalized_version,
-				'source_url'         => $url,
+				'meta'               => [
+					'source_url' => $url,
+				],
 			];
 		}
 
@@ -785,7 +786,7 @@ class PackageManager {
 					[
 						// We want the packagist.org repo since we are checking for package dependencies also.
 						'type' => 'composer',
-						'url' => 'https://repo.packagist.org',
+						'url'  => 'https://repo.packagist.org',
 					],
 				],
 				'require-dependencies'          => true,

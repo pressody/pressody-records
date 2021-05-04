@@ -148,7 +148,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @return object
 	 */
-	public function archive_updates( $value ) {
+	public function archive_updates( object $value ): object {
 		if ( empty( $value->response ) ) {
 			return $value;
 		}
@@ -186,12 +186,14 @@ class PackageArchiver extends AbstractHookProvider {
 			$release = new Release(
 				$package,
 				$update_data['new_version'],
-				(string) $update_data['package']
+				[
+					'source_url' => (string) $update_data['package'],
+				]
 			);
 
 			try {
 				$package->set_release( $this->release_manager->archive( $release ) );
-			} catch ( PixelgradeltRecordsException $e ) {
+			} catch ( \Exception $e ) {
 				$this->logger->error(
 					'Error archiving "{package}" - release "{release}".',
 					[
@@ -259,7 +261,7 @@ class PackageArchiver extends AbstractHookProvider {
 				if ( $release !== $new_release ) {
 					$package->set_release( $new_release );
 				}
-			} catch ( PixelgradeltRecordsException $e ) {
+			} catch ( \Exception $e ) {
 				$this->logger->error(
 					'Error archiving "{package}" - release "{release}".',
 					[
@@ -342,8 +344,9 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @param array  $parsed_args An array of HTTP request arguments.
 	 * @param string $url         The request URL.
+	 * @return array
 	 */
-	protected function maybe_relax_wp_http_settings( $parsed_args, $url ) {
+	protected function maybe_relax_wp_http_settings( $parsed_args, $url ): array {
 		// Increase the timeout so there is plenty of time to download.
 		$parsed_args['timeout'] = 300;
 

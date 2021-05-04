@@ -118,7 +118,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 		foreach ( $package->get_releases() as $release ) {
 			$version = $release->get_version();
 
-			// Start with the default requires.
+			// Start with the hard-coded requires.
 			$require = [
 				'composer/installers' => '^1.0',
 			];
