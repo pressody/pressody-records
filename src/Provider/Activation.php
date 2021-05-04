@@ -64,10 +64,12 @@ class Activation extends AbstractHookProvider {
 		global $wpdb;
 
 		// We only do something if the DB version is different
-		if ( self::DB_VERSION !== get_option( 'pixelgradelt_records_dbversion' ) ) {
+		if ( self::DB_VERSION === get_option( 'pixelgradelt_records_dbversion' ) ) {
+			return;
+		}
 
-			// Create/update the log table
-			$log_table = "
+		// Create/update the log table
+		$log_table = "
 CREATE TABLE {$wpdb->prefix}pixelgradelt_records_log (
   log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   timestamp datetime NOT NULL,
@@ -78,11 +80,10 @@ CREATE TABLE {$wpdb->prefix}pixelgradelt_records_log (
   PRIMARY KEY (log_id),
   KEY level (level)
 )";
-			$this->dbdelta( $log_table );
+		$this->dbdelta( $log_table );
 
-			// Remember the current DB version
-			update_option( 'pixelgradelt_records_dbversion', self::DB_VERSION );
-		}
+		// Remember the current DB version
+		update_option( 'pixelgradelt_records_dbversion', self::DB_VERSION );
 	}
 
 	protected function dbdelta( $sql ) {
