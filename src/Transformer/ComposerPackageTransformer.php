@@ -13,7 +13,6 @@ namespace PixelgradeLT\Records\Transformer;
 
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageType\BasePackage;
 
 /**
  * Composer package transformer class.
@@ -79,19 +78,18 @@ class ComposerPackageTransformer implements PackageTransformer {
 	 *
 	 * @since 0.8.0
 	 *
-	 * @param Package $package Package.
+	 * @param array $required_ltpackages
 	 * @return array
 	 */
-	public function transform_required_packages( Package $package ): array {
+	public function transform_required_packages( array $required_ltpackages ): array {
 		$composer_require = [];
-		if ( $package->has_required_packages() ) {
-			// Convert the managed required packages to the simple Composer format.
-			foreach ( $package->get_required_packages() as $required_package ) {
-				$composer_require[ $required_package['composer_package_name'] ] = $required_package['version_range'];
 
-				if ( 'stable' !== $required_package['stability'] ) {
-					$composer_require[ $required_package['composer_package_name'] ] .= '@' . $required_package['stability'];
-				}
+		// Convert the managed required packages to the simple Composer format.
+		foreach ( $required_ltpackages as $required_ltpackage ) {
+			$composer_require[ $required_ltpackage['composer_package_name'] ] = $required_ltpackage['version_range'];
+
+			if ( 'stable' !== $required_ltpackage['stability'] ) {
+				$composer_require[ $required_ltpackage['composer_package_name'] ] .= '@' . $required_ltpackage['stability'];
 			}
 		}
 

@@ -94,7 +94,7 @@ interface Package {
 	public function get_homepage(): string;
 
 	/**
-	 * Retrieve the pacakge license.
+	 * Retrieve the package license.
 	 *
 	 * @since 0.1.0
 	 *
@@ -110,6 +110,24 @@ interface Package {
 	 * @return bool
 	 */
 	public function is_managed(): bool;
+
+	/**
+	 * Whether a managed package is public.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return bool
+	 */
+	public function is_public(): bool;
+
+	/**
+	 * Get the visibility status of the package (public, draft, private).
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return string The visibility status of the package. One of: public, draft, private.
+	 */
+	public function get_visibility(): string;
 
 	/**
 	 * Whether the package has any releases.

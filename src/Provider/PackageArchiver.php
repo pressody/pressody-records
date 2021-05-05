@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use Composer\Util\Filesystem;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
@@ -100,7 +101,7 @@ class PackageArchiver extends AbstractHookProvider {
 		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'upgrader_post_install', [ $this, 'archive_on_upgrade' ], 10, 3 );
 
-		add_action( 'before_delete_post', [ $this, 'clean_on_ltpackage_post_delete' ], 10, 2 );
+		add_action( 'wp_trash_post', [ $this, 'clean_on_ltpackage_post_trash' ], 10, 1 );
 
 		$this->add_action( 'pixelgradelt_records_download_url_before', 'hook_before_download_url' );
 		$this->add_action( 'pixelgradelt_records_download_url_after', 'remove_hooks_after_download_url' );
@@ -187,15 +188,17 @@ class PackageArchiver extends AbstractHookProvider {
 				$package,
 				$update_data['new_version'],
 				[
-					'source_url' => (string) $update_data['package'],
+					'dist' => [
+						'url' => (string) $update_data['package'],
+					],
 				]
 			);
 
 			try {
-				$package->set_release( $this->release_manager->archive( $release ) );
+				$package->set_release( $this->release_manager->store( $release ) );
 			} catch ( \Exception $e ) {
 				$this->logger->error(
-					'Error archiving "{package}" - release "{release}".',
+					'Error archiving package "{package}" - release "{release}".',
 					[
 						'exception' => $e,
 						'package'   => $package->get_name(),
@@ -256,14 +259,14 @@ class PackageArchiver extends AbstractHookProvider {
 	protected function archive_package( Package $package ) {
 		foreach ( $package->get_releases() as $release ) {
 			try {
-				$new_release = $this->release_manager->archive( $release );
+				$new_release = $this->release_manager->store( $release );
 				// Once the release file (zip) is successfully archived (cached), it is transformed so we need to overwrite.
 				if ( $release !== $new_release ) {
 					$package->set_release( $new_release );
 				}
 			} catch ( \Exception $e ) {
 				$this->logger->error(
-					'Error archiving "{package}" - release "{release}".',
+					'Error archiving package "{package}" - release "{release}".',
 					[
 						'exception' => $e,
 						'package'   => $package->get_name(),
@@ -283,15 +286,21 @@ class PackageArchiver extends AbstractHookProvider {
 	 */
 	protected function clean_package( Package $package ) {
 		try {
-			// Delete each release zip.
-			foreach ( $package->get_releases() as $release ) {
-				$this->release_manager->delete( $release );
+			/** @var \WP_Filesystem_Base $wp_filesystem */
+			global $wp_filesystem;
+			include_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+
+			// Delete the package directory and its contents.
+			$package_storage_dir_absolute_path = $this->storage->get_absolute_path( $package->get_source_name() );
+			if ( ! $wp_filesystem->is_dir( $package_storage_dir_absolute_path ) || ! $wp_filesystem->delete( $package_storage_dir_absolute_path, true ) ) {
+				throw FileOperationFailed::unableToDeletePackageDirectoryFromStorage( $package_storage_dir_absolute_path );
 			}
 
-			// Delete the (empty) package directory.
-			$package_storage_dir_absolute_path = $this->storage->get_absolute_path( $package->get_slug() );
-			if ( ! \rmdir( $package_storage_dir_absolute_path ) ) {
-				throw FileOperationFailed::unableToDeletePackageDirectoryFromStorage( $package_storage_dir_absolute_path );
+			// Attempt to delete the package's vendor directory, if it is now empty.
+			$package_vendor_storage_dir_absolute_path = dirname( $package_storage_dir_absolute_path );
+			if ( $wp_filesystem->is_dir( $package_vendor_storage_dir_absolute_path ) && ! $wp_filesystem->dirlist( $package_vendor_storage_dir_absolute_path ) ) {
+				$wp_filesystem->delete( $package_vendor_storage_dir_absolute_path );
 			}
 		} catch ( PixelgradeltRecordsException $e ) {
 			$this->logger->warning(
@@ -305,13 +314,12 @@ class PackageArchiver extends AbstractHookProvider {
 	}
 
 	/**
-	 * Clean packages before a ltpackage post is deleted from the database.
+	 * Clean package artifacts before a ltpackage post is moved to trash.
 	 *
 	 * @param int      $post_ID Post ID.
-	 * @param \WP_Post $post    Post object.
 	 */
-	public function clean_on_ltpackage_post_delete( int $post_ID, \WP_Post $post ) {
-		if ( $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
+	public function clean_on_ltpackage_post_trash( int $post_ID ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
 			return;
 		}
 

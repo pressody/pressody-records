@@ -129,11 +129,25 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 				continue;
 			}
 
-			$this->add_release( $release_package['version'], [
-				'source_url' => $release_package['dist']['url'],
-				'composer_require' => $release_package['require'],
-				// We don't need more data since we prefer to use the details provided by the parent package (like description, authors).
-			] );
+			// Pick-up all the data we need from the source cached release package.
+			$release_meta = [];
+
+			if ( ! empty( $release_package['source'] ) ) {
+				$release_meta['source'] = $release_package['source'];
+			}
+
+			$release_meta['dist'] = $release_package['dist'];
+
+			if ( ! empty( $release_package['require'] ) ) {
+				$release_meta['require'] = $release_package['require'];
+			}
+
+			if ( ! empty( $release_package['time'] ) ) {
+				$release_meta['time'] = $release_package['time'];
+			}
+			// We don't need more data since we prefer to use the details provided by the parent package (like description, authors).
+
+			$this->add_release( $release_package['version'], $release_meta );
 		}
 
 		return $this;

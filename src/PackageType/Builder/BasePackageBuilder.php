@@ -129,7 +129,7 @@ class BasePackageBuilder {
 
 		$this->set( 'releases', $this->releases );
 
-		$this->cache_releases();
+		$this->store_releases();
 
 		return $this->package;
 	}
@@ -744,8 +744,6 @@ class BasePackageBuilder {
 	 * @return $this
 	 */
 	public function from_release_file( Release $release ): self {
-
-		/** @var \WP_Filesystem_Base $wp_filesystem */
 		global $wp_filesystem;
 		include_once ABSPATH . 'wp-admin/includes/file.php';
 		WP_Filesystem();
@@ -1074,14 +1072,14 @@ class BasePackageBuilder {
 	}
 
 	/**
-	 * Attempt to cache any releases not cached yet. But only for managed packages.
+	 * Attempt to store any releases not stored yet. But only for managed packages.
 	 *
-	 * We will also prune cached releases that are no longer present in the releases list.
+	 * We will also prune stored releases that are no longer present in the releases list.
 	 *
 	 * @return $this
 	 */
-	public function cache_releases(): BasePackageBuilder {
-		if ( ! $this->package->is_managed() ) {
+	public function store_releases(): BasePackageBuilder {
+		if ( ! $this->package->is_managed() || ! $this->package->is_public() ) {
 			return $this;
 		}
 
@@ -1089,7 +1087,7 @@ class BasePackageBuilder {
 		foreach ( $this->releases as $key => $release ) {
 
 			try {
-				$new_release = $this->release_manager->archive( $release );
+				$new_release = $this->release_manager->store( $release );
 				// Once the release file (.zip) is successfully archived (cached), it is transformed so we need to overwrite.
 				if ( $release !== $new_release ) {
 					$this->package->set_release( $new_release );
@@ -1101,7 +1099,7 @@ class BasePackageBuilder {
 				$versions[] = $new_release->get_version();
 			} catch ( \Exception $e ) {
 				$this->logger->error(
-					'Error archiving package {package}.',
+					'Error storing package {package}.',
 					[
 						'exception' => $e,
 						'package'   => $this->package->get_name(),
@@ -1110,9 +1108,9 @@ class BasePackageBuilder {
 			}
 		}
 
-		// Prune the cache from extra releases.
+		// Prune the storage from extra releases.
 		if ( ! empty( $versions ) ) {
-			$all_cached = $this->release_manager->all_cached( $this->package );
+			$all_cached = $this->release_manager->all_stored_releases( $this->package );
 			foreach ( $all_cached as $cached_release ) {
 				if ( ! in_array( $cached_release->get_version(), $versions ) ) {
 					$this->release_manager->delete( $cached_release );
@@ -1142,7 +1140,7 @@ class BasePackageBuilder {
 	 * @return $this
 	 */
 	public function add_cached_releases(): BasePackageBuilder {
-		$releases = $this->release_manager->all_cached( $this->package );
+		$releases = $this->release_manager->all_stored_releases( $this->package );
 
 		foreach ( $releases as $release ) {
 			$this->add_release( $release->get_version(), $release->get_meta() );

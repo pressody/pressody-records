@@ -17,12 +17,13 @@ use PixelgradeLT\Records\PackageType\BasePackage;
  * @global BasePackage $package
  */
 
+$package_visibility = $package->get_visibility();
 ?>
 
 <table class="pixelgradelt_records-package widefat">
 	<thead>
 	<tr>
-		<th colspan="2"><?php echo esc_html( $package->get_name() ); ?></th>
+		<th colspan="2"><?php echo esc_html( $package->get_name() ); echo 'public' !== $package_visibility ? ' (' . ucfirst( $package_visibility ) . ' package)' : ''; ?></th>
 	</tr>
 	</thead>
 	<tbody>
@@ -48,7 +49,7 @@ use PixelgradeLT\Records\PackageType\BasePackage;
 		<th><?php esc_html_e( 'Authors', 'pixelgradelt_records' ); ?></th>
 		<td class="package-authors__list" >
 		<?php foreach ( $authors as $author ) { ?>
-			<a class="package-author" href="<?php echo esc_url( $author['homepage'] ); ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $author['name'] ); ?></a>
+			<a class="package-author" href="<?php echo isset( $author['homepage'] ) ? esc_url( $author['homepage'] ) : '#'; ?>" target="_blank" rel="noopener noreferer"><?php echo esc_html( $author['name'] ); ?></a>
 		<?php } ?>
 		</td>
 	</tr>

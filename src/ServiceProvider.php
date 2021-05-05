@@ -86,7 +86,9 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['client.composer'] = function( $container ) {
-			return new Client\ComposerClient();
+			return new Client\ComposerClient(
+				$container['storage.composer_working_directory']
+			);
 		};
 
 		$container['client.composer.custom_token_auth'] = function( $container ) {
@@ -468,6 +470,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			update_option( 'pixelgradelt_records_working_directory', $directory );
 
 			return $directory;
+		};
+
+		$container['storage.composer_working_directory'] = function( $container ) {
+			return path_join( $container['storage.working_directory'], 'composer/' );
 		};
 
 		$container['transformer.composer_package'] = function( $container ) {

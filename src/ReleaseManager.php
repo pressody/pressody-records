@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records;
 use Composer\Json\JsonFile;
 use Composer\Package\Loader\ArrayLoader;
 use PixelgradeLT\Records\Client\ComposerClient;
+use PixelgradeLT\Records\Exception\FileNotFound;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
 use PixelgradeLT\Records\Exception\InvalidReleaseSource;
 use PixelgradeLT\Records\HTTP\Response;
@@ -98,7 +99,7 @@ class ReleaseManager {
 	}
 
 	/**
-	 * Retrieve all cached releases for a package.
+	 * Retrieve all stored releases for a package.
 	 *
 	 * @since 0.1.0
 	 *
@@ -106,7 +107,7 @@ class ReleaseManager {
 	 *
 	 * @return Release[]
 	 */
-	public function all_cached( Package $package ): array {
+	public function all_stored_releases( Package $package ): array {
 		$releases = [];
 
 		foreach ( $this->storage->list_files( $package->get_source_name() ) as $filename ) {
@@ -152,9 +153,11 @@ class ReleaseManager {
 	}
 
 	/**
-	 * Archive a release.
+	 * Store a release in the storage.
 	 *
-	 * @since 0.1.0
+	 * We will store the release zip artifact (archive) and meta data as JSON.
+	 *
+	 * @since 0.9.0
 	 *
 	 * @param Release $release Release instance.
 	 *
@@ -164,8 +167,8 @@ class ReleaseManager {
 	 * @throws \Exception           If Composer couldn't download the archive file.
 	 * @return Release
 	 */
-	public function archive( Release $release ): Release {
-		if ( $this->exists( $release ) ) {
+	public function store( Release $release ): Release {
+		if ( $this->is_stored( $release ) ) {
 			return $release;
 		}
 
@@ -202,12 +205,27 @@ class ReleaseManager {
 			throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
 		}
 
-		// We have safely cached the release.
-		// This means we should create a release without the source URL from now on, so the cached zip file is used as the source instead.
+		// We have safely stored the release.
+		// This means we should create a release with the authenticated source URL so the stored zip file is used as the source instead.
 		$meta = $release->get_meta();
-		if ( isset(  $meta['source_url'] ) ) {
-			unset ( $meta['source_url'] );
+		unset( $meta['dist'] );
+		try {
+			$meta['dist'] = [
+				'type'   => 'zip',
+				'url'    => $release->get_download_url(),
+				'shasum' => $this->checksum( 'sha1', $release ),
+			];
+		} catch ( FileNotFound $e ) {
+			$this->logger->error(
+				'Package artifact could not be found for package {package}:{version}.',
+				[
+					'exception' => $e,
+					'package'   => $package->get_name(),
+					'version'   => $release->get_version(),
+				]
+			);
 		}
+
 		return new Release( $package, $release->get_version(), $meta );
 	}
 
@@ -222,7 +240,11 @@ class ReleaseManager {
 	 */
 	public function dump_meta( Release $release ): Release {
 		try {
-			$meta_file = new JsonFile( $release->get_meta_file_path() );
+			$meta_file_path = $this->storage->get_absolute_path( $release->get_meta_file_path() );
+			$meta_file      = new JsonFile( $meta_file_path );
+			if ( ! $meta_file->exists() ) {
+				@touch( $meta_file_path );
+			}
 			$meta_file->write( $release->get_meta() );
 		} catch ( \UnexpectedValueException | \Exception $e ) {
 			throw FileOperationFailed::unableToWriteReleaseMetaFileToStorage( $release->get_meta_file_path() );
@@ -270,7 +292,7 @@ class ReleaseManager {
 	 * @return Release
 	 */
 	public function delete( Release $release ): Release {
-		if ( ! $this->exists( $release ) ) {
+		if ( ! $this->is_stored( $release ) ) {
 			return $release;
 		}
 
@@ -300,13 +322,13 @@ class ReleaseManager {
 	}
 
 	/**
-	 * Whether an artifact exists for a given release.
+	 * Whether an zip artifact is already stored for a given release.
 	 *
 	 * @param Release $release Release instance.
 	 *
 	 * @return bool
 	 */
-	public function exists( Release $release ): bool {
+	public function is_stored( Release $release ): bool {
 		return $this->storage->exists( $release->get_file_path() );
 	}
 
@@ -318,7 +340,7 @@ class ReleaseManager {
 	 * @return string|false The absolute file path or false if it doesn't exist.
 	 */
 	public function get_absolute_path( Release $release ) {
-		if ( ! $this->exists( $release ) ) {
+		if ( ! $this->is_stored( $release ) ) {
 			return false;
 		}
 

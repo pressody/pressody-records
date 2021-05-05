@@ -81,7 +81,7 @@ final class Logger extends BaseIO {
 						__METHOD__,
 						sprintf(
 						/* translators: 1: class name 2: WC_Log_Handler_Interface */
-							__( 'The provided handler %1$s does not implement %2$s.', '__plugin_txtd' ),
+							__( 'The provided handler %1$s does not implement %2$s.', 'pixelgradelt_records' ),
 							'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
 							'<code>PixelgradeLT\Records\Logging\Handler\LogHandlerInterface</code>'
 						),
@@ -106,7 +106,7 @@ final class Logger extends BaseIO {
 	public function log( $level, $message, array $context = [] ) {
 		if ( ! LogLevels::is_valid_level( $level ) ) {
 			/* translators: 1: WC_Logger::log 2: level */
-			doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', '__plugin_txtd' ), '<code>PixelgradeLT\Records\Logging\Logger::log</code>', $level ), '0.9.0' );
+			doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'pixelgradelt_records' ), '<code>PixelgradeLT\Records\Logging\Logger::log</code>', $level ), '0.9.0' );
 		}
 
 		if ( ! $this->should_handle( $level ) ) {
@@ -119,15 +119,6 @@ final class Logger extends BaseIO {
 		foreach ( $this->handlers as $handler ) {
 			$handler->handle( $timestamp, $level, $message, $context );
 		}
-
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-//		error_log(
-//			sprintf(
-//				'PIXELGRADELT_RECORDS.%s: %s',
-//				strtoupper( $level ),
-//				$this->format( $message, $context )
-//			)
-//		);
 	}
 
 	/**
@@ -143,8 +134,10 @@ final class Logger extends BaseIO {
 		return $this->minimum_level_severity >= 0 && $this->minimum_level_severity <= LogLevels::get_level_severity( $level );
 	}
 
-	/*
+	/**
+	 * ==================
 	 * IOInterface bridge
+	 * ==================
 	 */
 
 	/**

@@ -397,7 +397,7 @@ class FileLogHandler extends LogHandler {
 		if ( function_exists( 'wp_hash' ) ) {
 			return trailingslashit( LOG_DIR ) . self::get_log_file_name( $handle );
 		} else {
-			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', '__plugin_txtd' ), '0.9.0' );
+			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pixelgradelt_records' ), '0.9.0' );
 			return false;
 		}
 	}
@@ -417,7 +417,7 @@ class FileLogHandler extends LogHandler {
 			$hash_suffix = wp_hash( $handle );
 			return sanitize_file_name( implode( '-', [ $handle, $date_suffix, $hash_suffix ] ) . '.log' );
 		} else {
-			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', '__plugin_txtd' ), '0.9.0' );
+			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pixelgradelt_records' ), '0.9.0' );
 			return false;
 		}
 	}

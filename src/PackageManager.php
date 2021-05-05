@@ -149,7 +149,7 @@ class PackageManager {
 		$query_args = [
 			'post_type'        => PackageManager::PACKAGE_POST_TYPE,
 			'fields'           => 'ids',
-			'post_status'      => 'publish',
+			'post_status'      => [ 'publish', 'draft', 'private', ],
 			'tax_query'        => [],
 			'meta_query'       => [],
 			'nopaging'         => true,
@@ -388,7 +388,7 @@ class PackageManager {
 		$releases = [];
 
 		$post = get_post( $post_ID );
-		if ( empty( $post ) || 'publish' !== $post->post_status ) {
+		if ( empty( $post ) || ! in_array( $post->post_status, [ 'publish', 'draft', 'private', ] ) ) {
 			return [];
 		}
 
@@ -497,7 +497,7 @@ class PackageManager {
 		$query       = new \WP_Query( array_merge( [
 			'post_type'        => static::PACKAGE_POST_TYPE,
 			'fields'           => 'ids',
-			'post_status'      => 'publish',
+			'post_status'      => [ 'publish', 'draft', 'private', ],
 			'meta_query'       => [
 				[
 					'key'     => '_package_source_type',
@@ -530,7 +530,7 @@ class PackageManager {
 		$query       = new \WP_Query( array_merge( [
 			'post_type'        => PackageManager::PACKAGE_POST_TYPE,
 			'fields'           => 'ids',
-			'post_status'      => 'publish',
+			'post_status'      => [ 'publish', 'draft', 'private', ],
 			'meta_query'       => [
 				[
 					'key'     => '_package_source_type',
@@ -705,7 +705,9 @@ class PackageManager {
 				'version'            => $release_data['version'],
 				'normalized_version' => $normalized_version,
 				'meta'               => [
-					'source_url' => $url,
+					'dist' => [
+						'url' => $url,
+					],
 				],
 			];
 		}
@@ -759,8 +761,7 @@ class PackageManager {
 	 *
 	 * @param Package $package
 	 *
-	 * @throws \Exception
-	 * @return array
+	 * @return bool
 	 */
 	public function dry_run_package_require( Package $package ): bool {
 		$client = $this->get_composer_client();

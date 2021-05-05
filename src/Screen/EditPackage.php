@@ -318,7 +318,7 @@ class EditPackage extends AbstractHookProvider {
 				              ->set_width( 50 ),
 
 				         Field::make( 'text', 'package_source_name', __( 'Package Source Name', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>. Most often you will find the correct project name in the project\'s <code>composer.json</code> file, under the <code>"name"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket<code>)!</strong>', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>. Most often you will find the correct project name in the project\'s <code>composer.json</code> file, under the <code>"name"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket</code>)!</strong>', 'pixelgradelt_records' ) )
 				              ->set_width( 50 )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
@@ -767,7 +767,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		if ( false === $this->package_manager->dry_run_package_require( $package ) ) {
 			update_post_meta( $post_ID, '_package_require_dry_run_result', [
 					'type'    => 'error',
-					'message' => '<p>We could not resolve the package dependencies. <strong>You should give the required packages a further look and then hit Update!</strong><br>There should be additional information in the error logs.</p>',
+					'message' => '<p>We could not resolve the package dependencies. <strong>You should give the required packages a further look and then hit Update!</strong><br>There should be additional information in the PixelgradeLT Records logs.</p>',
 			] );
 		} else {
 			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );

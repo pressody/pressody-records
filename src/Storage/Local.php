@@ -26,7 +26,7 @@ class Local implements Storage {
 	 *
 	 * @var string
 	 */
-	protected $base_directory = '';
+	protected string $base_directory = '';
 
 	/**
 	 * Constructor.
@@ -68,6 +68,11 @@ class Local implements Storage {
 	 * @return bool
 	 */
 	public function delete( string $file ): bool {
+		$absolute_path = $this->get_absolute_path( $file );
+		if ( ! file_exists( $absolute_path ) ) {
+			return true;
+		}
+
 		return unlink( $this->get_absolute_path( $file ) );
 	}
 

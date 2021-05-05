@@ -78,4 +78,14 @@ interface Storage {
 	 * @return Response
 	 */
 	public function send( string $file ): Response;
+
+	/**
+	 * Given a relative path return its absolute path in the storage.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $path Relative path.
+	 * @return string
+	 */
+	public function get_absolute_path( string $path = '' ): string;
 }

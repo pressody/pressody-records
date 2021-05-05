@@ -12,7 +12,6 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use Psr\Log\LoggerInterface;
 
 /**
  * Class to activate the plugin.

@@ -24,7 +24,6 @@ use Composer\Package\Dumper\ArrayDumper;
 use Composer\Package\PackageInterface;
 use Composer\Semver\VersionParser;
 use PixelgradeLT\Records\Client\Builder\ComposerArchiveBuilder;
-use PixelgradeLT\Records\Client\Builder\ComposerBuilder;
 
 /**
  * Class for communicating with an external Composer repository.
@@ -38,14 +37,14 @@ class ComposerClient implements Client {
 	 *
 	 * @var Composer
 	 */
-	protected $composer;
+	protected $composer = null;
 
 	/**
 	 * The Composer config used to instantiate.
 	 *
 	 * We will use this to determine if we need to reinstantiate.
 	 *
-	 * @var array
+	 * @var array|string|null
 	 */
 	protected $composer_config = [];
 
@@ -53,7 +52,15 @@ class ComposerClient implements Client {
 	 *
 	 * @var BaseIO
 	 */
-	protected $io;
+	protected $io = null;
+
+	/**
+	 * Absolute path to the home directory to use for Composer.
+	 *
+	 * This is directory will be used internally by Composer for caching and stuff.
+	 * @var string
+	 */
+	protected $composer_home_dir = null;
 
 	/**
 	 * Constructor.
@@ -63,9 +70,11 @@ class ComposerClient implements Client {
 	 * @param BaseIO|null $io
 	 */
 	public function __construct(
+		string $composer_home_dir = null,
 		BaseIO $io = null
 	) {
-		$this->io = $io;
+		$this->composer_home_dir = $composer_home_dir;
+		$this->io                = $io;
 	}
 
 	/**
@@ -129,11 +138,11 @@ class ComposerClient implements Client {
 
 		// Prune version packages by the specified minimum stability.
 		if ( false !== $minimumStability ) {
-			$minimumStability = VersionParser::normalizeStability( $minimumStability );
+			$minimumStability      = VersionParser::normalizeStability( $minimumStability );
 			$acceptableStabilities = [];
-			foreach (BasePackage::$stabilities as $stability => $value) {
-				if ($value <= BasePackage::$stabilities[$minimumStability]) {
-					$acceptableStabilities[$stability] = $value;
+			foreach ( BasePackage::$stabilities as $stability => $value ) {
+				if ( $value <= BasePackage::$stabilities[ $minimumStability ] ) {
+					$acceptableStabilities[ $stability ] = $value;
 				}
 			}
 
@@ -152,7 +161,7 @@ class ComposerClient implements Client {
 
 	/**
 	 * @param PackageInterface[] $packages
-	 * @param array $args Composer config args.
+	 * @param array              $args Composer config args.
 	 *
 	 * @throws \Exception
 	 * @return void
@@ -184,7 +193,7 @@ class ComposerClient implements Client {
 
 	/**
 	 * @param PackageInterface $package
-	 * @param array $args Composer config args.
+	 * @param array            $args Composer config args.
 	 *
 	 * @throws \Exception
 	 * @return string The patch to the package archive.
@@ -202,13 +211,14 @@ class ComposerClient implements Client {
 			];
 		}
 
-		$skipErrors     = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
-		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : get_temp_dir();
+		$skipErrors = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
+		$outputDir  = ! empty( $args['output-dir'] ) ? $args['output-dir'] : get_temp_dir();
 
 		$composer = $this->getComposer( $config );
 
 		$downloads = new ComposerArchiveBuilder( $io, $outputDir, $config, $skipErrors );
 		$downloads->setComposer( $composer );
+
 		return $downloads->dumpPackage( $package );
 	}
 
@@ -299,8 +309,10 @@ class ComposerClient implements Client {
 			'minimum-stability'         => 'dev',
 			'providers'                 => false,
 
-			'prefer-stable'             => true,
-			'prefer-lowest'             => false,
+			'prefer-stable' => true,
+			'prefer-lowest' => false,
+			// This is the default Composer config to pass when initializing Composer.
+			'config'        => [],
 		];
 
 		// If we are in a local/development environment, relax further.
@@ -321,7 +333,13 @@ class ComposerClient implements Client {
 	public function getComposer( $config = null ): Composer {
 		if ( null === $this->composer || $this->composer_config !== $config ) {
 			try {
-				$this->composer = Factory::create( $this->io, $config );
+				$factory = new Factory();
+				// We will set the Composer current working directory to our home directory, if provided.
+				if ( ! empty( $this->composer_home_dir ) ) {
+					// Make sure that the directory exists.
+					wp_mkdir_p( $this->composer_home_dir );
+				}
+				$this->composer = $factory->createComposer( $this->io, $config, false, $this->getComposerHome() );
 			} catch ( \InvalidArgumentException $e ) {
 				$this->io->error( $e->getMessage() );
 				exit( 1 );
@@ -368,7 +386,11 @@ class ComposerClient implements Client {
 	}
 
 	private function getComposerHome(): string {
-		$home = getenv( 'COMPOSER_HOME' );
+		$home = $this->composer_home_dir;
+		if ( ! $home ) {
+			$home = getenv( 'COMPOSER_HOME' );
+		}
+
 		if ( ! $home ) {
 			if ( defined( 'PHP_WINDOWS_VERSION_MAJOR' ) ) {
 				if ( ! getenv( 'APPDATA' ) ) {

@@ -2,19 +2,18 @@
 /**
  * Composer repository transformer.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Transformer;
 
 use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Exception\FileNotFound;
-use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
@@ -31,28 +30,28 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	 *
 	 * @var ReleaseManager
 	 */
-	protected $release_manager;
+	protected ReleaseManager $release_manager;
 
 	/**
 	 * Composer package transformer.
 	 *
 	 * @var PackageTransformer.
 	 */
-	protected $composer_transformer;
+	protected PackageTransformer $composer_transformer;
 
 	/**
 	 * Logger.
 	 *
 	 * @var LoggerInterface
 	 */
-	protected $logger;
+	protected LoggerInterface $logger;
 
 	/**
 	 * Version parser.
 	 *
 	 * @var VersionParser
 	 */
-	protected $version_parser;
+	protected VersionParser $version_parser;
 
 	/**
 	 * Constructor.
@@ -82,13 +81,15 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	 * @since 0.1.0
 	 *
 	 * @param PackageRepository $repository Package repository.
+	 *
 	 * @return array
 	 */
 	public function transform( PackageRepository $repository ): array {
 		$items = [];
 
 		foreach ( $repository->all() as $package ) {
-			if ( ! $package->has_releases() ) {
+			// We will not include packages without releases or packages that are not public (except for admin users).
+			if ( ! $package->has_releases() || ! ( current_user_can( Capabilities::MANAGE_OPTIONS ) || $package->is_public() ) ) {
 				continue;
 			}
 
@@ -110,6 +111,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	 * Transform an item.
 	 *
 	 * @param Package $package Package instance.
+	 *
 	 * @return array
 	 */
 	protected function transform_item( Package $package ): array {
@@ -117,44 +119,38 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 
 		foreach ( $package->get_releases() as $release ) {
 			$version = $release->get_version();
+			$meta    = $release->get_meta();
 
-			// Start with the hard-coded requires.
-			$require = [
-				'composer/installers' => '^1.0',
-			];
+			// This order is important since we go from lower to higher importance. Each one overwrites the previous.
+			// Start with the hard-coded requires, if any.
+			$require = [];
+			// Merge the release require, if any.
+			if ( ! empty( $meta['require'] ) ) {
+				$require = array_merge( $require, $meta['require'] );
+			}
 			// Merge the managed required packages, if any.
-			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package ) );
+			if ( ! empty( $meta['require_ltpackages'] ) ) {
+				$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $meta['require_ltpackages'] ) );
+			}
+			// We want to enforce a sure composer/installers require.
+			$require = array_merge( $require, [ 'composer/installers' => '^1.0', ] );
+
 			// Finally, allow others to have a say.
 			$require = apply_filters( 'pixelgradelt_records_composer_package_require', $require, $package, $release );
 
-			try {
-				$data[ $version ] = [
-					'name'               => $package->get_name(),
-					'version'            => $version,
-					'version_normalized' => $this->version_parser->normalize( $version ),
-					'dist'               => [
-						'type'   => 'zip',
-						'url'    => $release->get_download_url(),
-						'shasum' => $this->release_manager->checksum( 'sha1', $release ),
-					],
-					'require'            => $require,
-					'type'               => $package->get_type(),
-					'authors'            => $package->get_authors(),
-					'description'        => $package->get_description(),
-					'keywords'           => $package->get_keywords(),
-					'homepage'           => $package->get_homepage(),
-					'license'            => $package->get_license(),
-				];
-			} catch ( FileNotFound $e ) {
-				$this->logger->error(
-					'Package artifact could not be found for {package}:{version}.',
-					[
-						'exception' => $e,
-						'package'   => $package->get_name(),
-						'version'   => $version,
-					]
-				);
-			}
+			$data[ $version ] = [
+				'name'               => $package->get_name(),
+				'version'            => $version,
+				'version_normalized' => $this->version_parser->normalize( $version ),
+				'dist'               => $meta['dist'],
+				'require'            => $require,
+				'type'               => $package->get_type(),
+				'authors'            => $meta['authors'],
+				'description'        => $meta['description'],
+				'keywords'           => $meta['keywords'],
+				'homepage'           => $meta['homepage'],
+				'license'            => $meta['license'],
+			];
 		}
 
 		return $data;

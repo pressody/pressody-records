@@ -5,12 +5,12 @@
  * Meta capabilities are mapped to primitive capabilities in
  * \PixelgradeLT\Records\Provider\Capabilities.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
@@ -63,14 +63,21 @@ final class Capabilities {
 	const MANAGE_PACKAGE_TYPES = 'pixelgradelt_records_manage_package_types';
 
 	/**
-	 * Register capabilities.
+	 * Register roles and capabilities.
 	 *
 	 * @since 0.1.0
 	 */
 	public static function register() {
 		$wp_roles = wp_roles();
+		// Add all capabilities to the administrator role.
 		$wp_roles->add_cap( 'administrator', self::DOWNLOAD_PACKAGES );
 		$wp_roles->add_cap( 'administrator', self::VIEW_PACKAGES );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_OPTIONS );
+
+		// Create a special role for users intended to be used by clients.
+		$wp_roles->add_role( 'pixelgradelt_records_client', 'LT Records Client', [
+			self::DOWNLOAD_PACKAGES => true,
+			self::VIEW_PACKAGES     => true,
+		] );
 	}
 }

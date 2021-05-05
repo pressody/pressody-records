@@ -13,13 +13,11 @@ namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Psr\Log\LoggerInterface;
-use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
-use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Htaccess;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
-use PixelgradeLT\Records\Storage\Local;
 use PixelgradeLT\Records\Storage\Storage;
+use PixelgradeLT\Records\Capabilities as Caps;
 
 use const PixelgradeLT\Records\VERSION;
 
@@ -41,28 +39,28 @@ class Upgrade extends AbstractHookProvider {
 	 *
 	 * @var Htaccess
 	 */
-	protected $htaccess;
+	protected Htaccess $htaccess;
 
 	/**
 	 * Logger.
 	 *
 	 * @var LoggerInterface
 	 */
-	protected $logger;
+	protected LoggerInterface $logger;
 
 	/**
 	 * Release manager.
 	 *
 	 * @var ReleaseManager
 	 */
-	protected $release_manager;
+	protected ReleaseManager $release_manager;
 
 	/**
 	 * Package repository.
 	 *
 	 * @var PackageRepository
 	 */
-	protected $repository;
+	protected PackageRepository $repository;
 
 	/**
 	 * Storage service.
@@ -113,11 +111,9 @@ class Upgrade extends AbstractHookProvider {
 	public function maybe_upgrade() {
 		$saved_version = get_option( self::VERSION_OPTION_NAME, '0' );
 
-//		if ( version_compare( $saved_version, '0.3.0-dev1', '<' ) ) {
-//			Capabilities::register();
-//			$this->setup_storage();
-//			$this->cache_packages();
-//		}
+		if ( version_compare( $saved_version, '0.9.0', '<' ) ) {
+			Caps::register();
+		}
 
 		if ( version_compare( $saved_version, VERSION, '<' ) ) {
 			update_option( self::VERSION_OPTION_NAME, VERSION );

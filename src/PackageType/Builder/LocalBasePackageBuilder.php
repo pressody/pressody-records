@@ -2,12 +2,12 @@
 /**
  * Local package builder.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType\Builder;
 
@@ -29,6 +29,7 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $directory Absolute path to the package directory.
+	 *
 	 * @return $this
 	 */
 	public function set_directory( string $directory ): self {
@@ -41,6 +42,7 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param bool $is_installed Whether the package is installed.
+	 *
 	 * @return $this
 	 */
 	public function set_installed( bool $is_installed ): self {
@@ -53,6 +55,7 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param string $version Version.
+	 *
 	 * @return $this
 	 */
 	public function set_installed_version( string $version ): self {
@@ -86,6 +89,7 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param Package $package Package.
+	 *
 	 * @return $this
 	 */
 	public function with_package( Package $package ): BasePackageBuilder {
@@ -107,14 +111,14 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 * This must be called after setting the installed state and version for
 	 * the package.
 	 *
-	 * @todo Rename this?
-	 *
 	 * @since 0.1.0
+	 *
+	 * @todo  Rename this?
 	 *
 	 * @return $this
 	 */
 	public function add_cached_releases(): BasePackageBuilder {
-		$releases = $this->release_manager->all_cached( $this->package );
+		$releases = $this->release_manager->all_stored_releases( $this->package );
 
 		if ( $this->package->is_installed() ) {
 			// Add the installed version in case it hasn't been cached yet.
@@ -143,6 +147,7 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param Package $package Package instance.
+	 *
 	 * @return null|Release
 	 */
 	protected function get_package_update( Package $package ): ?Release {
@@ -153,7 +158,9 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 			if ( ! empty( $updates->response[ $package->get_basename() ]->package ) ) {
 				$update  = $updates->response[ $package->get_basename() ];
 				$release = new Release( $package, $update->new_version, [
-					'source_url' => (string) $update->package,
+					'dist' => [
+						'url' => (string) $update->package,
+					],
 				] );
 			}
 		} elseif ( $package instanceof LocalTheme ) {
@@ -161,7 +168,9 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 			if ( ! empty( $updates->response[ $package->get_slug() ]['package'] ) ) {
 				$update  = $updates->response[ $package->get_slug() ];
 				$release = new Release( $package, $update['new_version'], [
-					'source_url' => (string) $update['package'],
+					'dist' => [
+						'url' => (string) $update['package'],
+					],
 				] );
 			}
 		}

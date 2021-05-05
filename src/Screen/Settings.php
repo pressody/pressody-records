@@ -250,9 +250,9 @@ class Settings extends AbstractHookProvider {
 		);
 
 		printf(
-				'<p>%s</p>',
+				'<p><strong>%s</strong></p>',
 				/* translators: %s: <code>pixelgradelt_records</code> */
-				sprintf( esc_html__( 'The password for all API Keys is %s.', 'pixelgradelt_records' ), '<code>pixelgradelt_records</code>' )
+				sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_records' ), '<code>pixelgradelt_records</code>' )
 		);
 
 		echo '<div id="pixelgradelt_records-api-key-manager"></div>';

@@ -111,6 +111,13 @@ class EditUser extends AbstractHookProvider {
 	 */
 	public function render_api_keys_section( WP_User $user ) {
 		printf( '<h2>%s</h2>', esc_html__( 'PixelgradeLT Records API Keys', 'pixelgradelt_records' ) );
+
+		printf(
+			'<p><strong>%s</strong></p>',
+			/* translators: %s: <code>pixelgradelt_records</code> */
+			sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_records' ), '<code>pixelgradelt_records</code>' )
+		);
+
 		echo '<div id="pixelgradelt_records-api-key-manager"></div>';
 	}
 

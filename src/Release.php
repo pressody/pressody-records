@@ -77,23 +77,23 @@ class Release {
 	 */
 	protected function fill_meta( array $meta = [] ) {
 		$meta_package_props = [
-			'source_type',
-			'source_name',
-			'authors',
-			'description',
-			'homepage',
-			'license',
-			'keywords',
-			'requires_at_least_wp',
-			'tested_up_to_wp',
-			'requires_php',
-			'required_packages',
-			'composer_require',
+			'source_type' => 'source_type',
+			'source_name' => 'source_name',
+			'authors' => 'authors',
+			'description' => 'description',
+			'homepage' => 'homepage',
+			'license' => 'license',
+			'keywords' => 'keywords',
+			'requires_at_least_wp' => 'requires_at_least_wp',
+			'tested_up_to_wp' => 'tested_up_to_wp',
+			'requires_php' => 'requires_php',
+			'required_packages' => 'require_ltpackages',
+			'composer_require' => 'require',
 		];
 
-		foreach ( $meta_package_props as $prop ) {
-			if ( ! isset( $meta[ $prop ] ) ) {
-				$meta[ $prop ] = $this->package[ $prop ];
+		foreach ( $meta_package_props as $package_prop => $meta_prop ) {
+			if ( ! isset( $meta[ $meta_prop ] ) && isset( $this->package[ $package_prop ] ) ) {
+				$meta[ $meta_prop ] = $this->package[ $package_prop ];
 			}
 		}
 
@@ -221,6 +221,6 @@ class Release {
 	 * @return string
 	 */
 	public function get_source_url(): string {
-		return $this->meta['source_url'] ?? '';
+		return $this->meta['dist']['url'] ?? '';
 	}
 }
