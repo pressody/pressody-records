@@ -505,6 +505,34 @@ class BasePackageBuilder {
 	}
 
 	/**
+	 * Set the package visibility.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param string $visibility
+	 *
+	 * @return $this
+	 */
+	public function set_visibility( string $visibility ): self {
+		return $this->set( 'visibility', $visibility );
+	}
+
+	/**
+	 * Set the (Composer) require list if this package is managed by us.
+	 *
+	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param array $composer_require
+	 *
+	 * @return $this
+	 */
+	public function set_composer_require( array $composer_require ): self {
+		return $this->set( 'composer_require', $composer_require );
+	}
+
+	/**
 	 * Set the managed required packages if this package is managed by us.
 	 *
 	 * @since 0.8.0
@@ -545,6 +573,7 @@ class BasePackageBuilder {
 
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
+		$this->set_visibility( $this->package_manager->get_package_visibility( $this->package ) );
 
 		$this->from_package_data( $package_data );
 
@@ -624,6 +653,14 @@ class BasePackageBuilder {
 
 		if ( empty( $this->package->get_managed_post_id() ) && ! empty( $package_data['managed_post_id'] ) ) {
 			$this->set_managed_post_id( $package_data['managed_post_id'] );
+		}
+
+		if ( empty( $this->package->get_visibility() ) && ! empty( $package_data['visibility'] ) ) {
+			$this->set_visibility( $package_data['visibility'] );
+		}
+
+		if ( empty( $this->package->get_composer_require() ) && ! empty( $package_data['composer_require'] ) ) {
+			$this->set_composer_require( $package_data['composer_require'] );
 		}
 
 		if ( ! empty( $package_data['required_packages'] ) ) {
@@ -1011,6 +1048,8 @@ class BasePackageBuilder {
 			->set_requires_php( $package->get_requires_php() )
 			->set_is_managed( $package->is_managed() )
 			->set_managed_post_id( $package->get_managed_post_id() )
+			->set_visibility( $package->get_visibility() )
+			->set_composer_require( $package->get_composer_require() )
 			->set_required_packages( $package->get_required_packages() );
 
 		foreach ( $package->get_releases() as $release ) {
@@ -1079,7 +1118,7 @@ class BasePackageBuilder {
 	 * @return $this
 	 */
 	public function store_releases(): BasePackageBuilder {
-		if ( ! $this->package->is_managed() || ! $this->package->is_public() ) {
+		if ( ! $this->package->is_managed() || ! $this->package_manager->is_package_public( $this->package ) ) {
 			return $this;
 		}
 

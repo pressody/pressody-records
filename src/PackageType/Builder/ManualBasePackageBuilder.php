@@ -46,6 +46,7 @@ class ManualBasePackageBuilder extends BasePackageBuilder {
 
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
+		$this->set_visibility( $this->package_manager->get_package_visibility( $this->package ) );
 
 		// Write the current package data here, so the following logic has the data it needs.
 		$this->from_package_data( $package_data );

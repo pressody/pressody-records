@@ -11,9 +11,9 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Transformer;
 
+use PixelgradeLT\Records\PackageManager;
 use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\Exception\FileNotFound;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
@@ -25,12 +25,6 @@ use PixelgradeLT\Records\VersionParser;
  * @since 0.1.0
  */
 class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
-	/**
-	 * Release manager.
-	 *
-	 * @var ReleaseManager
-	 */
-	protected ReleaseManager $release_manager;
 
 	/**
 	 * Composer package transformer.
@@ -40,11 +34,18 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	protected PackageTransformer $composer_transformer;
 
 	/**
-	 * Logger.
+	 * Package manager.
 	 *
-	 * @var LoggerInterface
+	 * @var PackageManager
 	 */
-	protected LoggerInterface $logger;
+	protected PackageManager $package_manager;
+
+	/**
+	 * Release manager.
+	 *
+	 * @var ReleaseManager
+	 */
+	protected ReleaseManager $release_manager;
 
 	/**
 	 * Version parser.
@@ -54,22 +55,33 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	protected VersionParser $version_parser;
 
 	/**
+	 * Logger.
+	 *
+	 * @var LoggerInterface
+	 */
+	protected LoggerInterface $logger;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param PackageTransformer $composer_transformer Composer package transformer.
+	 * @param PackageManager  $package_manager Packages manager.
 	 * @param ReleaseManager     $release_manager      Release manager.
 	 * @param VersionParser      $version_parser       Version parser.
 	 * @param LoggerInterface    $logger               Logger.
 	 */
 	public function __construct(
 		PackageTransformer $composer_transformer,
+		PackageManager $package_manager,
 		ReleaseManager $release_manager,
 		VersionParser $version_parser,
 		LoggerInterface $logger
 	) {
+
 		$this->composer_transformer = $composer_transformer;
+		$this->package_manager = $package_manager;
 		$this->release_manager      = $release_manager;
 		$this->version_parser       = $version_parser;
 		$this->logger               = $logger;
@@ -89,7 +101,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 
 		foreach ( $repository->all() as $package ) {
 			// We will not include packages without releases or packages that are not public (except for admin users).
-			if ( ! $package->has_releases() || ! ( current_user_can( Capabilities::MANAGE_OPTIONS ) || $package->is_public() ) ) {
+			if ( ! $package->has_releases() || ! ( current_user_can( Capabilities::MANAGE_OPTIONS ) || $this->package_manager->is_package_public( $package ) ) ) {
 				continue;
 			}
 
@@ -132,11 +144,16 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 			if ( ! empty( $meta['require_ltpackages'] ) ) {
 				$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $meta['require_ltpackages'] ) );
 			}
-			// We want to enforce a sure composer/installers require.
+			// We want to enforce a certain composer/installers require.
 			$require = array_merge( $require, [ 'composer/installers' => '^1.0', ] );
 
 			// Finally, allow others to have a say.
 			$require = apply_filters( 'pixelgradelt_records_composer_package_require', $require, $package, $release );
+
+			// We don't need the artifactmtime in the dist since that is only for internal use.
+			if ( isset( $meta['dist']['artifactmtime'] ) ) {
+				unset( $meta['dist']['artifactmtime'] );
+			}
 
 			$data[ $version ] = [
 				'name'               => $package->get_name(),

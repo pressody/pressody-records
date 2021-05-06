@@ -295,6 +295,10 @@ class ComposerClient implements Client {
 			$config['minimum-stability-per-package'] = $args['minimum-stability-per-package'];
 		}
 
+		if ( isset( $args['ignore-platform-reqs'] ) ) {
+			$config['ignore-platform-reqs'] = $args['ignore-platform-reqs'];
+		}
+
 		return apply_filters( 'pixelgradelt_records_composer_client_config_parse_args', $config, $args, $originalConfig );
 	}
 

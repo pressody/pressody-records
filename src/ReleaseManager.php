@@ -128,10 +128,10 @@ class ReleaseManager {
 			// This is the data that will take precedence over everything else.
 			// Missing meta data will get filled with parent package data.
 			$meta           = [];
-			$meta_file_path = basename( $filename, '.zip' ) . '.json';
+			$meta_file_path = trailingslashit( $package->get_source_name() ) . basename( $filename, '.zip' ) . '.json';
 			if ( $this->storage->exists( $meta_file_path ) ) {
 				try {
-					$meta_file = new JsonFile( $meta_file_path );
+					$meta_file = new JsonFile( $this->storage->get_absolute_path( $meta_file_path ) );
 					$meta      = array_merge( $meta, $meta_file->read() );
 				} catch ( \Exception $e ) {
 					$this->logger->error(
@@ -169,24 +169,24 @@ class ReleaseManager {
 	 */
 	public function store( Release $release ): Release {
 		if ( $this->is_stored( $release ) ) {
-			return $release;
+			return $this->transform_into_stored( $release );
 		}
 
-		$package    = $release->get_package();
-		$source_url = $release->get_source_url();
+		$parent_package = $release->get_package();
+		$source_url     = $release->get_source_url();
 
 		if ( ! empty( $source_url ) ) {
 			// Determine if we have a Composer repo source URL and thus use Composer to download since it has all the auth info required.
-			if ( $package instanceof BasePackage && $this->is_composer_repo_source_url( $source_url ) ) {
+			if ( $parent_package instanceof BasePackage && $this->is_composer_repo_source_url( $source_url ) ) {
 				$client = $this->get_composer_client();
 
 				// Get the cached source package data since that is in the format Composer expects.
-				$managed_post_id = $package->get_managed_post_id();
+				$managed_post_id = $parent_package->get_managed_post_id();
 				// Get the source version/release packages data (fetched from the external repo) we have stored.
 				$source_cached_release_packages = get_post_meta( $managed_post_id, '_package_source_cached_release_packages', true );
-				if ( ! empty( $source_cached_release_packages[ $package->get_source_name() ][ $release->get_version() ] ) ) {
+				if ( ! empty( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] ) ) {
 					$loader           = new ArrayLoader();
-					$composer_package = $loader->load( $source_cached_release_packages[ $package->get_source_name() ][ $release->get_version() ] );
+					$composer_package = $loader->load( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] );
 					$filename         = $client->archivePackage( $composer_package );
 				} else {
 					throw InvalidReleaseSource::missingSourceCachedPackage( $release );
@@ -195,8 +195,8 @@ class ReleaseManager {
 				// Otherwise, use the regular WordPress download logic.
 				$filename = $this->archiver->archive_from_url( $release );
 			}
-		} elseif ( $package instanceof LocalBasePackage && $package->is_installed() && $package->is_installed_release( $release ) ) {
-			$filename = $this->archiver->archive_from_source( $package, $release->get_version() );
+		} elseif ( $parent_package instanceof LocalBasePackage && $parent_package->is_installed() && $parent_package->is_installed_release( $release ) ) {
+			$filename = $this->archiver->archive_from_source( $parent_package, $release->get_version() );
 		} else {
 			throw InvalidReleaseSource::forRelease( $release );
 		}
@@ -207,26 +207,7 @@ class ReleaseManager {
 
 		// We have safely stored the release.
 		// This means we should create a release with the authenticated source URL so the stored zip file is used as the source instead.
-		$meta = $release->get_meta();
-		unset( $meta['dist'] );
-		try {
-			$meta['dist'] = [
-				'type'   => 'zip',
-				'url'    => $release->get_download_url(),
-				'shasum' => $this->checksum( 'sha1', $release ),
-			];
-		} catch ( FileNotFound $e ) {
-			$this->logger->error(
-				'Package artifact could not be found for package {package}:{version}.',
-				[
-					'exception' => $e,
-					'package'   => $package->get_name(),
-					'version'   => $release->get_version(),
-				]
-			);
-		}
-
-		return new Release( $package, $release->get_version(), $meta );
+		return $this->transform_into_stored( $release );
 	}
 
 	/**
@@ -251,6 +232,54 @@ class ReleaseManager {
 		}
 
 		return $release;
+	}
+
+	/**
+	 * Given a release modify its (meta) data to use the fact that its has a stored artifact.
+	 *
+	 * @param Release $release
+	 *
+	 * @return Release
+	 */
+	public function transform_into_stored( Release $release ): Release {
+		if ( ! $this->is_stored( $release ) ) {
+			return $release;
+		}
+
+		// We need create a release with the authenticated source URL so the stored zip file is used as the source.
+		$meta = $release->get_meta();
+
+		// If we already have the right 'dist' details (maybe from some cache; JSON?), don't recalculate the checksum.
+		// But only if the artifact file (.zip) wasn't modified in the mean time.
+		if ( ! empty( $meta['dist']['url'] )
+		     && ! empty( $meta['dist']['shasum'] )
+		     && $meta['dist']['url'] === $release->get_download_url()
+		     && ! empty( $meta['dist']['artifactmtime'] )
+		     && filemtime( $this->storage->get_absolute_path( $release->get_file_path() ) ) === $meta['dist']['artifactmtime'] ) {
+
+			return $release;
+		}
+
+		unset( $meta['dist'] );
+		try {
+			$meta['dist'] = [
+				'type'          => 'zip',
+				'url'           => $release->get_download_url(),
+				'shasum'        => $this->checksum( 'sha1', $release ),
+				'artifactmtime' => filemtime( $this->storage->get_absolute_path( $release->get_file_path() ) ),
+			];
+		} catch ( FileNotFound $e ) {
+			$this->logger->error(
+				'Package artifact could not be found for package {package}:{version}.',
+				[
+					'exception' => $e,
+					'package'   => $release->get_package()->get_name(),
+					'version'   => $release->get_version(),
+				]
+			);
+		}
+
+		return new Release( $release->get_package(), $release->get_version(), $meta );
 	}
 
 	/**

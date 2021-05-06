@@ -112,13 +112,13 @@ interface Package {
 	public function is_managed(): bool;
 
 	/**
-	 * Whether a managed package is public.
+	 * Retrieve the managed post ID.
 	 *
-	 * @since 0.9.0
+	 * @since 0.5.0
 	 *
-	 * @return bool
+	 * @return int
 	 */
-	public function is_public(): bool;
+	public function get_managed_post_id(): int;
 
 	/**
 	 * Get the visibility status of the package (public, draft, private).
@@ -128,6 +128,42 @@ interface Package {
 	 * @return string The visibility status of the package. One of: public, draft, private.
 	 */
 	public function get_visibility(): string;
+
+	/**
+	 * Retrieve the Composer config `require` entry.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return array
+	 */
+	public function get_composer_require(): array;
+
+	/**
+	 * Retrieve the managed required packages.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return array
+	 */
+	public function get_required_packages(): array;
+
+	/**
+	 * Whether the package has any managed required packages.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return bool
+	 */
+	public function has_required_packages(): bool;
+
+	/**
+	 * Check if the package has a source constraint.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_source_constraint(): bool;
 
 	/**
 	 * Whether the package has any releases.

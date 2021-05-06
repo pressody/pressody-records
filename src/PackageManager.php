@@ -353,6 +353,7 @@ class PackageManager {
 		}
 
 		$data['required_packages'] = $this->get_post_package_required_packages( $post_ID );
+		$data['composer_require'] = $this->get_post_package_composer_require( $post_ID );
 
 		return $data;
 	}
@@ -756,6 +757,16 @@ class PackageManager {
 		carbon_set_post_meta( $post_ID, 'package_required_packages', $required_packages, $container_id );
 	}
 
+	public function get_post_package_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		// We don't currently allow defining a per-package Composer require list.
+		return [];
+	}
+
+	public function set_post_package_composer_require( int $post_ID, array $composer_require, string $container_id = '' ) {
+		// Nothing right now.
+//		carbon_set_post_meta( $post_ID, 'package_composer_require', $composer_require, $container_id );
+	}
+
 	/**
 	 * Given a package, dry-run a composer require of it (including its required packages) and see if all goes well.
 	 *
@@ -800,6 +811,8 @@ class PackageManager {
 					// The loosest stability.
 					$package->get_name() => 'dev',
 				],
+				// Since we are just simulating, it doesn't make sense to check the platform requirements (like PHP version, PHP extensions, etc).
+				'ignore-platform-reqs' => true,
 			] );
 		} catch ( \Exception $e ) {
 			$this->logger->error(
@@ -815,6 +828,48 @@ class PackageManager {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether a managed package is public (published).
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param Package $package
+	 * @return bool
+	 */
+	public function is_package_public( Package $package ): bool {
+		if ( ! $package->is_managed() || ! $package->get_managed_post_id() ) {
+			return true;
+		}
+
+		if ( 'publish' === \get_post_status( $package->get_managed_post_id() ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the visibility status of a package (public, draft, private).
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param Package $package
+	 * @return string The visibility status of the package. One of: public, draft, private.
+	 */
+	public function get_package_visibility( Package $package ): string {
+		if ( ! $package->is_managed() || ! $package->get_managed_post_id() ) {
+			return 'public';
+		}
+
+		switch ( \get_post_status( $package->get_managed_post_id() ) ) {
+			case 'publish': return 'public';
+			case 'draft': return 'draft';
+			case 'private':
+			default:
+				return 'private';
+		}
 	}
 
 	/**

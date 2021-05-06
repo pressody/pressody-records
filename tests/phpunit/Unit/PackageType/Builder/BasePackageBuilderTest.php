@@ -40,7 +40,7 @@ class BasePackageBuilderTest extends TestCase {
 		$storage                 = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 		$composer_client         = new ComposerClient();
-		$logger = new NullIO();
+		$logger                  = new NullIO();
 
 		$package_manager = $this->getMockBuilder( PackageManager::class )
 		                        ->disableOriginalConstructor()
@@ -221,6 +221,20 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->managed_post_id );
 	}
 
+	public function test_visibility() {
+		$expected = 'draft';
+		$package  = $this->builder->set_visibility( $expected )->build();
+
+		$this->assertSame( $expected, $package->visibility );
+	}
+
+	public function test_composer_require() {
+		$expected = [ 'test/test' => '*' ];
+		$package  = $this->builder->set_composer_require( $expected )->build();
+
+		$this->assertSame( $expected, $package->composer_require );
+	}
+
 	public function test_from_package_data() {
 		$expected['name']                 = 'Plugin Name';
 		$expected['slug']                 = 'slug';
@@ -244,6 +258,8 @@ class BasePackageBuilderTest extends TestCase {
 		$expected['requires_php']         = '6.6.4';
 		$expected['is_managed']           = true;
 		$expected['managed_post_id']      = 234;
+		$expected['visibility']           = 'draft';
+		$expected['composer_require']     = [ 'test/test' => '*' ];
 		$expected['required_packages']    = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
@@ -272,6 +288,8 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected['requires_php'], $package->requires_php );
 		$this->assertSame( $expected['is_managed'], $package->is_managed );
 		$this->assertSame( $expected['managed_post_id'], $package->managed_post_id );
+		$this->assertSame( $expected['visibility'], $package->visibility );
+		$this->assertSame( $expected['composer_require'], $package->composer_require );
 		$this->assertSame( $expected['required_packages'], $package->required_packages );
 	}
 
@@ -303,16 +321,8 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->tested_up_to_wp      = '5.6.0';
 		$expected->requires_php         = '5.6.4';
 		$expected->managed_post_id      = 123;
-		$expected->required_packages    = [
-			'some_pseudo_id' => [
-				'composer_package_name' => 'pixelgrade/test',
-				'version_range'         => '*',
-				'stability'             => 'stable',
-				'source_name'           => 'local-plugin/test',
-				'managed_post_id'       => 123,
-				'pseudo_id'             => 'some_pseudo_id',
-			],
-		];
+		$expected->visibility           = 'draft';
+		$expected->composer_require     = [ 'test/test' => '*' ];
 
 		$package_data['name']                 = 'Plugin Name';
 		$package_data['slug']                 = 'slug';
@@ -328,16 +338,8 @@ class BasePackageBuilderTest extends TestCase {
 		$package_data['tested_up_to_wp']      = '6.6.0';
 		$package_data['requires_php']         = '6.6.4';
 		$package_data['managed_post_id']      = 234;
-		$package_data['required_packages']    = [
-			'some_pseudo_id' => [
-				'composer_package_name' => 'pixelgrade/test',
-				'version_range'         => '*',
-				'stability'             => 'stable',
-				'source_name'           => 'local-plugin/test',
-				'managed_post_id'       => 123,
-				'pseudo_id'             => 'some_pseudo_id',
-			],
-		];
+		$package_data['visibility']           = 'public';
+		$package_data['composer_require']     = [ 'test2/test2' => '*' ];
 
 		$package = $this->builder->with_package( $expected )->from_package_data( $package_data )->build();
 
@@ -355,10 +357,12 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
 		$this->assertSame( $expected->requires_php, $package->requires_php );
 		$this->assertSame( $expected->managed_post_id, $package->managed_post_id );
+		$this->assertSame( $expected->visibility, $package->visibility );
+		$this->assertSame( $expected->composer_require, $package->composer_require );
 	}
 
 	public function test_from_package_data_merge_required_packages() {
-		$initial_package                       = new class extends BasePackage {
+		$initial_package                    = new class extends BasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
@@ -367,9 +371,9 @@ class BasePackageBuilderTest extends TestCase {
 				$this->$name = $value;
 			}
 		};
-		$initial_package->name                 = 'Theme';
-		$initial_package->slug                 = 'theme-slug';
-		$initial_package->required_packages    = [
+		$initial_package->name              = 'Theme';
+		$initial_package->slug              = 'theme-slug';
+		$initial_package->required_packages = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
@@ -380,9 +384,9 @@ class BasePackageBuilderTest extends TestCase {
 			],
 		];
 
-		$package_data['name']                 = 'Plugin Name';
-		$package_data['slug']                 = 'slug';
-		$package_data['required_packages']    = [
+		$package_data['name']              = 'Plugin Name';
+		$package_data['slug']              = 'slug';
+		$package_data['required_packages'] = [
 			'some_pseudo_id2' => [
 				'composer_package_name' => 'pixelgrade/test2',
 				'version_range'         => '1.1',
@@ -394,7 +398,7 @@ class BasePackageBuilderTest extends TestCase {
 		];
 
 		$expected = [
-			'some_pseudo_id' => [
+			'some_pseudo_id'  => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
 				'stability'             => 'stable',
@@ -418,7 +422,7 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_from_package_data_merge_overwrite_required_packages() {
-		$initial_package                       = new class extends BasePackage {
+		$initial_package                    = new class extends BasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
@@ -427,9 +431,9 @@ class BasePackageBuilderTest extends TestCase {
 				$this->$name = $value;
 			}
 		};
-		$initial_package->name                 = 'Theme';
-		$initial_package->slug                 = 'theme-slug';
-		$initial_package->required_packages    = [
+		$initial_package->name              = 'Theme';
+		$initial_package->slug              = 'theme-slug';
+		$initial_package->required_packages = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
@@ -440,10 +444,10 @@ class BasePackageBuilderTest extends TestCase {
 			],
 		];
 
-		$package_data['name']                 = 'Plugin Name';
-		$package_data['slug']                 = 'slug';
-		$package_data['required_packages']    = [
-			'some_pseudo_id' => [
+		$package_data['name']              = 'Plugin Name';
+		$package_data['slug']              = 'slug';
+		$package_data['required_packages'] = [
+			'some_pseudo_id'  => [
 				'composer_package_name' => 'pixelgrade/test2',
 				'version_range'         => '1.1',
 				'stability'             => 'dev',
@@ -462,7 +466,7 @@ class BasePackageBuilderTest extends TestCase {
 		];
 
 		$expected = [
-			'some_pseudo_id' => [
+			'some_pseudo_id'  => [
 				'composer_package_name' => 'pixelgrade/test2',
 				'version_range'         => '1.1',
 				'stability'             => 'dev',
@@ -699,6 +703,8 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->requires_php         = '5.6.4';
 		$expected->is_managed           = true;
 		$expected->managed_post_id      = 123;
+		$expected->visibility           = 'draft';
+		$expected->composer_require     = [ 'test/test' => '*' ];
 		$expected->required_packages    = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
@@ -726,6 +732,9 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
 		$this->assertSame( $expected->requires_php, $package->requires_php );
 		$this->assertSame( $expected->is_managed, $package->is_managed );
+		$this->assertSame( $expected->managed_post_id, $package->managed_post_id );
+		$this->assertSame( $expected->visibility, $package->visibility );
+		$this->assertSame( $expected->composer_require, $package->composer_require );
 		$this->assertSame( $expected->required_packages, $package->required_packages );
 	}
 }

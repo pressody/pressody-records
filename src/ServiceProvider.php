@@ -81,7 +81,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['authentication.unauthorized'] = function( $container ) {
+		$container['authentication.unauthorized'] = function() {
 			return new Authentication\UnauthorizedServer();
 		};
 
@@ -91,7 +91,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['client.composer.custom_token_auth'] = function( $container ) {
+		$container['client.composer.custom_token_auth'] = function() {
 			return new Client\CustomTokenAuthentication();
 		};
 
@@ -204,7 +204,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['logs.level'] = function( $container ) {
+		$container['logs.level'] = function() {
 			// Log warnings and above when WP_DEBUG is enabled.
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				$level = LogLevel::WARNING;
@@ -483,6 +483,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['transformer.composer_repository'] = function( $container ) {
 			return new ComposerRepositoryTransformer(
 				$container['transformer.composer_package'],
+				$container['package.manager'],
 				$container['release.manager'],
 				$container['version.parser'],
 				$container['logs.logger']

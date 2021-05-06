@@ -127,6 +127,13 @@ class BasePackage implements \ArrayAccess, Package {
 	protected int $managed_post_id = 0;
 
 	/**
+	 * Managed package visibility.
+	 *
+	 * @var string
+	 */
+	protected string $visibility = '';
+
+	/**
 	 * A Composer config `require` entry.
 	 *
 	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
@@ -338,25 +345,6 @@ class BasePackage implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Whether a managed package is public (published).
-	 *
-	 * @since 0.9.0
-	 *
-	 * @return bool
-	 */
-	public function is_public(): bool {
-		if ( ! $this->is_managed() || ! $this->managed_post_id ) {
-			return true;
-		}
-
-		if ( 'publish' === get_post_status( $this->managed_post_id ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Get the visibility status of the package (public, draft, private).
 	 *
 	 * @since 0.9.0
@@ -364,17 +352,7 @@ class BasePackage implements \ArrayAccess, Package {
 	 * @return string The visibility status of the package. One of: public, draft, private.
 	 */
 	public function get_visibility(): string {
-		if ( ! $this->is_managed() || ! $this->managed_post_id ) {
-			return 'public';
-		}
-
-		switch ( get_post_status( $this->managed_post_id ) ) {
-			case 'publish': return 'public';
-			case 'draft': return 'draft';
-			case 'private':
-			default:
-				return 'private';
-		}
+		return $this->visibility;
 	}
 
 	/**

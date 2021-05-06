@@ -65,7 +65,7 @@ class Release {
 		$this->package = $package;
 		$this->version = $version;
 
-		$this->fill_meta( $meta );
+		$this->meta = $this->fill_meta( $meta );
 	}
 
 	/**
@@ -74,30 +74,38 @@ class Release {
 	 * @since 0.9.0
 	 *
 	 * @param array $meta Optional. Meta data to take precedence over the general one extracted from the release's parent package.
+	 * @return array The filled meta data.
 	 */
-	protected function fill_meta( array $meta = [] ) {
-		$meta_package_props = [
-			'source_type' => 'source_type',
-			'source_name' => 'source_name',
-			'authors' => 'authors',
-			'description' => 'description',
-			'homepage' => 'homepage',
-			'license' => 'license',
-			'keywords' => 'keywords',
+	protected function fill_meta( array $meta = [] ): array {
+		$package_to_meta_props = [
+			'source_type'          => 'source_type',
+			'source_name'          => 'source_name',
+			'authors'              => 'authors',
+			'description'          => 'description',
+			'homepage'             => 'homepage',
+			'license'              => 'license',
+			'keywords'             => 'keywords',
 			'requires_at_least_wp' => 'requires_at_least_wp',
-			'tested_up_to_wp' => 'tested_up_to_wp',
-			'requires_php' => 'requires_php',
-			'required_packages' => 'require_ltpackages',
-			'composer_require' => 'require',
+			'tested_up_to_wp'      => 'tested_up_to_wp',
+			'requires_php'         => 'requires_php',
+			'required_packages'    => 'require_ltpackages',
+			'composer_require'     => 'require',
 		];
 
-		foreach ( $meta_package_props as $package_prop => $meta_prop ) {
+		foreach ( $package_to_meta_props as $package_prop => $meta_prop ) {
 			if ( ! isset( $meta[ $meta_prop ] ) && isset( $this->package[ $package_prop ] ) ) {
 				$meta[ $meta_prop ] = $this->package[ $package_prop ];
 			}
 		}
 
-		$this->meta = $meta;
+		// Make sure that the 'dist' meta entry is in place, even if it doesn't point to an actual zip.
+		if ( empty( $meta['dist'] ) ) {
+			$meta['dist'] = [
+				'url' => '',
+			];
+		}
+
+		return $meta;
 	}
 
 	/**

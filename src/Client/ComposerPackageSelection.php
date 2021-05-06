@@ -87,6 +87,15 @@ class ComposerPackageSelection {
 	/** @var bool This is useful for testing purposes when you want to select the lowest possible packages that match the requirements. */
 	private $preferLowest;
 
+	/**
+	 * If this is set to true, all platform requirements are ignored
+	 * If this is set to false, no platform requirements are ignored
+	 * If this is set to string[], those packages will be ignored
+	 *
+	 * @var string[]|bool
+	 */
+	private $ignorePlatformReqs;
+
 	/** @var array The active package filter to merge. */
 	private $packagesFilter = [];
 
@@ -214,7 +223,7 @@ class ComposerPackageSelection {
 			// solve dependencies
 			$solver = new Solver( $policy, $pool, $this->io );
 			try {
-				$lockTransaction = $solver->solve( $request );
+				$lockTransaction = $solver->solve( $request, $this->ignorePlatformReqs );
 				$solver          = null;
 				// @todo Investigate if we could be much more elegant by using the solver result instead of the selecting links for root and deps.
 			} catch ( SolverProblemsException $e ) {
@@ -370,6 +379,7 @@ class ComposerPackageSelection {
 		$this->minimumStabilityPerPackage = $config['minimum-stability-per-package'] ?? [];
 		$this->preferStable               = $config['prefer-stable'] ?? true;
 		$this->preferLowest               = $config['prefer-lowest'] ?? false;
+		$this->ignorePlatformReqs         = $config['ignore-platform-reqs'] ?? false;
 		$this->abandoned                  = $config['abandoned'] ?? [];
 		$this->blacklist                  = $config['blacklist'] ?? [];
 		$this->includeTypes               = $config['include-types'] ?? null;
