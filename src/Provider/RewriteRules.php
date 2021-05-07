@@ -61,8 +61,8 @@ class RewriteRules extends AbstractHookProvider {
 		// Don't add a file extension. Some servers don't route file extensions
 		// through WordPress' front controller.
 		add_rewrite_rule(
-			'ltpackagist/([^/]+)(/([^/]+))?$',
-			'index.php?pixelgradelt_records_route=download&pixelgradelt_records_params[slug]=$matches[1]&pixelgradelt_records_params[version]=$matches[3]',
+			'ltpackagist/([^/]+)(/([^/]+))(/([^/]+))?$',
+			'index.php?pixelgradelt_records_route=download&pixelgradelt_records_params[hashid]=$matches[1]&pixelgradelt_records_params[slug]=$matches[3]&pixelgradelt_records_params[version]=$matches[5]',
 			'top'
 		);
 	}

@@ -1,0 +1,43 @@
+{
+    "source": {
+        "type": "git",
+        "url": "https://github.com/10up/WP-Minions.git",
+        "reference": "fe37083445db4173ae24ee5dc193095298ff968b"
+    },
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "time": "2017-07-06T22:15:30+00:00",
+    "source_type": "packagist.org",
+    "source_name": "10up/wp-minions",
+    "authors": [
+        {
+            "name": "10up",
+            "homepage": "http://10up.com"
+        },
+        {
+            "name": "Chris Marslender",
+            "email": "chrismarslender@gmail.com",
+            "homepage": "https://chrismarslender.com/",
+            "role": "Developer"
+        },
+        {
+            "name": "Darshan Sawardekar",
+            "role": "Developer"
+        }
+    ],
+    "description": "Job Queue for WordPress",
+    "homepage": "",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "requires_at_least_wp": "",
+    "tested_up_to_wp": "",
+    "requires_php": "",
+    "require_ltpackages": [],
+    "dist": {
+        "type": "zip",
+        "url": "http://example.org/ltpackagist/lDRYL/wp-minions-cached/3.0.0",
+        "shasum": "a95d10ce78b9900b413716b0cb52344a5cc87303",
+        "artifactmtime": 1620293308
+    }
+}

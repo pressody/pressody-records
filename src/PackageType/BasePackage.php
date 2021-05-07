@@ -127,6 +127,13 @@ class BasePackage implements \ArrayAccess, Package {
 	protected int $managed_post_id = 0;
 
 	/**
+	 * Managed package post ID string hash, if this is a managed package.
+	 *
+	 * @var string
+	 */
+	protected string $managed_post_id_hash = '';
+
+	/**
 	 * Managed package visibility.
 	 *
 	 * @var string
@@ -342,6 +349,17 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function get_managed_post_id(): int {
 		return $this->managed_post_id;
+	}
+
+	/**
+	 * Retrieve the managed post ID string hash.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return string
+	 */
+	public function get_managed_post_id_hash(): string {
+		return $this->managed_post_id_hash;
 	}
 
 	/**

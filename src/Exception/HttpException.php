@@ -94,6 +94,27 @@ class HttpException extends \Exception implements PixelgradeltRecordsException {
 	}
 
 	/**
+	 * Create an exception for an unknown package hashid request.
+	 *
+	 * @since 0.9.0.
+	 *
+	 * @param string         $hashid     Package hashed post ID .
+	 * @param int            $code     Optional. The Exception code.
+	 * @param Throwable|null $previous Optional. The previous throwable used for the exception chaining.
+	 *
+	 * @return HTTPException
+	 */
+	public static function forUnknownPackageHashid(
+		string $hashid,
+		int $code = 0,
+		Throwable $previous = null
+	): HttpException {
+		$message = "Package does not exist; Package hash: {$hashid}";
+
+		return new static( $message, HTTP::NOT_FOUND, $code, $previous );
+	}
+
+	/**
 	 * Create an exception for a forbidden package request.
 	 *
 	 * @since 0.1.0.

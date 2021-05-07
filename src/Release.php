@@ -119,7 +119,8 @@ class Release {
 	 */
 	public function get_download_url( array $args = [] ): string {
 		$url = sprintf(
-			'/ltpackagist/%s/%s',
+			'/ltpackagist/%s/%s/%s',
+			$this->get_package()->get_managed_post_id_hash(),
 			$this->get_package()->get_slug(),
 			$this->get_version()
 		);

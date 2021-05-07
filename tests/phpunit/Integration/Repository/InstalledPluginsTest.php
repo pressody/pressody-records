@@ -9,6 +9,7 @@ use PixelgradeLT\Records\Tests\Integration\TestCase;
 use function PixelgradeLT\Records\plugin;
 
 class InstalledPluginsTest extends TestCase {
+
 	public function test_get_plugin_from_source() {
 		$repository = plugin()->get_container()['repository.local.plugins'];
 

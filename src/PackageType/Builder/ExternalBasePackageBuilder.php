@@ -62,6 +62,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
 		$this->set_managed_post_id( $post_id );
+		$this->set_managed_post_id_hash( $this->package_manager->hash_encode_id( $post_id ) );
 		$this->set_visibility( $this->package_manager->get_package_visibility( $this->package ) );
 
 		if ( ! $this->package->has_source_constraint() && ! empty( $package_data['source_version_range'] ) && '*' !== $package_data['source_version_range'] ) {

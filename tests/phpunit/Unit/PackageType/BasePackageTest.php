@@ -137,6 +137,13 @@ class BasePackageTest extends TestCase {
 		$this->assertSame( $expected, $this->package->get_managed_post_id() );
 	}
 
+	public function test_managed_post_id_hash() {
+		$expected                       = 'we6d2';
+		$this->package->managed_post_id_hash = $expected;
+
+		$this->assertSame( $expected, $this->package->get_managed_post_id_hash() );
+	}
+
 	public function test_required_packages() {
 		$expected                         = [
 			'some_pseudo_id' => [

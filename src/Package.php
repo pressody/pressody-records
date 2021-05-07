@@ -103,6 +103,15 @@ interface Package {
 	public function get_license(): string;
 
 	/**
+	 * Retrieve the keywords.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string[]
+	 */
+	public function get_keywords(): array;
+
+	/**
 	 * Whether the package is managed by us.
 	 *
 	 * @since 0.1.0
@@ -119,6 +128,15 @@ interface Package {
 	 * @return int
 	 */
 	public function get_managed_post_id(): int;
+
+	/**
+	 * Retrieve the managed post ID string hash.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return string
+	 */
+	public function get_managed_post_id_hash(): string;
 
 	/**
 	 * Get the visibility status of the package (public, draft, private).

@@ -2,12 +2,12 @@
 /**
  * Download request handler.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Route;
 
@@ -18,6 +18,7 @@ use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
 use PixelgradeLT\Records\HTTP\Request;
 use PixelgradeLT\Records\HTTP\Response;
 use PixelgradeLT\Records\Package;
+use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
 
@@ -49,6 +50,13 @@ class Download implements Route {
 	const PACKAGE_VERSION_REGEX = '/[^0-9a-z.-]+/i';
 
 	/**
+	 * Package manager.
+	 *
+	 * @var PackageManager
+	 */
+	protected $package_manager;
+
+	/**
 	 * Release manager.
 	 *
 	 * @var ReleaseManager
@@ -68,10 +76,17 @@ class Download implements Route {
 	 * @since 0.1.0
 	 *
 	 * @param PackageRepository $repository      Package repository.
+	 * @param PackageManager    $package_manager Packages manager.
 	 * @param ReleaseManager    $release_manager Release manager.
 	 */
-	public function __construct( PackageRepository $repository, ReleaseManager $release_manager ) {
+	public function __construct(
+		PackageRepository $repository,
+		PackageManager $package_manager,
+		ReleaseManager $release_manager
+	) {
+
 		$this->repository      = $repository;
+		$this->package_manager = $package_manager;
 		$this->release_manager = $release_manager;
 	}
 
@@ -84,6 +99,7 @@ class Download implements Route {
 	 * @since 0.1.0
 	 *
 	 * @param Request $request HTTP request instance.
+	 *
 	 * @throws HTTPException For invalid parameters or the user doesn't have
 	 *                       permission to download the requested file.
 	 * @return Response
@@ -91,6 +107,12 @@ class Download implements Route {
 	public function handle( Request $request ): Response {
 		if ( ! current_user_can( Capabilities::DOWNLOAD_PACKAGES ) ) {
 			throw HttpException::forForbiddenResource();
+		}
+
+		$managed_package_post_id = 0;
+		if ( ! empty( $request['hashid'] ) ) {
+			// Decode the hashid.
+			$managed_package_post_id = $this->package_manager->hash_decode_id( $request['hashid'] );
 		}
 
 		$slug = preg_replace( self::PACKAGE_SLUG_REGEX, '', $request['slug'] );
@@ -103,7 +125,16 @@ class Download implements Route {
 			$version = preg_replace( self::PACKAGE_VERSION_REGEX, '', $request['version'] );
 		}
 
-		$package = $this->repository->first_where( [ 'slug' => $slug ] );
+		// If we have a package post ID, this will be the source of truth.
+		if ( $managed_package_post_id > 0 ) {
+			$post = get_post( $managed_package_post_id );
+			if ( empty( $post ) ) {
+				throw HttpException::forUnknownPackageHashid( $request['hashid'] );
+			}
+			$package = $this->repository->first_where( [ 'managed_post_id' => $post->ID ] );
+		} else {
+			$package = $this->repository->first_where( [ 'slug' => $slug ] );
+		}
 
 		// Send a 404 response if the package doesn't exist.
 		if ( ! $package instanceof Package ) {
@@ -122,6 +153,7 @@ class Download implements Route {
 	 *
 	 * @param Package $package Package object.
 	 * @param string  $version Version of the package to send.
+	 *
 	 * @throws HTTPException For invalid or missing releases.
 	 * @return Response
 	 */

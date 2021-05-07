@@ -90,6 +90,13 @@ class PackageManager {
 	protected LoggerInterface $logger;
 
 	/**
+	 * Hasher.
+	 *
+	 * @var HasherInterface
+	 */
+	protected HasherInterface $hasher;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
@@ -98,18 +105,21 @@ class PackageManager {
 	 * @param ComposerVersionParser $composer_version_parser
 	 * @param WordPressReadmeParser $wordpress_readme_parser
 	 * @param LoggerInterface       $logger Logger.
+	 * @param HasherInterface       $hasher
 	 */
 	public function __construct(
 		ComposerClient $composer_client,
 		ComposerVersionParser $composer_version_parser,
 		WordPressReadmeParser $wordpress_readme_parser,
-		LoggerInterface $logger
+		LoggerInterface $logger,
+		HasherInterface $hasher
 	) {
 
 		$this->composer_client         = $composer_client;
 		$this->composer_version_parser = $composer_version_parser;
 		$this->wordpress_readme_parser = $wordpress_readme_parser;
 		$this->logger                  = $logger;
+		$this->hasher                  = $hasher;
 	}
 
 	public function get_composer_client(): ComposerClient {
@@ -870,6 +880,14 @@ class PackageManager {
 			default:
 				return 'private';
 		}
+	}
+
+	public function hash_encode_id( int $id ): string {
+		return $this->hasher->encode( $id );
+	}
+
+	public function hash_decode_id( string $hash ): int {
+		return $this->hasher->decode( $hash );
 	}
 
 	/**

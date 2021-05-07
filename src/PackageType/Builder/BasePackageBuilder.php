@@ -505,6 +505,19 @@ class BasePackageBuilder {
 	}
 
 	/**
+	 * Set the managed post ID string hash.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param string $managed_post_id_hash
+	 *
+	 * @return $this
+	 */
+	public function set_managed_post_id_hash( string $managed_post_id_hash ): self {
+		return $this->set( 'managed_post_id_hash', $managed_post_id_hash );
+	}
+
+	/**
 	 * Set the package visibility.
 	 *
 	 * @since 0.9.0
@@ -557,6 +570,7 @@ class BasePackageBuilder {
 	 */
 	public function from_manager( int $post_id = 0, array $args = [] ): self {
 		$this->set_managed_post_id( $post_id );
+		$this->set_managed_post_id_hash( $this->package_manager->hash_encode_id( $post_id ) );
 
 		$package_data = $this->package_manager->get_package_id_data( $post_id );
 		// If we couldn't fetch package data by the post ID, try via the args.
@@ -653,6 +667,11 @@ class BasePackageBuilder {
 
 		if ( empty( $this->package->get_managed_post_id() ) && ! empty( $package_data['managed_post_id'] ) ) {
 			$this->set_managed_post_id( $package_data['managed_post_id'] );
+			$this->set_managed_post_id_hash( $this->package_manager->hash_encode_id( $package_data['managed_post_id'] ) );
+		}
+
+		if ( empty( $this->package->get_managed_post_id_hash() ) && ! empty( $package_data['managed_post_id_hash'] ) ) {
+			$this->set_managed_post_id_hash( $package_data['managed_post_id_hash'] );
 		}
 
 		if ( empty( $this->package->get_visibility() ) && ! empty( $package_data['visibility'] ) ) {
@@ -1048,6 +1067,7 @@ class BasePackageBuilder {
 			->set_requires_php( $package->get_requires_php() )
 			->set_is_managed( $package->is_managed() )
 			->set_managed_post_id( $package->get_managed_post_id() )
+			->set_managed_post_id_hash( $package->get_managed_post_id_hash() )
 			->set_visibility( $package->get_visibility() )
 			->set_composer_require( $package->get_composer_require() )
 			->set_required_packages( $package->get_required_packages() );

@@ -95,6 +95,15 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Client\CustomTokenAuthentication();
 		};
 
+		$container['hash.generator'] = function( $container ) {
+			// We will use the randomly generated storage directory name as the salt,
+			// so that if that changes the hashes are also invalidated.
+			return new StringHashes(
+				$container['storage.working_directory_name'],
+				5
+			);
+		};
+
 		$container['hooks.activation'] = function() {
 			return new Provider\Activation();
 		};
@@ -235,7 +244,8 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['client.composer'],
 				$container['version.parser'],
 				$container['wordpress.readme_parser'],
-				$container['logs.logger']
+				$container['logs.logger'],
+				$container['hash.generator'],
 			);
 		};
 
@@ -393,6 +403,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['route.download'] = function( $container ) {
 			return new Route\Download(
 				$container['repository.managed'],
+				$container['package.manager'],
 				$container['release.manager']
 			);
 		};

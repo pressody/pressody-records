@@ -2,6 +2,8 @@
 /**
  * Cached repository.
  *
+ * This repository will cache the items internally. Any changes during the request will not be taken into account.
+ *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
  * @since 0.1.0
@@ -67,5 +69,15 @@ class CachedRepository extends AbstractRepository implements PackageRepository {
 		$this->items       = $this->repository->all();
 
 		return $this->items;
+	}
+
+	/**
+	 * Reinitialize by emptying the cached items.
+	 *
+	 * @since 0.9.0
+	 */
+	public function reinitialize() {
+		$this->initialized = false;
+		$this->items       = [];
 	}
 }

@@ -221,6 +221,13 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->managed_post_id );
 	}
 
+	public function test_managed_post_id_hash() {
+		$expected = 'we45df';
+		$package  = $this->builder->set_managed_post_id_hash( $expected )->build();
+
+		$this->assertSame( $expected, $package->managed_post_id_hash );
+	}
+
 	public function test_visibility() {
 		$expected = 'draft';
 		$package  = $this->builder->set_visibility( $expected )->build();
@@ -258,6 +265,7 @@ class BasePackageBuilderTest extends TestCase {
 		$expected['requires_php']         = '6.6.4';
 		$expected['is_managed']           = true;
 		$expected['managed_post_id']      = 234;
+		$expected['managed_post_id_hash'] = 'sdfw23d';
 		$expected['visibility']           = 'draft';
 		$expected['composer_require']     = [ 'test/test' => '*' ];
 		$expected['required_packages']    = [
@@ -288,6 +296,7 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected['requires_php'], $package->requires_php );
 		$this->assertSame( $expected['is_managed'], $package->is_managed );
 		$this->assertSame( $expected['managed_post_id'], $package->managed_post_id );
+		$this->assertSame( $expected['managed_post_id_hash'], $package->managed_post_id_hash );
 		$this->assertSame( $expected['visibility'], $package->visibility );
 		$this->assertSame( $expected['composer_require'], $package->composer_require );
 		$this->assertSame( $expected['required_packages'], $package->required_packages );
@@ -321,6 +330,7 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->tested_up_to_wp      = '5.6.0';
 		$expected->requires_php         = '5.6.4';
 		$expected->managed_post_id      = 123;
+		$expected->managed_post_id_hash = 'sdfwer23';
 		$expected->visibility           = 'draft';
 		$expected->composer_require     = [ 'test/test' => '*' ];
 
@@ -338,6 +348,7 @@ class BasePackageBuilderTest extends TestCase {
 		$package_data['tested_up_to_wp']      = '6.6.0';
 		$package_data['requires_php']         = '6.6.4';
 		$package_data['managed_post_id']      = 234;
+		$package_data['managed_post_id_hash'] = 'sdfsdf11';
 		$package_data['visibility']           = 'public';
 		$package_data['composer_require']     = [ 'test2/test2' => '*' ];
 
@@ -357,6 +368,7 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->tested_up_to_wp, $package->tested_up_to_wp );
 		$this->assertSame( $expected->requires_php, $package->requires_php );
 		$this->assertSame( $expected->managed_post_id, $package->managed_post_id );
+		$this->assertSame( $expected->managed_post_id_hash, $package->managed_post_id_hash );
 		$this->assertSame( $expected->visibility, $package->visibility );
 		$this->assertSame( $expected->composer_require, $package->composer_require );
 	}
@@ -703,6 +715,7 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->requires_php         = '5.6.4';
 		$expected->is_managed           = true;
 		$expected->managed_post_id      = 123;
+		$expected->managed_post_id_hash = 'asdasd12';
 		$expected->visibility           = 'draft';
 		$expected->composer_require     = [ 'test/test' => '*' ];
 		$expected->required_packages    = [
@@ -733,6 +746,7 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->requires_php, $package->requires_php );
 		$this->assertSame( $expected->is_managed, $package->is_managed );
 		$this->assertSame( $expected->managed_post_id, $package->managed_post_id );
+		$this->assertSame( $expected->managed_post_id_hash, $package->managed_post_id_hash );
 		$this->assertSame( $expected->visibility, $package->visibility );
 		$this->assertSame( $expected->composer_require, $package->composer_require );
 		$this->assertSame( $expected->required_packages, $package->required_packages );

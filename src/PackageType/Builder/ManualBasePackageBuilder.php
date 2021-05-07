@@ -30,6 +30,7 @@ class ManualBasePackageBuilder extends BasePackageBuilder {
 	 */
 	public function from_manager( int $post_id = 0, array $args = [] ): BasePackageBuilder {
 		$this->set_managed_post_id( $post_id );
+		$this->set_managed_post_id_hash( $this->package_manager->hash_encode_id( $post_id ) );
 
 		$package_data = $this->package_manager->get_package_id_data( $post_id );
 		// If we couldn't fetch package data by the post ID, try via the args.
