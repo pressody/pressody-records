@@ -22,6 +22,8 @@ use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
+use function PixelgradeLT\Records\is_debug_mode;
+use function PixelgradeLT\Records\is_dev_url;
 
 /**
  * Package archiver class.
@@ -359,50 +361,11 @@ class PackageArchiver extends AbstractHookProvider {
 		$parsed_args['timeout'] = 300;
 
 		// If we are in a local/development environment, relax further.
-		if ( $this->is_debug_mode() && $this->is_dev_url( $url ) ) {
+		if ( is_debug_mode() && is_dev_url( $url ) ) {
 			// Skip SSL verification since we may be using self-signed certificates.
 			$parsed_args['sslverify'] = false;
 		}
 
 		return $parsed_args;
-	}
-
-	/**
-	 * Test if a given URL is one that we identify as a local/development site.
-	 *
-	 * @since 0.5.0
-	 *
-	 * @return bool
-	 */
-	protected function is_dev_url( string $url ): bool {
-		// Local/development url parts to match for
-		$devsite_needles = array(
-			'localhost',
-			':8888',
-			'.local',
-			'pixelgrade.dev',
-			'.dev',
-			':8082',
-			'staging.',
-		);
-
-		foreach ( $devsite_needles as $needle ) {
-			if ( false !== strpos( $url, $needle ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Whether debug mode is enabled.
-	 *
-	 * @since 0.5.0
-	 *
-	 * @return bool
-	 */
-	protected function is_debug_mode(): bool {
-		return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
 	}
 }

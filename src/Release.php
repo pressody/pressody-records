@@ -223,6 +223,17 @@ class Release {
 	}
 
 	/**
+	 * Retrieve the release's meta entry with the provided key.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return mixed
+	 */
+	public function get_meta_entry( string $key ) {
+		return $this->meta[ $key ] ?? null;
+	}
+
+	/**
 	 * Retrieve the source URL for a release.
 	 *
 	 * @since 0.1.0

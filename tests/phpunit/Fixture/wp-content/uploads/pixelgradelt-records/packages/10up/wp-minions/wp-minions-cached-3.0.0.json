@@ -12,31 +12,33 @@
     "source_name": "10up/wp-minions",
     "authors": [
         {
-            "name": "10up",
-            "homepage": "http://10up.com"
-        },
-        {
-            "name": "Chris Marslender",
-            "email": "chrismarslender@gmail.com",
-            "homepage": "https://chrismarslender.com/",
-            "role": "Developer"
-        },
-        {
-            "name": "Darshan Sawardekar",
-            "role": "Developer"
+            "name": "Pixelgrade",
+            "homepage": "https://pixelgrade.com"
         }
     ],
-    "description": "Job Queue for WordPress",
-    "homepage": "",
-    "license": "GPL-2.0-or-later",
-    "keywords": [],
-    "requires_at_least_wp": "",
-    "tested_up_to_wp": "",
-    "requires_php": "",
-    "require_ltpackages": [],
+    "description": "Custom release description.",
+    "homepage": "https://custom.com",
+    "license": "GPL-3.0-only",
+    "keywords": [
+        "custom1",
+        "custom2"
+    ],
+    "requires_at_least_wp": "5.5",
+    "tested_up_to_wp": "5.6",
+    "requires_php": "7.4",
+    "require_ltpackages": {
+        "local-plugin/automatewoo #102": {
+            "composer_package_name": "pixelgradelt_records/automatewoo",
+            "version_range": "*",
+            "stability": "stable",
+            "source_name": "local-plugin/automatewoo",
+            "managed_post_id": 102,
+            "pseudo_id": "local-plugin/automatewoo #102"
+        }
+    },
     "dist": {
         "type": "zip",
-        "url": "http://example.org/ltpackagist/lDRYL/wp-minions-cached/3.0.0",
+        "url": "http://example.org/ltpackagist/9VJPW/wp-minions-cached/3.0.0",
         "shasum": "a95d10ce78b9900b413716b0cb52344a5cc87303",
         "artifactmtime": 1620293308
     }

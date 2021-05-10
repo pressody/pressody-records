@@ -37,8 +37,8 @@
     "require_ltpackages": [],
     "dist": {
         "type": "zip",
-        "url": "https://ltsatispress.local/ltpackagist/wp-minions/4.0.0",
+        "url": "http://example.org/ltpackagist/9VJPW/wp-minions-cached/4.0.0",
         "shasum": "2f34ea10653eb92007383e79e284c35fa72c64ad",
-        "artifactmtime": 1620293307
+        "artifactmtime": 1620293308
     }
 }

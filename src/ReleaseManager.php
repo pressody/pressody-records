@@ -168,6 +168,11 @@ class ReleaseManager {
 	 * @return Release
 	 */
 	public function store( Release $release ): Release {
+		// We don't want to store if we are running tests.
+		if ( is_running_unit_tests() ) {
+			return $release;
+		}
+
 		if ( $this->is_stored( $release ) ) {
 			return $this->transform_into_stored( $release );
 		}
@@ -220,6 +225,11 @@ class ReleaseManager {
 	 * @return Release
 	 */
 	public function dump_meta( Release $release ): Release {
+		// We don't want to write if we are running tests.
+		if ( is_running_unit_tests() ) {
+			return $release;
+		}
+
 		try {
 			$meta_file_path = $this->storage->get_absolute_path( $release->get_meta_file_path() );
 			$meta_file      = new JsonFile( $meta_file_path );

@@ -175,6 +175,17 @@ function display_missing_dependencies_notice() {
 	);
 }
 
+/**
+ * Whether debug mode is enabled.
+ *
+ * @since 0.1.0
+ *
+ * @return bool
+ */
+function is_debug_mode(): bool {
+	return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
+}
+
 function doing_it_wrong( $function, $message, $version ) {
 	// @codingStandardsIgnoreStart
 	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
@@ -196,4 +207,43 @@ function is_rest_request() {
 	$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 	return apply_filters( 'pixelgradelt_records_is_rest_api_request', $is_rest_api_request );
+}
+
+/**
+ * Whether we are running unit tests.
+ *
+ * @since 0.9.0
+ *
+ * @return bool
+ */
+function is_running_unit_tests(): bool {
+	return \defined( 'PIXELGRADELT_RECORDS_RUNNING_UNIT_TESTS' ) && true === PIXELGRADELT_RECORDS_RUNNING_UNIT_TESTS;
+}
+
+/**
+ * Test if a given URL is one that we identify as a local/development site.
+ *
+ * @since 0.5.0
+ *
+ * @return bool
+ */
+function is_dev_url( string $url ): bool {
+	// Local/development url parts to match for
+	$devsite_needles = array(
+		'localhost',
+		':8888',
+		'.local',
+		'pixelgrade.dev',
+		'.dev',
+		':8082',
+		'staging.',
+	);
+
+	foreach ( $devsite_needles as $needle ) {
+		if ( false !== strpos( $url, $needle ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }

@@ -7,6 +7,7 @@ use PHPUnit\Util\Test;
 use PixelgradeLT\Records\Container;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\ExternalBasePackage;
+use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ServiceProvider;
 use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Integration\TestCase;
@@ -154,6 +155,8 @@ class ExternalPluginsTest extends TestCase {
 		$package = $repository->first_where( [ 'slug' => 'wp-minions-cached', 'source_type' => 'packagist.org' ] );
 		$this->assertInstanceOf( ExternalBasePackage::class, $package );
 		$this->assertTrue( $package->has_releases() );
+		// One cached release has the wrong slug and should not be taken into account.
+		$this->assertCount( 2, $package->get_releases() );
 		$this->assertFalse( $package->has_required_packages() );
 		$this->assertCount( 3, $package->get_authors() );
 		$this->assertSame( 'Package cached custom description.', $package->get_description() );
@@ -164,5 +167,25 @@ class ExternalPluginsTest extends TestCase {
 		// Same source name, but different source_type.
 		$package = $repository->first_where( [ 'source_name' => '10up/wp-minions', 'source_type' => 'vcs' ] );
 		$this->assertNull( $package );
+	}
+
+	public function test_release_cached_json() {
+		/** @var \PixelgradeLT\Records\Repository\CachedRepository $repository */
+		$repository = plugin()->get_container()['repository.external.plugins'];
+		$repository->reinitialize();
+
+		$package = $repository->first_where( [ 'slug' => 'wp-minions-cached', 'source_type' => 'packagist.org' ] );
+		$release = $package->get_release( '3.0.0' );
+		$this->assertInstanceOf( Release::class, $release );
+		$this->assertNull( $release->get_meta_entry('bogus') );
+		$this->assertCount( 1, $release->get_meta_entry('authors') );
+		$this->assertSame( 'Custom release description.', $release->get_meta_entry('description') );
+		$this->assertSame( 'https://custom.com', $release->get_meta_entry('homepage') );
+		$this->assertSame( 'GPL-3.0-only', $release->get_meta_entry('license') );
+		$this->assertCount( 2, $release->get_meta_entry('keywords') );
+		$this->assertSame( '5.5', $release->get_meta_entry('requires_at_least_wp') );
+		$this->assertSame( '5.6', $release->get_meta_entry('tested_up_to_wp') );
+		$this->assertSame( '7.4', $release->get_meta_entry('requires_php') );
+		$this->assertCount( 1, $release->get_meta_entry('require_ltpackages') );
 	}
 }

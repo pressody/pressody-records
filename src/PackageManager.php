@@ -796,7 +796,7 @@ class PackageManager {
 						'url'     => get_packages_permalink( [ 'base' => true ] ),
 						'options' => [
 							'ssl'  => [
-								'verify_peer' => ! $this->is_debug_mode(),
+								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
 								'header' => ! empty( $_ENV['PHP_AUTH_USER'] ) ? [
@@ -888,16 +888,5 @@ class PackageManager {
 
 	public function hash_decode_id( string $hash ): int {
 		return $this->hasher->decode( $hash );
-	}
-
-	/**
-	 * Whether debug mode is enabled.
-	 *
-	 * @since 0.8.0
-	 *
-	 * @return bool
-	 */
-	protected function is_debug_mode(): bool {
-		return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
 	}
 }

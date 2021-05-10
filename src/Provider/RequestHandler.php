@@ -19,6 +19,8 @@ use PixelgradeLT\Records\HTTP\Response;
 use PixelgradeLT\Records\Route\Route;
 use WP;
 use WP_REST_Server;
+use function PixelgradeLT\Records\is_debug_mode;
+use function PixelgradeLT\Records\is_running_unit_tests;
 
 /**
  * Request handler class.
@@ -93,7 +95,7 @@ class RequestHandler extends AbstractHookProvider {
 			// Don't throw authentication exceptions in debug mode so challenge
 			// headers can be sent to display login prompts.
 			// But throw them when running PHPUnit tests.
-			if ( $this->is_running_unit_tests() || ( $this->is_debug_mode() && ! $e instanceof AuthenticationException ) ) {
+			if ( is_running_unit_tests() || ( is_debug_mode() && ! $e instanceof AuthenticationException ) ) {
 				throw $e;
 			}
 
@@ -174,27 +176,5 @@ class RequestHandler extends AbstractHookProvider {
 	 */
 	protected function get_route_controller( string $route ): Route {
 		return $this->controllers->get( $route );
-	}
-
-	/**
-	 * Whether debug mode is enabled.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool
-	 */
-	protected function is_debug_mode(): bool {
-		return \defined( 'WP_DEBUG' ) && true === WP_DEBUG;
-	}
-
-	/**
-	 * Whether we are running unit tests.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool
-	 */
-	protected function is_running_unit_tests(): bool {
-		return \defined( 'PIXELGRADELT_RECORDS_RUNNING_UNIT_TESTS' ) && true === PIXELGRADELT_RECORDS_RUNNING_UNIT_TESTS;
 	}
 }
