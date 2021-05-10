@@ -3,12 +3,8 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Tests\Integration\Repository;
 
-use PHPUnit\Util\Test;
-use PixelgradeLT\Records\Container;
-use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\ExternalBasePackage;
 use PixelgradeLT\Records\Release;
-use PixelgradeLT\Records\ServiceProvider;
 use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Integration\TestCase;
 
