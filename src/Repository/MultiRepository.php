@@ -24,7 +24,7 @@ class MultiRepository extends AbstractRepository implements PackageRepository {
 	 *
 	 * @var PackageRepository[]
 	 */
-	protected $repositories = [];
+	protected array $repositories = [];
 
 	/**
 	 * Create a multi repository.

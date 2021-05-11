@@ -10,6 +10,7 @@ use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
 use Psr\Log\NullLogger;
@@ -56,7 +57,7 @@ class LocalPluginBuilderTest extends TestCase {
 
 		$package = $this->builder->from_basename( $plugin_file )->build();
 
-		$this->assertSame( 'plugin', $package->get_type() );
+		$this->assertSame( PackageTypes::PLUGIN, $package->get_type() );
 		$this->assertSame( $slug, $package->get_slug() );
 		$this->assertSame( 'local-plugin/' . $slug, $package->get_source_name() );
 		$this->assertSame( 'local.plugin', $package->get_source_type() );

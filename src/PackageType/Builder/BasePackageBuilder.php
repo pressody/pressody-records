@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records\PackageType\Builder;
 
 use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -833,7 +834,7 @@ class BasePackageBuilder {
 
 				// Depending on the package type (plugin or theme), extract the data accordingly.
 				$tmp_package_data = [];
-				if ( 'theme' === $this->package->get_type() ) {
+				if ( PackageTypes::THEME === $this->package->get_type() ) {
 					$tmp_package_data = get_file_data(
 						\trailingslashit( $package_source_dir ) . 'style.css',
 						array(

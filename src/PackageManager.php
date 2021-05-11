@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records;
 
 use PixelgradeLT\Records\Authentication\ApiKey\Server;
 use PixelgradeLT\Records\Client\ComposerClient;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -29,34 +30,6 @@ class PackageManager {
 
 	const PACKAGE_TYPE_TAXONOMY = 'ltpackage_types';
 	const PACKAGE_TYPE_TAXONOMY_SINGULAR = 'ltpackage_type';
-
-	/**
-	 * We will automatically register these if they are not present.The slugs will be transformed into the package types defined by composer/installers
-	 * @see  \PixelgradeLT\Records\Transformer\ComposerPackageTransformer::WORDPRESS_TYPES
-	 * @link https://packagist.org/packages/composer/installers
-	 */
-	const PACKAGE_TYPE_TERMS = [
-		[
-			'name'        => 'WordPress Plugin',
-			'slug'        => 'plugin',
-			'description' => 'A WordPress plugin package.',
-		],
-		[
-			'name'        => 'WordPress Theme',
-			'slug'        => 'theme',
-			'description' => 'A WordPress theme package.',
-		],
-		[
-			'name'        => 'WordPress Must-Use Plugin',
-			'slug'        => 'muplugin',
-			'description' => 'A WordPress Must-Use plugin package.',
-		],
-		[
-			'name'        => 'WordPress Drop-in Plugin',
-			'slug'        => 'dropin',
-			'description' => 'A WordPress Drop-in plugin package.',
-		],
-	];
 
 	const PACKAGE_KEYWORD_TAXONOMY = 'ltpackage_keywords';
 	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpackage_keyword';
@@ -363,7 +336,7 @@ class PackageManager {
 		}
 
 		$data['required_packages'] = $this->get_post_package_required_packages( $post_ID );
-		$data['composer_require'] = $this->get_post_package_composer_require( $post_ID );
+		$data['composer_require']  = $this->get_post_package_composer_require( $post_ID );
 
 		return $data;
 	}
@@ -605,7 +578,7 @@ class PackageManager {
 			case 'wpackagist.org':
 				// WPackagist.org used special vendor names.
 				$vendor = 'wpackagist-plugin';
-				if ( 'theme' === $this->get_post_package_type( $post_ID ) ) {
+				if ( PackageTypes::THEME === $this->get_post_package_type( $post_ID ) ) {
 					$vendor = 'wpackagist-theme';
 				}
 
@@ -691,24 +664,21 @@ class PackageManager {
 			}
 
 			// Try to normalize the version string.
-			try {
-				$normalized_version = $this->composer_version_parser->normalize( $release_data['version'] );
-			} catch ( \UnexpectedValueException $e ) {
+			$normalized_version = $this->normalize_version( $release_data['version'] );
+			if ( is_null( $normalized_version ) ) {
 				// This means that something is wrong with the version string. Skip it.
-				$this->logger->error(
-					'Invalid version string {version} for manually uploaded release in post ID {post_id}.',
-					[
-						'exception' => $e,
-						'version'   => $release_data['version'],
-						'post_id'   => $post_ID,
-					]
-				);
 				continue;
 			}
 
-			// Get the attachment URL.
-			$url = wp_get_attachment_url( $release_data['file'] );
-			if ( false === $url ) {
+			// The file may be a direct URL to a zip file (like when switching from external sources to a manually managed ones).
+			if ( ! is_numeric( $release_data['file'] ) ) {
+				$url = $release_data['file'];
+			} else {
+				// Get the attachment URL.
+				$url = wp_get_attachment_url( $release_data['file'] );
+			}
+
+			if ( empty( $url ) ) {
 				continue;
 			}
 
@@ -774,7 +744,7 @@ class PackageManager {
 
 	public function set_post_package_composer_require( int $post_ID, array $composer_require, string $container_id = '' ) {
 		// Nothing right now.
-//		carbon_set_post_meta( $post_ID, 'package_composer_require', $composer_require, $container_id );
+		//		carbon_set_post_meta( $post_ID, 'package_composer_require', $composer_require, $container_id );
 	}
 
 	/**
@@ -822,7 +792,7 @@ class PackageManager {
 					$package->get_name() => 'dev',
 				],
 				// Since we are just simulating, it doesn't make sense to check the platform requirements (like PHP version, PHP extensions, etc).
-				'ignore-platform-reqs' => true,
+				'ignore-platform-reqs'          => true,
 			] );
 		} catch ( \Exception $e ) {
 			$this->logger->error(
@@ -846,6 +816,7 @@ class PackageManager {
 	 * @since 0.9.0
 	 *
 	 * @param Package $package
+	 *
 	 * @return bool
 	 */
 	public function is_package_public( Package $package ): bool {
@@ -866,6 +837,7 @@ class PackageManager {
 	 * @since 0.9.0
 	 *
 	 * @param Package $package
+	 *
 	 * @return string The visibility status of the package. One of: public, draft, private.
 	 */
 	public function get_package_visibility( Package $package ): string {
@@ -874,8 +846,10 @@ class PackageManager {
 		}
 
 		switch ( \get_post_status( $package->get_managed_post_id() ) ) {
-			case 'publish': return 'public';
-			case 'draft': return 'draft';
+			case 'publish':
+				return 'public';
+			case 'draft':
+				return 'draft';
 			case 'private':
 			default:
 				return 'private';
@@ -888,5 +862,33 @@ class PackageManager {
 
 	public function hash_decode_id( string $hash ): int {
 		return $this->hasher->decode( $hash );
+	}
+
+	/**
+	 * Normalize a version string according to Composer logic.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param string $version
+	 *
+	 * @return string|null
+	 */
+	public function normalize_version( string $version ) {
+		try {
+			$normalized_version = $this->composer_version_parser->normalize( $version );
+		} catch ( \UnexpectedValueException $e ) {
+			// This means that something is wrong with the version string.
+			$this->logger->error(
+				'Invalid version string "{version}".',
+				[
+					'exception' => $e,
+					'version'   => $version,
+				]
+			);
+
+			return null;
+		}
+
+		return $normalized_version;
 	}
 }

@@ -5,6 +5,7 @@ namespace PixelgradeLT\Records\Tests\Unit\PackageType;
 
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageType\BasePackage;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
 
 class BasePackageTest extends TestCase {
@@ -32,7 +33,7 @@ class BasePackageTest extends TestCase {
 	}
 
 	public function test_type() {
-		$expected            = 'plugin';
+		$expected            = PackageTypes::PLUGIN;
 		$this->package->type = $expected;
 
 		$this->assertSame( $expected, $this->package->get_type() );

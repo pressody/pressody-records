@@ -136,10 +136,9 @@ class Release {
 	 * @return string
 	 */
 	public function get_file_path(): string {
-		// We will organize artifacts by their source package name.
 		return sprintf(
 			'%1$s/%2$s',
-			$this->get_package()->get_source_name(),
+			$this->get_package()->get_store_dir(),
 			$this->get_file()
 		);
 	}
@@ -169,7 +168,7 @@ class Release {
 	public function get_meta_file_path(): string {
 		return sprintf(
 			'%1$s/%2$s',
-			$this->get_package()->get_source_name(),
+			$this->get_package()->get_store_dir(),
 			$this->get_meta_file()
 		);
 	}

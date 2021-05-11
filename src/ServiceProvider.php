@@ -452,7 +452,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['storage.packages'] = function( $container ) {
-			$path = path_join( $container['storage.working_directory'], 'packages/' );
+			$path = \path_join( $container['storage.working_directory'], 'packages/' );
 			return new Storage\Local( $path );
 		};
 
@@ -461,14 +461,14 @@ class ServiceProvider implements ServiceProviderInterface {
 				return PIXELGRADELT_RECORDS_WORKING_DIRECTORY;
 			}
 
-			$upload_config = wp_upload_dir();
-			$path          = path_join( $upload_config['basedir'], $container['storage.working_directory_name'] );
+			$upload_config = \wp_upload_dir();
+			$path          = \path_join( $upload_config['basedir'], $container['storage.working_directory_name'] );
 
 			return (string) trailingslashit( apply_filters( 'pixelgradelt_records_working_directory', $path ) );
 		};
 
 		$container['storage.working_directory_name'] = function() {
-			$directory = get_option( 'pixelgradelt_records_working_directory' );
+			$directory = \get_option( 'pixelgradelt_records_working_directory' );
 
 			if ( ! empty( $directory ) ) {
 				return $directory;
@@ -478,13 +478,13 @@ class ServiceProvider implements ServiceProviderInterface {
 			$directory = sprintf( 'pixelgradelt_records-%s', generate_random_string() );
 
 			// Save the working directory so we will always use the same directory.
-			update_option( 'pixelgradelt_records_working_directory', $directory );
+			\update_option( 'pixelgradelt_records_working_directory', $directory );
 
 			return $directory;
 		};
 
 		$container['storage.composer_working_directory'] = function( $container ) {
-			return path_join( $container['storage.working_directory'], 'composer/' );
+			return \path_join( $container['storage.working_directory'], 'composer/' );
 		};
 
 		$container['transformer.composer_package'] = function( $container ) {
@@ -510,7 +510,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['validators.artifact'] = function( $container ) {
-			$servers = apply_filters(
+			$servers = \apply_filters(
 				'pixelgradelt_records_artifact_validators',
 				[
 					10 => 'validator.zip',

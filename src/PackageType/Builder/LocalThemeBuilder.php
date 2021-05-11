@@ -11,6 +11,8 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\PackageType\Builder;
 
+use PixelgradeLT\Records\PackageType\PackageTypes;
+
 /**
  * Local theme builder class.
  *
@@ -32,7 +34,7 @@ final class LocalThemeBuilder extends LocalBasePackageBuilder {
 	public function from_slug( string $slug ): self {
 
 		return $this
-			->set_type( 'theme' )
+			->set_type( PackageTypes::THEME )
 			->set_slug( $slug )
 			->set_source_name( 'local-theme' . '/' . $slug )
 			->set_source_type( 'local.theme' )
@@ -68,7 +70,7 @@ final class LocalThemeBuilder extends LocalBasePackageBuilder {
 		}
 
 		if ( empty( $this->package->get_type() ) ) {
-			$this->set_type( 'theme' );
+			$this->set_type( PackageTypes::THEME );
 		}
 
 		if ( empty( $this->package->get_installed_version() ) ) {
@@ -110,7 +112,7 @@ final class LocalThemeBuilder extends LocalBasePackageBuilder {
 		 */
 
 		if ( empty( $this->package->get_type() ) ) {
-			$this->set_type( 'theme' );
+			$this->set_type( PackageTypes::THEME );
 		}
 
 		if ( empty( $this->package->get_slug() ) ) {

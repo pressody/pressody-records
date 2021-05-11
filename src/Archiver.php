@@ -241,39 +241,36 @@ class Archiver {
 	public function download_url( string $url ): string {
 		$url = apply_filters( 'pixelgradelt_records_package_download_url', $url );
 
-		if ( $this->is_local_url( $url ) ) {
-			// Since this is a local URL to a file, we don't need to download, just to create a temporary copy.
-			$path = $this->local_url_to_path( $url );
-			if ( ! empty( $path ) ) {
-				$url_filename = basename( $path );
-				$tmpfname = wp_tempnam( $url_filename );
-				if ( ! $tmpfname ) {
-					$this->logger->error(
-						'Could not create Temporary file for file {filename} from URL {url}.',
-						[
-							'filename' => $url_filename,
-							'url'   => $url,
-						]
-					);
+		// Since this is a local URL to a file, we don't need to download, just to create a temporary copy.
+		if ( $this->is_local_url( $url ) && $path = $this->local_url_to_path( $url ) ) {
+			$url_filename = basename( $path );
+			$tmpfname = wp_tempnam( $url_filename );
+			if ( ! $tmpfname ) {
+				$this->logger->error(
+					'Could not create Temporary file for file {filename} from URL {url}.',
+					[
+						'filename' => $url_filename,
+						'url'   => $url,
+					]
+				);
 
-					throw FileDownloadFailed::forUrl( $url );
-				}
-
-				if ( false === copy( $path, $tmpfname ) ) {
-					$this->logger->error(
-						'Could not copy file {path} to the Temporary file {tmpfname}.',
-						[
-							'path' => $path,
-							'tmpfname'   => $tmpfname,
-						]
-					);
-
-					throw FileDownloadFailed::forUrl( $url );
-				}
-
-				// Return the path to the temporary file.
-				return $tmpfname;
+				throw FileDownloadFailed::forUrl( $url );
 			}
+
+			if ( false === copy( $path, $tmpfname ) ) {
+				$this->logger->error(
+					'Could not copy file {path} to the Temporary file {tmpfname}.',
+					[
+						'path' => $path,
+						'tmpfname'   => $tmpfname,
+					]
+				);
+
+				throw FileDownloadFailed::forUrl( $url );
+			}
+
+			// Return the path to the temporary file.
+			return $tmpfname;
 		}
 
 		// Allow others to hook-in just before the download.

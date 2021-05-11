@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\Repository;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 
 /**
  * Installed plugins repository class.
@@ -26,7 +27,7 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 	 *
 	 * @var PackageFactory
 	 */
-	protected $factory;
+	protected PackageFactory $factory;
 
 	/**
 	 * Create a repository.
@@ -70,7 +71,7 @@ class InstalledPlugins extends AbstractRepository implements PackageRepository {
 	 * @return LocalPlugin|Package
 	 */
 	protected function build( string $plugin_file, array $plugin_data ): LocalPlugin {
-		return $this->factory->create( 'plugin', 'local.plugin' )
+		return $this->factory->create( PackageTypes::PLUGIN, 'local.plugin' )
 			// Fill package details in a cascade.
 			// First from just the plugin file.
 			->from_basename( $plugin_file )

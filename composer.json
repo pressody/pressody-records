@@ -1,6 +1,6 @@
 {
 	"name": "pixelgradelt/pixelgradelt-records",
-	"description": "Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.",
+	"description": "Define and manage PixelgradeLT parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.",
 	"keywords": [
 		"pixelgradelt",
 		"pixelgrade",

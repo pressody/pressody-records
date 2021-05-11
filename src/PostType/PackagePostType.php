@@ -16,6 +16,7 @@ use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Capabilities;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\PackageManager;
 
@@ -38,7 +39,7 @@ class PackagePostType extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param PackageManager    $package_manager Packages manager.
+	 * @param PackageManager $package_manager Packages manager.
 	 */
 	public function __construct(
 			PackageManager $package_manager
@@ -130,9 +131,13 @@ class PackagePostType extends AbstractHookProvider {
 				$this->get_package_type_taxonomy_args()
 		);
 
-		foreach ( $this->package_manager::PACKAGE_TYPE_TERMS as $term ) {
-			if ( ! term_exists( $term['name'], $this->package_manager::PACKAGE_TYPE_TAXONOMY ) ) {
-				wp_insert_term( $term['name'], $this->package_manager::PACKAGE_TYPE_TAXONOMY, $term );
+		// Force the registration of needed terms matching the PACKAGE TYPES.
+		foreach ( PackageTypes::DETAILS as $term_slug => $term_details ) {
+			if ( ! term_exists( $term_slug, $this->package_manager::PACKAGE_TYPE_TAXONOMY ) ) {
+				wp_insert_term( $term_details['name'], $this->package_manager::PACKAGE_TYPE_TAXONOMY, [
+						'slug'        => $term_slug,
+						'description' => $term_details['description'],
+				] );
 			}
 		}
 
@@ -168,7 +173,7 @@ class PackagePostType extends AbstractHookProvider {
 				'show_ui'            => true,
 				'show_in_quick_edit' => true,
 				'show_admin_column'  => true,
-				'hierarchical'       => false,
+				'hierarchical'       => true,
 				'meta_box_cb'        => [ $this, 'package_type_meta_box' ],
 				'capabilities'       => [
 						'manage_terms' => Capabilities::MANAGE_PACKAGE_TYPES,

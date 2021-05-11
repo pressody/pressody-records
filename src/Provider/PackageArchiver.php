@@ -132,8 +132,8 @@ class PackageArchiver extends AbstractHookProvider {
 		}
 
 		$package = $this->packages->first_where( [
-			'source_name' => $package_data['source_name'],
-			'type'        => $package_data['type'],
+			'slug' => $package_data['slug'],
+			'type' => $package_data['type'],
 		] );
 		if ( empty( $package ) ) {
 			return;
@@ -294,7 +294,7 @@ class PackageArchiver extends AbstractHookProvider {
 			WP_Filesystem();
 
 			// Delete the package directory and its contents.
-			$package_storage_dir_absolute_path = $this->storage->get_absolute_path( $package->get_source_name() );
+			$package_storage_dir_absolute_path = $this->storage->get_absolute_path( $package->get_store_dir() );
 			if ( ! $wp_filesystem->is_dir( $package_storage_dir_absolute_path ) || ! $wp_filesystem->delete( $package_storage_dir_absolute_path, true ) ) {
 				throw FileOperationFailed::unableToDeletePackageDirectoryFromStorage( $package_storage_dir_absolute_path );
 			}
@@ -318,7 +318,7 @@ class PackageArchiver extends AbstractHookProvider {
 	/**
 	 * Clean package artifacts before a ltpackage post is moved to trash.
 	 *
-	 * @param int      $post_ID Post ID.
+	 * @param int $post_ID Post ID.
 	 */
 	public function clean_on_ltpackage_post_trash( int $post_ID ) {
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
@@ -331,8 +331,8 @@ class PackageArchiver extends AbstractHookProvider {
 		}
 
 		$package = $this->packages->first_where( [
-			'source_name' => $package_data['source_name'],
-			'type'        => $package_data['type'],
+			'slug' => $package_data['slug'],
+			'type' => $package_data['type'],
 		] );
 		if ( empty( $package ) ) {
 			return;
@@ -354,6 +354,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @param array  $parsed_args An array of HTTP request arguments.
 	 * @param string $url         The request URL.
+	 *
 	 * @return array
 	 */
 	protected function maybe_relax_wp_http_settings( $parsed_args, $url ): array {

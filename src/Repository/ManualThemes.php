@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\Repository;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 
 /**
  * Manual themes repository class.
@@ -26,14 +27,14 @@ class ManualThemes extends AbstractRepository implements PackageRepository {
 	 *
 	 * @var PackageFactory
 	 */
-	protected $factory;
+	protected PackageFactory $factory;
 
 	/**
 	 * Package manager.
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Create a repository.
@@ -62,7 +63,7 @@ class ManualThemes extends AbstractRepository implements PackageRepository {
 		$items = [];
 
 		$args = [
-			'package_type'        => 'theme',
+			'package_type'        => PackageTypes::THEME,
 			'package_source_type' => [ 'local.manual', ],
 		];
 		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {
@@ -91,7 +92,7 @@ class ManualThemes extends AbstractRepository implements PackageRepository {
 	 * @return Package
 	 */
 	protected function build( int $post_id, string $source_type = '' ): Package {
-		return $this->factory->create( 'theme', $source_type )
+		return $this->factory->create( PackageTypes::THEME, $source_type )
 			// Then add managed data, if this theme is managed.
 			->from_manager( $post_id )
 			->add_cached_releases()

@@ -3,13 +3,19 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Tests\Integration\PackageType;
 
+use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageType\LocalTheme;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Tests\Integration\TestCase;
 
 use function PixelgradeLT\Records\plugin;
 
 class LocalThemeTest extends TestCase {
 	protected $original_theme_directories = null;
+
+	/**
+	 * @var PackageFactory|null
+	 */
 	protected $factory = null;
 
 	public function setUp(): void {
@@ -29,13 +35,13 @@ class LocalThemeTest extends TestCase {
 
 	public function test_get_theme_from_slug() {
 		/** @var LocalTheme $package */
-		$package = $this->factory->create( 'theme', 'local.theme' )
+		$package = $this->factory->create( PackageTypes::THEME, 'local.theme' )
 		                         ->from_slug( 'ovation' )
 		                         ->build();
 
 		$this->assertInstanceOf( LocalTheme::class, $package );
 
-		$this->assertSame( 'theme', $package->get_type() );
+		$this->assertSame( PackageTypes::THEME, $package->get_type() );
 		$this->assertSame( 'local.theme', $package->get_source_type() );
 		$this->assertSame( 'local-theme/ovation', $package->get_source_name() );
 		$this->assertSame( 'ovation', $package->get_slug() );
@@ -44,7 +50,7 @@ class LocalThemeTest extends TestCase {
 
 	public function test_get_theme_from_source() {
 		/** @var LocalTheme $package */
-		$package = $this->factory->create( 'theme', 'local.theme' )
+		$package = $this->factory->create( PackageTypes::THEME, 'local.theme' )
 		                         ->from_slug( 'ovation' )
 		                         ->from_source( 'ovation' )
 		                         ->build();
@@ -52,7 +58,7 @@ class LocalThemeTest extends TestCase {
 		$this->assertInstanceOf( LocalTheme::class, $package );
 
 		$this->assertSame( 'Ovation', $package->get_name() );
-		$this->assertSame( 'theme', $package->get_type() );
+		$this->assertSame( PackageTypes::THEME, $package->get_type() );
 		$this->assertSame( 'local.theme', $package->get_source_type() );
 		$this->assertSame( 'local-theme/ovation', $package->get_source_name() );
 		$this->assertSame( 'ovation', $package->get_slug() );
@@ -81,7 +87,7 @@ class LocalThemeTest extends TestCase {
 
 	public function test_get_plugin_from_readme() {
 		/** @var LocalTheme $package */
-		$package = $this->factory->create( 'theme', 'local.theme' )
+		$package = $this->factory->create( PackageTypes::THEME, 'local.theme' )
 		                         ->from_slug( 'ovation' )
 		                         ->from_readme( 'ovation' )
 		                         ->build();
@@ -89,7 +95,7 @@ class LocalThemeTest extends TestCase {
 		$this->assertInstanceOf( LocalTheme::class, $package );
 
 		$this->assertSame( 'Ovation', $package->get_name() );
-		$this->assertSame( 'theme', $package->get_type() );
+		$this->assertSame( PackageTypes::THEME, $package->get_type() );
 		$this->assertSame( 'local.theme', $package->get_source_type() );
 		$this->assertSame( 'local-theme/ovation', $package->get_source_name() );
 		$this->assertSame( 'ovation', $package->get_slug() );

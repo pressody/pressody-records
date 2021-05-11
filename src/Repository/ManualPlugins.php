@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\Repository;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 
 /**
  * Manual plugins repository class.
@@ -26,14 +27,14 @@ class ManualPlugins extends AbstractRepository implements PackageRepository {
 	 *
 	 * @var PackageFactory
 	 */
-	protected $factory;
+	protected PackageFactory $factory;
 
 	/**
 	 * Package manager.
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Create a repository.
@@ -62,7 +63,7 @@ class ManualPlugins extends AbstractRepository implements PackageRepository {
 		$items = [];
 
 		$args = [
-			'package_type'        => 'plugin',
+			'package_type'        => PackageTypes::PLUGIN,
 			'package_source_type' => [ 'local.manual', ],
 		];
 		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {
@@ -91,7 +92,7 @@ class ManualPlugins extends AbstractRepository implements PackageRepository {
 	 * @return Package
 	 */
 	protected function build( int $post_id, string $source_type = '' ): Package {
-		return $this->factory->create( 'plugin', $source_type )
+		return $this->factory->create( PackageTypes::PLUGIN, $source_type )
 			// Then add managed data, if this plugin is managed.
 			->from_manager( $post_id )
 			->add_cached_releases()

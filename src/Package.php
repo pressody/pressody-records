@@ -11,6 +11,7 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records;
 
+use PixelgradeLT\Records\Exception\InvalidPackage;
 use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
 
 /**
@@ -250,4 +251,16 @@ interface Package {
 	 * @return string
 	 */
 	public function get_latest_download_url(): string;
+
+	/**
+	 * Retrieve the relative path for the package store directory.
+	 *
+	 * This will be used by the storage logic to organize the package releases and such.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @throws InvalidPackage If the package doesn't the needed details.
+	 * @return string
+	 */
+	public function get_store_dir(): string;
 }

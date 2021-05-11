@@ -4,6 +4,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\Tests\Integration\Repository;
 
 use PixelgradeLT\Records\PackageType\ExternalBasePackage;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Integration\TestCase;
@@ -33,8 +34,8 @@ class ExternalPluginsTest extends TestCase {
 		$register_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.package_post_type'], 'register_taxonomy' );
 		$register_taxonomy->invoke( self::$old_container['hooks.package_post_type'] );
 
-		// Set this package as a 'plugin' package type.
-		$package_type = get_term_by( 'slug', 'plugin', self::$old_container['package.manager']::PACKAGE_TYPE_TAXONOMY );
+		// Set this package as a plugin package type.
+		$package_type = get_term_by( 'slug', PackageTypes::PLUGIN, self::$old_container['package.manager']::PACKAGE_TYPE_TAXONOMY );
 
 		self::$posts_data = [
 			'packagist_not_cached' => [
@@ -152,7 +153,7 @@ class ExternalPluginsTest extends TestCase {
 		$this->assertInstanceOf( ExternalBasePackage::class, $package );
 		$this->assertTrue( $package->has_releases() );
 		// One cached release has the wrong slug and should not be taken into account.
-		$this->assertCount( 2, $package->get_releases() );
+		$this->assertCount( 5, $package->get_releases() );
 		$this->assertFalse( $package->has_required_packages() );
 		$this->assertCount( 3, $package->get_authors() );
 		$this->assertSame( 'Package cached custom description.', $package->get_description() );

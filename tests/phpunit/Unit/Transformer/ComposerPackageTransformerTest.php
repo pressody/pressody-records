@@ -3,12 +3,11 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Tests\Unit\Transformer;
 
-use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\Logger;
 use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
@@ -34,7 +33,7 @@ class ComposerPackageTransformerTest extends TestCase {
 
 		$factory = new PackageFactory( $package_manager, $release_manager, $archiver, $logger );
 
-		$this->package = $factory->create( 'plugin' )
+		$this->package = $factory->create( PackageTypes::PLUGIN )
 			->set_slug( 'AcmeCode' )
 			->build();
 

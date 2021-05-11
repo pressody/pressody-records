@@ -1,0 +1,38 @@
+{
+    "source": {
+        "type": "git",
+        "url": "https://github.com/10up/WP-Minions.git",
+        "reference": "afe3540d677e94489b9db70713a249725c9daef2"
+    },
+    "require": {
+        "composer/installers": "~1.0",
+        "php-amqplib/php-amqplib": ">=2.6.1"
+    },
+    "time": "2018-07-06T21:18:38+00:00",
+    "source_type": "packagist.org",
+    "source_name": "10up/wp-minions",
+    "authors": [
+        {
+            "name": "10up",
+            "homepage": "http://10up.com"
+        },
+        {
+            "name": "Darshan Sawardekar",
+            "role": "Developer"
+        }
+    ],
+    "description": "Job Queue for WordPress",
+    "homepage": "",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "requires_at_least_wp": "",
+    "tested_up_to_wp": "",
+    "requires_php": "",
+    "require_ltpackages": [],
+    "dist": {
+        "type": "zip",
+        "url": "http://example.org/ltpackagist/9VJPW/wp-minions-cached/4.0.0-beta.1",
+        "shasum": "2f34ea10653eb92007383e79e284c35fa72c64ad",
+        "artifactmtime": 1620293308
+    }
+}

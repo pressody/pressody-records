@@ -20,6 +20,7 @@ use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
 use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\PackageType\Builder\LocalThemeBuilder;
 use PixelgradeLT\Records\PackageType\Builder\ManualBasePackageBuilder;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -91,11 +92,11 @@ final class PackageFactory {
 	 */
 	public function create( string $package_type, string $source_type = '' ): BasePackageBuilder {
 
-		if ( 'plugin' === $package_type && 'local.plugin' === $source_type ) {
+		if ( PackageTypes::PLUGIN === $package_type && 'local.plugin' === $source_type ) {
 			return new LocalPluginBuilder( new LocalPlugin(), $this->package_manager, $this->release_manager, $this->archiver, $this->logger );
 		}
 
-		if ( 'theme' === $package_type && 'local.theme' === $source_type ) {
+		if ( PackageTypes::THEME === $package_type && 'local.theme' === $source_type ) {
 			return new LocalThemeBuilder( new LocalTheme(), $this->package_manager, $this->release_manager, $this->archiver, $this->logger );
 		}
 

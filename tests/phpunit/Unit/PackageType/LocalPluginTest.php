@@ -9,6 +9,7 @@ use Composer\Semver\VersionParser;
 use PixelgradeLT\Records\Client\ComposerClient;
 use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use Psr\Log\NullLogger;
 use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
@@ -54,7 +55,7 @@ class LocalPluginTest extends TestCase {
 
 		$this->assertInstanceOf( LocalPlugin::class, $package );
 
-		$this->assertSame( 'plugin', $package->get_type() );
+		$this->assertSame( PackageTypes::PLUGIN, $package->get_type() );
 		$this->assertSame( 'local.plugin', $package->get_source_type() );
 		$this->assertSame( 'local-plugin/basic', $package->get_source_name() );
 		$this->assertSame( 'basic', $package->get_slug() );
@@ -70,7 +71,7 @@ class LocalPluginTest extends TestCase {
 
 		$this->assertInstanceOf( LocalPlugin::class, $package );
 
-		$this->assertSame( 'plugin', $package->get_type() );
+		$this->assertSame( PackageTypes::PLUGIN, $package->get_type() );
 		$this->assertSame( 'local.plugin', $package->get_source_type() );
 		$this->assertSame( 'local-plugin/basic', $package->get_source_name() );
 		$this->assertSame( 'basic', $package->get_slug() );

@@ -20,17 +20,6 @@ use PixelgradeLT\Records\PackageFactory;
  * @since 0.1.0
  */
 class ComposerPackageTransformer implements PackageTransformer {
-	/**
-	 * Composer package type map.
-	 *
-	 * @var array
-	 */
-	const WORDPRESS_TYPES = [
-		'dropin'   => 'wordpress-dropin',
-		'muplugin' => 'wordpress-muplugin',
-		'plugin'   => 'wordpress-plugin',
-		'theme'    => 'wordpress-theme',
-	];
 
 	/**
 	 * Package factory.
@@ -65,10 +54,6 @@ class ComposerPackageTransformer implements PackageTransformer {
 		$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt_records' );
 		$name   = $this->normalize_package_name( $package->get_slug() );
 		$builder->set_name( $vendor . '/' . $name );
-
-		if ( isset( self::WORDPRESS_TYPES[ $package->get_type() ] ) ) {
-			$builder->set_type( self::WORDPRESS_TYPES[ $package->get_type() ] );
-		}
 
 		return $builder->build();
 	}

@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Utils\ArrayHelpers;
 
 /**
@@ -27,7 +28,7 @@ class ListPackages extends AbstractHookProvider {
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Constructor.
@@ -152,7 +153,7 @@ class ListPackages extends AbstractHookProvider {
 						$source_output = 'Local Theme - ' . $package_data['slug'];
 						break;
 					case 'local.manual':
-						if ( 'theme' === $package_data['type'] ) {
+						if ( PackageTypes::THEME === $package_data['type'] ) {
 							$source_output = 'Manual Theme - ' . $package_data['slug'];
 						} else {
 							$source_output = 'Manual Plugin - ' . $package_data['slug'];

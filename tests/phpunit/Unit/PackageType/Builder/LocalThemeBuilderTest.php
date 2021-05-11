@@ -11,6 +11,7 @@ use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\LocalThemeBuilder;
 use PixelgradeLT\Records\PackageType\LocalTheme;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
 use Psr\Log\NullLogger;
@@ -53,7 +54,7 @@ class LocalThemeBuilderTest extends TestCase {
 
 		$package = $this->builder->from_slug( $slug )->build();
 
-		$this->assertSame( 'theme', $package->get_type() );
+		$this->assertSame( PackageTypes::THEME, $package->get_type() );
 		$this->assertSame( $slug, $package->get_slug() );
 		$this->assertSame( 'local-theme/' . $slug, $package->get_source_name() );
 		$this->assertSame( 'local.theme', $package->get_source_type() );

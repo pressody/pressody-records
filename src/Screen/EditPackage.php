@@ -14,8 +14,12 @@ namespace PixelgradeLT\Records\Screen;
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
+use Carbon_Fields\Field\Complex_Field;
+use Carbon_Fields\Helper\Helper;
 use Carbon_Fields\Toolset\Key_Toolset;
+use Carbon_Fields\Value_Set\Value_Set;
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PostType\PackagePostType;
 use PixelgradeLT\Records\Repository\PackageRepository;
@@ -67,8 +71,15 @@ class EditPackage extends AbstractHookProvider {
 	protected array $user_messages = [
 			'error'   => [],
 			'warning' => [],
-			'info'  => [],
+			'info'    => [],
 	];
+
+	/**
+	 * We will use this to remember the package corresponding to a post before the save data is actually inserted into the DB.
+	 *
+	 * @var Package|null
+	 */
+	protected ?Package $pre_save_package = null;
 
 	/**
 	 * Constructor.
@@ -122,11 +133,15 @@ class EditPackage extends AbstractHookProvider {
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 		// Fetch external packages releases and cache them (the artifacts will not be cached here).
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 5, 1 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 5, 2 );
 		// Fill empty package details from source.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_empty_package_config_details_on_post_save', 10, 2 );
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required_packages', 20, 2 );
+
+		// Handle post data transform before the post is updated in the DB (like changing the source type)
+		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_migrate_releases_on_manual_switch', 10, 2 );
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_package_post', 5 );
@@ -365,7 +380,8 @@ class EditPackage extends AbstractHookProvider {
 				              ->set_width( 25 )
 				              ->set_options( [
 						              'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
-						              'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
+					              /** The uppercase 'RC' key is important. @see BasePackage::$stabilities */
+						              'RC'     => esc_html__( 'RC', 'pixelgradelt_records' ),
 						              'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
 						              'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
 						              'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
@@ -449,6 +465,9 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 				              ->set_header_template( '
 								    <% if (version) { %>
 								        Version: <%- version %>
+								    <% } %>
+								    <% if (file) { %>
+								        (file ID or URL: <%- file %>)
 								    <% } %>
 								' )
 				              ->set_conditional_logic( [
@@ -652,15 +671,15 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	 */
 	public function display_package_current_state_meta_box( \WP_Post $post ) {
 		$package_data = $this->package_manager->get_package_id_data( (int) $post->ID );
-		if ( empty( $package_data ) || empty( $package_data['source_name'] ) || empty( $package_data['type'] ) ) {
+		if ( empty( $package_data ) || empty( $package_data['slug'] ) || empty( $package_data['type'] ) ) {
 			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
 
 			return;
 		}
 
 		$package = $this->packages->first_where( [
-				'source_name' => $package_data['source_name'],
-				'type'        => $package_data['type'],
+				'slug' => $package_data['slug'],
+				'type' => $package_data['type'],
 		] );
 
 		if ( empty( $package ) ) {
@@ -684,10 +703,17 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	 * Attempt to fetch external packages on post save.
 	 *
 	 * @param int $post_ID
+	 * @param Container\Post_Meta_Container $meta_container
 	 *
 	 * @throws \Exception
 	 */
-	protected function fetch_external_packages_on_post_save( int $post_ID ) {
+	protected function fetch_external_packages_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+		// At the moment, we are only interested in the source_configuration container.
+		// This way we avoid running this logic unnecessarily for other containers.
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration' !== $meta_container->get_id() ) {
+			return;
+		}
+
 		$packages = $this->package_manager->fetch_external_package_remote_releases( $post_ID );
 
 		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
@@ -771,6 +797,90 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 			] );
 		} else {
 			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
+		}
+	}
+
+	/**
+	 * Given a post ID, find and remember the package instance corresponding to it.
+	 *
+	 * @param int $post_ID
+	 */
+	protected function remember_post_package( int $post_ID ) {
+		$package = $this->packages->first_where( [ 'managed_post_id' => $post_ID ] );
+		if ( empty( $package ) ) {
+			return;
+		}
+
+		$this->pre_save_package = $package;
+	}
+
+	/**
+	 * If we are switching to a manual source type, attempt to transform any existing stored releases to manual ones
+	 * so they can be managed, and not simply lost.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param int $post_ID
+	 * @param Container\Post_Meta_Container $meta_container
+	 */
+	protected function maybe_migrate_releases_on_manual_switch( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+		// At the moment, we are only interested in the source_configuration container.
+		// This way we avoid running this logic unnecessarily for other containers.
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration' !== $meta_container->get_id() ) {
+			return;
+		}
+
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
+			return;
+		}
+
+		if ( empty( $this->pre_save_package ) ) {
+			return;
+		}
+
+		// Get the CarbonFields $_POST input.
+		$cb_input = Helper::input();
+
+		// We want to migrate already stored releases to manual managed ones when the package source changes to local.manual.
+		if ( ! empty( $cb_input['_package_source_type'] )
+		     && 'local.manual' === $cb_input['_package_source_type']
+		     && 'local.manual' !== $this->pre_save_package->get_source_type()
+		     && $this->pre_save_package->has_releases()
+		) {
+			// We have work to do.
+
+			// Get all package releases and merge them with any existing manually managed releases.
+			$manual_releases_data      = $this->package_manager->get_post_package_manual_releases( $post_ID );
+			$updated                   = false;
+			$manual_releases_meta_data = carbon_get_post_meta( $post_ID, 'package_manual_releases' );
+			foreach ( $this->pre_save_package->get_releases() as $release ) {
+				$normalized_version = $this->package_manager->normalize_version( $release->get_version() );
+				if ( is_null( $normalized_version ) ) {
+					// This means that something is wrong with the version string. Skip it.
+					continue;
+				}
+
+				if ( in_array( $normalized_version, array_keys( $manual_releases_data ) ) ) {
+					// We don't want to overwrite existing releases. Just add the existing data.
+					continue;
+				}
+
+				$updated                     = true;
+				$manual_releases_meta_data[] = [
+						Complex_Field::TYPE_PROPERTY => '_',
+						'version' => $release->get_version(),
+						'file'    => $release->get_source_url(),
+				];
+			}
+
+			if ( $updated ) {
+				// Order the manual releases by version, descending.
+				usort( $manual_releases_meta_data, function( $a, $b ) {
+					return version_compare( $b['version'], $a['version'] );
+				});
+
+				carbon_set_post_meta( $post_ID, 'package_manual_releases', $manual_releases_meta_data );
+			}
 		}
 	}
 

@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\PackageType\Builder;
 use PixelgradeLT\Records\Package;
 
 use PixelgradeLT\Records\PackageType\LocalPlugin;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use function PixelgradeLT\Records\is_plugin_file;
 
 /**
@@ -51,7 +52,7 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 		$directory = '.' === \dirname( $plugin_file ) ? '' : \dirname( $plugin_file );
 
 		return $this
-			->set_type( 'plugin' )
+			->set_type( PackageTypes::PLUGIN )
 			->set_slug( $slug )
 			->set_source_name( 'local-plugin' . '/' . $slug )
 			->set_source_type( 'local.plugin' )
@@ -82,7 +83,7 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 		 */
 
 		if ( empty( $this->package->get_type() ) ) {
-			$this->set_type( 'plugin' );
+			$this->set_type( PackageTypes::PLUGIN );
 		}
 
 		if ( empty( $this->package->get_basename() ) ) {
@@ -118,7 +119,7 @@ final class LocalPluginBuilder extends LocalBasePackageBuilder {
 		 */
 
 		if ( empty( $this->package->get_type() ) ) {
-			$this->set_type( 'plugin' );
+			$this->set_type( PackageTypes::PLUGIN );
 		}
 
 		if ( empty( $this->package->get_basename() ) ) {

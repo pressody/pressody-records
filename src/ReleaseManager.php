@@ -110,7 +110,8 @@ class ReleaseManager {
 	public function all_stored_releases( Package $package ): array {
 		$releases = [];
 
-		foreach ( $this->storage->list_files( $package->get_source_name() ) as $filename ) {
+		$package_store_dir = $package->get_store_dir();
+		foreach ( $this->storage->list_files( $package_store_dir ) as $filename ) {
 			$version = trim( str_replace( $package->get_slug() . '-', '', basename( $filename, '.zip' ) ) );
 			if ( empty( $version ) ) {
 				continue;
@@ -128,7 +129,7 @@ class ReleaseManager {
 			// This is the data that will take precedence over everything else.
 			// Missing meta data will get filled with parent package data.
 			$meta           = [];
-			$meta_file_path = trailingslashit( $package->get_source_name() ) . basename( $filename, '.zip' ) . '.json';
+			$meta_file_path = trailingslashit( $package_store_dir ) . basename( $filename, '.zip' ) . '.json';
 			if ( $this->storage->exists( $meta_file_path ) ) {
 				try {
 					$meta_file = new JsonFile( $this->storage->get_absolute_path( $meta_file_path ) );

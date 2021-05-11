@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\Repository;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
 use PixelgradeLT\Records\PackageType\LocalTheme;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use WP_Theme;
 
 /**
@@ -27,7 +28,7 @@ class InstalledThemes extends AbstractRepository implements PackageRepository {
 	 *
 	 * @var PackageFactory
 	 */
-	protected $factory;
+	protected PackageFactory $factory;
 
 	/**
 	 * Create a repository.
@@ -68,7 +69,7 @@ class InstalledThemes extends AbstractRepository implements PackageRepository {
 	 * @return LocalTheme|Package
 	 */
 	protected function build( string $slug, WP_Theme $theme ): LocalTheme {
-		return $this->factory->create( 'theme', 'local.theme' )
+		return $this->factory->create( PackageTypes::THEME, 'local.theme' )
 			// Fill package details in a cascade.
 			// First from just the plugin file.
 			->from_slug( $slug )

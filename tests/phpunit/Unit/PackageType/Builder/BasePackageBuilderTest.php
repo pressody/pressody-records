@@ -14,6 +14,7 @@ use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\BasePackage;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
@@ -65,7 +66,7 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_type() {
-		$expected = 'plugin';
+		$expected = PackageTypes::PLUGIN;
 		$package  = $this->builder->set_type( $expected )->build();
 
 		$this->assertSame( $expected, $package->type );
@@ -245,7 +246,7 @@ class BasePackageBuilderTest extends TestCase {
 	public function test_from_package_data() {
 		$expected['name']                 = 'Plugin Name';
 		$expected['slug']                 = 'slug';
-		$expected['type']                 = 'plugin';
+		$expected['type']                 = PackageTypes::PLUGIN;
 		$expected['source_type']          = 'local.plugin';
 		$expected['source_name']          = 'local-plugin/slug';
 		$expected['authors']              = [
@@ -314,7 +315,7 @@ class BasePackageBuilderTest extends TestCase {
 		};
 		$expected->name                 = 'Theme';
 		$expected->slug                 = 'theme-slug';
-		$expected->type                 = 'theme';
+		$expected->type                 = PackageTypes::THEME;
 		$expected->source_type          = 'local.theme';
 		$expected->source_name          = 'local-theme/slug';
 		$expected->authors              = [
@@ -336,7 +337,7 @@ class BasePackageBuilderTest extends TestCase {
 
 		$package_data['name']                 = 'Plugin Name';
 		$package_data['slug']                 = 'slug';
-		$package_data['type']                 = 'plugin';
+		$package_data['type']                 = PackageTypes::PLUGIN;
 		$package_data['source_type']          = 'local.plugin';
 		$package_data['source_name']          = 'local-plugin/slug';
 		$package_data['authors']              = [];
@@ -702,7 +703,7 @@ class BasePackageBuilderTest extends TestCase {
 		};
 		$expected->name                 = 'Plugin Name';
 		$expected->slug                 = 'slug';
-		$expected->type                 = 'plugin';
+		$expected->type                 = PackageTypes::PLUGIN;
 		$expected->source_type          = 'local.plugin';
 		$expected->source_name          = 'local-plugin/slug';
 		$expected->authors              = [];
