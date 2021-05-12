@@ -13,7 +13,6 @@ use PixelgradeLT\Records\PackageType\Builder\ExternalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\ExternalBasePackage;
 use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
 use Psr\Log\NullLogger;
 

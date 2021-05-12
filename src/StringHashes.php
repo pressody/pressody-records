@@ -26,7 +26,7 @@ class StringHashes implements HasherInterface {
 
 	public function __construct(
 		string $salt = '',
-		int $minHashLength = 3,
+		int $minHashLength = 5,
 		string $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
 	) {
 

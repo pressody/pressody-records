@@ -15,7 +15,9 @@ use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
+use PixelgradeLT\Records\StringHashes;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use PixelgradeLT\Records\WordPressReadmeParser;
 use Psr\Log\NullLogger;
 
 class LocalBasePackageBuilderTest extends TestCase {
@@ -38,9 +40,9 @@ class LocalBasePackageBuilderTest extends TestCase {
 		$composer_client = new ComposerClient();
 		$logger = new NullIO();
 
-		$package_manager = $this->getMockBuilder( PackageManager::class )
-		                ->disableOriginalConstructor()
-		                ->getMock();
+		$hasher = new StringHashes();
+		$readme_parser = new WordPressReadmeParser();
+		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher );
 
 		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client, $logger );
 

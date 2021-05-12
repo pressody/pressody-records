@@ -664,9 +664,18 @@ class PackageManager {
 			}
 
 			// Try to normalize the version string.
-			$normalized_version = $this->normalize_version( $release_data['version'] );
-			if ( is_null( $normalized_version ) ) {
+			try {
+				$normalized_version = $this->normalize_version( $release_data['version'] );
+			} catch ( \UnexpectedValueException $e ) {
 				// This means that something is wrong with the version string. Skip it.
+				$this->logger->error(
+					'Invalid version string {version} for manually uploaded release in post ID {post_id}.',
+					[
+						'exception' => $e,
+						'version'   => $release_data['version'],
+						'post_id'   => $post_ID,
+					]
+				);
 				continue;
 			}
 
@@ -869,26 +878,12 @@ class PackageManager {
 	 *
 	 * @since 0.9.0
 	 *
+	 * @throws \UnexpectedValueException
 	 * @param string $version
 	 *
-	 * @return string|null
+	 * @return string
 	 */
-	public function normalize_version( string $version ) {
-		try {
-			$normalized_version = $this->composer_version_parser->normalize( $version );
-		} catch ( \UnexpectedValueException $e ) {
-			// This means that something is wrong with the version string.
-			$this->logger->error(
-				'Invalid version string "{version}".',
-				[
-					'exception' => $e,
-					'version'   => $version,
-				]
-			);
-
-			return null;
-		}
-
-		return $normalized_version;
+	public function normalize_version( string $version ): string {
+		return $this->composer_version_parser->normalize( $version );
 	}
 }

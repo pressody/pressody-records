@@ -854,9 +854,9 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 			$updated                   = false;
 			$manual_releases_meta_data = carbon_get_post_meta( $post_ID, 'package_manual_releases' );
 			foreach ( $this->pre_save_package->get_releases() as $release ) {
-				$normalized_version = $this->package_manager->normalize_version( $release->get_version() );
-				if ( is_null( $normalized_version ) ) {
-					// This means that something is wrong with the version string. Skip it.
+				try {
+					$normalized_version = $this->package_manager->normalize_version( $release->get_version() );
+				} catch ( \UnexpectedValueException $e ) {
 					continue;
 				}
 

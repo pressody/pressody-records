@@ -13,12 +13,12 @@ use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\BasePackage;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
-use PixelgradeLT\Records\PackageType\LocalBasePackage;
 use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
-use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
+use PixelgradeLT\Records\StringHashes;
 use PixelgradeLT\Records\Tests\Unit\TestCase;
+use PixelgradeLT\Records\WordPressReadmeParser;
 use Psr\Log\NullLogger;
 
 class BasePackageBuilderTest extends TestCase {
@@ -29,6 +29,9 @@ class BasePackageBuilderTest extends TestCase {
 
 		// Mock the WordPress sanitize_text_field() function.
 		Functions\when( 'sanitize_text_field' )->returnArg( 1 );
+
+		// Mock the WordPress get_post_status() function.
+		Functions\when( 'get_post_status' )->justReturn( 'publish' );
 
 		// Provide direct getters.
 		$package = new class extends BasePackage {
@@ -43,9 +46,9 @@ class BasePackageBuilderTest extends TestCase {
 		$composer_client         = new ComposerClient();
 		$logger                  = new NullIO();
 
-		$package_manager = $this->getMockBuilder( PackageManager::class )
-		                        ->disableOriginalConstructor()
-		                        ->getMock();
+		$hasher = new StringHashes();
+		$readme_parser = new WordPressReadmeParser();
+		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher );
 
 		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client, $logger );
 
@@ -266,7 +269,7 @@ class BasePackageBuilderTest extends TestCase {
 		$expected['requires_php']         = '6.6.4';
 		$expected['is_managed']           = true;
 		$expected['managed_post_id']      = 234;
-		$expected['managed_post_id_hash'] = 'sdfw23d';
+		$expected['managed_post_id_hash'] = 'e163a'; // This is the actual hash of 234.
 		$expected['visibility']           = 'draft';
 		$expected['composer_require']     = [ 'test/test' => '*' ];
 		$expected['required_packages']    = [
@@ -331,7 +334,7 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->tested_up_to_wp      = '5.6.0';
 		$expected->requires_php         = '5.6.4';
 		$expected->managed_post_id      = 123;
-		$expected->managed_post_id_hash = 'sdfwer23';
+		$expected->managed_post_id_hash = 'e163a';
 		$expected->visibility           = 'draft';
 		$expected->composer_require     = [ 'test/test' => '*' ];
 

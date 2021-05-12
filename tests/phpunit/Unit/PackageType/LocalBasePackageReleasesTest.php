@@ -10,6 +10,8 @@ use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
+use PixelgradeLT\Records\StringHashes;
+use PixelgradeLT\Records\WordPressReadmeParser;
 use Psr\Log\NullLogger;
 use PixelgradeLT\Records\Archiver;
 use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
@@ -32,9 +34,9 @@ class LocalBasePackageReleasesTest extends TestCase {
 		$composer_client = new ComposerClient();
 		$logger = new NullIO();
 
-		$package_manager = $this->getMockBuilder( PackageManager::class )
-		                        ->disableOriginalConstructor()
-		                        ->getMock();
+		$hasher = new StringHashes();
+		$readme_parser = new WordPressReadmeParser();
+		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher );
 
 		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client, $logger );
 

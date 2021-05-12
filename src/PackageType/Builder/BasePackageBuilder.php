@@ -1092,10 +1092,18 @@ class BasePackageBuilder {
 	 * @return bool
 	 */
 	protected function check_version_validity( string $version ): bool {
+		if ( '' === trim( $version ) ) {
+			return false;
+		}
+
 		try {
-			$this->release_manager->get_composer_version_parser()->normalize( $version );
+			$normalized = $this->package_manager->normalize_version( $version );
 		} catch ( \Exception $e ) {
 			// If there was an exception it means that something is wrong with this version.
+			return false;
+		}
+
+		if ( '' === $normalized ) {
 			return false;
 		}
 
@@ -1113,7 +1121,7 @@ class BasePackageBuilder {
 	 */
 	protected function normalize_version( string $version ): ?string {
 		try {
-			$normalized_version = $this->release_manager->get_composer_version_parser()->normalize( $version );
+			$normalized_version = $this->package_manager->normalize_version( $version );
 		} catch ( \Exception $e ) {
 			// If there was an exception it means that something is wrong with this version.
 			$this->logger->error(
