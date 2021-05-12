@@ -113,8 +113,6 @@ class LocalBasePackageBuilder extends BasePackageBuilder {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @todo  Rename this?
-	 *
 	 * @return $this
 	 */
 	public function add_cached_releases(): BasePackageBuilder {

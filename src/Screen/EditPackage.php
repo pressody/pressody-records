@@ -141,7 +141,8 @@ class EditPackage extends AbstractHookProvider {
 
 		// Handle post data transform before the post is updated in the DB (like changing the source type)
 		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_migrate_releases_on_manual_switch', 10, 2 );
+		$this->add_action( 'pre_post_update', 'maybe_clean_up_manual_release_post', 10, 1 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_migrate_releases_on_manual_source_switch', 10, 2 );
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_package_post', 5 );
@@ -448,12 +449,13 @@ class EditPackage extends AbstractHookProvider {
 				              ->set_help_text( __( 'The manually uploaded package releases (zips).<br>
 <strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br>
 <strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit "Update" for the post and them add a new release.<br>
-Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can\'t stand some mess.', 'pixelgradelt_records' ) )
+Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can\'t stand some mess.<br><br>
+<em>TIP: If you <strong>switch the package type to manual entries,</strong> hit "Update" and all existing, stored releases will be migrated for you to manually manage.</em>', 'pixelgradelt_records' ) )
 				              ->set_classes( 'package-manual-releases' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
 						              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )
-						                   ->set_help_text( __( 'Semver-formatted version string. Bear in mind that we currently don\'t do any check regarding the version. It is up to you to <strong>make sure that the zip file matches the version specified.</strong>', 'pixelgradelt_records' ) )
+						                   ->set_help_text( __( 'Semver-formatted version string. Bear in mind that we currently don\'t do any check regarding the version. It is up to you to <strong>make sure that the zip file contents match the version specified.</strong>', 'pixelgradelt_records' ) )
 						                   ->set_required( true )
 						                   ->set_width( 25 ),
 						              Field::make( 'file', 'file', __( 'Zip File', 'pixelgradelt_records' ) )
@@ -815,6 +817,27 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	}
 
 	/**
+	 * Since there some issues with the CarbonFields File field, do some cleanup to the $_POST data.
+	 *
+	 * @see https://github.com/htmlburger/carbon-fields/issues/1007
+	 * @todo If the issue above gets fixed, we might not need this.
+	 *
+	 * @param int $post_ID
+	 */
+	protected function maybe_clean_up_manual_release_post( int $post_ID ) {
+		if ( empty( $_POST['carbon_fields_compact_input']['_package_manual_releases'] ) || ! is_array( $_POST['carbon_fields_compact_input']['_package_manual_releases'] ) ) {
+			return;
+		}
+
+		// We don't want to send manual releases that are missing the version, but have the file.
+		foreach ( $_POST['carbon_fields_compact_input']['_package_manual_releases'] as $key => $value ) {
+			if ( ! isset( $value['_version'] ) && isset( $value['_file'] ) ) {
+				unset( $_POST['carbon_fields_compact_input']['_package_manual_releases'][ $key ] );
+			}
+		}
+	}
+
+	/**
 	 * If we are switching to a manual source type, attempt to transform any existing stored releases to manual ones
 	 * so they can be managed, and not simply lost.
 	 *
@@ -823,7 +846,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	 * @param int $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
-	protected function maybe_migrate_releases_on_manual_switch( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+	protected function maybe_migrate_releases_on_manual_source_switch( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
 		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration' !== $meta_container->get_id() ) {
@@ -867,7 +890,6 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 				$updated                     = true;
 				$manual_releases_meta_data[] = [
-						Complex_Field::TYPE_PROPERTY => '_',
 						'version' => $release->get_version(),
 						'file'    => $release->get_source_url(),
 				];
