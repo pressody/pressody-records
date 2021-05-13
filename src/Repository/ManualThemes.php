@@ -63,7 +63,7 @@ class ManualThemes extends AbstractRepository implements PackageRepository {
 		$items = [];
 
 		$args = [
-			'package_type'        => PackageTypes::THEME,
+			'package_type'        => [ PackageTypes::THEME ],
 			'package_source_type' => [ 'local.manual', ],
 		];
 		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {
@@ -82,7 +82,7 @@ class ManualThemes extends AbstractRepository implements PackageRepository {
 	}
 
 	/**
-	 * Build an manual theme.
+	 * Build a manual theme.
 	 *
 	 * @since 0.7.0
 	 *
@@ -93,7 +93,7 @@ class ManualThemes extends AbstractRepository implements PackageRepository {
 	 */
 	protected function build( int $post_id, string $source_type = '' ): Package {
 		return $this->factory->create( PackageTypes::THEME, $source_type )
-			// Then add managed data, if this theme is managed.
+			// Then add managed data.
 			->from_manager( $post_id )
 			->add_cached_releases()
 			->build();

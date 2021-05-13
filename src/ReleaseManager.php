@@ -136,7 +136,7 @@ class ReleaseManager {
 					$meta      = array_merge( $meta, $meta_file->read() );
 				} catch ( \Exception $e ) {
 					$this->logger->error(
-						'Error getting meta data from file {file} for package {package}: release version {version}.',
+						'Error getting meta data from file {file} for package "{package}": release version {version}.',
 						[
 							'exception' => $e,
 							'package'   => $package->get_source_name(),
@@ -281,7 +281,7 @@ class ReleaseManager {
 			];
 		} catch ( FileNotFound $e ) {
 			$this->logger->error(
-				'Package artifact could not be found for package {package}:{version}.',
+				'Package artifact could not be found for package "{package}":{version}.',
 				[
 					'exception' => $e,
 					'package'   => $release->get_package()->get_name(),

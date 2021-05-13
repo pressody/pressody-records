@@ -67,4 +67,11 @@ interface PackageRepository {
 	 * @return PackageRepository
 	 */
 	public function with_filter( callable $callback ): PackageRepository;
+
+	/**
+	 * Reinitialize all packages in the repository.
+	 *
+	 * @since 0.9.0
+	 */
+	public function reinitialize();
 }

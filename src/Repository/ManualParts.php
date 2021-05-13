@@ -1,10 +1,10 @@
 <?php
 /**
- * Manual plugins repository.
+ * Manual parts (plugins) repository.
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
- * @since 0.7.0
+ * @since 0.9.0
  */
 
 declare ( strict_types = 1 );
@@ -12,50 +12,50 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Repository;
 
 use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\PartFactory;
+use PixelgradeLT\Records\PartManager;
 
 /**
- * Manual plugins repository class.
+ * Manual parts (plugins) repository class.
  *
- * @since 0.7.0
+ * @since 0.9.0
  */
-class ManualPlugins extends AbstractRepository implements PackageRepository {
+class ManualParts extends AbstractRepository implements PackageRepository {
 	/**
 	 * Package factory.
 	 *
-	 * @var PackageFactory
+	 * @var PartFactory
 	 */
-	protected PackageFactory $factory;
+	protected PartFactory $factory;
 
 	/**
-	 * Package manager.
+	 * Part (Package) manager.
 	 *
-	 * @var PackageManager
+	 * @var PartManager
 	 */
-	protected PackageManager $package_manager;
+	protected PartManager $part_manager;
 
 	/**
 	 * Create a repository.
 	 *
-	 * @since 0.7.0
+	 * @since 0.9.0
 	 *
-	 * @param PackageFactory $factory Package factory.
-	 * @param PackageManager $package_manager
+	 * @param PartFactory $factory Package factory.
+	 * @param PartManager $package_manager
 	 */
 	public function __construct(
-		PackageFactory $factory,
-		PackageManager $package_manager
+		PartFactory $factory,
+		PartManager $package_manager
 	) {
-		$this->factory = $factory;
-		$this->package_manager = $package_manager;
+		$this->factory      = $factory;
+		$this->part_manager = $package_manager;
 	}
 
 	/**
 	 * Retrieve all manual plugins.
 	 *
-	 * @since 0.7.0
+	 * @since 0.9.0
 	 *
 	 * @return Package[]
 	 */
@@ -66,13 +66,13 @@ class ManualPlugins extends AbstractRepository implements PackageRepository {
 			'package_type'        => [ PackageTypes::PLUGIN ],
 			'package_source_type' => [ 'local.manual', ],
 		];
-		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {
+		foreach ( $this->part_manager->get_package_ids_by( $args ) as $post_id ) {
 			$post = get_post( $post_id );
-			if ( empty( $post ) || $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
+			if ( empty( $post ) || $this->part_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
 				continue;
 			}
 
-			$package = $this->build( $post_id, $this->package_manager->get_post_package_source_type( $post_id ) );
+			$package = $this->build( $post_id, $this->part_manager->get_post_package_source_type( $post_id ) );
 			$items[] = $package;
 		}
 
@@ -82,9 +82,9 @@ class ManualPlugins extends AbstractRepository implements PackageRepository {
 	}
 
 	/**
-	 * Build a manual plugin.
+	 * Build an manual part (plugin).
 	 *
-	 * @since 0.7.0
+	 * @since 0.9.0
 	 *
 	 * @param int    $post_id
 	 * @param string $source_type

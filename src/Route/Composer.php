@@ -31,14 +31,14 @@ class Composer implements Route {
 	 *
 	 * @var PackageRepository
 	 */
-	protected $repository;
+	protected PackageRepository $repository;
 
 	/**
 	 * Repository transformer.
 	 *
 	 * @var PackageRepositoryTransformer
 	 */
-	protected $transformer;
+	protected PackageRepositoryTransformer $transformer;
 
 	/**
 	 * Constructor.

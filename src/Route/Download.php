@@ -54,21 +54,21 @@ class Download implements Route {
 	 *
 	 * @var PackageManager
 	 */
-	protected $package_manager;
+	protected PackageManager $package_manager;
 
 	/**
 	 * Release manager.
 	 *
 	 * @var ReleaseManager
 	 */
-	protected $release_manager;
+	protected ReleaseManager $release_manager;
 
 	/**
 	 * Package repository.
 	 *
 	 * @var PackageRepository
 	 */
-	protected $repository;
+	protected PackageRepository $repository;
 
 	/**
 	 * Constructor.

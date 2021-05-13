@@ -14,14 +14,10 @@ namespace PixelgradeLT\Records\Screen;
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
-use Carbon_Fields\Field\Complex_Field;
 use Carbon_Fields\Helper\Helper;
-use Carbon_Fields\Toolset\Key_Toolset;
-use Carbon_Fields\Value_Set\Value_Set;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PostType\PackagePostType;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 use function PixelgradeLT\Records\get_packages_permalink;
@@ -48,13 +44,6 @@ class EditPackage extends AbstractHookProvider {
 	 * @var PackageRepository
 	 */
 	protected PackageRepository $packages;
-
-	/**
-	 * Package Post Type.
-	 *
-	 * @var PackagePostType
-	 */
-	protected PackagePostType $package_post_type;
 
 	/**
 	 * Composer package transformer.
@@ -88,19 +77,16 @@ class EditPackage extends AbstractHookProvider {
 	 *
 	 * @param PackageManager     $package_manager      Packages manager.
 	 * @param PackageRepository  $packages             Packages repository.
-	 * @param PackagePostType    $package_post_type    Packages post type.
 	 * @param PackageTransformer $composer_transformer Package transformer.
 	 */
 	public function __construct(
 			PackageManager $package_manager,
 			PackageRepository $packages,
-			PackagePostType $package_post_type,
 			PackageTransformer $composer_transformer
 	) {
 
 		$this->package_manager      = $package_manager;
 		$this->packages             = $packages;
-		$this->package_post_type    = $package_post_type;
 		$this->composer_transformer = $composer_transformer;
 	}
 
@@ -141,7 +127,7 @@ class EditPackage extends AbstractHookProvider {
 
 		// Handle post data transform before the post is updated in the DB (like changing the source type)
 		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
-		$this->add_action( 'pre_post_update', 'maybe_clean_up_manual_release_post', 10, 1 );
+		$this->add_action( 'pre_post_update', 'maybe_clean_up_manual_release_post_data', 10, 1 );
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_migrate_releases_on_manual_source_switch', 10, 2 );
 
 		// Show edit post screen error messages.
@@ -232,7 +218,7 @@ class EditPackage extends AbstractHookProvider {
 	}
 
 	protected function add_post_slug_description( string $post_name, $post ): string {
-		// we want this only on the edit post screen.
+		// We want this only on the edit post screen.
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_current_screen()->id ) {
 			return $post_name;
 		}
@@ -243,7 +229,9 @@ class EditPackage extends AbstractHookProvider {
 		}
 		// Just output it since there is no way to add it other way. ?>
 		<p class="description">
-			<?php _e( '<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong> It is best to use <strong>the exact plugin or theme slug!</strong><br>In the end this will be prefixed with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>The slug/name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.', 'pixelgradelt_records' ); ?>
+			<?php _e( '<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong> It is best to use <strong>the exact plugin or theme slug!</strong><br>
+In the end this will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>
+The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href="https://regexr.com/5sr9h" target="_blank">this regex</a>', 'pixelgradelt_records' ); ?>
 		</p>
 		<style>
 			input#post_name {
@@ -310,7 +298,7 @@ class EditPackage extends AbstractHookProvider {
 
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the source details of the package.
-		Container::make( 'post_meta', 'carbon_fields_container_source_configuration', esc_html__( 'Source Configuration', 'pixelgradelt_records' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_source_configuration_' . $this->package_manager::PACKAGE_POST_TYPE, esc_html__( 'Source Configuration', 'pixelgradelt_records' ) )
 		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
@@ -589,7 +577,7 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 		         ] );
 
 		// Register the metabox for managing the packages the current package depends on (dependencies that will translate in composer `require`s).
-		Container::make( 'post_meta', 'carbon_fields_container_dependencies_configuration', esc_html__( 'Dependencies Configuration', 'pixelgradelt_records' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_dependencies_configuration_' . $this->package_manager::PACKAGE_POST_TYPE, esc_html__( 'Dependencies Configuration', 'pixelgradelt_records' ) )
 		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
@@ -600,7 +588,7 @@ For each required package you can <strong>specify a version range</strong> to be
 Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) ) ),
 
 				         Field::make( 'complex', 'package_required_packages', __( 'Required Packages', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same required package multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
+				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same package multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
 <strong>FYI:</strong> Each required package label is comprised of the standardized <code>source_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
 				              ->set_classes( 'package-required-packages' )
 				              ->set_collapsed( true )
@@ -712,7 +700,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	protected function fetch_external_packages_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
-		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration' !== $meta_container->get_id() ) {
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
 			return;
 		}
 
@@ -734,9 +722,12 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	protected function fill_empty_package_config_details_on_post_save( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
-		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration' !== $meta_container->get_id() ) {
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
 			return;
 		}
+
+		// Before we get the package, we need to reinitialize the repository since this package details might be changed upon save.
+		$this->packages->reinitialize();
 
 		$package = $this->packages->first_where( [
 				'managed_post_id' => $post_ID,
@@ -778,7 +769,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	protected function check_required_packages( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
-		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration' !== $meta_container->get_id() ) {
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
 			return;
 		}
 
@@ -824,7 +815,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	 *
 	 * @param int $post_ID
 	 */
-	protected function maybe_clean_up_manual_release_post( int $post_ID ) {
+	protected function maybe_clean_up_manual_release_post_data( int $post_ID ) {
 		if ( empty( $_POST['carbon_fields_compact_input']['_package_manual_releases'] ) || ! is_array( $_POST['carbon_fields_compact_input']['_package_manual_releases'] ) ) {
 			return;
 		}
@@ -849,7 +840,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	protected function maybe_migrate_releases_on_manual_source_switch( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
-		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration' !== $meta_container->get_id() ) {
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
 			return;
 		}
 
@@ -960,75 +951,6 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	}
 
 	/**
-	 * Since Carbon Fields turns multi-select values into individual key-pairs, lets build an array out of the values
-	 * This method is meant to be run before CF fields are registered. Use carbon_the_post_meta() when appropriate.
-	 * See for Upgrade: https://github.com/htmlburger/carbon-fields/issues/822
-	 *
-	 * @since 0.8.0
-	 *
-	 * @param int    $post_id
-	 * @param string $field_key
-	 * @param bool   $values_only
-	 *
-	 * @return array
-	 */
-	protected function get_complex_cf_fields( $post_id, $field_key, $values_only = true ): array {
-
-		global $wpdb;
-
-		$results = $wpdb->get_results(
-				"SELECT meta_key,meta_value
-            FROM {$wpdb->prefix}postmeta
-            WHERE meta_key
-            LIKE '_{$field_key}%'
-            AND post_id='{$post_id}'",
-				ARRAY_N
-		);
-
-		/* CF will store an empty placeholder for a multiselect. ignore it */
-		if ( count( $results ) == 1 && substr( $results[0][0], - 6 ) == "_empty" ) {
-			return array();
-		}
-
-		if ( $values_only ) {
-			return $results;
-		}
-
-		/* parse piped array keys and set nested values  */
-		$filtered = array();
-		foreach ( $results as $result ) {
-			$key_parsed = explode( Key_Toolset::SEGMENT_GLUE, $result[0] );
-			$this->set_nested_value( $filtered, $key_parsed, $result[1] );
-		}
-
-		return $filtered;
-
-	}
-
-	/**
-	 * StackOverflow: https://stackoverflow.com/questions/7116796/convert-flat-php-array-to-nested-array-based-on-array-keys
-	 *
-	 * @since 0.8.0
-	 *
-	 * @param array $arr
-	 * @param array $ancestors
-	 * @param       $value
-	 */
-	protected function set_nested_value( array &$arr, array $ancestors, $value ) {
-		$current = &$arr;
-		foreach ( $ancestors as $key ) {
-			if ( ! is_array( $current ) ) {
-				$current = array( $current );
-			}
-			if ( ! array_key_exists( $key, $current ) ) {
-				$current[ $key ] = array();
-			}
-			$current = &$current[ $key ];
-		}
-		$current = $value;
-	}
-
-	/**
 	 * Retrieve a plugin slug.
 	 *
 	 * @since 0.5.0
@@ -1093,7 +1015,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 				'order'   => 'ASC',
 		) );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
-			$taxonomy_args = $this->package_post_type->get_package_type_taxonomy_args();
+			$taxonomy_args = $this->package_manager->get_package_type_taxonomy_args();
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
 					sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
@@ -1167,7 +1089,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 		printf(
 				'<div class="message patience"><p>%s</p></div>',
-				esc_html__( 'Please bear in mind that Publish/Update may take a minute or two since we do some heavy lifting behind the scenes. Patience is advised.', 'pixelgradelt_records' )
+				wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉<br><em>On trash the stored artifacts are deleted!</em>', 'pixelgradelt_records' ) )
 		);
 	}
 

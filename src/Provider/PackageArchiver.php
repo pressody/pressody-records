@@ -98,12 +98,12 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		add_action( 'save_post', [ $this, 'archive_on_ltpackage_post_save' ], 999, 3 );
+		add_action( 'save_post', [ $this, 'archive_on_post_save' ], 999, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'archive_updates' ], 9999 );
 		add_filter( 'upgrader_post_install', [ $this, 'archive_on_upgrade' ], 10, 3 );
 
-		add_action( 'wp_trash_post', [ $this, 'clean_on_ltpackage_post_trash' ], 10, 1 );
+		add_action( 'wp_trash_post', [ $this, 'clean_on_post_trash' ], 10, 1 );
 
 		$this->add_action( 'pixelgradelt_records_download_url_before', 'hook_before_download_url' );
 		$this->add_action( 'pixelgradelt_records_download_url_after', 'remove_hooks_after_download_url' );
@@ -121,7 +121,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 * @param \WP_Post $post    Post object.
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
-	public function archive_on_ltpackage_post_save( int $post_ID, \WP_Post $post, bool $update ) {
+	public function archive_on_post_save( int $post_ID, \WP_Post $post, bool $update ) {
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type || 'publish' !== $post->post_status ) {
 			return;
 		}
@@ -306,7 +306,7 @@ class PackageArchiver extends AbstractHookProvider {
 			}
 		} catch ( PixelgradeltRecordsException $e ) {
 			$this->logger->warning(
-				'Could not clean {package} storage before delete. Manual cleanup may be needed.',
+				'Could not clean package "{package}" storage before delete. Manual cleanup may be needed.',
 				[
 					'exception' => $e,
 					'package'   => $package->get_name(),
@@ -320,7 +320,7 @@ class PackageArchiver extends AbstractHookProvider {
 	 *
 	 * @param int $post_ID Post ID.
 	 */
-	public function clean_on_ltpackage_post_trash( int $post_ID ) {
+	public function clean_on_post_trash( int $post_ID ) {
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
 			return;
 		}

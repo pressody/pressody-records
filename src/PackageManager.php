@@ -95,16 +95,131 @@ class PackageManager {
 		$this->hasher                  = $hasher;
 	}
 
-	public function get_composer_client(): ComposerClient {
-		return $this->composer_client;
+	/**
+	 * @since 0.9.0
+	 *
+	 * @param array $args Optional. Any provided args will be merged and overwrite default ones.
+	 *
+	 * @return array
+	 */
+	public function get_package_post_type_args( array $args = [] ): array {
+		$labels = [
+			'name'                  => esc_html__( 'LT Packages', 'pixelgradelt_records' ),
+			'singular_name'         => esc_html__( 'LT Package', 'pixelgradelt_records' ),
+			'menu_name'             => esc_html_x( 'LT Packages', 'Admin Menu text', 'pixelgradelt_records' ),
+			'add_new'               => esc_html_x( 'Add New', 'LT Package', 'pixelgradelt_records' ),
+			'add_new_item'          => esc_html__( 'Add New LT Package', 'pixelgradelt_records' ),
+			'new_item'              => esc_html__( 'New LT Package', 'pixelgradelt_records' ),
+			'edit_item'             => esc_html__( 'Edit LT Package', 'pixelgradelt_records' ),
+			'view_item'             => esc_html__( 'View LT Package', 'pixelgradelt_records' ),
+			'all_items'             => esc_html__( 'All Packages', 'pixelgradelt_records' ),
+			'search_items'          => esc_html__( 'Search Packages', 'pixelgradelt_records' ),
+			'not_found'             => esc_html__( 'No packages found.', 'pixelgradelt_records' ),
+			'not_found_in_trash'    => esc_html__( 'No packages found in Trash.', 'pixelgradelt_records' ),
+			'uploaded_to_this_item' => esc_html__( 'Uploaded to this package', 'pixelgradelt_records' ),
+			'filter_items_list'     => esc_html__( 'Filter packages list', 'pixelgradelt_records' ),
+			'items_list_navigation' => esc_html__( 'Packages list navigation', 'pixelgradelt_records' ),
+			'items_list'            => esc_html__( 'LT Packages list', 'pixelgradelt_records' ),
+		];
+
+		return array_merge( [
+			'labels'             => $labels,
+			'description'        => esc_html__( 'Composer packages to be used in the PixelgradeLT parts delivered to PixelgradeLT users.', 'pixelgradelt_records' ),
+			'hierarchical'       => false,
+			'public'             => false,
+			'publicly_queryable' => false,
+			'has_archive'        => false,
+			'rest_base'          => static::PACKAGE_POST_TYPE_PLURAL,
+			'show_ui'            => true,
+			'show_in_menu'       => true,
+			'show_in_nav_menus'  => false,
+			'show_in_rest'       => true,
+			'map_meta_cap'       => true,
+			'supports'           => [
+				'title',
+				'revisions',
+				'custom-fields',
+			],
+		], $args );
 	}
 
-	public function get_composer_version_parser(): ComposerVersionParser {
-		return $this->composer_version_parser;
+	/**
+	 * @since 0.9.0
+	 *
+	 * @param array $args Optional. Any provided args will be merged and overwrite default ones.
+	 *
+	 * @return array
+	 */
+	public function get_package_type_taxonomy_args( array $args = [] ): array {
+		$labels = [
+			'name'                  => esc_html__( 'Package Types', 'pixelgradelt_records' ),
+			'singular_name'         => esc_html__( 'Package Type', 'pixelgradelt_records' ),
+			'add_new'               => esc_html_x( 'Add New', 'LT Package Type', 'pixelgradelt_records' ),
+			'add_new_item'          => esc_html__( 'Add New Package Type', 'pixelgradelt_records' ),
+			'update_item'           => esc_html__( 'Update Package Type', 'pixelgradelt_records' ),
+			'new_item_name'         => esc_html__( 'New Package Type Name', 'pixelgradelt_records' ),
+			'edit_item'             => esc_html__( 'Edit Package Type', 'pixelgradelt_records' ),
+			'all_items'             => esc_html__( 'All Package Types', 'pixelgradelt_records' ),
+			'search_items'          => esc_html__( 'Search Package Types', 'pixelgradelt_records' ),
+			'parent_item'           => esc_html__( 'Parent Package Type', 'pixelgradelt_records' ),
+			'parent_item_colon'     => esc_html__( 'Parent Package Type:', 'pixelgradelt_records' ),
+			'not_found'             => esc_html__( 'No package types found.', 'pixelgradelt_records' ),
+			'no_terms'              => esc_html__( 'No package types.', 'pixelgradelt_records' ),
+			'items_list_navigation' => esc_html__( 'Package Types list navigation', 'pixelgradelt_records' ),
+			'items_list'            => esc_html__( 'Package Types list', 'pixelgradelt_records' ),
+			'back_to_items'         => esc_html__( '&larr; Go to Package Types', 'pixelgradelt_records' ),
+		];
+
+		return array_merge( [
+			'labels'             => $labels,
+			'show_ui'            => true,
+			'show_in_quick_edit' => true,
+			'show_admin_column'  => true,
+			'hierarchical'       => true,
+			'capabilities'       => [
+				'manage_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
+				'edit_terms'   => Capabilities::MANAGE_PACKAGE_TYPES,
+				'delete_terms' => Capabilities::MANAGE_PACKAGE_TYPES,
+				'assign_terms' => 'edit_posts',
+			],
+		], $args );
 	}
 
-	public function get_wordpress_readme_parser(): WordPressReadmeParser {
-		return $this->wordpress_readme_parser;
+	/**
+	 * @since 0.9.0
+	 *
+	 * @param array $args Optional. Any provided args will be merged and overwrite default ones.
+	 *
+	 * @return array
+	 */
+	public function get_package_keyword_taxonomy_args( array $args = [] ): array {
+		$labels = [
+			'name'                       => esc_html__( 'Package Keywords', 'pixelgradelt_records' ),
+			'singular_name'              => esc_html__( 'Package Keyword', 'pixelgradelt_records' ),
+			'add_new'                    => esc_html_x( 'Add New', 'LT Package Keyword', 'pixelgradelt_records' ),
+			'add_new_item'               => esc_html__( 'Add New Package Keyword', 'pixelgradelt_records' ),
+			'update_item'                => esc_html__( 'Update Package Keyword', 'pixelgradelt_records' ),
+			'new_item_name'              => esc_html__( 'New Package Keyword Name', 'pixelgradelt_records' ),
+			'edit_item'                  => esc_html__( 'Edit Package Keyword', 'pixelgradelt_records' ),
+			'all_items'                  => esc_html__( 'All Package Keywords', 'pixelgradelt_records' ),
+			'search_items'               => esc_html__( 'Search Package Keywords', 'pixelgradelt_records' ),
+			'not_found'                  => esc_html__( 'No package keywords found.', 'pixelgradelt_records' ),
+			'no_terms'                   => esc_html__( 'No package keywords.', 'pixelgradelt_records' ),
+			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pixelgradelt_records' ),
+			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pixelgradelt_records' ),
+			'most_used'                  => esc_html__( 'Most used.', 'pixelgradelt_records' ),
+			'items_list_navigation'      => esc_html__( 'Package Keywords list navigation', 'pixelgradelt_records' ),
+			'items_list'                 => esc_html__( 'Package Keywords list', 'pixelgradelt_records' ),
+			'back_to_items'              => esc_html__( '&larr; Go to Package Keywords', 'pixelgradelt_records' ),
+		];
+
+		return array_merge( [
+			'labels'             => $labels,
+			'show_ui'            => true,
+			'show_in_quick_edit' => true,
+			'show_admin_column'  => true,
+			'hierarchical'       => false,
+		], $args );
 	}
 
 	/**
@@ -130,7 +245,7 @@ class PackageManager {
 	 */
 	public function get_package_ids_by( array $args ): array {
 		$query_args = [
-			'post_type'        => PackageManager::PACKAGE_POST_TYPE,
+			'post_type'        => static::PACKAGE_POST_TYPE,
 			'fields'           => 'ids',
 			'post_status'      => [ 'publish', 'draft', 'private', ],
 			'tax_query'        => [],
@@ -139,6 +254,11 @@ class PackageManager {
 			'no_found_rows'    => true,
 			'suppress_filters' => true,
 		];
+
+		// This allows us to query for specific package post types.
+		if ( ! empty( $args['post_type'] ) ) {
+			$query_args['post_type'] = $args['post_type'];
+		}
 
 		if ( ! empty( $args['package_type'] ) && 'all' !== $args['package_type'] ) {
 			if ( is_string( $args['package_type'] ) ) {
@@ -264,11 +384,7 @@ class PackageManager {
 		$data = [];
 
 		// First, some checking.
-		if ( empty( $post_ID ) ) {
-			return $data;
-		}
-		$post = get_post( $post_ID );
-		if ( empty( $post ) || PackageManager::PACKAGE_POST_TYPE !== $post->post_type ) {
+		if ( ! $this->check_post_id( $post_ID ) ) {
 			return $data;
 		}
 
@@ -339,6 +455,25 @@ class PackageManager {
 		$data['composer_require']  = $this->get_post_package_composer_require( $post_ID );
 
 		return $data;
+	}
+
+	/**
+	 * Check if a given post ID should be handled by the manager.
+	 *
+	 * @param int $post_ID
+	 *
+	 * @return bool
+	 */
+	protected function check_post_id( int $post_ID ): bool {
+		if ( empty( $post_ID ) ) {
+			return false;
+		}
+		$post = get_post( $post_ID );
+		if ( empty( $post ) || static::PACKAGE_POST_TYPE !== $post->post_type ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -458,7 +593,7 @@ class PackageManager {
 			}
 		} catch ( \Exception $e ) {
 			$this->logger->error(
-				'Error fetching external packages with the Composer Client for {package} (source type {source_type}).',
+				'Error fetching external packages with the Composer Client for package "{package}" (source type {source_type}).',
 				[
 					'exception'   => $e,
 					'package'     => $package_data['source_name'],
@@ -512,7 +647,7 @@ class PackageManager {
 
 		// Get all package posts that use installed themes.
 		$query       = new \WP_Query( array_merge( [
-			'post_type'        => PackageManager::PACKAGE_POST_TYPE,
+			'post_type'        => static::PACKAGE_POST_TYPE,
 			'fields'           => 'ids',
 			'post_status'      => [ 'publish', 'draft', 'private', ],
 			'meta_query'       => [
@@ -551,7 +686,7 @@ class PackageManager {
 
 	public function get_post_package_type( int $post_ID ): string {
 		/** @var \WP_Error|\WP_Term[] $package_type */
-		$package_type = wp_get_post_terms( $post_ID, PackageManager::PACKAGE_TYPE_TAXONOMY );
+		$package_type = wp_get_post_terms( $post_ID, static::PACKAGE_TYPE_TAXONOMY );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
 			return '';
 		}
@@ -805,7 +940,7 @@ class PackageManager {
 			] );
 		} catch ( \Exception $e ) {
 			$this->logger->error(
-				'Error during Composer require dry-run for {package} (type {type}).' . PHP_EOL . $e->getMessage(),
+				'Error during Composer require dry-run for package "{package}" (type {type}).' . PHP_EOL . $e->getMessage(),
 				[
 					'exception' => $e,
 					'package'   => $package->get_name(),
@@ -885,5 +1020,17 @@ class PackageManager {
 	 */
 	public function normalize_version( string $version ): string {
 		return $this->composer_version_parser->normalize( $version );
+	}
+
+	public function get_composer_client(): ComposerClient {
+		return $this->composer_client;
+	}
+
+	public function get_composer_version_parser(): ComposerVersionParser {
+		return $this->composer_version_parser;
+	}
+
+	public function get_wordpress_readme_parser(): WordPressReadmeParser {
+		return $this->wordpress_readme_parser;
 	}
 }

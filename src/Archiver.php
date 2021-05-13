@@ -117,7 +117,7 @@ class Archiver {
 		}
 
 		$this->logger->info(
-			'Archived {package} {version} from source.',
+			'Archived "{package}" version {version} from source.',
 			[
 				'package' => $package->get_name(),
 				'version' => $version,
@@ -220,7 +220,7 @@ class Archiver {
 		}
 
 		$this->logger->info(
-			'Archived {package} {version} from URL.',
+			'Archived "{package}" version {version} from URL.',
 			[
 				'package' => $release->get_package()->get_name(),
 				'version' => $release->get_version(),

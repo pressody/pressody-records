@@ -115,4 +115,13 @@ abstract class AbstractRepository implements PackageRepository {
 
 		return $args;
 	}
+
+	/**
+	 * Reinitialize all packages in the repository.
+	 *
+	 * @since 0.9.0
+	 */
+	public function reinitialize() {
+		// By default, nothing to do.
+	}
 }

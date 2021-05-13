@@ -103,6 +103,6 @@ abstract class LogHandler implements LogHandlerInterface {
 			$value = wp_json_encode( $value, \JSON_UNESCAPED_SLASHES, 128 );
 		}
 
-		return $value;
+		return (string) $value;
 	}
 }

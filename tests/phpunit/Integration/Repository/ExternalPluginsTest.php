@@ -31,8 +31,12 @@ class ExternalPluginsTest extends TestCase {
 		$register_post_type->invoke( self::$old_container['hooks.package_post_type'] );
 
 		// Register and populate the taxonomies.
-		$register_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.package_post_type'], 'register_taxonomy' );
-		$register_taxonomy->invoke( self::$old_container['hooks.package_post_type'] );
+		$register_package_type_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.package_post_type'], 'register_package_type_taxonomy' );
+		$register_package_type_taxonomy->invoke( self::$old_container['hooks.package_post_type'] );
+		$insert_package_type_taxonomy_terms = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.package_post_type'], 'insert_package_type_taxonomy_terms' );
+		$insert_package_type_taxonomy_terms->invoke( self::$old_container['hooks.package_post_type'] );
+		$register_package_keyword_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.package_post_type'], 'register_package_keyword_taxonomy' );
+		$register_package_keyword_taxonomy->invoke( self::$old_container['hooks.package_post_type'] );
 
 		// Set this package as a plugin package type.
 		$package_type = get_term_by( 'slug', PackageTypes::PLUGIN, self::$old_container['package.manager']::PACKAGE_TYPE_TAXONOMY );

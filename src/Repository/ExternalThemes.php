@@ -63,7 +63,7 @@ class ExternalThemes extends AbstractRepository implements PackageRepository {
 		$items = [];
 
 		$args = [
-			'package_type'        => PackageTypes::THEME,
+			'package_type'        => [ PackageTypes::THEME ],
 			'package_source_type' => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
 		];
 		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {

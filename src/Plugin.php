@@ -48,13 +48,16 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'hooks.health_check' ) )
 			->register_hooks( $container->get( 'hooks.request_handler' ) )
 			// Register the post type early.
+			->register_hooks( $container->get( 'hooks.part_post_type' ) )
 			->register_hooks( $container->get( 'hooks.package_post_type' ) )
 			->register_hooks( $container->get( 'hooks.package_archiver' ) )
+			->register_hooks( $container->get( 'hooks.part_archiver' ) )
 			->register_hooks( $container->get( 'client.composer.custom_token_auth' ) )
 
 			->register_hooks( $container->get( 'logs.manager' ) )
 
 			->register_hooks( $container->get( 'screen.edit_package' ) )
+			->register_hooks( $container->get( 'screen.edit_part' ) )
 			->register_hooks( $container->get( 'screen.list_packages' ) );
 
 

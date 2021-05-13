@@ -76,7 +76,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 				$this->set_source_constraint( $this->package_manager->get_composer_version_parser()->parseConstraints( $version_range ) );
 			} catch ( \Exception $e ) {
 				$this->logger->error(
-					'Error parsing source constraint for {package}.',
+					'Error parsing source constraint for package "{package}".',
 					[
 						'exception' => $e,
 						'package'   => $this->package->get_name(),

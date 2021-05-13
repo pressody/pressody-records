@@ -724,7 +724,7 @@ class BasePackageBuilder {
 			     || empty( $required_package['managed_post_id'] )
 			) {
 				$this->logger->error(
-					'Invalid required package details for package {package}.',
+					'Invalid required package details for package "{package}".',
 					[
 						'package'          => $this->package->get_name(),
 						'required_package' => $required_package,
@@ -751,7 +751,7 @@ class BasePackageBuilder {
 			if ( empty( $package_data ) ) {
 				// Something is wrong. We will not include this required package.
 				$this->logger->error(
-					'Error getting managed required package data with post ID #{managed_post_id} for package {package}.',
+					'Error getting managed required package data with post ID #{managed_post_id} for package "{package}".',
 					[
 						'managed_post_id' => $required_package['managed_post_id'],
 						'package'         => $this->package->get_name(),
@@ -1125,7 +1125,7 @@ class BasePackageBuilder {
 		} catch ( \Exception $e ) {
 			// If there was an exception it means that something is wrong with this version.
 			$this->logger->error(
-				'Error normalizing version: {version} for package {package}.',
+				'Error normalizing version: {version} for package "{package}".',
 				[
 					'exception' => $e,
 					'version'   => $version,
@@ -1167,7 +1167,7 @@ class BasePackageBuilder {
 				$versions[] = $new_release->get_version();
 			} catch ( \Exception $e ) {
 				$this->logger->error(
-					'Error storing package {package}.',
+					'Error storing package "{package}".',
 					[
 						'exception' => $e,
 						'package'   => $this->package->get_name(),

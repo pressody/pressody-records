@@ -158,9 +158,25 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['hooks.part_archiver'] = function( $container ) {
+			return new Provider\PackageArchiver(
+				$container['repository.parts'],
+				$container['release.manager'],
+				$container['part.manager'],
+				$container['storage.packages'],
+				$container['logs.logger']
+			);
+		};
+
 		$container['hooks.package_post_type'] = function( $container ) {
 			return new PostType\PackagePostType(
 				$container['package.manager']
+			);
+		};
+
+		$container['hooks.part_post_type'] = function( $container ) {
+			return new PostType\PartPostType(
+				$container['part.manager']
 			);
 		};
 
@@ -249,6 +265,25 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['part.factory'] = function( $container ) {
+			return new PartFactory(
+				$container['part.manager'],
+				$container['release.manager'],
+				$container['archiver'],
+				$container['logs.logger']
+			);
+		};
+
+		$container['part.manager'] = function( $container ) {
+			return new PartManager(
+				$container['client.composer'],
+				$container['version.parser'],
+				$container['wordpress.readme_parser'],
+				$container['logs.logger'],
+				$container['hash.generator'],
+			);
+		};
+
 		$container['plugin.envato_market'] = function() {
 			return new Integration\EnvatoMarket();
 		};
@@ -268,6 +303,16 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['version.parser'],
 				$container['client.composer'],
 				$container['logs.logger']
+			);
+		};
+
+		// This is the repo that hold all of our packages (regular managed packages or parts) that we want to expose to the public.
+		$container['repository.all.managed'] = function( $container ) {
+			return new Repository\MultiRepository(
+				[
+					$container['repository.parts'],
+					$container['repository.managed'],
+				]
 			);
 		};
 
@@ -393,16 +438,44 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['repository.parts.external'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ExternalParts(
+					$container['part.factory'],
+					$container['part.manager']
+				)
+			);
+		};
+
+		$container['repository.parts.manual'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ManualParts(
+					$container['part.factory'],
+					$container['part.manager']
+				)
+			);
+		};
+
+		// This is the repo that hold all of our managed parts (they are plugins at their core).
+		$container['repository.parts'] = function( $container ) {
+			return new Repository\MultiRepository(
+				[
+					$container['repository.parts.external'],
+					$container['repository.parts.manual'],
+				]
+			);
+		};
+
 		$container['route.composer'] = function( $container ) {
 			return new Route\Composer(
-				$container['repository.managed'],
+				$container['repository.all.managed'],
 				$container['transformer.composer_repository']
 			);
 		};
 
 		$container['route.download'] = function( $container ) {
 			return new Route\Download(
-				$container['repository.managed'],
+				$container['repository.all.managed'],
 				$container['package.manager'],
 				$container['release.manager']
 			);
@@ -422,7 +495,14 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Screen\EditPackage(
 				$container['package.manager'],
 				$container['repository.managed'],
-				$container['hooks.package_post_type'],
+				$container['transformer.composer_package']
+			);
+		};
+
+		$container['screen.edit_part'] = function( $container ) {
+			return new Screen\EditPart(
+				$container['part.manager'],
+				$container['repository.parts'],
 				$container['transformer.composer_package']
 			);
 		};
@@ -445,7 +525,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['screen.settings'] = function( $container ) {
 			return new Screen\Settings(
-				$container['repository.managed'],
+				$container['repository.all.managed'],
 				$container['api_key.repository'],
 				$container['transformer.composer_package']
 			);

@@ -53,4 +53,17 @@ class MultiRepository extends AbstractRepository implements PackageRepository {
 
 		return $packages;
 	}
+
+	/**
+	 * Reinitialize all packages in the repository.
+	 *
+	 * @since 0.9.0
+	 */
+	public function reinitialize() {
+		foreach ( $this->repositories as $repository ) {
+			if ( method_exists( $repository, 'reinitialize' ) ) {
+				$repository->reinitialize();
+			}
+		}
+	}
 }

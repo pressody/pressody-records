@@ -106,7 +106,7 @@ $package_visibility = $package->get_visibility();
 			if ( $package->has_required_packages() ) {
 				$requires = array_map(
 						function( $required_package ) {
-							$package_name = $required_package['source_name'] . ':' . $required_package['version_range'];
+							$package_name = $required_package['composer_package_name'] . ':' . $required_package['version_range'];
 							if ( 'stable' !== $required_package['stability'] ) {
 								$package_name .= '@' . $required_package['stability'];
 							}

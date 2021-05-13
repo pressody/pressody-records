@@ -1,10 +1,10 @@
 <?php
 /**
- * External plugins repository.
+ * External parts (plugins) repository.
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @since 0.9.0
  */
 
 declare ( strict_types = 1 );
@@ -12,50 +12,50 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Repository;
 
 use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\PartFactory;
+use PixelgradeLT\Records\PartManager;
 
 /**
- * External plugins repository class.
+ * External parts (plugins) repository.
  *
- * @since 0.1.0
+ * @since 0.9.0
  */
-class ExternalPlugins extends AbstractRepository implements PackageRepository {
+class ExternalParts extends AbstractRepository implements PackageRepository {
 	/**
 	 * Package factory.
 	 *
-	 * @var PackageFactory
+	 * @var PartFactory
 	 */
-	protected PackageFactory $factory;
+	protected PartFactory $factory;
 
 	/**
-	 * Package manager.
+	 * Parts (Package) manager.
 	 *
-	 * @var PackageManager
+	 * @var PartManager
 	 */
-	protected PackageManager $package_manager;
+	protected PartManager $part_manager;
 
 	/**
 	 * Create a repository.
 	 *
-	 * @since 0.1.0
+	 * @since 0.9.0
 	 *
-	 * @param PackageFactory $factory Package factory.
-	 * @param PackageManager $package_manager
+	 * @param PartFactory $factory Package factory.
+	 * @param PartManager $package_manager
 	 */
 	public function __construct(
-		PackageFactory $factory,
-		PackageManager $package_manager
+		PartFactory $factory,
+		PartManager $package_manager
 	) {
-		$this->factory = $factory;
-		$this->package_manager = $package_manager;
+		$this->factory      = $factory;
+		$this->part_manager = $package_manager;
 	}
 
 	/**
-	 * Retrieve all external plugins.
+	 * Retrieve all external parts (plugins).
 	 *
-	 * @since 0.1.0
+	 * @since 0.9.0
 	 *
 	 * @return Package[]
 	 */
@@ -66,13 +66,13 @@ class ExternalPlugins extends AbstractRepository implements PackageRepository {
 			'package_type'        => [ PackageTypes::PLUGIN ],
 			'package_source_type' => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
 		];
-		foreach ( $this->package_manager->get_package_ids_by( $args ) as $post_id ) {
+		foreach ( $this->part_manager->get_package_ids_by( $args ) as $post_id ) {
 			$post = get_post( $post_id );
-			if ( empty( $post ) || $this->package_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
+			if ( empty( $post ) || $this->part_manager::PACKAGE_POST_TYPE !== $post->post_type ) {
 				continue;
 			}
 
-			$package = $this->build( $post_id, $this->package_manager->get_post_package_source_type( $post_id ) );
+			$package = $this->build( $post_id, $this->part_manager->get_post_package_source_type( $post_id ) );
 			$items[] = $package;
 		}
 
@@ -82,9 +82,9 @@ class ExternalPlugins extends AbstractRepository implements PackageRepository {
 	}
 
 	/**
-	 * Build an external plugin.
+	 * Build an external part (plugin).
 	 *
-	 * @since 0.1.0
+	 * @since 0.9.0
 	 *
 	 * @param int    $post_id
 	 * @param string $source_type
