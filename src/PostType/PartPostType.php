@@ -44,8 +44,8 @@ class PartPostType extends PackagePostType {
 	protected function insert_package_type_taxonomy_terms() {
 		// Force the insertion of needed terms matching the PACKAGE TYPES.
 		foreach ( PackageTypes::DETAILS as $term_slug => $term_details ) {
-			// For parts, we only want plugins, not themes.
-			if ( $term_slug === PackageTypes::THEME ) {
+			// For parts, we only want plugins.
+			if ( ! in_array( $term_slug, [ PackageTypes::PLUGIN, PackageTypes::MUPLUGIN, PackageTypes::DROPINPLUGIN ] ) ) {
 				continue;
 			}
 

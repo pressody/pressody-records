@@ -350,6 +350,15 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['repository.external.wpcore'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ExternalWPCore(
+					$container['package.factory'],
+					$container['package.manager']
+				)
+			);
+		};
+
 		$container['repository.manual.plugins'] = function( $container ) {
 			return new Repository\CachedRepository(
 				new Repository\ManualPlugins(
@@ -362,6 +371,14 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['repository.manual.themes'] = function( $container ) {
 			return new Repository\CachedRepository(
 				new Repository\ManualThemes(
+					$container['package.factory'],
+					$container['package.manager']
+				)
+			);
+		};
+		$container['repository.manual.wpcore'] = function( $container ) {
+			return new Repository\CachedRepository(
+				new Repository\ManualWPCore(
 					$container['package.factory'],
 					$container['package.manager']
 				)
@@ -432,8 +449,10 @@ class ServiceProvider implements ServiceProviderInterface {
 					$container['repository.installed.managed'],
 					$container['repository.external.plugins'],
 					$container['repository.external.themes'],
+					$container['repository.external.wpcore'],
 					$container['repository.manual.plugins'],
 					$container['repository.manual.themes'],
+					$container['repository.manual.wpcore'],
 				]
 			);
 		};

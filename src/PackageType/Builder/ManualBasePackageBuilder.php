@@ -52,9 +52,10 @@ class ManualBasePackageBuilder extends BasePackageBuilder {
 		// Write the current package data here, so the following logic has the data it needs.
 		$this->from_package_data( $package_data );
 
-		// If we have manually uploaded releases (in the database), add them.
+		// If we have manually uploaded releases (in the database), use their info and add them.
 		if ( ! empty( $package_data['manual_releases'] ) ) {
 			$this->from_manual_releases( $package_data['manual_releases'] );
+			$this->add_manual_releases( $package_data['manual_releases'] );
 		}
 
 		return $this;
@@ -85,6 +86,11 @@ class ManualBasePackageBuilder extends BasePackageBuilder {
 				$this->from_release_file( $this->releases[ $latest_release['version'] ] );
 			}
 		}
+
+		return $this;
+	}
+
+	public function add_manual_releases( array $releases ): BasePackageBuilder {
 
 		foreach ( $releases as $release ) {
 			if ( empty( $release['version'] ) || empty( $release['meta'] ) ) {

@@ -52,6 +52,14 @@ final class PackageTypes {
 	 */
 	const DROPINPLUGIN = 'wordpress-dropin';
 
+	/**
+	 * Package type ID for WordPress Core packages.
+	 * @link https://packagist.org/packages/roots/wordpress-core-installer
+	 *
+	 * @var string
+	 */
+	const WPCORE = 'wordpress-core';
+
 	const DETAILS = [
 		self::PLUGIN => [
 			'name'        => 'WordPress Plugin',
@@ -68,6 +76,10 @@ final class PackageTypes {
 		self::DROPINPLUGIN => [
 			'name'        => 'WordPress Drop-in Plugin',
 			'description' => 'A WordPress Drop-in plugin package.',
+		],
+		self::WPCORE => [
+			'name'        => 'WordPress Core',
+			'description' => 'A WordPress core (source-code) package.',
 		],
 	];
 }

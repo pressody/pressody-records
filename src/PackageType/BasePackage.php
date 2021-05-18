@@ -32,6 +32,8 @@ class BasePackage implements \ArrayAccess, Package {
 	/**
 	 * Package type.
 	 *
+	 * @see PackageTypes
+	 *
 	 * @var string
 	 */
 	protected string $type = '';

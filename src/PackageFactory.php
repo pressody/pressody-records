@@ -12,6 +12,8 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records;
 
 use PixelgradeLT\Records\PackageType\BasePackage;
+use PixelgradeLT\Records\PackageType\Builder\ExternalWPCorePackageBuilder;
+use PixelgradeLT\Records\PackageType\Builder\ManualWPCorePackageBuilder;
 use PixelgradeLT\Records\PackageType\ExternalBasePackage;
 use PixelgradeLT\Records\PackageType\Builder\ExternalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
@@ -88,9 +90,18 @@ final class PackageFactory {
 	 * @param string $package_type Package type.
 	 * @param string $source_type  The managed package source type, if that is the case.
 	 *
-	 * @return LocalPluginBuilder|LocalThemeBuilder|ExternalBasePackageBuilder|ManualBasePackageBuilder|BasePackageBuilder Package builder instance.
+	 * @return LocalPluginBuilder|LocalThemeBuilder|ExternalBasePackageBuilder|ExternalWPCorePackageBuilder|ManualBasePackageBuilder|ManualWPCorePackageBuilder|BasePackageBuilder Package builder instance.
 	 */
 	public function create( string $package_type, string $source_type = '' ): BasePackageBuilder {
+		if ( PackageTypes::WPCORE === $package_type ) {
+			if ( in_array( $source_type, [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
+				return new ExternalWPCorePackageBuilder( new ExternalBasePackage(), $this->package_manager, $this->release_manager, $this->archiver, $this->logger );
+			}
+
+			if ( 'local.manual' === $source_type ) {
+				return new ManualWPCorePackageBuilder( new BasePackage(), $this->package_manager, $this->release_manager, $this->archiver, $this->logger );
+			}
+		}
 
 		if ( PackageTypes::PLUGIN === $package_type && 'local.plugin' === $source_type ) {
 			return new LocalPluginBuilder( new LocalPlugin(), $this->package_manager, $this->release_manager, $this->archiver, $this->logger );

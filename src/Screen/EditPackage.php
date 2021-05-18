@@ -18,6 +18,7 @@ use Carbon_Fields\Helper\Helper;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 use function PixelgradeLT\Records\get_packages_permalink;
@@ -1020,6 +1021,19 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 					'<p>%s</p>',
 					sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
 			) );
+		} else {
+			$package_type = reset( $package_type );
+		}
+
+		// WordPress Core packages can only use certain source types. Display a message regarding that.
+		if ( ! is_wp_error( $package_type ) && ! empty( $package_type ) && PackageTypes::WPCORE === $package_type->slug ) {
+			$package_source_type = get_post_meta( $post->ID, '_package_source_type', true );
+			if ( ! in_array( $package_source_type, [ 'packagist.org', 'vcs', 'local.manual' ] ) ) {
+				$this->add_user_message( 'error', sprintf(
+						'<p>%s</p>',
+						esc_html__( 'For WordPress-Core-type packages, you can only use choose the following source types: Packagist.org, VCS (e.g. Github repo), or manually uploaded zips.', 'pixelgradelt_records' )
+				) );
+			}
 		}
 
 		$dry_run_results = get_post_meta( $post->ID, '_package_require_dry_run_result', true );

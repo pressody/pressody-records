@@ -88,15 +88,16 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 		// Write the package current data here, so the following logic has the data it needs.
 		$this->from_package_data( $package_data );
 
-		// If we have cached external releases (in the database, not from a zip files point of view), add them.
+		// If we have cached external releases (in the database, not from a zip files point of view), use their info and add them.
 		if ( ! empty( $package_data['source_cached_release_packages'] ) ) {
-			$this->from_cached_release_packages( $package_data['source_cached_release_packages'] );
+			$this->from_source_cached_release_packages( $package_data['source_cached_release_packages'] );
+			$this->add_source_cached_releases( $package_data['source_cached_release_packages'] );
 		}
 
 		return $this;
 	}
 
-	public function from_cached_release_packages( array $cached_release_packages ): BasePackageBuilder {
+	public function from_source_cached_release_packages( array $cached_release_packages ): BasePackageBuilder {
 		// Determine the latest version.
 		$latest_version_package = reset( $cached_release_packages );
 		foreach ( $cached_release_packages as $release_package ) {
@@ -125,6 +126,11 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 				$this->from_release_file( $this->releases[ $latest_version_package['version'] ] );
 			}
 		}
+
+		return $this;
+	}
+
+	public function add_source_cached_releases( array $cached_release_packages ): BasePackageBuilder {
 
 		foreach ( $cached_release_packages as $release_package ) {
 			if ( empty( $release_package['version'] ) || empty( $release_package['dist']['url'] ) ) {
