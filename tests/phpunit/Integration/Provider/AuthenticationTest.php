@@ -13,12 +13,14 @@ use WP_Error;
 
 use function Patchwork\{always, redefine, restore};
 use function PixelgradeLT\Records\get_packages_permalink;
+use function PixelgradeLT\Records\get_parts_permalink;
 use function PixelgradeLT\Records\plugin;
 
 class AuthenticationTest extends TestCase {
 	protected static $api_key;
 	protected static $user_id;
 	protected static $redefine_handle;
+	protected $provider;
 
 	public static function wpSetUpBeforeClass( $factory ) {
 		$container = plugin()->get_container();
@@ -54,9 +56,9 @@ class AuthenticationTest extends TestCase {
 
 	public function test_authentication_succeeds_with_valid_credentials() {
 		$this->set_request_headers( [
-			'Authorization' => 'Basic ' . base64_encode( self::$api_key . ':pixelgradelt-records' ),
+			'Authorization' => 'Basic ' . base64_encode( self::$api_key . ':lt' ),
 			'PHP_AUTH_USER' => self::$api_key,
-			'PHP_AUTH_PW'   => 'pixelgradelt_records',
+			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -71,9 +73,9 @@ class AuthenticationTest extends TestCase {
 
 	public function test_authentication_fails_with_invalid_scheme() {
 		$this->set_request_headers( [
-			'Authorization' => 'Bearer ' . base64_encode( self::$api_key . ':pixelgradelt-records' ),
+			'Authorization' => 'Bearer ' . base64_encode( self::$api_key . ':lt' ),
 			'PHP_AUTH_USER' => self::$api_key,
-			'PHP_AUTH_PW'   => 'pixelgradelt_records',
+			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -83,11 +85,11 @@ class AuthenticationTest extends TestCase {
 		$this->go_to( get_packages_permalink() );
 	}
 
-	public function test_authentication_fails_with_invalid_realm() {
+	public function test_authentication_fails_with_invalid_pwd() {
 		$this->set_request_headers( [
-			'Authorization' => 'Basic ' . base64_encode( self::$api_key . ':' ),
+			'Authorization' => 'Basic ' . base64_encode( self::$api_key . ':lt' ),
 			'PHP_AUTH_USER' => self::$api_key,
-			'PHP_AUTH_PW'   => '', // The Basic Auth password field is used for the realm.
+			'PHP_AUTH_PW'   => 'asdasd', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -95,12 +97,26 @@ class AuthenticationTest extends TestCase {
 
 		$this->expectException( AuthenticationException::class );
 		$this->go_to( get_packages_permalink() );
+	}
+
+	public function test_parts_authentication_fails_with_invalid_pwd() {
+		$this->set_request_headers( [
+			'Authorization' => 'Basic ' . base64_encode( self::$api_key . ':lt' ),
+			'PHP_AUTH_USER' => self::$api_key,
+			'PHP_AUTH_PW'   => 'asdasd', // This is the password that is used as the Basic Auth Pass.
+		] );
+
+		$user = wp_get_current_user();
+		$this->assertSame( 0, $user->ID );
+
+		$this->expectException( AuthenticationException::class );
+		$this->go_to( get_parts_permalink() );
 	}
 
 	public function test_authentication_fails_with_missing_key() {
 		$this->set_request_headers( [
-			'Authorization' => 'Basic ' . base64_encode( ':pixelgradelt-records' ),
-			'PHP_AUTH_PW'   => 'pixelgradelt_records',
+			'Authorization' => 'Basic ' . base64_encode( ':lt' ),
+			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -112,9 +128,9 @@ class AuthenticationTest extends TestCase {
 
 	public function test_authentication_fails_with_invalid_key() {
 		$this->set_request_headers( [
-			'Authorization' => 'Basic ' . base64_encode( 'abcdef:pixelgradelt-records' ),
+			'Authorization' => 'Basic ' . base64_encode( 'abcdef:lt' ),
 			'PHP_AUTH_USER' => 'abcdef',
-			'PHP_AUTH_PW'   => 'pixelgradelt_records',
+			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();

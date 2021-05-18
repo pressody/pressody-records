@@ -13,7 +13,7 @@ namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pimple\ServiceIterator;
-use PixelgradeLT\Records\Authentication\Server;
+use PixelgradeLT\Records\Authentication\ServerInterface;
 use PixelgradeLT\Records\Capabilities as Caps;
 use PixelgradeLT\Records\Exception\AuthenticationException;
 use PixelgradeLT\Records\HTTP\Request;
@@ -28,23 +28,23 @@ class Authentication extends AbstractHookProvider {
 	/**
 	 * Errors that occurred during authentication.
 	 *
-	 * @var AuthenticationException Authentication exception.
+	 * @var AuthenticationException|null Authentication exception.
 	 */
-	protected $auth_status;
+	protected ?AuthenticationException $auth_status = null;
 
 	/**
 	 * Server request.
 	 *
 	 * @var Request
 	 */
-	protected $request;
+	protected Request $request;
 
 	/**
 	 * Authentication servers.
 	 *
 	 * @var ServiceIterator
 	 */
-	protected $servers;
+	protected ServiceIterator $servers;
 
 	/**
 	 * Whether to attempt to authenticate.
@@ -53,7 +53,7 @@ class Authentication extends AbstractHookProvider {
 	 *
 	 * @var bool
 	 */
-	protected $should_attempt = true;
+	protected bool $should_attempt = true;
 
 	/**
 	 * Constructor.
@@ -79,8 +79,9 @@ class Authentication extends AbstractHookProvider {
 		add_filter( 'determine_current_user', [ $this, 'determine_current_user' ] );
 		add_filter( 'user_has_cap', [ $this, 'maybe_allow_public_access' ] );
 
-		// Allow cookie authentication to work for download requests.
-		if ( 0 === strpos( $this->get_request_path(), '/ltpackagist' ) ) {
+		// Allow cookie authentication to work for our requests.
+		$request_path = $this->get_request_path();
+		if ( 0 === strpos( $request_path, '/ltpackagist' ) || 0 === strpos( $request_path, '/ltparts' ) ) {
 			remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
 		}
 	}
@@ -102,8 +103,8 @@ class Authentication extends AbstractHookProvider {
 		$this->should_attempt = false;
 
 		foreach ( $this->servers as $server ) {
-			if ( ! $server instanceof Server ) {
-				throw new \LogicException( 'Authentication servers must implement \PixelgradeLT\Records\Authentication\Server.' );
+			if ( ! $server instanceof ServerInterface ) {
+				throw new \LogicException( 'Authentication servers must implement \PixelgradeLT\Records\Authentication\ServerInterface.' );
 			}
 
 			if ( ! $server->check_scheme( $this->request ) ) {
@@ -167,7 +168,7 @@ class Authentication extends AbstractHookProvider {
 			return true;
 		}
 
-		if ( 0 === strpos( $request_path, '/ltpackagist' ) ) {
+		if ( 0 === strpos( $request_path, '/ltpackagist' ) || 0 === strpos( $request_path, '/ltparts' ) ) {
 			return true;
 		}
 

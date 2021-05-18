@@ -14,17 +14,14 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Authentication;
 
 use PixelgradeLT\Records\Exception\AuthenticationException;
-use PixelgradeLT\Records\Exception\HttpException;
 use PixelgradeLT\Records\HTTP\Request;
-use WP_Error;
-use WP_Http as HTTP;
 
 /**
  * Unauthorized authentication server class.
  *
  * @since 0.1.0
  */
-class UnauthorizedServer implements Server {
+class UnauthorizedServer implements ServerInterface {
 	/**
 	 * Check if the server should handle the current request.
 	 *
@@ -44,7 +41,7 @@ class UnauthorizedServer implements Server {
 	 *
 	 * @param Request $request Request instance.
 	 *
-	 * @throws AuthenticationException|HttpException If the user has not been authenticated at this point.
+	 * @throws AuthenticationException If the user has not been authenticated at this point.
 	 */
 	public function authenticate( Request $request ): int {
 		throw AuthenticationException::forAuthenticationRequired();

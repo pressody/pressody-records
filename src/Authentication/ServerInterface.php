@@ -20,7 +20,7 @@ use WP_Error;
  *
  * @since 0.1.0
  */
-interface Server {
+interface ServerInterface {
 	/**
 	 * Check if the server should handle the current request.
 	 *

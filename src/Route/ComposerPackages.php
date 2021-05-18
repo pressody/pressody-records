@@ -1,6 +1,6 @@
 <?php
 /**
- * Composer packages.json endpoint.
+ * Composer packages.json rendering.
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
@@ -21,11 +21,11 @@ use PixelgradeLT\Records\Transformer\PackageRepositoryTransformer;
 use WP_Http as HTTP;
 
 /**
- * Class for rendering packages.json for Composer.
+ * Class for rendering a Composer packages.json for a given repository.
  *
  * @since 0.1.0
  */
-class Composer implements Route {
+class ComposerPackages implements Route {
 	/**
 	 * Package repository.
 	 *

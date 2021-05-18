@@ -67,7 +67,7 @@ class Upgrade extends AbstractHookProvider {
 	 *
 	 * @var Storage
 	 */
-	protected $storage;
+	protected Storage $storage;
 
 	/**
 	 * Constructor.

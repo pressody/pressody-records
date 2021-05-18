@@ -33,14 +33,14 @@ class RequestHandler extends AbstractHookProvider {
 	 *
 	 * @var ContainerInterface
 	 */
-	protected $controllers;
+	protected ContainerInterface $controllers;
 
 	/**
 	 * Server request.
 	 *
 	 * @var Request
 	 */
-	protected $request;
+	protected Request $request;
 
 	/**
 	 * Constructor.

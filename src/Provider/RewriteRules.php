@@ -54,7 +54,7 @@ class RewriteRules extends AbstractHookProvider {
 	public function register_rewrite_rules() {
 		add_rewrite_rule(
 			'ltpackagist/packages.json$',
-			'index.php?pixelgradelt_records_route=composer',
+			'index.php?pixelgradelt_records_route=composer_packages',
 			'top'
 		);
 
@@ -63,6 +63,12 @@ class RewriteRules extends AbstractHookProvider {
 		add_rewrite_rule(
 			'ltpackagist/([^/]+)(/([^/]+))(/([^/]+))?$',
 			'index.php?pixelgradelt_records_route=download&pixelgradelt_records_params[hashid]=$matches[1]&pixelgradelt_records_params[slug]=$matches[3]&pixelgradelt_records_params[version]=$matches[5]',
+			'top'
+		);
+
+		add_rewrite_rule(
+			'ltparts/packages.json$',
+			'index.php?pixelgradelt_records_route=composer_parts',
 			'top'
 		);
 	}
@@ -80,7 +86,12 @@ class RewriteRules extends AbstractHookProvider {
 	public function register_external_rewrite_rules( WP_Rewrite $wp_rewrite ) {
 		$wp_rewrite->add_external_rule(
 			'ltpackagist/packages.json$',
-			'index.php?pixelgradelt_records_route=composer'
+			'index.php?pixelgradelt_records_route=composer_packages'
+		);
+
+		$wp_rewrite->add_external_rule(
+			'ltparts/packages.json$',
+			'index.php?pixelgradelt_records_route=composer_parts'
 		);
 	}
 

@@ -11,11 +11,9 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Authentication\ApiKey;
 
-use PixelgradeLT\Records\Authentication\Server as ServerInterface;
+use PixelgradeLT\Records\Authentication\ServerInterface;
 use PixelgradeLT\Records\Exception\AuthenticationException;
 use PixelgradeLT\Records\HTTP\Request;
-use WP_Error;
-use WP_Http as HTTP;
 
 /**
  * API Key authentication server class.
@@ -31,7 +29,7 @@ class Server implements ServerInterface {
 	 *
 	 * @var ApiKeyRepository
 	 */
-	protected $repository;
+	protected ApiKeyRepository $repository;
 
 	/**
 	 * Constructor method.
@@ -60,11 +58,13 @@ class Server implements ServerInterface {
 			return false;
 		}
 
-		// The password field isn't used for API Key authentication.
-		$realm = $request->get_header( 'PHP_AUTH_PW' );
+		// The password part of the authorization header isn't used for API Key authentication.
+		// We use instead the PHP_AUTH_PW header.
+		// The password is hardcoded because the username is a private API Key.
+		$auth_password = $request->get_header( 'PHP_AUTH_PW' );
 
 		// Bail if this isn't a PixelgradeLT Records authentication request.
-		if ( self::AUTH_PWD !== $realm ) {
+		if ( self::AUTH_PWD !== $auth_password ) {
 			return false;
 		}
 
@@ -77,6 +77,7 @@ class Server implements ServerInterface {
 	 * @since 0.1.0
 	 *
 	 * @param Request $request Request instance.
+	 *
 	 * @throws AuthenticationException If authentication fails.
 	 * @return int A user ID.
 	 */

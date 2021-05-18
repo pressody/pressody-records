@@ -75,7 +75,7 @@ class AuthenticationException extends HttpException {
 		array $headers = [],
 		string $code = 'invalid_request',
 		Throwable $previous = null
-	): HttpException {
+	): AuthenticationException {
 		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="PixelgradeLT Records"' ];
 		$message = 'Authentication is required for this resource.';
 
@@ -91,13 +91,13 @@ class AuthenticationException extends HttpException {
 	 * @param string         $code     Optional. The Exception code.
 	 * @param Throwable|null $previous Optional. The previous throwable used for the exception chaining.
 	 *
-	 * @return HTTPException
+	 * @return AuthenticationException
 	 */
 	public static function forInvalidCredentials(
 		array $headers = [],
 		string $code = 'invalid_credentials',
 		Throwable $previous = null
-	): HttpException {
+	): AuthenticationException {
 		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="PixelgradeLT Records"' ];
 		$message = 'Invalid credentials.';
 
@@ -113,13 +113,13 @@ class AuthenticationException extends HttpException {
 	 * @param string         $code     Optional. The Exception code.
 	 * @param Throwable|null $previous Optional. The previous throwable used for the exception chaining.
 	 *
-	 * @return HTTPException
+	 * @return AuthenticationException
 	 */
 	public static function forMissingAuthorizationHeader(
 		array $headers = [],
 		string $code = 'invalid_credentials',
 		Throwable $previous = null
-	): HttpException {
+	): AuthenticationException {
 		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="PixelgradeLT Records"' ];
 		$message = 'Missing authorization header.';
 

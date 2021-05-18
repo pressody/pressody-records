@@ -13,10 +13,7 @@ namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\HTTP\Request;
-use WP_Error;
 use WP_Http as HTTP;
-
-use function PixelgradeLT\Records\get_authorization_header;
 
 /**
  * Class to check the health of the system.

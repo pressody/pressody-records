@@ -93,7 +93,7 @@ function get_authorization_header(): ?string {
 }
 
 /**
- * Retrieve the permalink for packages.json.
+ * Retrieve the permalink for all the packages JSON (packages.json).
  *
  * @since 0.1.0
  *
@@ -108,11 +108,37 @@ function get_packages_permalink( array $args = null ): string {
 
 	$permalink = get_option( 'permalink_structure' );
 	if ( empty( $permalink ) ) {
-		$url = add_query_arg( 'pixelgradelt_records_route', 'composer', home_url( '/' ) );
+		$url = add_query_arg( 'pixelgradelt_records_route', 'composer_packages', home_url( '/' ) );
 	} else {
 		// Leave off the packages.json if 'base' arg is true.
 		$suffix = isset( $args['base'] ) && $args['base'] ? '' : 'packages.json';
 		$url    = sprintf( network_home_url( '/ltpackagist/%s' ), $suffix );
+	}
+
+	return $url;
+}
+
+/**
+ * Retrieve the permalink for all the part packages JSON (packages.json).
+ *
+ * @since 0.1.0
+ *
+ * @param array|null $args Optional. Query string parameters. Default is an empty array.
+ *
+ * @return string
+ */
+function get_parts_permalink( array $args = null ): string {
+	if ( null === $args ) {
+		$args = [];
+	}
+
+	$permalink = get_option( 'permalink_structure' );
+	if ( empty( $permalink ) ) {
+		$url = add_query_arg( 'pixelgradelt_records_route', 'composer_parts', home_url( '/' ) );
+	} else {
+		// Leave off the packages.json if 'base' arg is true.
+		$suffix = isset( $args['base'] ) && $args['base'] ? '' : 'packages.json';
+		$url    = sprintf( network_home_url( '/ltparts/%s' ), $suffix );
 	}
 
 	return $url;

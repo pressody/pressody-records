@@ -1,6 +1,6 @@
 <?php
 /**
- * Download request handler.
+ * Download package request handler.
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
@@ -12,7 +12,6 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\Route;
 
 use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Exception\HttpException;
 use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
 use PixelgradeLT\Records\HTTP\Request;
@@ -23,11 +22,11 @@ use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
 
 /**
- * Class to handle download requests.
+ * Class to handle download package requests.
  *
  * @since 0.1.0
  */
-class Download implements Route {
+class DownloadPackage implements Route {
 	/**
 	 * Latest version.
 	 *
