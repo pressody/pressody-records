@@ -11,8 +11,6 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Records\Exception;
 
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\Release;
 use Throwable;
 use WP_Http as HTTP;
 
