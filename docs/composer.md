@@ -12,18 +12,18 @@ Once PixelgradeLT Records is installed and configured you can include the Pixelg
 	],
 	"require": {
 		"composer/installers": "^1.0",
-		"pixelgradelt-records/atomic-blocks": "*",
-		"pixelgradelt-records/genesis": "*",
-		"pixelgradelt-records/gravityforms": "*"
+		"pixelgradelt_records/atomic-blocks": "*",
+		"pixelgradelt_records/genesis": "*",
+		"pixelgradelt_records/gravityforms": "*"
 	}
 }
 ```
 
-_The `pixelgradelt-records` vendor name can be changed on the [Settings page](settings.md)._
+_The `pixelgradelt_records` vendor name can be changed on the [Settings page](settings.md)._
 
 ## Installing Packages
 
-When you install a package from a PixelgradeLT Records repository for the first time, Composer will notify you that authentication is required. Use your API Key for the username and `pixelgradelt-records` as the password. Composer will then ask if you want to store the credentials, which should be fine.
+When you install a package from a PixelgradeLT Records repository for the first time, Composer will notify you that authentication is required. Use your API Key for the username and `pixelgradelt_records` as the password. Composer will then ask if you want to store the credentials, which should be fine.
 
 ```sh
 $ ls -1
@@ -39,9 +39,9 @@ Do you want to store credentials for local.test in /Users/vladolaru/.composer/au
 Updating dependencies (including require-dev)
 Package operations: 4 installs, 0 updates, 0 removals
   - Installing composer/installers (v1.5.0):
-  - Installing pixelgradelt-records/genesis (2.6.1):
-  - Installing pixelgradelt-records/gravityforms (2.3.2):
-  - Installing pixelgradelt-records/atomic-blocks (1.2.1):
+  - Installing pixelgradelt_records/genesis (2.6.1):
+  - Installing pixelgradelt_records/gravityforms (2.3.2):
+  - Installing pixelgradelt_records/atomic-blocks (1.2.1):
 Writing lock file
 Generating autoload files
 
@@ -61,7 +61,7 @@ It's also possible to configure Composer to use your API Key by running the `con
 
 ```sh
 $ composer config http-basic.records.pixelgradelt.com \
-   aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR pixelgradelt-records
+   aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR pixelgradelt_records
 ```
 
 After running that command, you should end up with an `auth.json` in your project alongside the `composer.json` that looks like this:
@@ -71,7 +71,7 @@ After running that command, you should end up with an `auth.json` in your projec
     "http-basic": {
         "records.pixelgradelt.com": {
             "username": "aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR",
-            "password": "pixelgradelt-records"
+            "password": "pixelgradelt_records"
         }
     }
 }

@@ -2,7 +2,7 @@
 
 As a standard WordPress plugin, installation is the same as most other plugins. This can be done by uploading the plugin as a zip file, or using Composer.
 
-PixelgradeLT Records requires PHP 7.0 or later.
+PixelgradeLT Records requires PHP 7.4 or later.
 
 ## Zip File
 

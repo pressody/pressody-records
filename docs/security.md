@@ -28,7 +28,7 @@ __Example Request__
 
 ```shell
 $ curl https://records.pixelgradelt.com/ltpackagist/packages.json \
-   -u aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR:pixelgradelt-records
+   -u aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR:pixelgradelt_records
 ```
 
 ### Revoking Keys

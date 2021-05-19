@@ -2,7 +2,9 @@
 
 PixelgradeLT Records implements a [PSR-3 Logger Interface](https://www.php-fig.org/psr/psr-3/) for logging messages when `WP_DEBUG` is enabled. The default implementation only logs messages with a [log level](https://www.php-fig.org/psr/psr-3/#5-psrlogloglevel) of `warning` or higher.
 
-Messages are logged via PHP's `error_log()` function, which typically saves them to the `wp-content/debug.log` file when `WP_DEBUG` is enabled.
+Messages are logged in daily logs in the `wp-content/uploads/pixelgradelt-records-logs/` directory when `WP_DEBUG` is enabled.
+
+The file-based logs are rotated if they exceed 5 Mb (by default; use the `pixelgradelt_records_log_file_size_limit` filter to change this), and also automatically cleaned if older than 30 days (by default; use the `pixelgradelt_records_logger_days_to_retain_logs` filter to change this).
 
 ## Changing the Log Level
 
