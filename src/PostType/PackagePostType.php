@@ -149,11 +149,11 @@ class PackagePostType extends AbstractHookProvider {
 				'orderby' => 'term_id',
 				'order'   => 'ASC',
 		) );
-		$package_type_name = '';
+		$current_package_type = '';
 
 		if ( ! is_wp_error( $package_type ) ) {
-			if ( isset( $package_type[0] ) && isset( $package_type[0]->name ) ) {
-				$package_type_name = $package_type[0]->name;
+			if ( isset( $package_type[0] ) && isset( $package_type[0]->slug ) ) {
+				$current_package_type = $package_type[0]->slug;
 			}
 		}
 
@@ -161,7 +161,7 @@ class PackagePostType extends AbstractHookProvider {
 			<label title="<?php esc_attr_e( $term->name ); ?>">
 				<input type="radio"
 				       name="<?php esc_attr_e( $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ); ?>"
-				       value="<?php esc_attr_e( $term->name ); ?>" <?php checked( $term->name, $package_type_name ); ?>>
+				       value="<?php esc_attr_e( $term->slug ); ?>" <?php checked( $term->slug, $current_package_type ); ?>>
 				<span><?php esc_html_e( $term->name ); ?></span>
 			</label><br>
 			<?php
@@ -187,7 +187,7 @@ class PackagePostType extends AbstractHookProvider {
 
 		$package_type = isset( $_POST[ $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ] ) ? sanitize_text_field( $_POST[ $this->package_manager::PACKAGE_TYPE_TAXONOMY_SINGULAR ] ) : '';
 
-		// A valid rating is required, so don't let this get published without one
+		// A valid type is required, so don't let this get published without one
 		if ( empty( $package_type ) ) {
 			// unhook this function so it doesn't loop infinitely
 			$this->remove_action( 'save_post_' . $this->package_manager::PACKAGE_POST_TYPE, 'save_package_type_meta_box' );
@@ -198,7 +198,7 @@ class PackagePostType extends AbstractHookProvider {
 			);
 			wp_update_post( $postdata );
 		} else {
-			$term = get_term_by( 'name', $package_type, $this->package_manager::PACKAGE_TYPE_TAXONOMY );
+			$term = get_term_by( 'slug', $package_type, $this->package_manager::PACKAGE_TYPE_TAXONOMY );
 			if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
 				wp_set_object_terms( $post_id, $term->term_id, $this->package_manager::PACKAGE_TYPE_TAXONOMY, false );
 			}
