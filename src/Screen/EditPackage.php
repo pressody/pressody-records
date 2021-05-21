@@ -595,7 +595,6 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 				              ->set_collapsed( true )
 				              ->add_fields( [
 						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
-						                   ->set_help_text( __( 'Packages that are already required by this package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
 						                   ->set_options( [ $this, 'get_available_required_packages_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )

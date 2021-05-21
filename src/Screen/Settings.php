@@ -20,6 +20,7 @@ use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 
 use function PixelgradeLT\Records\get_packages_permalink;
+use function PixelgradeLT\Records\get_parts_permalink;
 
 /**
  * Settings screen provider class.
@@ -231,6 +232,7 @@ class Settings extends AbstractHookProvider {
 	 */
 	public function render_screen() {
 		$packages_permalink     = esc_url( get_packages_permalink() );
+		$parts_permalink     = esc_url( get_parts_permalink() );
 		$packages      = array_map( [ $this->composer_transformer, 'transform' ], $this->packages->all() );
 		$system_checks = [];
 

@@ -913,8 +913,8 @@ class PackageManager {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( $_ENV['PHP_AUTH_USER'] ) ? [
-									'Authorization: Basic ' . base64_encode( $_ENV['PHP_AUTH_USER'] . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( $_ENV['LTRECORDS_PHP_AUTH_USER'] ) ? [
+									'Authorization: Basic ' . base64_encode( $_ENV['LTRECORDS_PHP_AUTH_USER'] . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],

@@ -34,10 +34,6 @@
 			"type": "vcs",
 			"url": "https://github.com/WordPress/wordpress-develop",
 			"no-api": true
-		},
-		"wp-test-suite": {
-			"type": "vcs",
-			"url": "https://github.com/cedaro/wp-test-suite"
 		}
 	},
 	"require": {
@@ -92,6 +88,13 @@
 		"phpcs": "./vendor/bin/phpcs",
 		"tests": "./vendor/bin/phpunit --colors=always",
 		"tests-unit": "./vendor/bin/phpunit --testsuite=Unit --colors=always",
-		"tests-integration": "./vendor/bin/phpunit --testsuite=Integration --colors=always"
+		"tests-integration": "./vendor/bin/phpunit --testsuite=Integration --colors=always",
+	  	"makepot": "./vendor/bin/wp i18n make-pot . languages/pixelgradelt-records.pot",
+		"prepare-for-release": [
+		  "composer install",
+		  "composer makepot",
+		  "composer install --no-dev --prefer-dist",
+		  "composer dump-autoload --no-dev --optimize"
+		]
 	}
 }

@@ -16,6 +16,7 @@ use PixelgradeLT\Records\PackageType\BasePackage;
 /**
  * @global BasePackage[] $packages
  * @global string $packages_permalink
+ * @global string $parts_permalink
  * @global array $system_checks
  */
 
@@ -54,6 +55,11 @@ use PixelgradeLT\Records\PackageType\BasePackage;
 		}
 	]
 }</code></pre>
+
+		<p>
+			<?php esc_html_e( 'You also have the PixelgradeLT Records Parts repository is available at:', 'pixelgradelt_records' ); ?>
+			<a href="<?php echo esc_url( $parts_permalink ); ?>"><?php echo esc_html( $parts_permalink ); ?></a>
+		</p>
 
 		<form action="<?php echo esc_url( admin_url( 'options.php' ) ); ?>" method="post">
 			<?php settings_fields( 'pixelgradelt_records' ); ?>

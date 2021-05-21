@@ -324,7 +324,6 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 				              ->set_collapsed( true )
 				              ->add_fields( [
 						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
-						                   ->set_help_text( __( 'Packages that are already required by this part are NOT part of the list of choices.', 'pixelgradelt_records' ) )
 						                   ->set_options( [ $this, 'get_available_required_packages_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
@@ -370,7 +369,6 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 				              ->set_collapsed( true )
 				              ->add_fields( [
 						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the parts', 'pixelgradelt_records' ) )
-						                   ->set_help_text( __( 'Parts that are already required by this part are NOT part of the list of choices.', 'pixelgradelt_records' ) )
 						                   ->set_options( [ $this, 'get_available_required_parts_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
@@ -410,8 +408,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 		$pseudo_id_delimiter = ' #';
 
-		// We exclude the current package post ID, of course.
-		$exclude_post_ids = [ get_the_ID(), ];
+		$exclude_post_ids = [];
 		// We can't exclude the currently required packages because if we use carbon_get_post_meta()
 		// to fetch the current complex field value, we enter an infinite loop since that requires the field options.
 		// And to replicate the Carbon Fields logic to parse complex fields datastore is not fun.
