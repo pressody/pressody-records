@@ -765,7 +765,7 @@ class BasePackageBuilder {
 			/**
 			 * Construct the Composer-like package name (the same way @see ComposerPackageTransformer::transform() does it).
 			 */
-			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt_records', $required_package, $package_data );
+			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records', $required_package, $package_data );
 			$name   = $this->normalize_package_name( $package_data['slug'] );
 
 			$normalized[ $required_package['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;

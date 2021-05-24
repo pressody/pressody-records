@@ -51,7 +51,7 @@ class ComposerPackageTransformer implements PackageTransformer {
 	public function transform( Package $package ): Package {
 		$builder = $this->factory->create( 'composer' )->with_package( $package );
 
-		$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt_records' );
+		$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records' );
 		$name   = $this->normalize_package_name( $package->get_slug() );
 		$builder->set_name( $vendor . '/' . $name );
 
