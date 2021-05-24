@@ -304,7 +304,7 @@ class ComposerClient implements Client {
 
 	public function getDefaultDynamicConfig(): array {
 		$default_config = [
-			'name'                      => 'pixelgradelt_records/fake_project',
+			'name'                      => 'pixelgradelt-records/fake_project',
 			'repositories'              => [],
 			'require-all'               => false,
 			'require-dependencies'      => false,
