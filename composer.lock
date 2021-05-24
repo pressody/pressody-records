@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "49bfd0e2c3c66c41a6b6d83c091f2242",
+    "content-hash": "8c582e50ed62f387a2eaf6eb5788838f",
     "packages": [
         {
             "name": "automattic/jetpack-constants",
@@ -219,16 +219,16 @@
         },
         {
             "name": "composer/composer",
-            "version": "2.0.13",
+            "version": "2.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "986e8b86b7b570632ad0a905c3726c33dd4c0efb"
+                "reference": "92b2ccbef65292ba9f2004271ef47c7231e2eed5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/986e8b86b7b570632ad0a905c3726c33dd4c0efb",
-                "reference": "986e8b86b7b570632ad0a905c3726c33dd4c0efb",
+                "url": "https://api.github.com/repos/composer/composer/zipball/92b2ccbef65292ba9f2004271ef47c7231e2eed5",
+                "reference": "92b2ccbef65292ba9f2004271ef47c7231e2eed5",
                 "shasum": ""
             },
             "require": {
@@ -236,21 +236,21 @@
                 "composer/metadata-minifier": "^1.0",
                 "composer/semver": "^3.0",
                 "composer/spdx-licenses": "^1.2",
-                "composer/xdebug-handler": "^1.1",
+                "composer/xdebug-handler": "^2.0",
                 "justinrainbow/json-schema": "^5.2.10",
                 "php": "^5.3.2 || ^7.0 || ^8.0",
                 "psr/log": "^1.0",
                 "react/promise": "^1.2 || ^2.7",
                 "seld/jsonlint": "^1.4",
                 "seld/phar-utils": "^1.0",
-                "symfony/console": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0",
-                "symfony/filesystem": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0",
-                "symfony/finder": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0",
-                "symfony/process": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0"
+                "symfony/console": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0",
+                "symfony/filesystem": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0",
+                "symfony/finder": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0",
+                "symfony/process": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0"
             },
             "require-dev": {
                 "phpspec/prophecy": "^1.10",
-                "symfony/phpunit-bridge": "^4.2 || ^5.0"
+                "symfony/phpunit-bridge": "^4.2 || ^5.0 || ^6.0"
             },
             "suggest": {
                 "ext-openssl": "Enabling the openssl extension allows you to access https URLs for repositories and packages",
@@ -297,7 +297,7 @@
             "support": {
                 "irc": "irc://irc.freenode.org/composer",
                 "issues": "https://github.com/composer/composer/issues",
-                "source": "https://github.com/composer/composer/tree/2.0.13"
+                "source": "https://github.com/composer/composer/tree/2.0.14"
             },
             "funding": [
                 {
@@ -313,7 +313,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-27T11:11:08+00:00"
+            "time": "2021-05-21T15:03:37+00:00"
         },
         {
             "name": "composer/installers",
@@ -696,16 +696,16 @@
         },
         {
             "name": "composer/xdebug-handler",
-            "version": "1.4.6",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/xdebug-handler.git",
-                "reference": "f27e06cd9675801df441b3656569b328e04aa37c"
+                "reference": "964adcdd3a28bf9ed5d9ac6450064e0d71ed7496"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/xdebug-handler/zipball/f27e06cd9675801df441b3656569b328e04aa37c",
-                "reference": "f27e06cd9675801df441b3656569b328e04aa37c",
+                "url": "https://api.github.com/repos/composer/xdebug-handler/zipball/964adcdd3a28bf9ed5d9ac6450064e0d71ed7496",
+                "reference": "964adcdd3a28bf9ed5d9ac6450064e0d71ed7496",
                 "shasum": ""
             },
             "require": {
@@ -740,7 +740,7 @@
             "support": {
                 "irc": "irc://irc.freenode.org/composer",
                 "issues": "https://github.com/composer/xdebug-handler/issues",
-                "source": "https://github.com/composer/xdebug-handler/tree/1.4.6"
+                "source": "https://github.com/composer/xdebug-handler/tree/2.0.1"
             },
             "funding": [
                 {
@@ -756,7 +756,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-03-25T17:01:18+00:00"
+            "time": "2021-05-05T19:37:51+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -3074,6 +3074,152 @@
             "time": "2020-11-10T18:47:58+00:00"
         },
         {
+            "name": "gettext/gettext",
+            "version": "v4.8.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-gettext/Gettext.git",
+                "reference": "58bc0f7f37e78efb0f9758f93d4a0f669f0f84a1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-gettext/Gettext/zipball/58bc0f7f37e78efb0f9758f93d4a0f669f0f84a1",
+                "reference": "58bc0f7f37e78efb0f9758f93d4a0f669f0f84a1",
+                "shasum": ""
+            },
+            "require": {
+                "gettext/languages": "^2.3",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "illuminate/view": "*",
+                "phpunit/phpunit": "^4.8|^5.7|^6.5",
+                "squizlabs/php_codesniffer": "^3.0",
+                "symfony/yaml": "~2",
+                "twig/extensions": "*",
+                "twig/twig": "^1.31|^2.0"
+            },
+            "suggest": {
+                "illuminate/view": "Is necessary if you want to use the Blade extractor",
+                "symfony/yaml": "Is necessary if you want to use the Yaml extractor/generator",
+                "twig/extensions": "Is necessary if you want to use the Twig extractor",
+                "twig/twig": "Is necessary if you want to use the Twig extractor"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Gettext\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Oscar Otero",
+                    "email": "oom@oscarotero.com",
+                    "homepage": "http://oscarotero.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP gettext manager",
+            "homepage": "https://github.com/oscarotero/Gettext",
+            "keywords": [
+                "JS",
+                "gettext",
+                "i18n",
+                "mo",
+                "po",
+                "translation"
+            ],
+            "support": {
+                "email": "oom@oscarotero.com",
+                "issues": "https://github.com/oscarotero/Gettext/issues",
+                "source": "https://github.com/php-gettext/Gettext/tree/v4.8.4"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/oscarotero",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/oscarotero",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/misteroom",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2021-03-10T19:35:49+00:00"
+        },
+        {
+            "name": "gettext/languages",
+            "version": "2.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-gettext/Languages.git",
+                "reference": "38ea0482f649e0802e475f0ed19fa993bcb7a618"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-gettext/Languages/zipball/38ea0482f649e0802e475f0ed19fa993bcb7a618",
+                "reference": "38ea0482f649e0802e475f0ed19fa993bcb7a618",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.16.0",
+                "phpunit/phpunit": "^4.8 || ^5.7 || ^6.5 || ^7.5 || ^8.4"
+            },
+            "bin": [
+                "bin/export-plural-rules"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Gettext\\Languages\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michele Locati",
+                    "email": "mlocati@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "gettext languages with plural rules",
+            "homepage": "https://github.com/php-gettext/Languages",
+            "keywords": [
+                "cldr",
+                "i18n",
+                "internationalization",
+                "l10n",
+                "language",
+                "languages",
+                "localization",
+                "php",
+                "plural",
+                "plural rules",
+                "plurals",
+                "translate",
+                "translations",
+                "unicode"
+            ],
+            "support": {
+                "issues": "https://github.com/php-gettext/Languages/issues",
+                "source": "https://github.com/php-gettext/Languages/tree/2.6.0"
+            },
+            "time": "2019-11-13T10:30:21+00:00"
+        },
+        {
             "name": "graham-campbell/result-type",
             "version": "v1.0.1",
             "source": {
@@ -3191,6 +3337,55 @@
             "time": "2020-07-09T08:09:16+00:00"
         },
         {
+            "name": "mck89/peast",
+            "version": "v1.13.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mck89/peast.git",
+                "reference": "db38b1524f5bda921cbda2385e440c2bb71d18b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mck89/peast/zipball/db38b1524f5bda921cbda2385e440c2bb71d18b4",
+                "reference": "db38b1524f5bda921cbda2385e440c2bb71d18b4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.13.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Peast\\": "lib/Peast/",
+                    "Peast\\test\\": "test/Peast/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Marco Marchiò",
+                    "email": "marco.mm89@gmail.com"
+                }
+            ],
+            "description": "Peast is PHP library that generates AST for JavaScript code",
+            "support": {
+                "issues": "https://github.com/mck89/peast/issues",
+                "source": "https://github.com/mck89/peast/tree/v1.13.0"
+            },
+            "time": "2021-05-22T16:06:09+00:00"
+        },
+        {
             "name": "mockery/mockery",
             "version": "1.3.4",
             "source": {
@@ -3258,6 +3453,56 @@
                 "source": "https://github.com/mockery/mockery/tree/1.3.4"
             },
             "time": "2021-02-24T09:51:00+00:00"
+        },
+        {
+            "name": "mustache/mustache",
+            "version": "v2.13.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bobthecow/mustache.php.git",
+                "reference": "e95c5a008c23d3151d59ea72484d4f72049ab7f4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bobthecow/mustache.php/zipball/e95c5a008c23d3151d59ea72484d4f72049ab7f4",
+                "reference": "e95c5a008c23d3151d59ea72484d4f72049ab7f4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "~1.11",
+                "phpunit/phpunit": "~3.7|~4.0|~5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Mustache": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Justin Hileman",
+                    "email": "justin@justinhileman.info",
+                    "homepage": "http://justinhileman.com"
+                }
+            ],
+            "description": "A Mustache implementation in PHP.",
+            "homepage": "https://github.com/bobthecow/mustache.php",
+            "keywords": [
+                "mustache",
+                "templating"
+            ],
+            "support": {
+                "issues": "https://github.com/bobthecow/mustache.php/issues",
+                "source": "https://github.com/bobthecow/mustache.php/tree/master"
+            },
+            "time": "2019-11-23T21:40:31+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -4273,17 +4518,77 @@
             "time": "2020-01-08T08:45:45+00:00"
         },
         {
+            "name": "rmccue/requests",
+            "version": "v1.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/Requests.git",
+                "reference": "afbe4790e4def03581c4a0963a1e8aa01f6030f1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/Requests/zipball/afbe4790e4def03581c4a0963a1e8aa01f6030f1",
+                "reference": "afbe4790e4def03581c4a0963a1e8aa01f6030f1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
+                "php-parallel-lint/php-console-highlighter": "^0.5.0",
+                "php-parallel-lint/php-parallel-lint": "^1.3",
+                "phpcompatibility/php-compatibility": "^9.0",
+                "phpunit/phpunit": "^4.8 || ^5.7 || ^6.5 || ^7.5",
+                "requests/test-server": "dev-master",
+                "squizlabs/php_codesniffer": "^3.5",
+                "wp-coding-standards/wpcs": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Requests": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "ISC"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan McCue",
+                    "homepage": "http://ryanmccue.info"
+                }
+            ],
+            "description": "A HTTP library written in PHP, for human beings.",
+            "homepage": "http://github.com/WordPress/Requests",
+            "keywords": [
+                "curl",
+                "fsockopen",
+                "http",
+                "idna",
+                "ipv6",
+                "iri",
+                "sockets"
+            ],
+            "support": {
+                "issues": "https://github.com/WordPress/Requests/issues",
+                "source": "https://github.com/WordPress/Requests/tree/v1.8.0"
+            },
+            "time": "2021-04-27T11:05:25+00:00"
+        },
+        {
             "name": "roave/security-advisories",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "6e52ab3a11a0d4fb0d9b2fb199a5887b8e01b1ae"
+                "reference": "b690895fa1530e85397d5070517e45e098be6d18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/6e52ab3a11a0d4fb0d9b2fb199a5887b8e01b1ae",
-                "reference": "6e52ab3a11a0d4fb0d9b2fb199a5887b8e01b1ae",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/b690895fa1530e85397d5070517e45e098be6d18",
+                "reference": "b690895fa1530e85397d5070517e45e098be6d18",
                 "shasum": ""
             },
             "conflict": {
@@ -4467,7 +4772,7 @@
                 "shopware/core": "<=6.3.5.2",
                 "shopware/platform": "<=6.3.5.2",
                 "shopware/production": "<=6.3.5.2",
-                "shopware/shopware": "<5.6.9",
+                "shopware/shopware": "<=5.6.9",
                 "silverstripe/admin": ">=1.0.3,<1.0.4|>=1.1,<1.1.1",
                 "silverstripe/assets": ">=1,<1.4.7|>=1.5,<1.5.2",
                 "silverstripe/cms": "<4.3.6|>=4.4,<4.4.4",
@@ -4566,6 +4871,7 @@
                 "yiisoft/yii2-gii": "<2.0.4",
                 "yiisoft/yii2-jui": "<2.0.4",
                 "yiisoft/yii2-redis": "<2.0.8",
+                "yoast-seo-for-typo3/yoast_seo": "<7.2.1",
                 "yourls/yourls": "<1.7.4",
                 "zendesk/zendesk_api_client_php": "<2.2.11",
                 "zendframework/zend-cache": ">=2.4,<2.4.8|>=2.5,<2.5.3",
@@ -4627,7 +4933,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-20T18:43:44+00:00"
+            "time": "2021-05-21T19:22:20+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -5609,6 +5915,244 @@
             "time": "2021-05-12T23:48:08+00:00"
         },
         {
+            "name": "wp-cli/i18n-command",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wp-cli/i18n-command.git",
+                "reference": "45c08a977db94991d69a9879d7a92cde67ea91e9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/45c08a977db94991d69a9879d7a92cde67ea91e9",
+                "reference": "45c08a977db94991d69a9879d7a92cde67ea91e9",
+                "shasum": ""
+            },
+            "require": {
+                "gettext/gettext": "^4.8",
+                "mck89/peast": "^1.8",
+                "wp-cli/wp-cli": "^2.5"
+            },
+            "require-dev": {
+                "wp-cli/scaffold-command": "^1.2 || ^2",
+                "wp-cli/wp-cli-tests": "^3.0.11"
+            },
+            "default-branch": true,
+            "type": "wp-cli-package",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                },
+                "bundled": true,
+                "commands": [
+                    "i18n",
+                    "i18n make-pot",
+                    "i18n make-json"
+                ]
+            },
+            "autoload": {
+                "psr-4": {
+                    "WP_CLI\\I18n\\": "src/"
+                },
+                "files": [
+                    "i18n-command.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Pascal Birchler",
+                    "homepage": "https://pascalbirchler.com/"
+                }
+            ],
+            "description": "Provides internationalization tools for WordPress projects.",
+            "homepage": "https://github.com/wp-cli/i18n-command",
+            "support": {
+                "issues": "https://github.com/wp-cli/i18n-command/issues",
+                "source": "https://github.com/wp-cli/i18n-command/tree/master"
+            },
+            "time": "2021-05-12T08:25:37+00:00"
+        },
+        {
+            "name": "wp-cli/mustangostang-spyc",
+            "version": "0.6.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wp-cli/spyc.git",
+                "reference": "6aa0b4da69ce9e9a2c8402dab8d43cf32c581cc7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wp-cli/spyc/zipball/6aa0b4da69ce9e9a2c8402dab8d43cf32c581cc7",
+                "reference": "6aa0b4da69ce9e9a2c8402dab8d43cf32c581cc7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.3.*@dev"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.5.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Mustangostang\\": "src/"
+                },
+                "files": [
+                    "includes/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "mustangostang",
+                    "email": "vlad.andersen@gmail.com"
+                }
+            ],
+            "description": "A simple YAML loader/dumper class for PHP (WP-CLI fork)",
+            "homepage": "https://github.com/mustangostang/spyc/",
+            "support": {
+                "source": "https://github.com/wp-cli/spyc/tree/autoload"
+            },
+            "time": "2017-04-25T11:26:20+00:00"
+        },
+        {
+            "name": "wp-cli/php-cli-tools",
+            "version": "v0.11.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wp-cli/php-cli-tools.git",
+                "reference": "e472e08489f7504d9e8c5c5a057e1419cd1b2b3e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wp-cli/php-cli-tools/zipball/e472e08489f7504d9e8c5c5a057e1419cd1b2b3e",
+                "reference": "e472e08489f7504d9e8c5c5a057e1419cd1b2b3e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">= 5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "cli": "lib/"
+                },
+                "files": [
+                    "lib/cli/cli.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Bachhuber",
+                    "email": "daniel@handbuilt.co",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "James Logsdon",
+                    "email": "jlogsdon@php.net",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Console utilities for PHP",
+            "homepage": "http://github.com/wp-cli/php-cli-tools",
+            "keywords": [
+                "cli",
+                "console"
+            ],
+            "support": {
+                "issues": "https://github.com/wp-cli/php-cli-tools/issues",
+                "source": "https://github.com/wp-cli/php-cli-tools/tree/v0.11.12"
+            },
+            "time": "2021-03-03T12:43:49+00:00"
+        },
+        {
+            "name": "wp-cli/wp-cli",
+            "version": "v2.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wp-cli/wp-cli.git",
+                "reference": "0bcf0c54f4d35685211d435e25219cc7acbe6d48"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/0bcf0c54f4d35685211d435e25219cc7acbe6d48",
+                "reference": "0bcf0c54f4d35685211d435e25219cc7acbe6d48",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "mustache/mustache": "~2.13",
+                "php": "^5.6 || ^7.0 || ^8.0",
+                "rmccue/requests": "^1.8",
+                "symfony/finder": ">2.7",
+                "wp-cli/mustangostang-spyc": "^0.6.3",
+                "wp-cli/php-cli-tools": "~0.11.2"
+            },
+            "require-dev": {
+                "roave/security-advisories": "dev-master",
+                "wp-cli/db-command": "^1.3 || ^2",
+                "wp-cli/entity-command": "^1.2 || ^2",
+                "wp-cli/extension-command": "^1.1 || ^2",
+                "wp-cli/package-command": "^1 || ^2",
+                "wp-cli/wp-cli-tests": "^3.0.7"
+            },
+            "suggest": {
+                "ext-readline": "Include for a better --prompt implementation",
+                "ext-zip": "Needed to support extraction of ZIP archives when doing downloads or updates"
+            },
+            "bin": [
+                "bin/wp",
+                "bin/wp.bat"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.5.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "WP_CLI\\": "php/"
+                },
+                "classmap": [
+                    "php/class-wp-cli.php",
+                    "php/class-wp-cli-command.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "WP-CLI framework",
+            "homepage": "https://wp-cli.org",
+            "keywords": [
+                "cli",
+                "wordpress"
+            ],
+            "support": {
+                "docs": "https://make.wordpress.org/cli/handbook/",
+                "issues": "https://github.com/wp-cli/wp-cli/issues",
+                "source": "https://github.com/wp-cli/wp-cli"
+            },
+            "time": "2021-05-14T13:44:51+00:00"
+        },
+        {
             "name": "wp-coding-standards/wpcs",
             "version": "1.2.1",
             "source": {
@@ -5661,7 +6205,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "knplabs/packagist-api": 20,
-        "roave/security-advisories": 20
+        "roave/security-advisories": 20,
+        "wp-cli/i18n-command": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

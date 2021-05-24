@@ -1,19 +1,44 @@
-# Copyright (C) 2021 Cedaro
+# Copyright (C) 2021 Pixelgrade
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: PixelgradeLT Records 0.7.1\n"
+"Project-Id-Version: PixelgradeLT Records 0.9.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pixelgradelt-records\n"
-"POT-Creation-Date: 2021-02-04 15:48:08+00:00\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2021-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-05-24T10:14:29+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.5.0\n"
+"X-Domain: pixelgradelt_records\n"
 
-#. Plugin Name of the plugin/theme
+#. Plugin Name of the plugin
+#: src/Integration/Members.php:44
+#: src/Screen/Settings.php:100
 msgid "PixelgradeLT Records"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://github.com/pixelgradelt/pixelgradelt-records"
+msgstr ""
+
+#. Description of the plugin
+msgid "Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes."
+msgstr ""
+
+#. Author of the plugin
+msgid "Pixelgrade"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://pixelgrade.com/"
+msgstr ""
+
+#. translators: %s: documentation URL
+#: src/functions.php:185
+msgid "PixelgradeLT Records is missing required dependencies. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferer\">Learn more.</a>"
 msgstr ""
 
 #: src/Integration/Members.php:63
@@ -28,125 +53,1018 @@ msgstr ""
 msgid "Manage Options"
 msgstr ""
 
+#: src/Integration/Members.php:87
+msgid "Manage Package Types"
+msgstr ""
+
+#: src/Logging/Handler/FileLogHandler.php:400
+#: src/Logging/Handler/FileLogHandler.php:420
+msgid "This method should not be called before plugins_loaded."
+msgstr ""
+
+#. translators: 1: class name 2: WC_Log_Handler_Interface
+#: src/Logging/Logger.php:84
+msgid "The provided handler %1$s does not implement %2$s."
+msgstr ""
+
+#. translators: 1: WC_Logger::log 2: level
+#: src/Logging/Logger.php:109
+msgid "%1$s was called with an invalid level \"%2$s\"."
+msgstr ""
+
+#: src/PackageManager.php:108
+msgid "LT Packages"
+msgstr ""
+
+#: src/PackageManager.php:109
+msgid "LT Package"
+msgstr ""
+
+#: src/PackageManager.php:110
+msgctxt "Admin Menu text"
+msgid "LT Packages"
+msgstr ""
+
+#: src/PackageManager.php:111
+msgctxt "LT Package"
+msgid "Add New"
+msgstr ""
+
+#: src/PackageManager.php:112
+msgid "Add New LT Package"
+msgstr ""
+
+#: src/PackageManager.php:113
+msgid "New LT Package"
+msgstr ""
+
+#: src/PackageManager.php:114
+msgid "Edit LT Package"
+msgstr ""
+
+#: src/PackageManager.php:115
+msgid "View LT Package"
+msgstr ""
+
+#: src/PackageManager.php:116
+msgid "All Packages"
+msgstr ""
+
+#: src/PackageManager.php:117
+msgid "Search Packages"
+msgstr ""
+
+#: src/PackageManager.php:118
+msgid "No packages found."
+msgstr ""
+
+#: src/PackageManager.php:119
+msgid "No packages found in Trash."
+msgstr ""
+
+#: src/PackageManager.php:120
+#: src/PartManager.php:55
+msgid "Uploaded to this package"
+msgstr ""
+
+#: src/PackageManager.php:121
+msgid "Filter packages list"
+msgstr ""
+
+#: src/PackageManager.php:122
+msgid "Packages list navigation"
+msgstr ""
+
+#: src/PackageManager.php:123
+msgid "LT Packages list"
+msgstr ""
+
+#: src/PackageManager.php:128
+msgid "Composer packages to be used in the PixelgradeLT parts delivered to PixelgradeLT users."
+msgstr ""
+
+#: src/PackageManager.php:156
+msgid "Package Types"
+msgstr ""
+
+#: src/PackageManager.php:157
+#: src/Screen/EditPackage.php:292
+#: views/package-details.php:139
+msgid "Package Type"
+msgstr ""
+
+#: src/PackageManager.php:158
+msgctxt "LT Package Type"
+msgid "Add New"
+msgstr ""
+
+#: src/PackageManager.php:159
+msgid "Add New Package Type"
+msgstr ""
+
+#: src/PackageManager.php:160
+msgid "Update Package Type"
+msgstr ""
+
+#: src/PackageManager.php:161
+msgid "New Package Type Name"
+msgstr ""
+
+#: src/PackageManager.php:162
+msgid "Edit Package Type"
+msgstr ""
+
+#: src/PackageManager.php:163
+msgid "All Package Types"
+msgstr ""
+
+#: src/PackageManager.php:164
+msgid "Search Package Types"
+msgstr ""
+
+#: src/PackageManager.php:165
+msgid "Parent Package Type"
+msgstr ""
+
+#: src/PackageManager.php:166
+msgid "Parent Package Type:"
+msgstr ""
+
+#: src/PackageManager.php:167
+msgid "No package types found."
+msgstr ""
+
+#: src/PackageManager.php:168
+msgid "No package types."
+msgstr ""
+
+#: src/PackageManager.php:169
+msgid "Package Types list navigation"
+msgstr ""
+
+#: src/PackageManager.php:170
+msgid "Package Types list"
+msgstr ""
+
+#: src/PackageManager.php:171
+msgid "&larr; Go to Package Types"
+msgstr ""
+
+#: src/PackageManager.php:198
+msgid "Package Keywords"
+msgstr ""
+
+#: src/PackageManager.php:199
+msgid "Package Keyword"
+msgstr ""
+
+#: src/PackageManager.php:200
+msgctxt "LT Package Keyword"
+msgid "Add New"
+msgstr ""
+
+#: src/PackageManager.php:201
+msgid "Add New Package Keyword"
+msgstr ""
+
+#: src/PackageManager.php:202
+msgid "Update Package Keyword"
+msgstr ""
+
+#: src/PackageManager.php:203
+msgid "New Package Keyword Name"
+msgstr ""
+
+#: src/PackageManager.php:204
+msgid "Edit Package Keyword"
+msgstr ""
+
+#: src/PackageManager.php:205
+msgid "All Package Keywords"
+msgstr ""
+
+#: src/PackageManager.php:206
+msgid "Search Package Keywords"
+msgstr ""
+
+#: src/PackageManager.php:207
+msgid "No package keywords found."
+msgstr ""
+
+#: src/PackageManager.php:208
+msgid "No package keywords."
+msgstr ""
+
+#: src/PackageManager.php:209
+#: src/PartManager.php:144
+msgid "Separate keywords with commas."
+msgstr ""
+
+#: src/PackageManager.php:210
+#: src/PartManager.php:145
+msgid "Choose from the most used keywords."
+msgstr ""
+
+#: src/PackageManager.php:211
+#: src/PartManager.php:146
+msgid "Most used."
+msgstr ""
+
+#: src/PackageManager.php:212
+msgid "Package Keywords list navigation"
+msgstr ""
+
+#: src/PackageManager.php:213
+msgid "Package Keywords list"
+msgstr ""
+
+#: src/PackageManager.php:214
+msgid "&larr; Go to Package Keywords"
+msgstr ""
+
+#: src/PartManager.php:43
+msgid "LT Parts"
+msgstr ""
+
+#: src/PartManager.php:44
+msgid "LT Part"
+msgstr ""
+
+#: src/PartManager.php:45
+msgctxt "Admin Menu text"
+msgid "LT Parts"
+msgstr ""
+
+#: src/PartManager.php:46
+msgctxt "LT Part"
+msgid "Add New"
+msgstr ""
+
+#: src/PartManager.php:47
+msgid "Add New LT Part"
+msgstr ""
+
+#: src/PartManager.php:48
+msgid "New LT Part"
+msgstr ""
+
+#: src/PartManager.php:49
+msgid "Edit LT Part"
+msgstr ""
+
+#: src/PartManager.php:50
+msgid "View LT Part"
+msgstr ""
+
+#: src/PartManager.php:51
+msgid "All Parts"
+msgstr ""
+
+#: src/PartManager.php:52
+msgid "Search Parts"
+msgstr ""
+
+#: src/PartManager.php:53
+msgid "No parts found."
+msgstr ""
+
+#: src/PartManager.php:54
+msgid "No parts found in Trash."
+msgstr ""
+
+#: src/PartManager.php:56
+msgid "Filter parts list"
+msgstr ""
+
+#: src/PartManager.php:57
+msgid "Parts list navigation"
+msgstr ""
+
+#: src/PartManager.php:58
+msgid "LT Parts list"
+msgstr ""
+
+#: src/PartManager.php:63
+msgid "Composer (special) packages to be used as the basis for PixelgradeLT solutions offered to PixelgradeLT users."
+msgstr ""
+
+#: src/PartManager.php:91
+msgid "Part Types"
+msgstr ""
+
+#: src/PartManager.php:92
+msgid "Part Type"
+msgstr ""
+
+#: src/PartManager.php:93
+msgctxt "LT Part Type"
+msgid "Add New"
+msgstr ""
+
+#: src/PartManager.php:94
+msgid "Add New Part Type"
+msgstr ""
+
+#: src/PartManager.php:95
+msgid "Update Part Type"
+msgstr ""
+
+#: src/PartManager.php:96
+msgid "New Part Type Name"
+msgstr ""
+
+#: src/PartManager.php:97
+msgid "Edit Part Type"
+msgstr ""
+
+#: src/PartManager.php:98
+msgid "All Part Types"
+msgstr ""
+
+#: src/PartManager.php:99
+msgid "Search Part Types"
+msgstr ""
+
+#: src/PartManager.php:100
+msgid "Parent Part Type"
+msgstr ""
+
+#: src/PartManager.php:101
+msgid "Parent Part Type:"
+msgstr ""
+
+#: src/PartManager.php:102
+msgid "No part types found."
+msgstr ""
+
+#: src/PartManager.php:103
+msgid "No part types."
+msgstr ""
+
+#: src/PartManager.php:104
+msgid "Part Types list navigation"
+msgstr ""
+
+#: src/PartManager.php:105
+msgid "Part Types list"
+msgstr ""
+
+#: src/PartManager.php:106
+msgid "&larr; Go to Part Types"
+msgstr ""
+
+#: src/PartManager.php:133
+msgid "Part Keywords"
+msgstr ""
+
+#: src/PartManager.php:134
+msgid "Part Keyword"
+msgstr ""
+
+#: src/PartManager.php:135
+msgctxt "LT Part Keyword"
+msgid "Add New"
+msgstr ""
+
+#: src/PartManager.php:136
+msgid "Add New Part Keyword"
+msgstr ""
+
+#: src/PartManager.php:137
+msgid "Update Part Keyword"
+msgstr ""
+
+#: src/PartManager.php:138
+msgid "New Part Keyword Name"
+msgstr ""
+
+#: src/PartManager.php:139
+msgid "Edit Part Keyword"
+msgstr ""
+
+#: src/PartManager.php:140
+msgid "All Part Keywords"
+msgstr ""
+
+#: src/PartManager.php:141
+msgid "Search Part Keywords"
+msgstr ""
+
+#: src/PartManager.php:142
+msgid "No part keywords found."
+msgstr ""
+
+#: src/PartManager.php:143
+msgid "No part keywords."
+msgstr ""
+
+#: src/PartManager.php:147
+msgid "Part Keywords list navigation"
+msgstr ""
+
+#: src/PartManager.php:148
+msgid "Part Keywords list"
+msgstr ""
+
+#: src/PartManager.php:149
+msgid "&larr; Go to Part Keywords"
+msgstr ""
+
 #: src/Provider/AdminAssets.php:58
 msgid "Are you sure you want to delete this API Key?"
+msgstr ""
+
+#: src/Provider/HealthCheck.php:61
+msgid "Health Check"
+msgstr ""
+
+#. translators: %s: permalink screen URL
+#: src/Provider/HealthCheck.php:101
+msgid "PixelgradeLT Records requires pretty permalinks to be enabled. <a href=\"%s\">Enable permalinks</a>."
+msgstr ""
+
+#: src/Screen/EditPackage.php:218
+msgid "Add package title"
+msgstr ""
+
+#: src/Screen/EditPackage.php:233
+msgid ""
+"<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong> It is best to use <strong>the exact plugin or theme slug!</strong><br>\n"
+"In the end this will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>\n"
+"The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href=\"https://regexr.com/5sr9h\" target=\"_blank\">this regex</a>"
+msgstr ""
+
+#: src/Screen/EditPackage.php:302
+msgid "Source Configuration"
+msgstr ""
+
+#: src/Screen/EditPackage.php:307
+#: src/Screen/EditPackage.php:489
+#: src/Screen/EditPart.php:107
+#: src/Screen/EditPart.php:228
+msgid "Section Description"
+msgstr ""
+
+#: src/Screen/EditPackage.php:308
+msgid "First, configure details about <strong>where from should we get package/versions</strong> for this package."
+msgstr ""
+
+#: src/Screen/EditPackage.php:310
+msgid "Set the package source type"
+msgstr ""
+
+#: src/Screen/EditPackage.php:311
+#: src/Screen/EditPart.php:111
+msgid "Composer works with packages and repositories to find the core to use for the defined dependencies. We will strive to keep as close to that in terms of concepts. Learn more about it <a href=\"https://getcomposer.org/doc/05-repositories.md#repository\" target=\"_blank\">here</a>."
+msgstr ""
+
+#: src/Screen/EditPackage.php:313
+msgid "Pick your package source, carefully.."
+msgstr ""
+
+#: src/Screen/EditPackage.php:314
+#: src/Screen/EditPart.php:114
+msgid "A Packagist.org public repo"
+msgstr ""
+
+#: src/Screen/EditPackage.php:315
+msgid "A WPackagist.org repo (mirror of wordpress.org)"
+msgstr ""
+
+#: src/Screen/EditPackage.php:316
+#: src/Screen/EditPart.php:115
+msgid "A VCS repo (git, SVN, fossil or hg)"
+msgstr ""
+
+#: src/Screen/EditPackage.php:317
+msgid "A plugin installed on this WordPress installation"
+msgstr ""
+
+#: src/Screen/EditPackage.php:318
+msgid "A theme installed on this WordPress installation"
+msgstr ""
+
+#: src/Screen/EditPackage.php:319
+msgid "A local repo: package releases/versions are managed here, manually"
+msgstr ""
+
+#: src/Screen/EditPackage.php:325
+#: src/Screen/EditPart.php:122
+msgid "Package Source Name"
+msgstr ""
+
+#: src/Screen/EditPackage.php:326
+#: src/Screen/EditPart.php:123
+msgid "Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href=\"https://getcomposer.org/doc/04-schema.md#name\" target=\"_blank\">here</a>. Most often you will find the correct project name in the project's <code>composer.json</code> file, under the <code>\"name\"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket</code>)!</strong>"
+msgstr ""
+
+#: src/Screen/EditPackage.php:339
+msgid "Package Source Project Name"
+msgstr ""
+
+#: src/Screen/EditPackage.php:340
+msgid "Composer identifies a certain package by its project name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href=\"https://getcomposer.org/doc/04-schema.md#name\" target=\"_blank\">here</a>.<br>The project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide only the project name (e.g. <code>akismet</code>), not the whole package name (e.g. <code>wpackagist-plugin/akismet</code>)!</strong>"
+msgstr ""
+
+#: src/Screen/EditPackage.php:353
+#: src/Screen/EditPart.php:134
+msgid "Package Source Version Range"
+msgstr ""
+
+#: src/Screen/EditPackage.php:354
+#: src/Screen/EditPart.php:135
+msgid ""
+"A certain source can contain tens or even hundreds of historical versions/releases. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>\n"
+" Specify a version range to <strong>limit the available versions/releases for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>\n"
+" Learn more about Composer <a href=\"https://getcomposer.org/doc/articles/versions.md#writing-version-constraints\" target=\"_blank\">versions</a> or <a href=\"https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable\" target=\"_blank\">play around</a> with version ranges."
+msgstr ""
+
+#: src/Screen/EditPackage.php:368
+#: src/Screen/EditPart.php:147
+msgid "Package Source Stability"
+msgstr ""
+
+#: src/Screen/EditPackage.php:369
+#: src/Screen/EditPart.php:148
+msgid "Limit the minimum stability required for versions. <code>Stable</code> is the most restrictive one, while <code>dev</code> the most all encompassing.<br><code>Stable</code> is the recommended (and default) one."
+msgstr ""
+
+#: src/Screen/EditPackage.php:372
+#: src/Screen/EditPackage.php:608
+#: src/Screen/EditPart.php:151
+#: src/Screen/EditPart.php:337
+#: src/Screen/EditPart.php:382
+msgid "Stable"
+msgstr ""
+
+#: src/Screen/EditPackage.php:374
+#: src/Screen/EditPackage.php:609
+#: src/Screen/EditPart.php:153
+#: src/Screen/EditPart.php:338
+#: src/Screen/EditPart.php:383
+msgid "RC"
+msgstr ""
+
+#: src/Screen/EditPackage.php:375
+#: src/Screen/EditPackage.php:610
+#: src/Screen/EditPart.php:154
+#: src/Screen/EditPart.php:339
+#: src/Screen/EditPart.php:384
+msgid "Beta"
+msgstr ""
+
+#: src/Screen/EditPackage.php:376
+#: src/Screen/EditPackage.php:611
+#: src/Screen/EditPart.php:155
+#: src/Screen/EditPart.php:340
+#: src/Screen/EditPart.php:385
+msgid "Alpha"
+msgstr ""
+
+#: src/Screen/EditPackage.php:377
+#: src/Screen/EditPackage.php:612
+#: src/Screen/EditPart.php:156
+#: src/Screen/EditPart.php:341
+#: src/Screen/EditPart.php:386
+msgid "Dev"
+msgstr ""
+
+#: src/Screen/EditPackage.php:391
+#: src/Screen/EditPart.php:168
+msgid "Package VCS URL"
+msgstr ""
+
+#: src/Screen/EditPackage.php:392
+#: src/Screen/EditPart.php:169
+msgid "Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pixelgradelt/satispress</code>). Learn more about it <a href=\"https://getcomposer.org/doc/05-repositories.md#vcs\" target=\"_blank\">here</a>."
+msgstr ""
+
+#: src/Screen/EditPackage.php:404
+msgid "Choose one of the installed plugins"
+msgstr ""
+
+#: src/Screen/EditPackage.php:405
+msgid "Installed plugins that are already attached to a package are NOT part of the list of choices."
+msgstr ""
+
+#: src/Screen/EditPackage.php:420
+msgid "Choose one of the installed themes"
+msgstr ""
+
+#: src/Screen/EditPackage.php:421
+msgid "Installed themes that are already attached to a package are NOT part of the list of choices."
+msgstr ""
+
+#: src/Screen/EditPackage.php:437
+msgid "Package Releases"
+msgstr ""
+
+#: src/Screen/EditPackage.php:438
+msgid ""
+"The manually uploaded package releases (zips).<br>\n"
+"<strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br>\n"
+"<strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit \"Update\" for the post and them add a new release.<br>\n"
+"Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can't stand some mess.<br><br>\n"
+"<em>TIP: If you <strong>switch the package type to manual entries,</strong> hit \"Update\" and all existing, stored releases will be migrated for you to manually manage.</em>"
+msgstr ""
+
+#: src/Screen/EditPackage.php:446
+#: src/Screen/EditPart.php:188
+msgid "Version"
+msgstr ""
+
+#: src/Screen/EditPackage.php:447
+#: src/Screen/EditPart.php:189
+msgid "Semver-formatted version string. Bear in mind that we currently don't do any check regarding the version. It is up to you to <strong>make sure that the zip file contents match the version specified.</strong>"
+msgstr ""
+
+#: src/Screen/EditPackage.php:450
+#: src/Screen/EditPart.php:192
+msgid "Zip File"
+msgstr ""
+
+#: src/Screen/EditPackage.php:490
+msgid "Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like."
+msgstr ""
+
+#: src/Screen/EditPackage.php:505
+msgid "Package Description"
+msgstr ""
+
+#: src/Screen/EditPackage.php:520
+msgid "Package Homepage URL"
+msgstr ""
+
+#: src/Screen/EditPackage.php:535
+msgid "Package License"
+msgstr ""
+
+#: src/Screen/EditPackage.php:536
+msgid "The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href=\"https://getcomposer.org/doc/04-schema.md#license\" target=\"_blank\">here</a>."
+msgstr ""
+
+#: src/Screen/EditPackage.php:551
+#: src/Screen/EditPart.php:283
+msgid "Package Authors"
+msgstr ""
+
+#: src/Screen/EditPackage.php:552
+msgid "The package authors details. Learn more about it <a href=\"https://getcomposer.org/doc/04-schema.md#authors\" target=\"_blank\">here</a>."
+msgstr ""
+
+#: src/Screen/EditPackage.php:554
+#: src/Screen/EditPart.php:286
+msgid "Author Name"
+msgstr ""
+
+#: src/Screen/EditPackage.php:555
+#: src/Screen/EditPart.php:287
+msgid "Author Email"
+msgstr ""
+
+#: src/Screen/EditPackage.php:556
+#: src/Screen/EditPart.php:288
+msgid "Author Homepage"
+msgstr ""
+
+#: src/Screen/EditPackage.php:557
+#: src/Screen/EditPart.php:289
+msgid "Author Role"
+msgstr ""
+
+#: src/Screen/EditPackage.php:581
+msgid "Dependencies Configuration"
+msgstr ""
+
+#: src/Screen/EditPackage.php:586
+#: src/Screen/EditPart.php:315
+msgid "Dependencies Description"
+msgstr ""
+
+#: src/Screen/EditPackage.php:587
+msgid ""
+"Here you edit and configure <strong>the list of other managed packages</strong> the current package depends on (required packages that translate into entries in Composer's <code>require</code> entries).<br>\n"
+"For each required package you can <strong>specify a version range</strong> to better control the package releases/versions required. Set to <code>*</code> to <strong>use the latest available required-package release that matches all constraints</strong> (other packages in a module might impose stricter limits).<br>\n"
+"Learn more about Composer <a href=\"https://getcomposer.org/doc/articles/versions.md#writing-version-constraints\" target=\"_blank\">versions</a> or <a href=\"https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable\" target=\"_blank\">play around</a> with version ranges."
+msgstr ""
+
+#: src/Screen/EditPackage.php:591
+#: views/package-details.php:103
+msgid "Required Packages"
+msgstr ""
+
+#: src/Screen/EditPackage.php:592
+#: src/Screen/EditPart.php:321
+msgid ""
+"The order is not important, from a logic standpoint. Also, if you add <strong>the same package multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>\n"
+"<strong>FYI:</strong> Each required package label is comprised of the standardized <code>source_name</code> and the <code>#post_id</code>."
+msgstr ""
+
+#: src/Screen/EditPackage.php:597
+#: src/Screen/EditPart.php:326
+msgid "Choose one of the managed packages"
+msgstr ""
+
+#: src/Screen/EditPackage.php:602
+#: src/Screen/EditPart.php:331
+#: src/Screen/EditPart.php:376
+msgid "Version Range"
+msgstr ""
+
+#: src/Screen/EditPackage.php:606
+#: src/Screen/EditPart.php:335
+#: src/Screen/EditPart.php:380
+msgid "Stability"
+msgstr ""
+
+#: src/Screen/EditPackage.php:631
+msgid "Current Package State Details"
+msgstr ""
+
+#: src/Screen/EditPackage.php:917
+#: src/Screen/EditPackage.php:990
+msgid "%s (by %s) - %s"
+msgstr ""
+
+#: src/Screen/EditPackage.php:923
+msgid "Pick your installed plugin, carefully.."
+msgstr ""
+
+#: src/Screen/EditPackage.php:949
+#: src/Screen/EditPart.php:424
+#: src/Screen/EditPart.php:456
+msgid "%s - %s"
+msgstr ""
+
+#: src/Screen/EditPackage.php:955
+msgid "Pick your required package, carefully.."
+msgstr ""
+
+#: src/Screen/EditPackage.php:996
+msgid "Pick your installed theme, carefully.."
+msgstr ""
+
+#: src/Screen/EditPackage.php:1015
+msgid "You MUST set a unique name (title) for creating a new package."
+msgstr ""
+
+#: src/Screen/EditPackage.php:1028
+msgid "You MUST choose a %s for creating a new package."
+msgstr ""
+
+#: src/Screen/EditPackage.php:1040
+msgid "For WordPress-Core-type packages, you can only use choose the following source types: Packagist.org, VCS (e.g. Github repo), or manually uploaded zips."
+msgstr ""
+
+#: src/Screen/EditPackage.php:1112
+msgid "Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉<br><em>On trash the stored artifacts are deleted!</em>"
+msgstr ""
+
+#: src/Screen/EditPart.php:43
+msgid "Add part title"
+msgstr ""
+
+#: src/Screen/EditPart.php:58
+msgid ""
+"<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong><br>\n"
+"In the end this will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>\n"
+"<strong>The slug/name must be</strong> lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href=\"https://regexr.com/5sr9h\" target=\"_blank\">this regex</a>.<br>\n"
+"<em>Note: Add the <code>"
+msgstr ""
+
+#: src/Screen/EditPart.php:102
+msgid "Part's plugin source configuration"
+msgstr ""
+
+#: src/Screen/EditPart.php:108
+msgid "First, configure details about <strong>where from should we get releases</strong> for this part's plugin.<br>This should be a WP plugin that handles the integration for this part once deployed on a site."
+msgstr ""
+
+#: src/Screen/EditPart.php:110
+msgid "Set the part's plugin source type"
+msgstr ""
+
+#: src/Screen/EditPart.php:113
+msgid "Pick your source, carefully.."
+msgstr ""
+
+#: src/Screen/EditPart.php:116
+msgid "A local repo: part releases/versions are managed here, manually"
+msgstr ""
+
+#: src/Screen/EditPart.php:179
+msgid "Part's Plugin Releases"
+msgstr ""
+
+#: src/Screen/EditPart.php:180
+msgid ""
+"The manually uploaded part's plugin releases (zips).<br>\n"
+"<strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br>\n"
+"<strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit \"Update\" for the post and them add a new release.<br>\n"
+"Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can't stand some mess.<br><br>\n"
+"<em>TIP: If you <strong>switch the package type to manual entries,</strong> hit \"Update\" and all existing, stored releases will be migrated for you to manually manage.</em>"
+msgstr ""
+
+#: src/Screen/EditPart.php:229
+msgid ""
+"Configure details about <strong>the part itself,</strong> as it will be exposed for consumption.<br>\n"
+"<strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.<br>\n"
+"<em>Note: These details only refer to the part's plugin code, not its dependencies.</em>"
+msgstr ""
+
+#: src/Screen/EditPart.php:246
+msgid "Part Description"
+msgstr ""
+
+#: src/Screen/EditPart.php:258
+msgid "Part Homepage URL"
+msgstr ""
+
+#: src/Screen/EditPart.php:270
+msgid "Part License"
+msgstr ""
+
+#: src/Screen/EditPart.php:271
+msgid "The part license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href=\"https://getcomposer.org/doc/04-schema.md#license\" target=\"_blank\">here</a>."
+msgstr ""
+
+#: src/Screen/EditPart.php:284
+msgid "The part authors details. Learn more about it <a href=\"https://getcomposer.org/doc/04-schema.md#authors\" target=\"_blank\">here</a>."
+msgstr ""
+
+#: src/Screen/EditPart.php:310
+msgid "Included Packages Configuration"
+msgstr ""
+
+#: src/Screen/EditPart.php:316
+msgid ""
+"Here you edit and configure <strong>the list of managed packages</strong> this part provides/includes (required packages that translate into entries in Composer's <code>require</code> entries).<br>\n"
+"For each required package you can <strong>specify a version range</strong> to better control the package releases/versions required. Set to <code>*</code> to <strong>use the latest available required-package release that matches all constraints</strong> (other packages in a module might impose stricter limits).<br>\n"
+"Learn more about Composer <a href=\"https://getcomposer.org/doc/articles/versions.md#writing-version-constraints\" target=\"_blank\">versions</a> or <a href=\"https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable\" target=\"_blank\">play around</a> with version ranges."
+msgstr ""
+
+#: src/Screen/EditPart.php:320
+msgid "Included Packages"
+msgstr ""
+
+#: src/Screen/EditPart.php:355
+msgid "Required Parts Configuration"
+msgstr ""
+
+#: src/Screen/EditPart.php:360
+msgid "Required Parts Description"
+msgstr ""
+
+#: src/Screen/EditPart.php:361
+msgid ""
+"Here you edit and configure <strong>the list of other parts</strong> this part depends on.<br>\n"
+"For each required part you can <strong>specify a version range</strong> to better control the part releases/versions required. Set to <code>*</code> to <strong>use the latest available required-part release that matches all constraints</strong> (other parts present on a site might impose stricter limits).<br>\n"
+"Learn more about Composer <a href=\"https://getcomposer.org/doc/articles/versions.md#writing-version-constraints\" target=\"_blank\">versions</a> or <a href=\"https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable\" target=\"_blank\">play around</a> with version ranges."
+msgstr ""
+
+#: src/Screen/EditPart.php:365
+msgid "Required Parts"
+msgstr ""
+
+#: src/Screen/EditPart.php:366
+msgid ""
+"The order is not important, from a logic standpoint. Also, if you add <strong>the same part multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>\n"
+"<strong>FYI:</strong> Each required part label is comprised of the standardized <code>source_name</code> and the <code>#post_id</code>."
+msgstr ""
+
+#: src/Screen/EditPart.php:371
+msgid "Choose one of the parts"
+msgstr ""
+
+#: src/Screen/EditPart.php:430
+msgid "Pick your included package, carefully.."
+msgstr ""
+
+#: src/Screen/EditPart.php:462
+msgid "Pick your required part, carefully.."
 msgstr ""
 
 #: src/Screen/EditUser.php:113
 msgid "PixelgradeLT Records API Keys"
 msgstr ""
 
-#: src/Screen/Settings.php:164
-msgid "General"
+#. translators: %s: <code>pixelgradelt_records</code>
+#: src/Screen/EditUser.php:118
+#: src/Screen/Settings.php:257
+msgid "The password for all API Keys is %s. Use the API key as the username."
+msgstr ""
+
+#: src/Screen/ListPackages.php:77
+msgid "All %s"
+msgstr ""
+
+#: src/Screen/ListPackages.php:121
+msgid "Package Source"
+msgstr ""
+
+#: src/Screen/Settings.php:101
+msgid "LT Records"
 msgstr ""
 
 #: src/Screen/Settings.php:171
-msgid "Access"
+msgid "General"
 msgstr ""
 
-#: src/Screen/Settings.php:178 src/Screen/Settings.php:200
-#: views/packages.php:129
-msgid "Themes"
+#: src/Screen/Settings.php:178
+msgid "Access"
 msgstr ""
 
 #: src/Screen/Settings.php:192
 msgid "Vendor"
 msgstr ""
 
-#: src/Screen/Settings.php:255
-msgid ""
-"API Keys are used to access your PixelgradeLT Records repository and download "
-"packages. Your personal API keys appear below or you can create keys for "
-"other users by editing their accounts."
+#: src/Screen/Settings.php:200
+msgid "Github OAuth Token"
 msgstr ""
 
-#: src/Screen/Settings.php:261
-#. translators: %s: <code>pixelgradelt-records</code>
-msgid "The password for all API Keys is %s."
+#: src/Screen/Settings.php:251
+msgid "API Keys are used to access your PixelgradeLT Records repository and download packages. Your personal API keys appear below or you can create keys for other users by editing their accounts."
 msgstr ""
 
-#: src/Screen/Settings.php:268
+#: src/Screen/Settings.php:264
 msgid "Read more about securing your PixelgradeLT Records repository."
 msgstr ""
 
-#: src/Screen/Settings.php:280
-msgid "Choose themes to make available in your PixelgradeLT Records repository."
-msgstr ""
-
-#: src/functions.php:155
-#. translators: %s: documentation URL
-msgid ""
-"PixelgradeLT Records is missing required dependencies. <a href=\"%s\" "
-"target=\"_blank\" rel=\"noopener noreferer\">Learn more.</a>"
-msgstr ""
-
-#: views/packages.php:44
+#: views/package-details.php:41
 msgid "Homepage"
 msgstr ""
 
-#: views/packages.php:50
+#: views/package-details.php:49
 msgid "Authors"
 msgstr ""
 
-#: views/packages.php:54
+#: views/package-details.php:59
 msgid "Releases"
 msgstr ""
 
-#: views/packages.php:96
-msgid "Package Type"
+#: views/package-details.php:82
+msgctxt "latest version"
+msgid "Latest"
 msgstr ""
 
-#: views/packages.php:107
-msgid "Whitelisting Packages"
+#: views/package-details.php:97
+msgid "No releases! This package will not be available for use since there is nothing to use!"
 msgstr ""
 
-#: views/packages.php:109
+#: views/package-details.php:133
+msgid "None"
+msgstr ""
+
+#: views/packages.php:33
 msgid ""
-"Plugins and themes need to be whitelisted to make them available as "
-"Composer packages."
+"These are <strong>all the packages</strong> that PixelgradeLT Records makes available as Composer packages, regardless of their configuration.<br>\n"
+"This view is primarily available to assist in <strong>double-checking that things work properly.</strong><br>\n"
+"If you want to <strong>dig deeper,</strong> check <a href=\"%s\" target=\"_blank\">the actual JSON</a> of the PixelgradeLT Records repo."
 msgstr ""
 
-#: views/packages.php:112
-msgid "Read more about whitelisting plugins and themes."
+#: views/packages.php:45
+msgid "No packages defined"
 msgstr ""
 
-#: views/packages.php:115
-msgid "Plugins"
+#: views/packages.php:47
+msgid "Plugins and themes need to be configured as Pixelgrade LT packages to make them available as Composer packages."
 msgstr ""
 
-#: views/packages.php:121
-#. translators: %s: Plugins screen URL
-msgid ""
-"Plugins can be whitelisted by visiting the <a href=\"%s\"><em>Plugins "
-"&rarr; Installed Plugins</em></a> screen and toggling the checkbox for each "
-"plugin in the \"PixelgradeLT Records\" column."
+#: views/packages.php:50
+msgid "Go to <code>LT Packages > Add New</code> and start managing your first package."
 msgstr ""
 
-#: views/packages.php:135
-#. translators: %s: PixelgradeLT Records settings screen URL
-msgid ""
-"Themes can be toggled on the <a href=\"%s\"><em>Settings &rarr; "
-"PixelgradeLT Records</em></a> screen."
-msgstr ""
-
-#: views/screen-settings.php:18
+#: views/screen-settings.php:27
 msgid "Settings"
 msgstr ""
 
-#: views/screen-settings.php:19
+#: views/screen-settings.php:28
 msgid "Packages"
 msgstr ""
 
-#: views/screen-settings.php:24
+#: views/screen-settings.php:29
+msgid "Status"
+msgstr ""
+
+#: views/screen-settings.php:34
 msgid "Your PixelgradeLT Records repository is available at:"
 msgstr ""
 
-#: views/screen-settings.php:33
 #. translators: 1: <code>repositories</code>, 2: <code>composer.json</code>
-msgid "Add it to the %1$s list in your %2$s:"
+#: views/screen-settings.php:43
+msgid "Add it to the %1$s list in your project's %2$s, like so:"
 msgstr ""
 
-#: views/templates.php:17 views/templates.php:37
+#: views/screen-settings.php:60
+msgid "You also have the PixelgradeLT Records Parts repository is available at:"
+msgstr ""
+
+#: views/status.php:30
+msgid "These are a series of system checks to reassure or warn you of <strong>how fit is the webserver for running PixelgradeLT Records.</strong>"
+msgstr ""
+
+#: views/templates.php:17
+#: views/templates.php:37
 msgid "Name"
 msgstr ""
 
@@ -194,8 +1112,8 @@ msgstr ""
 msgid "Require"
 msgstr ""
 
-#: views/templates.php:93
 #. translators: %s: <code>composer.json</code>
+#: views/templates.php:93
 msgid "Copy and paste into %s"
 msgstr ""
 
@@ -203,28 +1121,7 @@ msgstr ""
 msgid "CLI Command"
 msgstr ""
 
-#: views/templates.php:108
 #. translators: %s: version number
+#: views/templates.php:108
 msgid "Download %s"
-msgstr ""
-
-#. Plugin URI of the plugin/theme
-msgid "https://github.com/pixelgradelt/pixelgradelt-records"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "Generate a Composer repository from installed WordPress plugins and themes."
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "Cedaro"
-msgstr ""
-
-#. Author URI of the plugin/theme
-msgid "https://www.cedaro.com/"
-msgstr ""
-
-#: views/packages.php:77
-msgctxt "latest version"
-msgid "Latest"
 msgstr ""
