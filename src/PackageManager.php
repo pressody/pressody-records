@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
+use Mockery\Exception;
 use PixelgradeLT\Records\Authentication\ApiKey\Server;
 use PixelgradeLT\Records\Client\ComposerClient;
 use PixelgradeLT\Records\PackageType\PackageTypes;
@@ -896,9 +897,9 @@ class PackageManager {
 	 *
 	 * @param Package $package
 	 *
-	 * @return bool
+	 * @return \Exception|bool
 	 */
-	public function dry_run_package_require( Package $package ): bool {
+	public function dry_run_package_require( Package $package ) {
 		$client = $this->get_composer_client();
 
 		try {
@@ -948,7 +949,7 @@ class PackageManager {
 				]
 			);
 
-			return false;
+			return $e;
 		}
 
 		return true;

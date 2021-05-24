@@ -783,10 +783,17 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		// Transform the package in the Composer format.
 		$package = $this->composer_transformer->transform( $package );
 
-		if ( false === $this->package_manager->dry_run_package_require( $package ) ) {
+		if ( true !== ( $result = $this->package_manager->dry_run_package_require( $package ) ) ) {
+			$message = '<p>';
+			$message .= 'We could not resolve the package dependencies. <strong>You should give the required packages a further look and then hit Update!</strong><br>';
+			if ( $result instanceof \Exception ) {
+				$message .= '<pre>' . $result->getMessage() . '</pre><br>';
+			}
+			$message .= 'There should be additional information in the PixelgradeLT Records logs.';
+			$message .= '</p>';
 			update_post_meta( $post_ID, '_package_require_dry_run_result', [
 					'type'    => 'error',
-					'message' => '<p>We could not resolve the package dependencies. <strong>You should give the required packages a further look and then hit Update!</strong><br>There should be additional information in the PixelgradeLT Records logs.</p>',
+					'message' => $message,
 			] );
 		} else {
 			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
