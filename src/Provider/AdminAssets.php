@@ -24,6 +24,7 @@ class AdminAssets extends AbstractHookProvider {
 	 */
 	public function register_hooks() {
 		add_action( 'admin_enqueue_scripts', [ $this, 'register_assets' ], 1 );
+		add_filter( 'script_loader_tag', [ $this, 'filter_script_type' ], 10, 3 );
 	}
 
 	/**
@@ -35,44 +36,81 @@ class AdminAssets extends AbstractHookProvider {
 		wp_register_script(
 			'pixelgradelt_records-admin',
 			$this->plugin->get_url( 'assets/js/admin.js' ),
-			[ 'jquery', 'wp-backbone', 'wp-util' ],
-			'20210210',
+			[ 'jquery' ],
+			'20210524',
 			true
 		);
 
 		wp_register_script(
-			'pixelgradelt_records-api-keys',
-			$this->plugin->get_url( 'assets/js/api-keys.js' ),
-			[ 'wp-backbone', 'wp-util' ],
-			'20210210',
+			'pixelgradelt_records-access',
+			$this->plugin->get_url( 'assets/js/access.js' ),
+			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
+			'20210211',
 			true
 		);
 
-		wp_localize_script(
-			'pixelgradelt_records-api-keys',
-			'_pixelgradelt_recordsApiKeySettings',
-			[
-				'createApiKeyNonce' => wp_create_nonce( 'create-api-key' ),
-				'deleteApiKeyNonce' => wp_create_nonce( 'delete-api-key' ),
-				'l10n'              => [
-					'aysDeleteApiKey' => esc_html__( 'Are you sure you want to delete this API Key?', 'pixelgradelt_records' ),
-				],
-			]
+		wp_set_script_translations(
+			'pixelgradelt_records-access',
+			'pixelgradelt_records',
+			$this->plugin->get_path( 'languages' )
 		);
 
 		wp_register_script(
-			'pixelgradelt_records-package-settings',
-			$this->plugin->get_url( 'assets/js/package-settings.js' ),
-			[ 'wp-backbone', 'wp-util' ],
-			'20180708',
+			'pixelgradelt_records-repository',
+			$this->plugin->get_url( 'assets/js/repository.js' ),
+			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
+			'20210211',
 			true
+		);
+
+		wp_set_script_translations(
+			'pixelgradelt_records-repository',
+			'pixelgradelt_records',
+			$this->plugin->get_path( 'languages' )
+		);
+
+		wp_register_script(
+			'pixelgradelt_records-edit-package',
+			$this->plugin->get_url( 'assets/js/edit-package.js' ),
+			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
+			'20210524',
+			true
+		);
+
+		wp_set_script_translations(
+			'pixelgradelt_records-edit-package',
+			'pixelgradelt_records',
+			$this->plugin->get_path( 'languages' )
 		);
 
 		wp_register_style(
 			'pixelgradelt_records-admin',
 			$this->plugin->get_url( 'assets/css/admin.css' ),
-			[],
+			[ 'wp-components' ],
 			'20210210'
 		);
+	}
+
+	/**
+	 * Filter script tag type attributes.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $tag    Script tag HTML.
+	 * @param string $handle Script identifier.
+	 * @return string
+	 */
+	public function filter_script_type( string $tag, string $handle ): string {
+		$modules = [
+			'pixelgradelt_records-access',
+			'pixelgradelt_records-repository',
+			'pixelgradelt_records-edit-package',
+		];
+
+		if ( in_array( $handle, $modules, true ) ) {
+			$tag = str_replace( '<script', '<script type="module"', $tag );
+		}
+
+		return $tag;
 	}
 }

@@ -21,6 +21,7 @@ use PixelgradeLT\Records\Transformer\PackageTransformer;
 
 use function PixelgradeLT\Records\get_packages_permalink;
 use function PixelgradeLT\Records\get_parts_permalink;
+use function PixelgradeLT\Records\preload_rest_data;
 
 /**
  * Settings screen provider class.
@@ -33,14 +34,14 @@ class Settings extends AbstractHookProvider {
 	 *
 	 * @var ApiKeyRepository
 	 */
-	protected $api_keys;
+	protected ApiKeyRepository $api_keys;
 
 	/**
 	 * Composer package transformer.
 	 *
 	 * @var PackageTransformer
 	 */
-	protected $composer_transformer;
+	protected PackageTransformer $composer_transformer;
 
 	/**
 	 * Package repository.
@@ -126,29 +127,41 @@ class Settings extends AbstractHookProvider {
 	public function enqueue_assets() {
 		wp_enqueue_script( 'pixelgradelt_records-admin' );
 		wp_enqueue_style( 'pixelgradelt_records-admin' );
-		wp_enqueue_script( 'pixelgradelt_records-package-settings' );
+		wp_enqueue_script( 'pixelgradelt_records-access' );
+		wp_enqueue_script( 'pixelgradelt_records-repository' );
 
-		$api_keys = $this->api_keys->find_for_user( wp_get_current_user() );
-
-		$items = array_map(
-				function ( ApiKey $api_key ) {
-					$data                   = $api_key->to_array();
-					$data['user_edit_link'] = esc_url( get_edit_user_link( $api_key->get_user()->ID ) );
-
-					return $data;
-				},
-				$api_keys
-		);
-
-		wp_enqueue_script( 'pixelgradelt_records-api-keys' );
 		wp_localize_script(
-				'pixelgradelt_records-api-keys',
-				'_pixelgradelt_recordsApiKeysData',
+				'pixelgradelt_records-access',
+				'_pixelgradeltRecordsAccessData',
 				[
-						'items'  => $items,
-						'userId' => get_current_user_id(),
+						'editedUserId' => get_current_user_id(),
 				]
 		);
+
+		wp_localize_script(
+				'pixelgradelt_records-repository',
+				'_pixelgradeltRecordsRepositoryData',
+				[
+						'addNewPackageUrl' => admin_url('post-new.php?post_type=ltpackage'),
+				]
+		);
+
+		$preload_paths = [
+				'/pixelgradelt_records/v1/packages',
+		];
+
+		if ( current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
+			$preload_paths = array_merge(
+					$preload_paths,
+					[
+							'/pixelgradelt_records/v1/apikeys?user=' . get_current_user_id(),
+							'/pixelgradelt_records/v1/plugins?_fields=slug,name,type',
+							'/pixelgradelt_records/v1/themes?_fields=slug,name,type',
+					]
+			);
+		}
+
+		preload_rest_data( $preload_paths );
 	}
 
 	/**
@@ -170,13 +183,6 @@ class Settings extends AbstractHookProvider {
 				'default',
 				esc_html__( 'General', 'pixelgradelt_records' ),
 				'__return_null',
-				'pixelgradelt_records'
-		);
-
-		add_settings_section(
-				'access',
-				esc_html__( 'Access', 'pixelgradelt_records' ),
-				[ $this, 'render_section_access_description' ],
 				'pixelgradelt_records'
 		);
 	}
@@ -233,11 +239,31 @@ class Settings extends AbstractHookProvider {
 	public function render_screen() {
 		$packages_permalink     = esc_url( get_packages_permalink() );
 		$parts_permalink     = esc_url( get_parts_permalink() );
-		$packages      = array_map( [ $this->composer_transformer, 'transform' ], $this->packages->all() );
 		$system_checks = [];
 
+		$tabs = [
+				'repository' => [
+						'name'       => esc_html__( 'Repository', 'pixelgradelt_records' ),
+						'capability' => Capabilities::VIEW_PACKAGES,
+				],
+				'access'     => [
+						'name'       => esc_html__( 'Access', 'pixelgradelt_records' ),
+						'capability' => Capabilities::MANAGE_OPTIONS,
+						'is_active'  => false,
+				],
+				'composer'   => [
+						'name'       => esc_html__( 'Composer', 'pixelgradelt_records' ),
+						'capability' => Capabilities::VIEW_PACKAGES,
+				],
+				'settings'   => [
+						'name'       => esc_html__( 'Settings', 'pixelgradelt_records' ),
+						'capability' => Capabilities::MANAGE_OPTIONS,
+				],
+		];
+
+		$active_tab = 'repository';
+
 		include $this->plugin->get_path( 'views/screen-settings.php' );
-		include $this->plugin->get_path( 'views/templates.php' );
 	}
 
 	/**
@@ -246,23 +272,7 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function render_section_access_description() {
-		printf(
-				'<p>%s</p>',
-				esc_html__( 'API Keys are used to access your PixelgradeLT Records repository and download packages. Your personal API keys appear below or you can create keys for other users by editing their accounts.', 'pixelgradelt_records' )
-		);
 
-		printf(
-				'<p><strong>%s</strong></p>',
-				/* translators: %s: <code>pixelgradelt_records</code> */
-				sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_records' ), '<code>pixelgradelt_records</code>' )
-		);
-
-		echo '<div id="pixelgradelt_records-api-key-manager"></div>';
-
-		printf(
-				'<p><a href="https://github.com/pixelgradelt/pixelgradelt-records/blob/develop/docs/security.md" target="_blank" rel="noopener noreferer"><em>%s</em></a></p>',
-				esc_html__( 'Read more about securing your PixelgradeLT Records repository.', 'pixelgradelt_records' )
-		);
 	}
 
 	/**

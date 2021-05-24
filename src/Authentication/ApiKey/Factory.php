@@ -26,9 +26,10 @@ final class Factory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_User $user  WordPress user.
-	 * @param array   $data  Optional. Additional data associated with the API key.
-	 * @param string  $token Optional. API Key token.
+	 * @param WP_User     $user  WordPress user.
+	 * @param array|null  $data  Optional. Additional data associated with the API key.
+	 * @param string|null $token Optional. API Key token.
+	 *
 	 * @return ApiKey
 	 */
 	public function create( WP_User $user, array $data = null, string $token = null ): ApiKey {

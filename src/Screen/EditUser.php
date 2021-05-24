@@ -18,6 +18,7 @@ use PixelgradeLT\Records\Capabilities;
 use WP_User;
 
 use function PixelgradeLT\Records\get_edited_user_id;
+use function PixelgradeLT\Records\preload_rest_data;
 
 /**
  * Edit User screen provider class.
@@ -70,7 +71,6 @@ class EditUser extends AbstractHookProvider {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_action( 'edit_user_profile', [ $this, 'render_api_keys_section' ] );
 		add_action( 'show_user_profile', [ $this, 'render_api_keys_section' ] );
-		add_action( 'admin_footer', [ $this, 'print_templates' ] );
 	}
 
 	/**
@@ -82,24 +82,19 @@ class EditUser extends AbstractHookProvider {
 		wp_enqueue_script( 'pixelgradelt_records-admin' );
 		wp_enqueue_style( 'pixelgradelt_records-admin' );
 
-		$user_id  = get_edited_user_id();
-		$user     = get_user_by( 'id', $user_id );
-		$api_keys = $this->api_keys->find_for_user( $user );
+		wp_enqueue_script( 'pixelgradelt_records-access' );
 
-		$items = array_map(
-			function( ApiKey $api_key ) {
-					return $api_key->to_array();
-			},
-			$api_keys
+		wp_localize_script(
+			'pixelgradelt_records-access',
+			'_pixelgradeltRecordsAccessData',
+			[
+				'editedUserId' => get_edited_user_id(),
+			]
 		);
 
-		wp_enqueue_script( 'pixelgradelt_records-api-keys' );
-		wp_localize_script(
-			'pixelgradelt_records-api-keys',
-			'_pixelgradelt_recordsApiKeysData',
+		preload_rest_data(
 			[
-				'items'  => $items,
-				'userId' => $user_id,
+				'/pixelgradelt_records/v1/apikeys?user=' . get_edited_user_id(),
 			]
 		);
 	}
@@ -119,14 +114,5 @@ class EditUser extends AbstractHookProvider {
 		);
 
 		echo '<div id="pixelgradelt_records-api-key-manager"></div>';
-	}
-
-	/**
-	 * Print Underscore.js templates.
-	 *
-	 * @since 0.1.0
-	 */
-	public function print_templates() {
-		include $this->plugin->get_path( 'views/templates.php' );
 	}
 }

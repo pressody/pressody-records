@@ -187,6 +187,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['hooks.rest'] = function( $container ) {
+			return new Provider\REST( $container['rest.controllers'] );
+		};
+
 		$container['hooks.rewrite_rules'] = function () {
 			return new Provider\RewriteRules();
 		};
@@ -481,6 +485,34 @@ class ServiceProvider implements ServiceProviderInterface {
 				[
 					$container['repository.parts.external'],
 					$container['repository.parts.manual'],
+				]
+			);
+		};
+
+		$container['rest.controller.api_keys'] = function( $container ) {
+			return new REST\ApiKeysController(
+				'pixelgradelt_records/v1',
+				'apikeys',
+				$container['api_key.factory'],
+				$container['api_key.repository']
+			);
+		};
+
+		$container['rest.controller.packages'] = function( $container ) {
+			return new REST\PackagesController(
+				'pixelgradelt_records/v1',
+				'packages',
+				$container['repository.all.managed'],
+				$container['transformer.composer_package']
+			);
+		};
+
+		$container['rest.controllers'] = function( $container ) {
+			return new ServiceIterator(
+				$container,
+				[
+					'api_keys' => 'rest.controller.api_keys',
+					'packages' => 'rest.controller.packages',
 				]
 			);
 		};

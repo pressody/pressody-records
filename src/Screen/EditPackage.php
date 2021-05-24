@@ -22,6 +22,7 @@ use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 use function PixelgradeLT\Records\get_packages_permalink;
+use function PixelgradeLT\Records\preload_rest_data;
 
 /**
  * Edit Package screen provider class.
@@ -151,7 +152,6 @@ class EditPackage extends AbstractHookProvider {
 		}
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_footer', [ $this, 'print_templates' ] );
 	}
 
 	/**
@@ -162,15 +162,22 @@ class EditPackage extends AbstractHookProvider {
 	public function enqueue_assets() {
 		wp_enqueue_script( 'pixelgradelt_records-admin' );
 		wp_enqueue_style( 'pixelgradelt_records-admin' );
-	}
 
-	/**
-	 * Print Underscore.js templates.
-	 *
-	 * @since 0.5.0
-	 */
-	public function print_templates() {
-		include $this->plugin->get_path( 'views/templates.php' );
+		wp_enqueue_script( 'pixelgradelt_records-edit-package' );
+
+		wp_localize_script(
+				'pixelgradelt_records-edit-package',
+				'_pixelgradeltRecordsEditPackageData',
+				[
+						'editedPostId' => get_the_ID(),
+				]
+		);
+
+		$preload_paths = [
+				'/pixelgradelt_records/v1/packages',
+		];
+
+		preload_rest_data( $preload_paths );
 	}
 
 	/**
@@ -660,32 +667,10 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	 * @param \WP_Post $post
 	 */
 	public function display_package_current_state_meta_box( \WP_Post $post ) {
-		$package_data = $this->package_manager->get_package_id_data( (int) $post->ID );
-		if ( empty( $package_data ) || empty( $package_data['slug'] ) || empty( $package_data['type'] ) ) {
-			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
-
-			return;
-		}
-
-		$package = $this->packages->first_where( [
-				'slug' => $package_data['slug'],
-				'type' => $package_data['type'],
-		] );
-
-		if ( empty( $package ) ) {
-			echo '<div class="cf-container"><div class="cf-field"><p>No current package details. Probably you need to do some configuring first.</p></div></div>';
-
-			return;
-		}
-
-		// Transform the package in the Composer format.
-		// This variable will be available to the view.
-		$package = $this->composer_transformer->transform( $package );
-
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
 		echo '<p>This is <strong>the same info</strong> shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
-		require $this->plugin->get_path( 'views/package-details.php' );
+		require $this->plugin->get_path( 'views/package-preview.php' );
 		echo '</div></div>';
 	}
 
