@@ -1,6 +1,5 @@
-import { components, element, html } from '../utils/index.js';
+import { element, html } from '../utils/index.js';
 
-const { Button } = components;
 const { Fragment } = element;
 
 function PackageAuthors( props ) {
@@ -13,9 +12,10 @@ function PackageAuthors( props ) {
 		releases,
 		requiredPackages,
 		type,
+		visibility,
 	} = props;
 
-	const authorButtons = authors.map( ( author, index ) => {
+	const authorLinks = authors.map( ( author, index ) => {
 
 		let className = 'package-author';
 
@@ -34,7 +34,7 @@ function PackageAuthors( props ) {
 
 	return html`
 		<${ Fragment }>
-			${ authorButtons }
+			${ authorLinks }
 		</${ Fragment }
 	`;
 }

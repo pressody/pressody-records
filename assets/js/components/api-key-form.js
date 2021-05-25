@@ -1,7 +1,7 @@
 import { components, element, html, i18n } from '../utils/index.js';
 
 const { Button, Flex, FlexItem, TextControl } = components;
-const { useEffect, useState } = element;
+const { useState } = element;
 const { __ } = i18n;
 
 function ApiKeyForm( props ) {

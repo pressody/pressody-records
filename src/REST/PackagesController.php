@@ -384,6 +384,44 @@ class PackagesController extends WP_REST_Controller {
 						],
 					],
 				],
+				'requiredPackages' => [
+					'description' => esc_html__( 'A list of required packages.', 'pixelgradelt_records' ),
+					'type'        => 'array',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+					'items'       => [
+						'type'       => 'object',
+						'readonly'   => true,
+						'properties' => [
+							'name' => [
+								'description' => __( 'Composer package name.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'version' => [
+								'description' => esc_html__( 'The required package version constraint.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'stability' => [
+								'description' => esc_html__( 'The required package stability constraint.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'editLink' => [
+								'description' => esc_html__( 'The required package post edit link.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'displayName' => [
+								'description' => esc_html__( 'The required package display name/string.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+						],
+					],
+				],
 				'slug'        => [
 					'description' => esc_html__( 'The package slug.', 'pixelgradelt_records' ),
 					'type'        => 'string',
@@ -403,6 +441,12 @@ class PackagesController extends WP_REST_Controller {
 					],
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,
+				],
+				'visibility'        => [
+					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pixelgradelt_records' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit', 'embed' ],
+					'readonly'    => true,
 				],
 			],
 		];

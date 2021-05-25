@@ -12,16 +12,18 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records;
 
 ?>
-<p>
-	<?php esc_html_e( 'API Keys are used to access your PixelgradeLT Records repository and download packages. Your personal API keys appear below or you can create keys for other users by editing their accounts.', 'pixelgradelt_records' ); ?>
-</p>
+<div class="pixelgradelt_records-card">
+	<p>
+		<?php esc_html_e( 'API Keys are used to access your PixelgradeLT Records repository and download packages. Your personal API keys appear below or you can create keys for other users by editing their accounts.', 'pixelgradelt_records' ); ?>
+	</p>
 
-<p>
-	<?php
-	/* translators: %s: <code>pixelgradelt_records</code> */
-	printf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_records' ), '<code>pixelgradelt_records</code>' );
-	?>
-</p>
+	<p>
+		<?php
+		/* translators: %s: <code>pixelgradelt_records</code> */
+		printf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_records' ), '<code>pixelgradelt_records</code>' );
+		?>
+	</p>
+</div>
 
 <div id="pixelgradelt_records-api-key-manager"></div>
 

@@ -336,9 +336,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 								              'value'   => [ 'packagist.org', 'vcs', ],
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 								              'compare' => 'IN',
 						              ],
 				              ] ),
@@ -350,9 +348,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 								              'value'   => [ 'wpackagist.org', ],
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 								              'compare' => 'IN',
 						              ],
 				              ] ),
@@ -366,9 +362,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 								              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 								              'compare' => 'IN',
 						              ],
 				              ] ),
@@ -388,9 +382,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 								              'value'   => [ 'packagist.org', 'wpackagist.org', 'vcs' ],
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 								              'compare' => 'IN',
 						              ],
 				              ] ),
@@ -401,9 +393,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 								              'value'   => 'vcs',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 								              'compare' => '=',
 						              ],
 				              ] ),
@@ -418,9 +408,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 								              'value'   => 'local.plugin',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 								              'compare' => '=',
 						              ],
 				              ] ),
@@ -434,9 +422,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
 								              'field'   => 'package_source_type',
-							              // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
 								              'value'   => 'local.theme',
-							              // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
 								              'compare' => '=',
 						              ],
 				              ] ),
@@ -677,7 +663,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	/**
 	 * Attempt to fetch external packages on post save.
 	 *
-	 * @param int $post_ID
+	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 *
 	 * @throws \Exception
@@ -802,7 +788,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	/**
 	 * Since there some issues with the CarbonFields File field, do some cleanup to the $_POST data.
 	 *
-	 * @see https://github.com/htmlburger/carbon-fields/issues/1007
+	 * @see  https://github.com/htmlburger/carbon-fields/issues/1007
 	 * @todo If the issue above gets fixed, we might not need this.
 	 *
 	 * @param int $post_ID
@@ -826,7 +812,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	 *
 	 * @since 0.9.0
 	 *
-	 * @param int $post_ID
+	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
 	protected function maybe_migrate_releases_on_manual_source_switch( int $post_ID, Container\Post_Meta_Container $meta_container ) {
@@ -880,9 +866,9 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 			if ( $updated ) {
 				// Order the manual releases by version, descending.
-				usort( $manual_releases_meta_data, function( $a, $b ) {
+				usort( $manual_releases_meta_data, function ( $a, $b ) {
 					return version_compare( $b['version'], $a['version'] );
-				});
+				} );
 
 				carbon_set_post_meta( $post_ID, 'package_manual_releases', $manual_releases_meta_data );
 			}

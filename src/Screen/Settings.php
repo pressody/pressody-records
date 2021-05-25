@@ -155,8 +155,6 @@ class Settings extends AbstractHookProvider {
 					$preload_paths,
 					[
 							'/pixelgradelt_records/v1/apikeys?user=' . get_current_user_id(),
-							'/pixelgradelt_records/v1/plugins?_fields=slug,name,type',
-							'/pixelgradelt_records/v1/themes?_fields=slug,name,type',
 					]
 			);
 		}
@@ -239,7 +237,6 @@ class Settings extends AbstractHookProvider {
 	public function render_screen() {
 		$packages_permalink     = esc_url( get_packages_permalink() );
 		$parts_permalink     = esc_url( get_parts_permalink() );
-		$system_checks = [];
 
 		$tabs = [
 				'repository' => [
@@ -259,20 +256,16 @@ class Settings extends AbstractHookProvider {
 						'name'       => esc_html__( 'Settings', 'pixelgradelt_records' ),
 						'capability' => Capabilities::MANAGE_OPTIONS,
 				],
+				'system-status'   => [
+						'name'       => esc_html__( 'System Status', 'pixelgradelt_records' ),
+						'capability' => Capabilities::MANAGE_OPTIONS,
+				],
 		];
 
+		// By default, the Repository tabs is active.
 		$active_tab = 'repository';
 
 		include $this->plugin->get_path( 'views/screen-settings.php' );
-	}
-
-	/**
-	 * Display the access section description.
-	 *
-	 * @since 0.1.0
-	 */
-	public function render_section_access_description() {
-
 	}
 
 	/**

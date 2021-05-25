@@ -11,14 +11,15 @@ const defaultRelease = {
 
 function Releases( props ) {
 	const {
-		author,
-		author_url,
+		authors,
 		composer,
 		description,
 		name,
 		homepage,
 		releases,
+		requiredPackages,
 		type,
+		visibility,
 	} = props;
 
 	const [ selectedRelease, setSelectedRelease ] = useState( defaultRelease );
@@ -53,7 +54,7 @@ function Releases( props ) {
 				${ release.version }
 			</${ Button }>
 			${ ' ' }
-		`
+		`;
 	} );
 
 	const releaseActions = '' !== selectedVersion && html`

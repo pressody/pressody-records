@@ -21,10 +21,12 @@ use PixelgradeLT\Records\PackageType\BasePackage;
  */
 ?>
 
-<p>
-	<?php esc_html_e( 'Your PixelgradeLT Records repository is available at:', 'pixelgradelt_records' ); ?>
-	<a href="<?php echo esc_url( $packages_permalink ); ?>"><?php echo esc_html( $packages_permalink ); ?></a>. This includes <strong>all your packages, regardless of type.</strong>
-</p>
+<div class="pixelgradelt_records-card">
+	<p>
+		<?php esc_html_e( 'Your PixelgradeLT Records repository is available at:', 'pixelgradelt_records' ); ?>
+		<a href="<?php echo esc_url( $packages_permalink ); ?>"><?php echo esc_html( $packages_permalink ); ?></a>. This includes <strong>all your packages, regardless of type.</strong>
+	</p>
+</div>
 <p>
 	<?php
 	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Need to update global variable.
@@ -67,7 +69,9 @@ printf(
 	>
 </p>
 
-<p>
-	<?php esc_html_e( 'You also have the PixelgradeLT Records Parts repository available at:', 'pixelgradelt_records' ); ?>
-	<a href="<?php echo esc_url( $parts_permalink ); ?>"><?php echo esc_html( $parts_permalink ); ?></a>. This is a repository that <strong>includes just the parts</strong> (a subset of the main repository above).
-</p>
+<div class="pixelgradelt_records-card">
+	<p>
+		<?php esc_html_e( 'You also have the PixelgradeLT Records Parts repository available at:', 'pixelgradelt_records' ); ?>
+		<a href="<?php echo esc_url( $parts_permalink ); ?>"><?php echo esc_html( $parts_permalink ); ?></a>. This is a repository that <strong>includes just the parts</strong> (a subset of the main repository above).
+	</p>
+</div>

@@ -23,7 +23,7 @@ function PackageTable( props ) {
 		<table className="pixelgradelt_records-package widefat">
 			<thead>
 				<tr>
-					<th colSpan="2">${ composer.name }</th>
+					<th colSpan="2">${ composer.name } ${ 'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : '' }</th>
 				</tr>
 			</thead>
 			<tbody>

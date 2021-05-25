@@ -1,11 +1,13 @@
-import { components, element, html } from '../utils/index.js';
+import { components, element, html, i18n } from '../utils/index.js'
 
 const { Button } = components;
 const { Fragment } = element;
 
+const { __ } = i18n;
+
 function PackageRequiredPackages(props ) {
 	const {
-		author,
+		authors,
 		composer,
 		description,
 		name,
@@ -13,6 +15,7 @@ function PackageRequiredPackages(props ) {
 		releases,
 		requiredPackages,
 		type,
+		visibility,
 	} = props;
 
 	const requiredButtons = requiredPackages.map( ( requiredPackage, index ) => {
@@ -33,7 +36,7 @@ function PackageRequiredPackages(props ) {
 
 	return html`
 		<${ Fragment }>
-			${ requiredButtons }
+			${ requiredButtons.length ? requiredButtons : __( 'None', 'pixelgradelt_records' ) }
 		</${ Fragment }
 	`;
 }
