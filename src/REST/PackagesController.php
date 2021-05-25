@@ -315,13 +315,13 @@ class PackagesController extends WP_REST_Controller {
 			'title'      => 'package',
 			'type'       => 'object',
 			'properties' => [
-				'authors'     => [
+				'authors'          => [
 					'description' => esc_html__( 'The package authors details.', 'pixelgradelt_records' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
-				'composer'    => [
+				'composer'         => [
 					'description' => esc_html__( 'Package data formatted for Composer.', 'pixelgradelt_records' ),
 					'type'        => 'object',
 					'context'     => [ 'view', 'edit' ],
@@ -342,26 +342,26 @@ class PackagesController extends WP_REST_Controller {
 						],
 					],
 				],
-				'description' => [
+				'description'      => [
 					'description' => esc_html__( 'The package description.', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
-				'homepage'    => [
+				'homepage'         => [
 					'description' => esc_html__( 'The package URL.', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
-				'name'        => [
+				'name'             => [
 					'description' => esc_html__( 'The name of the package.', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
-				'releases'    => [
+				'releases'         => [
 					'description' => esc_html__( 'A list of package releases.', 'pixelgradelt_records' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit' ],
@@ -393,23 +393,23 @@ class PackagesController extends WP_REST_Controller {
 						'type'       => 'object',
 						'readonly'   => true,
 						'properties' => [
-							'name' => [
+							'name'        => [
 								'description' => __( 'Composer package name.', 'pixelgradelt_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
-							'version' => [
+							'version'     => [
 								'description' => esc_html__( 'The required package version constraint.', 'pixelgradelt_records' ),
 								'type'        => 'string',
 								'readonly'    => true,
 							],
-							'stability' => [
+							'stability'   => [
 								'description' => esc_html__( 'The required package stability constraint.', 'pixelgradelt_records' ),
 								'type'        => 'string',
 								'readonly'    => true,
 							],
-							'editLink' => [
+							'editLink'    => [
 								'description' => esc_html__( 'The required package post edit link.', 'pixelgradelt_records' ),
 								'type'        => 'string',
 								'readonly'    => true,
@@ -422,14 +422,14 @@ class PackagesController extends WP_REST_Controller {
 						],
 					],
 				],
-				'slug'        => [
+				'slug'             => [
 					'description' => esc_html__( 'The package slug.', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'pattern'     => self::SLUG_PATTERN,
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,
 				],
-				'type'        => [
+				'type'             => [
 					'description' => esc_html__( 'Type of package.', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'enum'        => [
@@ -442,7 +442,7 @@ class PackagesController extends WP_REST_Controller {
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,
 				],
-				'visibility'        => [
+				'visibility'       => [
 					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
