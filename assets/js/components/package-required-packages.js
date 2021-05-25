@@ -7,15 +7,7 @@ const { __ } = i18n;
 
 function PackageRequiredPackages(props ) {
 	const {
-		authors,
-		composer,
-		description,
-		name,
-		homepage,
-		releases,
 		requiredPackages,
-		type,
-		visibility,
 	} = props;
 
 	const requiredButtons = requiredPackages.map( ( requiredPackage, index ) => {

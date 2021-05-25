@@ -37,19 +37,19 @@ function PackageTable( props ) {
 				<tr>
 					<th>${ __( 'Authors', 'pixelgradelt_records' ) }</th>
 					<td className="package-authors__list">
-						<${ PackageAuthors } authors=${ authors } ...${ props } />
+						<${ PackageAuthors } authors=${ authors } />
 					</td>
 				</tr>
 				<tr>
 					<th>${ __( 'Releases', 'pixelgradelt_records' ) }</th>
 					<td className="pixelgradelt_records-releases">
-						<${ Releases } releases=${ releases } ...${ props } />
+						<${ Releases } releases=${ releases } name=${ name } composer=${ composer } />
 					</td>
 				</tr>
 				<tr>
 					<th>${ __( 'Required Packages', 'pixelgradelt_records' ) }</th>
 					<td className="pixelgradelt_records-required-packages">
-						<${ PackageRequiredPackages } requiredPackages=${ requiredPackages } ...${ props } />
+						<${ PackageRequiredPackages } requiredPackages=${ requiredPackages } />
 					</td>
 				</tr>
 				<tr>

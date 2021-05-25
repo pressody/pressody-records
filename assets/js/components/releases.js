@@ -13,15 +13,9 @@ const defaultRelease = {
 
 function Releases( props ) {
 	const {
-		authors,
 		composer,
-		description,
 		name,
-		homepage,
 		releases,
-		requiredPackages,
-		type,
-		visibility,
 	} = props;
 
 	const [ selectedRelease, setSelectedRelease ] = useState( defaultRelease );

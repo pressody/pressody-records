@@ -7,14 +7,6 @@ const { __ } = i18n;
 function PackageAuthors( props ) {
 	const {
 		authors,
-		composer,
-		description,
-		name,
-		homepage,
-		releases,
-		requiredPackages,
-		type,
-		visibility,
 	} = props;
 
 	const authorLinks = authors.map( ( author, index ) => {
