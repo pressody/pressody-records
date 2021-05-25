@@ -42,7 +42,7 @@ use PixelgradeLT\Records\PackageType\BasePackage;
 
 <pre class="pixelgradelt_records-composer-snippet"><code>{
 	"repositories": {
-		"pixelgradelt_records": {
+		"pixelgradelt-records": {
 			"type": "composer",
 			"url": "<?php echo esc_url( get_packages_permalink( [ 'base' => true ] ) ); ?>"
 		}
@@ -64,7 +64,7 @@ printf(
 		type="text"
 		class="pixelgradelt_records-cli-field large-text"
 		readonly
-		value="composer config repositories.pixelgradelt_records composer <?php echo esc_url( get_packages_permalink( [ 'base' => true ] ) ); ?>"
+		value="composer config repositories.pixelgradelt-records composer <?php echo esc_url( get_packages_permalink( [ 'base' => true ] ) ); ?>"
 		onclick="this.select();"
 	>
 </p>
