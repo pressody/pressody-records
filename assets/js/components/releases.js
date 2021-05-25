@@ -1,8 +1,10 @@
-import { components, element, html } from '../utils/index.js';
+import { components, element, html, i18n } from '../utils/index.js';
 import ReleaseActions from './release-actions.js';
 
 const { Button } = components;
 const { Fragment, useState } = element;
+
+const { __ } = i18n;
 
 const defaultRelease = {
 	url: '',
@@ -67,7 +69,7 @@ function Releases( props ) {
 
 	return html`
 		<${ Fragment }>
-			${ releaseButtons }
+			${ releaseButtons.length ? releaseButtons : __( 'None', 'pixelgradelt_retailer' ) }
 			${ releaseActions }
 		</${ Fragment }
 	`;

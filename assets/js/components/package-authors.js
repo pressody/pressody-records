@@ -1,6 +1,8 @@
-import { element, html } from '../utils/index.js';
+import { element, html, i18n } from '../utils/index.js';
 
 const { Fragment } = element;
+
+const { __ } = i18n;
 
 function PackageAuthors( props ) {
 	const {
@@ -34,7 +36,7 @@ function PackageAuthors( props ) {
 
 	return html`
 		<${ Fragment }>
-			${ authorLinks }
+			${ authorLinks.length ? authorLinks : __( 'None', 'pixelgradelt_retailer' ) }
 		</${ Fragment }
 	`;
 }

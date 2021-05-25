@@ -1,4 +1,4 @@
-import { components, element, html, i18n } from '../utils/index.js'
+import { components, element, html, i18n } from '../utils/index.js';
 
 const { Button } = components;
 const { Fragment } = element;
