@@ -22,7 +22,7 @@ require_once dirname( __DIR__, 2 ) . '/vendor/antecedent/patchwork/Patchwork.php
 $suite = new TestSuite();
 
 $GLOBALS['wp_tests_options'] = [
-	'active_plugins'  => [ 'pixelgradelt_records/pixelgradelt-records.php' ],
+	'active_plugins'  => [ 'pixelgradelt-records/pixelgradelt-records.php' ],
 	'timezone_string' => 'Europe/Bucharest',
 ];
 
