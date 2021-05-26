@@ -170,6 +170,7 @@ class PartManager extends PackageManager {
 
 		// Parts have extra data.
 		$data['required_parts'] = $this->get_post_package_required_parts( $post_ID );
+		$data['replaced_parts'] = $this->get_post_package_replaced_parts( $post_ID );
 
 		return $data;
 	}
@@ -226,5 +227,39 @@ class PartManager extends PackageManager {
 
 	public function set_post_package_required_parts( int $post_ID, array $required_parts, string $container_id = '' ) {
 		carbon_set_post_meta( $post_ID, 'package_required_parts', $required_parts, $container_id );
+	}
+
+	public function get_post_package_replaced_parts( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		$replaced_parts = carbon_get_post_meta( $post_ID, 'package_replaced_parts', $container_id );
+		if ( empty( $replaced_parts ) || ! is_array( $replaced_parts ) ) {
+			return [];
+		}
+
+		// Make sure only the fields we are interested in are left.
+		$accepted_keys = array_fill_keys( [ 'pseudo_id', 'version_range', 'stability' ], '' );
+		foreach ( $replaced_parts as $key => $replaced_part ) {
+			$replaced_parts[ $key ] = array_replace( $accepted_keys, array_intersect_key( $replaced_part, $accepted_keys ) );
+
+			if ( empty( $replaced_part['pseudo_id'] ) || false === strpos( $replaced_part['pseudo_id'], $pseudo_id_delimiter ) ) {
+				unset( $replaced_parts[ $key ] );
+				continue;
+			}
+
+			// We will now split the pseudo_id in its components (source_name and post_id with the delimiter in between).
+			[ $source_name, $post_id ] = explode( $pseudo_id_delimiter, $replaced_part['pseudo_id'] );
+			if ( empty( $post_id ) ) {
+				unset( $replaced_parts[ $key ] );
+				continue;
+			}
+
+			$replaced_parts[ $key ]['source_name']     = $source_name;
+			$replaced_parts[ $key ]['managed_post_id'] = intval( $post_id );
+		}
+
+		return $replaced_parts;
+	}
+
+	public function set_post_package_replaced_parts( int $post_ID, array $replaced_parts, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'package_replaced_parts', $replaced_parts, $container_id );
 	}
 }

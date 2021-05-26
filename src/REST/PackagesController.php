@@ -234,6 +234,7 @@ class PackagesController extends WP_REST_Controller {
 
 		$data['releases']         = $this->prepare_releases_for_response( $package, $request );
 		$data['requiredPackages'] = $this->prepare_required_packages_for_response( $package, $request );
+		$data['replacedPackages'] = $this->prepare_replaced_packages_for_response( $package, $request );
 
 		$data = $this->filter_response_by_context( $data, $request['context'] );
 
@@ -300,6 +301,35 @@ class PackagesController extends WP_REST_Controller {
 		}
 
 		return array_values( $requiredPackages );
+	}
+
+	/**
+	 * Prepare package replaced packages for response.
+	 *
+	 * @param Package         $package Package instance.
+	 * @param WP_REST_Request $request WP request instance.
+	 *
+	 * @return array
+	 */
+	protected function prepare_replaced_packages_for_response( Package $package, WP_REST_Request $request ): array {
+		$replacedPackages = [];
+
+		foreach ( $package->get_replaced_packages() as $replacedPackage ) {
+			$package_name = $replacedPackage['composer_package_name'] . ':' . $replacedPackage['version_range'];
+			if ( 'stable' !== $replacedPackage['stability'] ) {
+				$package_name .= '@' . $replacedPackage['stability'];
+			}
+
+			$replacedPackages[] = [
+				'name'        => $replacedPackage['composer_package_name'],
+				'version'     => $replacedPackage['version_range'],
+				'stability'   => $replacedPackage['stability'],
+				'editLink'    => get_edit_post_link( $replacedPackage['managed_post_id'] ),
+				'displayName' => $package_name,
+			];
+		}
+
+		return array_values( $replacedPackages );
 	}
 
 	/**
@@ -416,6 +446,44 @@ class PackagesController extends WP_REST_Controller {
 							],
 							'displayName' => [
 								'description' => esc_html__( 'The required package display name/string.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+						],
+					],
+				],
+				'replacedPackages' => [
+					'description' => esc_html__( 'A list of replaced packages.', 'pixelgradelt_records' ),
+					'type'        => 'array',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+					'items'       => [
+						'type'       => 'object',
+						'readonly'   => true,
+						'properties' => [
+							'name'        => [
+								'description' => __( 'Composer package name.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'version'     => [
+								'description' => esc_html__( 'The replaced package version constraint.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'stability'   => [
+								'description' => esc_html__( 'The replaced package stability constraint.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'editLink'    => [
+								'description' => esc_html__( 'The replaced package post edit link.', 'pixelgradelt_records' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'displayName' => [
+								'description' => esc_html__( 'The replaced package display name/string.', 'pixelgradelt_records' ),
 								'type'        => 'string',
 								'readonly'    => true,
 							],

@@ -133,8 +133,8 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 			$version = $release->get_version();
 			$meta    = $release->get_meta();
 
-			// This order is important since we go from lower to higher importance. Each one overwrites the previous.
 			// Start with the hard-coded requires, if any.
+			// This order is important since we go from lower to higher importance. Each one overwrites the previous.
 			$require = [];
 			// Merge the release require, if any.
 			if ( ! empty( $meta['require'] ) ) {
@@ -142,13 +142,28 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 			}
 			// Merge the managed required packages, if any.
 			if ( ! empty( $meta['require_ltpackages'] ) ) {
-				$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $meta['require_ltpackages'] ) );
+				$require = array_merge( $require, $this->composer_transformer->transform_dependency_packages( $meta['require_ltpackages'] ) );
 			}
 			// We want to enforce a certain composer/installers require.
 			$require = array_merge( $require, [ 'composer/installers' => '^1.0', ] );
 
 			// Finally, allow others to have a say.
 			$require = apply_filters( 'pixelgradelt_records_composer_package_require', $require, $package, $release );
+
+			// Start with the hard-coded replaces, if any.
+			// This order is important since we go from lower to higher importance. Each one overwrites the previous.
+			$replace = [];
+			// Merge the release replace, if any.
+			if ( ! empty( $meta['replace'] ) ) {
+				$replace = array_merge( $replace, $meta['replace'] );
+			}
+			// Merge the managed replaced packages, if any.
+			if ( ! empty( $meta['replace_ltpackages'] ) ) {
+				$replace = array_merge( $replace, $this->composer_transformer->transform_dependency_packages( $meta['replace_ltpackages'] ) );
+			}
+
+			// Finally, allow others to have a say.
+			$replace = apply_filters( 'pixelgradelt_records_composer_package_replace', $replace, $package, $release );
 
 			// We don't need the artifactmtime in the dist since that is only for internal use.
 			if ( isset( $meta['dist']['artifactmtime'] ) ) {
@@ -161,6 +176,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 				'version_normalized' => $this->version_parser->normalize( $version ),
 				'dist'               => $meta['dist'],
 				'require'            => $require,
+				'replace'            => $replace,
 				'type'               => $package->get_type(),
 				'authors'            => $meta['authors'],
 				'description'        => $meta['description'],

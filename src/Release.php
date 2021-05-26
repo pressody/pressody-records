@@ -89,6 +89,7 @@ class Release {
 			'tested_up_to_wp'      => 'tested_up_to_wp',
 			'requires_php'         => 'requires_php',
 			'required_packages'    => 'require_ltpackages',
+			'replaced_packages'    => 'replace_ltpackages',
 			'composer_require'     => 'require',
 		];
 

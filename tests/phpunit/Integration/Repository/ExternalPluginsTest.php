@@ -65,6 +65,7 @@ class ExternalPluginsTest extends TestCase {
 					'_package_details_authors|homepage|0|0|value' => 'https://humanmade.com',
 					'_package_details_authors|role|0|0|value'     => '',
 					'_package_required_packages|||0|_empty'       => '',
+					'_package_replaced_packages|||0|_empty'       => '',
 				],
 			],
 			'packagist_cached_releases' => [
@@ -100,6 +101,7 @@ class ExternalPluginsTest extends TestCase {
 					'_package_details_authors|homepage|2|0|value' => '""',
 					'_package_details_authors|role|2|0|value'     => 'Developer',
 					'_package_required_packages|||0|_empty'       => '',
+					'_package_replaced_packages|||0|_empty'       => '',
 				],
 			],
 		];
@@ -134,6 +136,7 @@ class ExternalPluginsTest extends TestCase {
 		$this->assertInstanceOf( ExternalBasePackage::class, $package );
 		$this->assertFalse( $package->has_releases() );
 		$this->assertFalse( $package->has_required_packages() );
+		$this->assertFalse( $package->has_replaced_packages() );
 		$this->assertCount( 1, $package->get_authors() );
 		$this->assertSame( 'Package custom description.', $package->get_description() );
 		$this->assertSame( 'https://package.homepage', $package->get_homepage() );
@@ -159,6 +162,7 @@ class ExternalPluginsTest extends TestCase {
 		// One cached release has the wrong slug and should not be taken into account.
 		$this->assertCount( 5, $package->get_releases() );
 		$this->assertFalse( $package->has_required_packages() );
+		$this->assertFalse( $package->has_replaced_packages() );
 		$this->assertCount( 3, $package->get_authors() );
 		$this->assertSame( 'Package cached custom description.', $package->get_description() );
 		$this->assertSame( 'https://package.homepage', $package->get_homepage() );

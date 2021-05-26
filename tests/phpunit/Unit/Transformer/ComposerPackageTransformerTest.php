@@ -42,6 +42,6 @@ class ComposerPackageTransformerTest extends TestCase {
 
 	public function test_package_name_is_lowercased() {
 		$package = $this->transformer->transform( $this->package );
-		$this->assertSame( 'pixelgradelt_records/acmecode', $package->get_name() );
+		$this->assertSame( 'pixelgradelt-records/acmecode', $package->get_name() );
 	}
 }

@@ -161,6 +161,22 @@ class BasePackageTest extends TestCase {
 		$this->assertTrue( $this->package->has_required_packages() );
 	}
 
+	public function test_replaced_packages() {
+		$expected                         = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+			],
+		];
+		$this->package->replaced_packages = $expected;
+
+		$this->assertSame( $expected, $this->package->get_replaced_packages() );
+		$this->assertTrue( $this->package->has_replaced_packages() );
+	}
+
 	public function test_has_source_constraint() {
 
 		$this->assertFalse( $this->package->has_source_constraint() );

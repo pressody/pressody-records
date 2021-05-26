@@ -394,6 +394,39 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 								        <%- pseudo_id %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
 								    <% } %>
 								' ),
+				         Field::make( 'complex', 'package_replaced_parts', __( 'Replaced Parts', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'These are parts that are <strong>automatically ignored from a site\'s composition</strong> when the current part is included. The order is not important, from a logic standpoint.<br>
+These apply the Composer <code>replace</code> logic, meaning that the current part already includes the replaced parts. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#replace" target="_blank">here</a>.<br>
+<strong>FYI:</strong> Each replaced part label is comprised of the part <code>source_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
+				              ->set_classes( 'package-required-packages package-required-parts' )
+				              ->set_collapsed( true )
+				              ->add_fields( [
+						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the parts', 'pixelgradelt_records' ) )
+						                   ->set_options( [ $this, 'get_available_required_parts_options' ] )
+						                   ->set_default_value( null )
+						                   ->set_required( true )
+						                   ->set_width( 50 ),
+						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_records' ) )
+						                   ->set_default_value( '*' )
+						                   ->set_required( true )
+						                   ->set_width( 25 ),
+						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_records' ) )
+						                   ->set_options( [
+								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
+								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
+								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
+								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
+								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+						                   ] )
+						                   ->set_required( true )
+						                   ->set_default_value( 'stable' )
+						                   ->set_width( 25 ),
+				              ] )
+				              ->set_header_template( '
+								    <% if (pseudo_id) { %>
+								        <%- pseudo_id %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
+								    <% } %>
+								' ),
 		         ] );
 	}
 

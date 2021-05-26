@@ -453,6 +453,7 @@ class PackageManager {
 		}
 
 		$data['required_packages'] = $this->get_post_package_required_packages( $post_ID );
+		$data['replaced_packages'] = $this->get_post_package_replaced_packages( $post_ID );
 		$data['composer_require']  = $this->get_post_package_composer_require( $post_ID );
 
 		return $data;
@@ -880,6 +881,40 @@ class PackageManager {
 
 	public function set_post_package_required_packages( int $post_ID, array $required_packages, string $container_id = '' ) {
 		carbon_set_post_meta( $post_ID, 'package_required_packages', $required_packages, $container_id );
+	}
+
+	public function get_post_package_replaced_packages( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		$replaced_packages = carbon_get_post_meta( $post_ID, 'package_replaced_packages', $container_id );
+		if ( empty( $replaced_packages ) || ! is_array( $replaced_packages ) ) {
+			return [];
+		}
+
+		// Make sure only the fields we are interested in are left.
+		$accepted_keys = array_fill_keys( [ 'pseudo_id', 'version_range', 'stability' ], '' );
+		foreach ( $replaced_packages as $key => $replaced_package ) {
+			$replaced_packages[ $key ] = array_replace( $accepted_keys, array_intersect_key( $replaced_package, $accepted_keys ) );
+
+			if ( empty( $replaced_package['pseudo_id'] ) || false === strpos( $replaced_package['pseudo_id'], $pseudo_id_delimiter ) ) {
+				unset( $replaced_packages[ $key ] );
+				continue;
+			}
+
+			// We will now split the pseudo_id in its components (source_name and post_id with the delimiter in between).
+			[ $source_name, $post_id ] = explode( $pseudo_id_delimiter, $replaced_package['pseudo_id'] );
+			if ( empty( $post_id ) ) {
+				unset( $replaced_packages[ $key ] );
+				continue;
+			}
+
+			$replaced_packages[ $key ]['source_name']     = $source_name;
+			$replaced_packages[ $key ]['managed_post_id'] = intval( $post_id );
+		}
+
+		return $replaced_packages;
+	}
+
+	public function set_post_package_replaced_packages( int $post_ID, array $replaced_packages, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'package_replaced_packages', $replaced_packages, $container_id );
 	}
 
 	public function get_post_package_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {

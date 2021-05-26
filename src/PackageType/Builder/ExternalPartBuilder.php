@@ -35,12 +35,25 @@ class ExternalPartBuilder extends ExternalBasePackageBuilder {
 		if ( ! empty( $package_data['required_parts'] ) ) {
 			// We need to normalize before the merge since we need the keys to be in the same format.
 			// A bit inefficient, I know.
-			$package_data['required_parts'] = $this->normalize_required_packages( $package_data['required_parts'] );
+			$package_data['required_parts'] = $this->normalize_dependency_packages( $package_data['required_parts'] );
 			// We will merge the required parts into the existing required packages.
 			$this->set_required_packages(
 				ArrayHelpers::array_merge_recursive_distinct(
 					$this->package->get_required_packages(),
 					$package_data['required_parts']
+				)
+			);
+		}
+
+		if ( ! empty( $package_data['replaced_parts'] ) ) {
+			// We need to normalize before the merge since we need the keys to be in the same format.
+			// A bit inefficient, I know.
+			$package_data['replaced_parts'] = $this->normalize_dependency_packages( $package_data['replaced_parts'] );
+			// We will merge the replaced parts into the existing replaced packages.
+			$this->set_replaced_packages(
+				ArrayHelpers::array_merge_recursive_distinct(
+					$this->package->get_replaced_packages(),
+					$package_data['replaced_parts']
 				)
 			);
 		}

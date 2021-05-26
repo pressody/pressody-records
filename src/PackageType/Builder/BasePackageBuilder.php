@@ -532,6 +532,32 @@ class BasePackageBuilder {
 	}
 
 	/**
+	 * Set the managed required packages if this package is managed by us.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param array $required_packages
+	 *
+	 * @return $this
+	 */
+	public function set_required_packages( array $required_packages ): self {
+		return $this->set( 'required_packages', $this->normalize_dependency_packages( $required_packages ) );
+	}
+
+	/**
+	 * Set the managed replaced packages if this package is managed by us.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param array $replaced_packages
+	 *
+	 * @return $this
+	 */
+	public function set_replaced_packages( array $replaced_packages ): self {
+		return $this->set( 'replaced_packages', $this->normalize_dependency_packages( $replaced_packages ) );
+	}
+
+	/**
 	 * Set the (Composer) require list if this package is managed by us.
 	 *
 	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
@@ -544,19 +570,6 @@ class BasePackageBuilder {
 	 */
 	public function set_composer_require( array $composer_require ): self {
 		return $this->set( 'composer_require', $composer_require );
-	}
-
-	/**
-	 * Set the managed required packages if this package is managed by us.
-	 *
-	 * @since 0.8.0
-	 *
-	 * @param array $required_packages
-	 *
-	 * @return $this
-	 */
-	public function set_required_packages( array $required_packages ): self {
-		return $this->set( 'required_packages', $this->normalize_required_packages( $required_packages ) );
 	}
 
 	/**
@@ -679,14 +692,10 @@ class BasePackageBuilder {
 			$this->set_visibility( $package_data['visibility'] );
 		}
 
-		if ( empty( $this->package->get_composer_require() ) && ! empty( $package_data['composer_require'] ) ) {
-			$this->set_composer_require( $package_data['composer_require'] );
-		}
-
 		if ( ! empty( $package_data['required_packages'] ) ) {
 			// We need to normalize before the merge since we need the keys to be in the same format.
 			// A bit inefficient, I know.
-			$package_data['required_packages'] = $this->normalize_required_packages( $package_data['required_packages'] );
+			$package_data['required_packages'] = $this->normalize_dependency_packages( $package_data['required_packages'] );
 			// We will merge the required packages into the existing ones.
 			$this->set_required_packages(
 				ArrayHelpers::array_merge_recursive_distinct(
@@ -696,79 +705,96 @@ class BasePackageBuilder {
 			);
 		}
 
+		if ( ! empty( $package_data['replaced_packages'] ) ) {
+			// We need to normalize before the merge since we need the keys to be in the same format.
+			// A bit inefficient, I know.
+			$package_data['replaced_packages'] = $this->normalize_dependency_packages( $package_data['replaced_packages'] );
+			// We will merge the replaced packages into the existing ones.
+			$this->set_replaced_packages(
+				ArrayHelpers::array_merge_recursive_distinct(
+					$this->package->get_replaced_packages(),
+					$package_data['replaced_packages']
+				)
+			);
+		}
+
+		if ( empty( $this->package->get_composer_require() ) && ! empty( $package_data['composer_require'] ) ) {
+			$this->set_composer_require( $package_data['composer_require'] );
+		}
+
 		return $this;
 	}
 
 	/**
-	 * Make sure that the managed required packages are in a format expected by BasePackage.
+	 * Make sure that the managed dependency packages are in a format expected by BasePackage.
 	 *
 	 * @since 0.8.0
 	 *
-	 * @param array $required_packages
+	 * @param array $packages
 	 *
 	 * @return array
 	 */
-	protected function normalize_required_packages( array $required_packages ): array {
-		if ( empty( $required_packages ) ) {
+	protected function normalize_dependency_packages( array $packages ): array {
+		if ( empty( $packages ) ) {
 			return [];
 		}
 
 		$normalized = [];
 		// The pseudo_id is completely unique to a package since it encloses the source_name (source_type or vendor and package name/slug),
 		// and the post ID. Totally unique.
-		// We will rely on this uniqueness to make sure the only one required package remains of each entity.
-		// Subsequent required package data referring to the same managed package post will overwrite previous ones.
-		foreach ( $required_packages as $required_package ) {
-			if ( empty( $required_package['pseudo_id'] )
-			     || empty( $required_package['source_name'] )
-			     || empty( $required_package['managed_post_id'] )
+		// We will rely on this uniqueness to make sure that only one dependent package remains of each entity.
+		// Subsequent dependent package data referring to the same managed package post will overwrite previous ones.
+		foreach ( $packages as $package ) {
+			if ( empty( $package['pseudo_id'] )
+			     || empty( $package['source_name'] )
+			     || empty( $package['managed_post_id'] )
 			) {
 				$this->logger->error(
-					'Invalid required package details for package "{package}".',
+					'Invalid dependent package details for package "{package}".',
 					[
 						'package'          => $this->package->get_name(),
-						'required_package' => $required_package,
+						'required_package' => $package,
 					]
 				);
 
 				continue;
 			}
 
-			$normalized[ $required_package['pseudo_id'] ] = [
-				'composer_package_name' => ! empty( $required_package['composer_package_name'] ) ? $required_package['composer_package_name'] : false,
-				'version_range'         => ! empty( $required_package['version_range'] ) ? $required_package['version_range'] : '*',
-				'stability'             => ! empty( $required_package['stability'] ) ? $required_package['stability'] : 'stable',
-				'source_name'           => $required_package['source_name'],
-				'managed_post_id'       => $required_package['managed_post_id'],
-				'pseudo_id'             => $required_package['pseudo_id'],
+			$normalized[ $package['pseudo_id'] ] = [
+				'composer_package_name' => ! empty( $package['composer_package_name'] ) ? $package['composer_package_name'] : false,
+				'version_range'         => ! empty( $package['version_range'] ) ? $package['version_range'] : '*',
+				'stability'             => ! empty( $package['stability'] ) ? $package['stability'] : 'stable',
+				'source_name'           => $package['source_name'],
+				'managed_post_id'       => $package['managed_post_id'],
+				'pseudo_id'             => $package['pseudo_id'],
 			];
 
-			if ( ! empty( $required_package['composer_package_name'] ) ) {
+			if ( ! empty( $package['composer_package_name'] ) ) {
 				continue;
 			}
 
-			$package_data = $this->package_manager->get_package_id_data( $required_package['managed_post_id'] );
+			$package_data = $this->package_manager->get_package_id_data( $package['managed_post_id'] );
 			if ( empty( $package_data ) ) {
 				// Something is wrong. We will not include this required package.
 				$this->logger->error(
-					'Error getting managed required package data with post ID #{managed_post_id} for package "{package}".',
+					'Error getting managed dependent package data with post ID #{managed_post_id} for package "{package}".',
 					[
-						'managed_post_id' => $required_package['managed_post_id'],
+						'managed_post_id' => $package['managed_post_id'],
 						'package'         => $this->package->get_name(),
 					]
 				);
 
-				unset( $normalized[ $required_package['pseudo_id'] ] );
+				unset( $normalized[ $package['pseudo_id'] ] );
 				continue;
 			}
 
 			/**
 			 * Construct the Composer-like package name (the same way @see ComposerPackageTransformer::transform() does it).
 			 */
-			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records', $required_package, $package_data );
+			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records', $package, $package_data );
 			$name   = $this->normalize_package_name( $package_data['slug'] );
 
-			$normalized[ $required_package['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;
+			$normalized[ $package['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;
 		}
 
 		return $normalized;
@@ -1070,8 +1096,9 @@ class BasePackageBuilder {
 			->set_managed_post_id( $package->get_managed_post_id() )
 			->set_managed_post_id_hash( $package->get_managed_post_id_hash() )
 			->set_visibility( $package->get_visibility() )
-			->set_composer_require( $package->get_composer_require() )
-			->set_required_packages( $package->get_required_packages() );
+			->set_required_packages( $package->get_required_packages() )
+			->set_replaced_packages( $package->get_replaced_packages() )
+			->set_composer_require( $package->get_composer_require() );
 
 		foreach ( $package->get_releases() as $release ) {
 			$this->add_release( $release->get_version(), $release->get_meta() );

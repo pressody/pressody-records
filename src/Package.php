@@ -149,15 +149,6 @@ interface Package {
 	public function get_visibility(): string;
 
 	/**
-	 * Retrieve the Composer config `require` entry.
-	 *
-	 * @since 0.9.0
-	 *
-	 * @return array
-	 */
-	public function get_composer_require(): array;
-
-	/**
 	 * Retrieve the managed required packages.
 	 *
 	 * @since 0.8.0
@@ -174,6 +165,33 @@ interface Package {
 	 * @return bool
 	 */
 	public function has_required_packages(): bool;
+
+	/**
+	 * Retrieve the managed replaced packages.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return array
+	 */
+	public function get_replaced_packages(): array;
+
+	/**
+	 * Whether the package has any managed replaced packages.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return bool
+	 */
+	public function has_replaced_packages(): bool;
+
+	/**
+	 * Retrieve the Composer config `require` entry.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return array
+	 */
+	public function get_composer_require(): array;
 
 	/**
 	 * Check if the package has a source constraint.

@@ -125,7 +125,7 @@ class EditPackage extends AbstractHookProvider {
 		// Fill empty package details from source.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_empty_package_config_details_on_post_save', 10, 2 );
 		// Check that the package can be resolved with the required packages.
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required_packages', 20, 2 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_dependency_packages', 20, 2 );
 
 		// Handle post data transform before the post is updated in the DB (like changing the source type)
 		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
@@ -613,6 +613,39 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 								        <%- pseudo_id %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
 								    <% } %>
 								' ),
+				         Field::make( 'complex', 'package_replaced_packages', __( 'Replaced Packages', 'pixelgradelt_records' ) )
+				              ->set_help_text( __( 'These are packages that are <strong>automatically ignored from a site\'s composition</strong> when the current package is included. The order is not important, from a logic standpoint.<br>
+These apply the Composer <code>replace</code> logic, meaning that the current package already includes the replaced packages. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#replace" target="_blank">here</a>.<br>
+<strong>FYI:</strong> Each replaced package label is comprised of the standardized package <code>source_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
+				              ->set_classes( 'package-required-packages' )
+				              ->set_collapsed( true )
+				              ->add_fields( [
+						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
+						                   ->set_options( [ $this, 'get_available_required_packages_options' ] )
+						                   ->set_default_value( null )
+						                   ->set_required( true )
+						                   ->set_width( 50 ),
+						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_records' ) )
+						                   ->set_default_value( '*' )
+						                   ->set_required( true )
+						                   ->set_width( 25 ),
+						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_records' ) )
+						                   ->set_options( [
+								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
+								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
+								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
+								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
+								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+						                   ] )
+						                   ->set_required( true )
+						                   ->set_default_value( 'stable' )
+						                   ->set_width( 25 ),
+				              ] )
+				              ->set_header_template( '
+								    <% if (pseudo_id) { %>
+								        <%- pseudo_id %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
+								    <% } %>
+								' ),
 		         ] );
 	}
 
@@ -732,12 +765,12 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	}
 
 	/**
-	 * Check if the package can be resolved by Composer with the required packages. Show a warning message if it can't be.
+	 * Check if the package can be resolved by Composer with the dependency packages. Show a warning message if it can't be.
 	 *
 	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
-	protected function check_required_packages( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+	protected function check_dependency_packages( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
 		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
@@ -756,7 +789,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 		if ( true !== ( $result = $this->package_manager->dry_run_package_require( $package ) ) ) {
 			$message = '<p>';
-			$message .= 'We could not resolve the package dependencies. <strong>You should give the required packages a further look and then hit Update!</strong><br>';
+			$message .= 'We could not resolve the package dependencies. <strong>You should give the dependency packages a further look and then hit Update!</strong><br>';
 			if ( $result instanceof \Exception ) {
 				$message .= '<pre>' . $result->getMessage() . '</pre><br>';
 			}

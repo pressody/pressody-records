@@ -144,6 +144,20 @@ class BasePackage implements \ArrayAccess, Package {
 	protected string $visibility = '';
 
 	/**
+	 * Managed packages required by this package.
+	 *
+	 * @var array
+	 */
+	protected array $required_packages = [];
+
+	/**
+	 * Managed packages replaced by this package.
+	 *
+	 * @var array
+	 */
+	protected array $replaced_packages = [];
+
+	/**
 	 * A Composer config `require` entry.
 	 *
 	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
@@ -151,13 +165,6 @@ class BasePackage implements \ArrayAccess, Package {
 	 * @var array
 	 */
 	protected array $composer_require = [];
-
-	/**
-	 * Managed packages required by this package.
-	 *
-	 * @var array
-	 */
-	protected array $required_packages = [];
 
 	/**
 	 * Releases.
@@ -377,17 +384,6 @@ class BasePackage implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the Composer config `require` entry.
-	 *
-	 * @since 0.9.0
-	 *
-	 * @return array
-	 */
-	public function get_composer_require(): array {
-		return $this->composer_require;
-	}
-
-	/**
 	 * Retrieve the managed required packages.
 	 *
 	 * @since 0.8.0
@@ -407,6 +403,39 @@ class BasePackage implements \ArrayAccess, Package {
 	 */
 	public function has_required_packages(): bool {
 		return ! empty( $this->required_packages );
+	}
+
+	/**
+	 * Retrieve the managed replaced packages.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return array
+	 */
+	public function get_replaced_packages(): array {
+		return $this->replaced_packages;
+	}
+
+	/**
+	 * Whether the package has any managed replaced packages.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return bool
+	 */
+	public function has_replaced_packages(): bool {
+		return ! empty( $this->replaced_packages );
+	}
+
+	/**
+	 * Retrieve the Composer config `require` entry.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return array
+	 */
+	public function get_composer_require(): array {
+		return $this->composer_require;
 	}
 
 	/**

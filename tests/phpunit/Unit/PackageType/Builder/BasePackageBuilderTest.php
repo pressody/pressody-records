@@ -282,6 +282,16 @@ class BasePackageBuilderTest extends TestCase {
 				'pseudo_id'             => 'some_pseudo_id',
 			],
 		];
+		$expected['replaced_packages']    = [
+			'some_pseudo_id2' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 456,
+				'pseudo_id'             => 'some_pseudo_id2',
+			],
+		];
 
 		$package = $this->builder->from_package_data( $expected )->build();
 
@@ -304,6 +314,7 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected['visibility'], $package->visibility );
 		$this->assertSame( $expected['composer_require'], $package->composer_require );
 		$this->assertSame( $expected['required_packages'], $package->required_packages );
+		$this->assertSame( $expected['replaced_packages'], $package->replaced_packages );
 	}
 
 	public function test_from_package_data_do_not_overwrite() {
@@ -437,6 +448,66 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->required_packages );
 	}
 
+	public function test_from_package_data_merge_replaced_packages() {
+		$initial_package                    = new class extends BasePackage {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+
+			public function __set( $name, $value ) {
+				$this->$name = $value;
+			}
+		};
+		$initial_package->name              = 'Theme';
+		$initial_package->slug              = 'theme-slug';
+		$initial_package->replaced_packages = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		$package_data['name']              = 'Plugin Name';
+		$package_data['slug']              = 'slug';
+		$package_data['replaced_packages'] = [
+			'some_pseudo_id2' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id2',
+			],
+		];
+
+		$expected = [
+			'some_pseudo_id'  => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+			'some_pseudo_id2' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id2',
+			],
+		];
+
+		$package = $this->builder->with_package( $initial_package )->from_package_data( $package_data )->build();
+
+		$this->assertSame( $expected, $package->replaced_packages );
+	}
+
 	public function test_from_package_data_merge_overwrite_required_packages() {
 		$initial_package                    = new class extends BasePackage {
 			public function __get( $name ) {
@@ -503,6 +574,74 @@ class BasePackageBuilderTest extends TestCase {
 		$package = $this->builder->with_package( $initial_package )->from_package_data( $package_data )->build();
 
 		$this->assertSame( $expected, $package->required_packages );
+	}
+
+	public function test_from_package_data_merge_overwrite_replaced_packages() {
+		$initial_package                    = new class extends BasePackage {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+
+			public function __set( $name, $value ) {
+				$this->$name = $value;
+			}
+		};
+		$initial_package->name              = 'Theme';
+		$initial_package->slug              = 'theme-slug';
+		$initial_package->replaced_packages = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		$package_data['name']              = 'Plugin Name';
+		$package_data['slug']              = 'slug';
+		$package_data['replaced_packages'] = [
+			'some_pseudo_id'  => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+			'some_pseudo_id3' => [
+				'composer_package_name' => 'pixelgrade/test3',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test3',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id3',
+			],
+		];
+
+		$expected = [
+			'some_pseudo_id'  => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+			'some_pseudo_id3' => [
+				'composer_package_name' => 'pixelgrade/test3',
+				'version_range'         => '1.1',
+				'stability'             => 'dev',
+				'source_name'           => 'local-plugin/test3',
+				'managed_post_id'       => 234,
+				'pseudo_id'             => 'some_pseudo_id3',
+			],
+		];
+
+		$package = $this->builder->with_package( $initial_package )->from_package_data( $package_data )->build();
+
+		$this->assertSame( $expected, $package->replaced_packages );
 	}
 
 	public function test_from_header_data_plugin() {
@@ -732,6 +871,16 @@ class BasePackageBuilderTest extends TestCase {
 				'pseudo_id'             => 'some_pseudo_id',
 			],
 		];
+		$expected->replaced_packages    = [
+			'some_pseudo_id2' => [
+				'composer_package_name' => 'pixelgrade/test2',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'source_name'           => 'local-plugin/test2',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id2',
+			],
+		];
 
 		$package = $this->builder->with_package( $expected )->build();
 
@@ -754,5 +903,6 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->visibility, $package->visibility );
 		$this->assertSame( $expected->composer_require, $package->composer_require );
 		$this->assertSame( $expected->required_packages, $package->required_packages );
+		$this->assertSame( $expected->replaced_packages, $package->replaced_packages );
 	}
 }

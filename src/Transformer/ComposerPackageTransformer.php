@@ -59,18 +59,19 @@ class ComposerPackageTransformer implements PackageTransformer {
 	}
 
 	/**
-	 * Transform a package's required packages into a Composer require list.
+	 * Transform a package's dependency packages into a Composer require list.
 	 *
 	 * @since 0.8.0
 	 *
-	 * @param array $required_ltpackages
+	 * @param array $ltpackages
+	 *
 	 * @return array
 	 */
-	public function transform_required_packages( array $required_ltpackages ): array {
+	public function transform_dependency_packages( array $ltpackages ): array {
 		$composer_require = [];
 
-		// Convert the managed required packages to the simple Composer format.
-		foreach ( $required_ltpackages as $required_ltpackage ) {
+		// Convert the managed dependency packages to the simple Composer format.
+		foreach ( $ltpackages as $required_ltpackage ) {
 			$composer_require[ $required_ltpackage['composer_package_name'] ] = $required_ltpackage['version_range'];
 
 			if ( 'stable' !== $required_ltpackage['stability'] ) {

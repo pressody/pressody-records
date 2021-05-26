@@ -14,6 +14,7 @@ function PackageTable( props ) {
 		homepage,
 		releases,
 		requiredPackages,
+		replacedPackages,
 		slug,
 		type,
 		visibility,
@@ -50,6 +51,12 @@ function PackageTable( props ) {
 					<th>${ __( 'Required Packages', 'pixelgradelt_records' ) }</th>
 					<td className="pixelgradelt_records-required-packages">
 						<${ PackageRequiredPackages } requiredPackages=${ requiredPackages } />
+					</td>
+				</tr>
+				<tr>
+					<th>${ __( 'Replaced Packages', 'pixelgradelt_records' ) }</th>
+					<td className="pixelgradelt_records-required-packages pixelgradelt_records-replaced-packages">
+						<${ PackageRequiredPackages } requiredPackages=${ replacedPackages } />
 					</td>
 				</tr>
 				<tr>
