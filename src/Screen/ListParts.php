@@ -1,8 +1,8 @@
 <?php
 /**
- * List Packages (All Packages) screen provider.
+ * List Parts screen provider.
  *
- * @since   0.5.0
+ * @since   1.0.0
  * @license GPL-2.0-or-later
  * @package PixelgradeLT
  */
@@ -14,39 +14,40 @@ namespace PixelgradeLT\Records\Screen;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\PartManager;
 use PixelgradeLT\Records\Utils\ArrayHelpers;
 
 /**
- * List Packages screen provider class.
+ * List Parts screen provider class.
  *
- * @since 0.5.0
+ * @since 1.0.0
  */
-class ListPackages extends AbstractHookProvider {
+class ListParts extends AbstractHookProvider {
 
 	/**
-	 * Package manager.
+	 * Part manager.
 	 *
-	 * @var PackageManager
+	 * @var PartManager
 	 */
-	protected PackageManager $package_manager;
+	protected PartManager $part_manager;
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.5.0
+	 * @since 1.0.0
 	 *
-	 * @param PackageManager    $package_manager   Packages manager.
+	 * @param PartManager $part_manager Parts manager.
 	 */
 	public function __construct(
-		PackageManager $package_manager
+		PartManager $part_manager
 	) {
-		$this->package_manager   = $package_manager;
+		$this->part_manager = $part_manager;
 	}
 
 	/**
 	 * Register hooks.
 	 *
-	 * @since 0.5.0
+	 * @since 1.0.0
 	 */
 	public function register_hooks() {
 		// Assets.
@@ -57,8 +58,8 @@ class ListPackages extends AbstractHookProvider {
 		$this->add_action( 'restrict_manage_posts', 'output_admin_list_filters' );
 
 		// Add custom columns to post list.
-		$this->add_action( 'manage_' . $this->package_manager::PACKAGE_POST_TYPE . '_posts_columns', 'add_custom_columns' );
-		$this->add_action( 'manage_' . $this->package_manager::PACKAGE_POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2);
+		$this->add_action( 'manage_' . $this->part_manager::PACKAGE_POST_TYPE . '_posts_columns', 'add_custom_columns' );
+		$this->add_action( 'manage_' . $this->part_manager::PACKAGE_POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2);
 	}
 
 	/**
@@ -67,11 +68,11 @@ class ListPackages extends AbstractHookProvider {
 	 * @param string $post_type The current post type.
 	 */
 	protected function output_admin_list_filters( string $post_type ) {
-		if ( $this->package_manager::PACKAGE_POST_TYPE !== $post_type ) {
+		if ( $this->part_manager::PACKAGE_POST_TYPE !== $post_type ) {
 			return;
 		}
 
-		$taxonomy = get_taxonomy( $this->package_manager::PACKAGE_TYPE_TAXONOMY );
+		$taxonomy = get_taxonomy( $this->part_manager::PACKAGE_TYPE_TAXONOMY );
 
 		wp_dropdown_categories( array(
 			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_records' ), $taxonomy->label ),
@@ -90,11 +91,11 @@ class ListPackages extends AbstractHookProvider {
 	/**
 	 * Set up the screen.
 	 *
-	 * @since 0.5.0
+	 * @since 1.0.0
 	 */
 	public function load_screen() {
 		$screen = get_current_screen();
-		if ( $this->package_manager::PACKAGE_POST_TYPE !== $screen->post_type ) {
+		if ( $this->part_manager::PACKAGE_POST_TYPE !== $screen->post_type ) {
 			return;
 		}
 
@@ -104,7 +105,7 @@ class ListPackages extends AbstractHookProvider {
 	/**
 	 * Enqueue assets.
 	 *
-	 * @since 0.5.0
+	 * @since 1.0.0
 	 */
 	public function enqueue_assets() {
 		wp_enqueue_script( 'pixelgradelt_records-admin' );
@@ -113,15 +114,15 @@ class ListPackages extends AbstractHookProvider {
 
 	protected function add_custom_columns( array $columns ): array {
 		$screen = get_current_screen();
-		if ( $this->package_manager::PACKAGE_POST_TYPE !== $screen->post_type ) {
+		if ( $this->part_manager::PACKAGE_POST_TYPE !== $screen->post_type ) {
 			return $columns;
 		}
 
-		// Insert after the title a column for package source details and columns for dependency details.
+		// Insert after the title columns with dependency details.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
 			[
-				'package_source' => esc_html__( 'Package Source', 'pixelgradelt_records' ),
 				'package_required_packages' => esc_html__( 'Required Packages', 'pixelgradelt_records' ),
+				'package_required_parts' => esc_html__( 'Required Parts', 'pixelgradelt_records' ),
 			]
 		);
 
@@ -129,55 +130,16 @@ class ListPackages extends AbstractHookProvider {
 	}
 
 	protected function populate_custom_columns( string $column, int $post_id ): void {
-		if ( ! in_array( $column, [ 'package_source', 'package_required_packages', ] ) ) {
+		if ( ! in_array( $column, [ 'package_required_packages', 'package_required_parts', ] ) ) {
 			return;
 		}
 
 		$output = '—';
 
-		$package_data = $this->package_manager->get_package_id_data( $post_id );
-		if ( 'package_source' === $column ) {
-			// Add details to the title regarding the package configured source.
-			if ( ! empty( $package_data ) && ! empty( $package_data['source_type'] ) ) {
-				switch ( $package_data['source_type'] ) {
-					case 'packagist.org':
-						$output = 'Packagist.org - ' . $package_data['source_name'];
-						break;
-					case 'wpackagist.org':
-						$output = 'WPackagist.org - ' . $package_data['source_name'];
-						break;
-					case 'vcs':
-						if ( false !== strpos( $package_data['vcs_url'], 'github.com' ) ) {
-							$output = 'Github - ';
-						} else {
-							$output = 'VCS - ';
-						}
-
-						$output .= $package_data['source_name'];
-						break;
-					case 'local.plugin':
-						$output = 'Local Plugin - ' . $package_data['slug'];
-						break;
-					case 'local.theme':
-						$output = 'Local Theme - ' . $package_data['slug'];
-						break;
-					case 'local.manual':
-						if ( PackageTypes::THEME === $package_data['type'] ) {
-							$output = 'Manual Theme - ' . $package_data['slug'];
-						} else {
-							$output = 'Manual Plugin - ' . $package_data['slug'];
-						}
-						break;
-					default:
-						// Nothing
-						break;
-				}
-			}
-		}
-
-		if ( 'package_required_packages' === $column && ! empty( $package_data['required_packages'] ) ) {
+		$part_data = $this->part_manager->get_package_id_data( $post_id );
+		if ( 'package_required_packages' === $column && ! empty( $part_data['required_packages'] ) ) {
 			$list = [];
-			foreach ( $package_data['required_packages'] as $package_details ) {
+			foreach ( $part_data['required_packages'] as $package_details ) {
 				$item = $package_details['pseudo_id'] . ':' . $package_details['version_range'];
 				if ( 'stable' !== $package_details['stability'] ) {
 					$item .= '@' . $package_details['stability'];
@@ -185,6 +147,24 @@ class ListPackages extends AbstractHookProvider {
 
 				if ( ! empty( $package_details['managed_post_id'] ) ) {
 					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $package_details['managed_post_id'] ) ) . '" title="Edit Required LT Package">' . $item . '</a>';
+				}
+
+				$list[] = $item;
+			}
+
+			$output = implode( '<br>' . PHP_EOL, $list );
+		}
+
+		if ( 'package_required_parts' === $column && ! empty( $part_data['required_parts'] ) ) {
+			$list = [];
+			foreach ( $part_data['required_parts'] as $part_details ) {
+				$item = $part_details['pseudo_id'] . ':' . $part_details['version_range'];
+				if ( 'stable' !== $part_details['stability'] ) {
+					$item .= '@' . $part_details['stability'];
+				}
+
+				if ( ! empty( $part_details['managed_post_id'] ) ) {
+					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $part_details['managed_post_id'] ) ) . '" title="Edit Required LT Part">' . $item . '</a>';
 				}
 
 				$list[] = $item;

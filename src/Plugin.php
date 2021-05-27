@@ -57,8 +57,9 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'logs.manager' ) )
 
 			->register_hooks( $container->get( 'screen.edit_package' ) )
+			->register_hooks( $container->get( 'screen.list_packages' ) )
 			->register_hooks( $container->get( 'screen.edit_part' ) )
-			->register_hooks( $container->get( 'screen.list_packages' ) );
+			->register_hooks( $container->get( 'screen.list_parts' ) );
 
 
 		if ( is_admin() ) {

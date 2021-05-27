@@ -563,6 +563,11 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['package.manager']
 			);
 		};
+		$container['screen.list_parts'] = function ( $container ) {
+			return new Screen\Listparts(
+				$container['part.manager']
+			);
+		};
 
 		$container['screen.edit_user'] = function ( $container ) {
 			return new Screen\EditUser(

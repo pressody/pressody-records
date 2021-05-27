@@ -283,3 +283,7 @@ input.pixelgradelt_records-cli-field {
 	width: auto;
 	height: 100px;
 }
+
+.wp-list-table .package-list_link:hover {
+	text-decoration: underline;
+}
