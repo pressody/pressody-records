@@ -14,9 +14,11 @@ namespace PixelgradeLT\Records\REST;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Exception\FileNotFound;
 use PixelgradeLT\Records\Package;
+use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\PartManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 use WP_Error;
@@ -141,7 +143,15 @@ class PackagesController extends WP_REST_Controller {
 					return false;
 				}
 
-				if ( ! empty( $post ) && $package->get_managed_post_id() !== $post->ID ) {
+				if ( ! empty( $request['postId'] ) && ! in_array( $package->get_managed_post_id(), $request['postId'] ) ) {
+					return false;
+				}
+
+				if ( ! empty( $request['postSlug'] ) && ! in_array( $package->get_slug(), $request['postSlug'] ) ) {
+					return false;
+				}
+
+				if ( ! empty( $request['packageName'] ) && ! in_array( $package->get_composer_package_name(), $request['packageName'] ) ) {
 					return false;
 				}
 
@@ -149,7 +159,7 @@ class PackagesController extends WP_REST_Controller {
 			}
 		);
 
-		foreach ( $repository->all() as $slug => $package ) {
+		foreach ( $repository->all() as $package ) {
 			$data    = $this->prepare_item_for_response( $package, $request );
 			$items[] = $this->prepare_response_for_collection( $data );
 		}
@@ -169,11 +179,34 @@ class PackagesController extends WP_REST_Controller {
 			'context' => $this->get_context_param( [ 'default' => 'view' ] ),
 		];
 
-		$params['post'] = [
-			'description'       => esc_html__( 'Limit results to a managed packages by its post ID.', 'pixelgradelt_records' ),
-			'type'              => 'integer',
-			'default'           => 0,
-			'sanitize_callback' => 'absint',
+		$params['postId'] = [
+			'description'       => esc_html__( 'Limit results to packages by one or more (managed) post IDs.', 'pixelgradelt_records' ),
+			'type'              => 'array',
+			'items'             => [
+				'type' => 'integer',
+			],
+			'default'           => [],
+			'sanitize_callback' => 'wp_parse_id_list',
+		];
+
+		$params['postSlug'] = [
+			'description'       => esc_html__( 'Limit results to packages by one or more (managed) post slugs.', 'pixelgradelt_records' ),
+			'type'              => 'array',
+			'items'             => [
+				'type' => 'string',
+			],
+			'default'           => [],
+			'sanitize_callback' => 'wp_parse_slug_list',
+		];
+
+		$params['packageName'] = [
+			'description'       => esc_html__( 'Limit results to packages by one or more Composer package names (including the vendor). Use the "postSlug" parameter if you want to provide only the name, without the vendor.', 'pixelgradelt_records' ),
+			'type'              => 'array',
+			'items'             => [
+				'type' => 'string',
+			],
+			'default'           => [],
+			'sanitize_callback' => 'wp_parse_slug_list',
 		];
 
 		$params['type'] = [
@@ -225,6 +258,8 @@ class PackagesController extends WP_REST_Controller {
 			'authors'     => $package->get_authors(),
 			'type'        => $package->get_type(),
 			'visibility'  => $package->get_visibility(),
+			'editLink'    => get_edit_post_link( $package->get_managed_post_id(),$request['context'] ),
+			'ltType'      => get_post_type( $package->get_managed_post_id() ) === PartManager::PACKAGE_POST_TYPE ? 'part' : 'package',
 		];
 
 		$data['composer'] = [
@@ -295,7 +330,7 @@ class PackagesController extends WP_REST_Controller {
 				'name'        => $requiredPackage['composer_package_name'],
 				'version'     => $requiredPackage['version_range'],
 				'stability'   => $requiredPackage['stability'],
-				'editLink'    => get_edit_post_link( $requiredPackage['managed_post_id'] ),
+				'editLink'    => get_edit_post_link( $requiredPackage['managed_post_id'], $request['context'] ),
 				'displayName' => $package_name,
 			];
 		}
@@ -324,7 +359,7 @@ class PackagesController extends WP_REST_Controller {
 				'name'        => $replacedPackage['composer_package_name'],
 				'version'     => $replacedPackage['version_range'],
 				'stability'   => $replacedPackage['stability'],
-				'editLink'    => get_edit_post_link( $replacedPackage['managed_post_id'] ),
+				'editLink'    => get_edit_post_link( $replacedPackage['managed_post_id'], $request['context'] ),
 				'displayName' => $package_name,
 			];
 		}
@@ -394,7 +429,7 @@ class PackagesController extends WP_REST_Controller {
 				'releases'         => [
 					'description' => esc_html__( 'A list of package releases.', 'pixelgradelt_records' ),
 					'type'        => 'array',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'items'       => [
 						'type'       => 'object',
@@ -417,7 +452,7 @@ class PackagesController extends WP_REST_Controller {
 				'requiredPackages' => [
 					'description' => esc_html__( 'A list of required packages.', 'pixelgradelt_records' ),
 					'type'        => 'array',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'items'       => [
 						'type'       => 'object',
@@ -432,21 +467,26 @@ class PackagesController extends WP_REST_Controller {
 							'version'     => [
 								'description' => esc_html__( 'The required package version constraint.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
 								'description' => esc_html__( 'The required package stability constraint.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
 								'description' => esc_html__( 'The required package post edit link.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'format'      => 'uri',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
 								'description' => esc_html__( 'The required package display name/string.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 						],
@@ -455,7 +495,7 @@ class PackagesController extends WP_REST_Controller {
 				'replacedPackages' => [
 					'description' => esc_html__( 'A list of replaced packages.', 'pixelgradelt_records' ),
 					'type'        => 'array',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'items'       => [
 						'type'       => 'object',
@@ -470,21 +510,25 @@ class PackagesController extends WP_REST_Controller {
 							'version'     => [
 								'description' => esc_html__( 'The replaced package version constraint.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
 								'description' => esc_html__( 'The replaced package stability constraint.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
 								'description' => esc_html__( 'The replaced package post edit link.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
 								'description' => esc_html__( 'The replaced package display name/string.', 'pixelgradelt_records' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 						],
@@ -512,6 +556,19 @@ class PackagesController extends WP_REST_Controller {
 				],
 				'visibility'       => [
 					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pixelgradelt_records' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit', 'embed' ],
+					'readonly'    => true,
+				],
+				'editLink'    => [
+					'description' => esc_html__( 'The package post edit link.', 'pixelgradelt_records' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'ltType'       => [
+					'description' => esc_html__( 'The LT package type (package or part).', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,

@@ -18,13 +18,17 @@ function PackageTable( props ) {
 		slug,
 		type,
 		visibility,
+		editLink,
+		ltType,
 	} = props;
 
+	let className = 'pixelgradelt_records-package widefat ' + 'lt-type__' + ltType;
+
 	return html`
-		<table className="pixelgradelt_records-package widefat">
+		<table className="${ className }">
 			<thead>
 				<tr>
-					<th colSpan="2">${ composer.name } ${ 'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : '' }</th>
+					<th colSpan="2">${ composer.name } ${ 'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : '' } <a className="edit-package" href=${ editLink }>Edit ${ ltType.toLowerCase() }</a></th>
 				</tr>
 			</thead>
 			<tbody>

@@ -80,10 +80,7 @@ class Authentication extends AbstractHookProvider {
 		add_filter( 'user_has_cap', [ $this, 'maybe_allow_public_access' ] );
 
 		// Allow cookie authentication to work for our requests.
-		$request_path = $this->get_request_path();
-		if ( 0 === strpos( $request_path, '/ltpackagist' ) || 0 === strpos( $request_path, '/ltparts' ) ) {
-			remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
-		}
+		remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
 	}
 
 	/**
@@ -169,6 +166,10 @@ class Authentication extends AbstractHookProvider {
 		}
 
 		if ( 0 === strpos( $request_path, '/ltpackagist' ) || 0 === strpos( $request_path, '/ltparts' ) ) {
+			return true;
+		}
+
+		if ( 0 === strpos( $request_path, '/wp-json/pixelgradelt_records/' ) ) {
 			return true;
 		}
 

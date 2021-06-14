@@ -44,7 +44,7 @@ function setPostId( postId ) {
 
 function* getPackages() {
 	const postId = select( STORE_KEY ).getPostId();
-	const packages = yield apiFetch( { path: `/pixelgradelt_records/v1/packages?post=${ postId }` } );
+	const packages = yield apiFetch( { path: `/pixelgradelt_records/v1/packages?postId=${ postId }` } );
 	dispatch( STORE_KEY ).setPackages( packages.sort( compareByName ) );
 }
 
@@ -75,7 +75,7 @@ const store = {
 			return state.packages || [];
 		},
 		getPostId( state ) {
-			return state.postId || null;
+			return state.postId || [];
 		},
 	},
 	resolvers: {
