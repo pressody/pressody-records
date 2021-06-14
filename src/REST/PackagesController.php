@@ -256,6 +256,7 @@ class PackagesController extends WP_REST_Controller {
 			'description' => $package->get_description(),
 			'homepage'    => $package->get_homepage(),
 			'authors'     => $package->get_authors(),
+			'keywords'    => $package->get_keywords(),
 			'type'        => $package->get_type(),
 			'visibility'  => $package->get_visibility(),
 			'editLink'    => get_edit_post_link( $package->get_managed_post_id(),$request['context'] ),
@@ -417,6 +418,15 @@ class PackagesController extends WP_REST_Controller {
 					'description' => esc_html__( 'The package URL.', 'pixelgradelt_records' ),
 					'type'        => 'string',
 					'format'      => 'uri',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'keywords'         => [
+					'description' => esc_html__( 'The package keywords.', 'pixelgradelt_records' ),
+					'type'        => 'array',
+					'items'             => [
+						'type' => 'string',
+					],
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],

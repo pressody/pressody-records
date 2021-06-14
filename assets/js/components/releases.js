@@ -63,7 +63,7 @@ function Releases( props ) {
 
 	return html`
 		<${ Fragment }>
-			${ releaseButtons.length ? releaseButtons : __( 'None', 'pixelgradelt_retailer' ) }
+			${ releaseButtons.length ? releaseButtons : __( 'None', 'pixelgradelt_records' ) }
 			${ releaseActions }
 		</${ Fragment }
 	`;

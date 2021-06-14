@@ -2,6 +2,7 @@ import { html, i18n } from '../utils/index.js';
 import Releases from './releases.js';
 import PackageRequiredPackages from './package-required-packages.js';
 import PackageAuthors from './package-authors.js';
+import PackageKeywords from './package-keywords.js';
 
 const { __ } = i18n;
 
@@ -12,6 +13,7 @@ function PackageTable( props ) {
 		description,
 		name,
 		homepage,
+		keywords,
 		releases,
 		requiredPackages,
 		replacedPackages,
@@ -61,6 +63,12 @@ function PackageTable( props ) {
 					<th>${ __( 'Replaced Packages', 'pixelgradelt_records' ) }</th>
 					<td className="pixelgradelt_records-required-packages pixelgradelt_records-replaced-packages">
 						<${ PackageRequiredPackages } requiredPackages=${ replacedPackages } />
+					</td>
+				</tr>
+				<tr>
+					<th>${ __( 'Keywords', 'pixelgradelt_records' ) }</th>
+					<td className="package-keywords__list">
+						<${ PackageKeywords } keywords=${ keywords } />
 					</td>
 				</tr>
 				<tr>
