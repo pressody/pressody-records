@@ -2,7 +2,7 @@
 /**
  * REST provider.
  *
- * @since   1.0.0
+ * @since   0.10.0
  * @license GPL-2.0-or-later
  * @package PixelgradeLT
  */
@@ -18,7 +18,7 @@ use WP_REST_Controller;
 /**
  * REST provider class.
  *
- * @since 1.0.0
+ * @since 0.10.0
  */
 class REST extends AbstractHookProvider {
 	/**
@@ -40,7 +40,7 @@ class REST extends AbstractHookProvider {
 	/**
 	 * Register hooks.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 */
 	public function register_hooks() {
 		add_action( 'rest_api_init', [ $this, 'register_rest_controllers' ] );
@@ -49,7 +49,7 @@ class REST extends AbstractHookProvider {
 	/**
 	 * Register REST controllers.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @throws \LogicException If a registered controller doesn't extend WP_REST_Controller.
 	 */

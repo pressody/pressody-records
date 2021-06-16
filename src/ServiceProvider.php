@@ -17,6 +17,7 @@ use Pimple\Container as PimpleContainer;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
 use Pimple\Psr11\ServiceLocator;
+use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
 use PixelgradeLT\Records\Logging\Handler\FileLogHandler;
 use PixelgradeLT\Records\Logging\Logger;
 use PixelgradeLT\Records\Logging\LogsManager;
@@ -93,6 +94,19 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['client.composer.custom_token_auth'] = function () {
 			return new Client\CustomTokenAuthentication();
+		};
+
+		$container['crypter'] = function () {
+			$crypter = new StringCrypter();
+			// Load the encryption key from the environment.
+			try {
+				$crypter->loadEncryptionKey( $_ENV['LTRECORDS_ENCRYPTION_KEY'] );
+			} catch ( PixelgradeltRecordsException $e ) {
+				// Do nothing right now.
+				// We should handle a failed encryption setup through health checks and when attempting to encrypt or decrypt.
+			}
+
+			return $crypter;
 		};
 
 		$container['hash.generator'] = function ( $container ) {
@@ -180,7 +194,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['hooks.rest'] = function( $container ) {
+		$container['hooks.rest'] = function ( $container ) {
 			return new Provider\REST( $container['rest.controllers'] );
 		};
 
@@ -482,7 +496,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['rest.controller.api_keys'] = function( $container ) {
+		$container['rest.controller.api_keys'] = function ( $container ) {
 			return new REST\ApiKeysController(
 				'pixelgradelt_records/v1',
 				'apikeys',
@@ -491,7 +505,16 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['rest.controller.packages'] = function( $container ) {
+		$container['rest.controller.compositions'] = function ( $container ) {
+			return new REST\CompositionsController(
+				'pixelgradelt_records/v1',
+				'compositions',
+				$container['repository.all.managed'],
+				$container['transformer.composer_repository']
+			);
+		};
+
+		$container['rest.controller.packages'] = function ( $container ) {
 			return new REST\PackagesController(
 				'pixelgradelt_records/v1',
 				'packages',
@@ -500,12 +523,13 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['rest.controllers'] = function( $container ) {
+		$container['rest.controllers'] = function ( $container ) {
 			return new ServiceIterator(
 				$container,
 				[
-					'api_keys' => 'rest.controller.api_keys',
-					'packages' => 'rest.controller.packages',
+					'api_keys'     => 'rest.controller.api_keys',
+					'compositions' => 'rest.controller.compositions',
+					'packages'     => 'rest.controller.packages',
 				]
 			);
 		};
@@ -563,7 +587,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['package.manager']
 			);
 		};
-		$container['screen.list_parts'] = function ( $container ) {
+		$container['screen.list_parts']    = function ( $container ) {
 			return new Screen\Listparts(
 				$container['part.manager']
 			);

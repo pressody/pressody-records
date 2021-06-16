@@ -2,14 +2,16 @@
 /**
  * Helper functions
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
+
+use PixelgradeLT\Records\Exception\InvalidComposerVendor;
 
 /**
  * Retrieve the main plugin instance.
@@ -21,6 +23,7 @@ namespace PixelgradeLT\Records;
 function plugin(): Plugin {
 	static $instance;
 	$instance = $instance ?: new Plugin();
+
 	return $instance;
 }
 
@@ -56,7 +59,7 @@ function generate_random_string( int $length = 12 ): string {
 
 	$str = '';
 	$max = \strlen( $chars ) - 1;
-	for ( $i = 0; $i < $length; $i++ ) {
+	for ( $i = 0; $i < $length; $i ++ ) {
 		$str .= $chars[ random_int( 0, $max ) ];
 	}
 
@@ -145,6 +148,34 @@ function get_parts_permalink( array $args = null ): string {
 }
 
 /**
+ * Retrieve the PixelgradeLT Records Composer vendor for use with our packages.
+ *
+ * @throws InvalidComposerVendor
+ * @return string
+ */
+function get_composer_vendor(): string {
+	/**
+	 * The custom vendor configured via the Settings page is hooked through @see CustomVendor::register_hooks()
+	 */
+	$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records' );
+	if ( empty( $vendor ) || ! is_string( $vendor ) ) {
+		throw new InvalidComposerVendor( "The PixelgradeLT Records Composer vendor must be a string and it can't be empty or falsy." );
+	}
+
+	if ( strlen( $vendor ) < 10 ) {
+		throw new InvalidComposerVendor( "The PixelgradeLT Records Composer vendor must be at least 10 characters long. Please make sure that it is as unique as possible, in the entire Composer ecosystem." );
+	}
+
+	// This is the same partial pattern used by Composer.
+	// @see https://getcomposer.org/schema.json
+	if ( ! preg_match( '/^[a-z0-9]([_.-]?[a-z0-9]+)*$/i', $vendor ) ) {
+		throw InvalidComposerVendor::wrongFormat( $vendor );
+	}
+
+	return $vendor;
+}
+
+/**
  * Retrieve ID for the user being edited.
  *
  * @since 0.1.0
@@ -171,7 +202,7 @@ function get_edited_user_id(): int {
  * @return bool
  */
 function is_plugin_file( string $plugin_file ): bool {
-	return '.php' === substr( $plugin_file, -4 );
+	return '.php' === substr( $plugin_file, - 4 );
 }
 
 /**
@@ -181,7 +212,7 @@ function is_plugin_file( string $plugin_file ): bool {
  */
 function display_missing_dependencies_notice() {
 	$message = sprintf(
-		/* translators: %s: documentation URL */
+	/* translators: %s: documentation URL */
 		__( 'PixelgradeLT Records is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'pixelgradelt_records' ),
 		'https://github.com/pixelgradelt/pixelgradelt-records/blob/master/docs/installation.md'
 	);

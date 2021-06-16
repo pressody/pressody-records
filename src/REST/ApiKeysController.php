@@ -2,7 +2,7 @@
 /**
  * API Keys REST controller.
  *
- * @since   1.0.0
+ * @since   0.10.0
  * @license GPL-2.0-or-later
  * @package PixelgradeLT
  */
@@ -24,7 +24,7 @@ use WP_REST_Server;
 /**
  * API Keys REST controller class.
  *
- * @since 1.0.0
+ * @since 0.10.0
  */
 class ApiKeysController extends WP_REST_Controller {
 	/**
@@ -51,7 +51,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Constructor.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param string           $namespace  The namespace for this controller's route.
 	 * @param string           $rest_base  The base of this controller's route.
@@ -73,7 +73,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Register the routes.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @see   register_rest_route()
 	 */
@@ -135,7 +135,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Check if a given request has access to view the resource.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -164,7 +164,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Retrieve a collection of API Keys.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -214,7 +214,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Create a resource.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -244,7 +244,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Check if a given request has access to delete a resource.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -282,7 +282,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Delete a resource.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -309,7 +309,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Retrieve the query parameters for collections of API Keys.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @return array
 	 */
@@ -322,7 +322,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Prepare a single package output for response.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param ApiKey          $api_key API Key instance.
 	 * @param WP_REST_Request $request Request instance.
@@ -339,7 +339,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Checks that the "token" parameter is a valid.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param string $token API Key token.
 	 *
@@ -356,7 +356,7 @@ class ApiKeysController extends WP_REST_Controller {
 	/**
 	 * Get the package schema, conforming to JSON Schema.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @return array
 	 */

@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records\Transformer;
 
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageFactory;
+use function PixelgradeLT\Records\get_composer_vendor;
 
 /**
  * Composer package transformer class.
@@ -51,7 +52,7 @@ class ComposerPackageTransformer implements PackageTransformer {
 	public function transform( Package $package ): Package {
 		$builder = $this->factory->create( 'composer' )->with_package( $package );
 
-		$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records' );
+		$vendor = get_composer_vendor();
 		$name   = $this->normalize_package_name( $package->get_slug() );
 		$builder->set_name( $vendor . '/' . $name );
 

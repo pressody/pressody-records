@@ -20,6 +20,7 @@ use ReflectionClass;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\Release;
 use PixelgradeLT\Records\ReleaseManager;
+use function PixelgradeLT\Records\get_composer_vendor;
 
 /**
  * Base package builder class.
@@ -791,7 +792,7 @@ class BasePackageBuilder {
 			/**
 			 * Construct the Composer-like package name (the same way @see ComposerPackageTransformer::transform() does it).
 			 */
-			$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records', $package, $package_data );
+			$vendor = get_composer_vendor();
 			$name   = $this->normalize_package_name( $package_data['slug'] );
 
 			$normalized[ $package['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;

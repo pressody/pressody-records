@@ -10,7 +10,7 @@
  * Plugin Name: PixelgradeLT Records
  * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-records
  * Description: Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.
- * Version: 0.9.4
+ * Version: 0.10.0
  * Author: Pixelgrade
  * Author URI: https://pixelgrade.com/
  * License: GPL-2.0-or-later
@@ -37,7 +37,7 @@ if ( ! \defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-const VERSION = '0.9.4';
+const VERSION = '0.10.0';
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
@@ -57,8 +57,10 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 
 // Load the environment variables.
 // We use immutable since we don't want to overwrite variables already set.
-$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
 $dotenv->load();
+$dotenv->required( 'LTRECORDS_PHP_AUTH_USER' )->notEmpty();
+$dotenv->required( 'LTRECORDS_ENCRYPTION_KEY' )->notEmpty();
 
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';

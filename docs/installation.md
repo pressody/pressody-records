@@ -1,8 +1,10 @@
 # Installation
 
-As a standard WordPress plugin, installation is the same as most other plugins. This can be done by uploading the plugin as a zip file, or using Composer.
+As a standard WordPress plugin, installation is the same as most other plugins. This can be done by uploading the plugin as a zip file, or cloning this Git repo in the `wp-content/plugins` directory and running `composer install` from the new directory.
 
-PixelgradeLT Records requires PHP 7.4 or later.
+After you install the plugin, you need to copy the `.env.example` file into a `.env` file and fill in the needed details according to instructions present in the `.env` file. Of course, if you provide those ENV variables through other means, that is fine by us.
+
+*__Note__: PixelgradeLT Records requires PHP 7.4 or later.*
 
 ## Zip File
 

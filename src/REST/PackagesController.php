@@ -2,7 +2,7 @@
 /**
  * Packages REST controller.
  *
- * @since   1.0.0
+ * @since   0.10.0
  * @license GPL-2.0-or-later
  * @package PixelgradeLT
  */
@@ -14,7 +14,6 @@ namespace PixelgradeLT\Records\REST;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Exception\FileNotFound;
 use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\LocalPlugin;
 use PixelgradeLT\Records\PackageType\LocalTheme;
 use PixelgradeLT\Records\PackageType\PackageTypes;
@@ -30,7 +29,7 @@ use WP_REST_Server;
 /**
  * Packages REST controller class.
  *
- * @since 1.0.0
+ * @since 0.10.0
  */
 class PackagesController extends WP_REST_Controller {
 	/**
@@ -57,7 +56,7 @@ class PackagesController extends WP_REST_Controller {
 	/**
 	 * Constructor.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param string             $namespace            The namespace for this controller's route.
 	 * @param string             $rest_base            The base of this controller's route.
@@ -79,7 +78,7 @@ class PackagesController extends WP_REST_Controller {
 	/**
 	 * Register the routes.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @see   register_rest_route()
 	 */
@@ -102,7 +101,7 @@ class PackagesController extends WP_REST_Controller {
 	/**
 	 * Check if a given request has access to view the resources.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -123,7 +122,7 @@ class PackagesController extends WP_REST_Controller {
 	/**
 	 * Retrieve a collection of packages.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -132,14 +131,9 @@ class PackagesController extends WP_REST_Controller {
 	public function get_items( $request ) {
 		$items = [];
 
-		$post = null;
-		if ( ! empty( $request['post'] ) ) {
-			$post = get_post( $request['post'] );
-		}
-
 		$repository = $this->repository->with_filter(
-			function ( $package ) use ( $request, $post ) {
-				if ( ! in_array( $package->get_type(), $request['type'], true ) ) {
+			function ( $package ) use ( $request ) {
+				if ( ! empty( $request['type'] ) && ! in_array( $package->get_type(), $request['type'], true ) ) {
 					return false;
 				}
 
@@ -170,7 +164,7 @@ class PackagesController extends WP_REST_Controller {
 	/**
 	 * Retrieve the query parameters for collections of packages.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @return array
 	 */
@@ -231,7 +225,7 @@ class PackagesController extends WP_REST_Controller {
 	/**
 	 * Prepare a single package output for response.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @param Package         $package Package instance.
 	 * @param WP_REST_Request $request Request instance.
@@ -371,7 +365,7 @@ class PackagesController extends WP_REST_Controller {
 	/**
 	 * Get the package schema, conforming to JSON Schema.
 	 *
-	 * @since 1.0.0
+	 * @since 0.10.0
 	 *
 	 * @return array
 	 */
