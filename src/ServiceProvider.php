@@ -510,7 +510,8 @@ class ServiceProvider implements ServiceProviderInterface {
 				'pixelgradelt_records/v1',
 				'compositions',
 				$container['repository.all.managed'],
-				$container['transformer.composer_repository']
+				$container['transformer.composer_repository'],
+				$container['crypter']
 			);
 		};
 

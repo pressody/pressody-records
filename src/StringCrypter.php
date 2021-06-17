@@ -74,6 +74,10 @@ class StringCrypter implements CrypterInterface {
 	 * @return string The cipher text corresponding to the provided string.
 	 */
 	public function encrypt( string $secretString ): string {
+		if ( empty( $this->key ) ) {
+			throw new CrypterEnvironmentIsBrokenException( 'Encryption key not loaded. Load a valid encryption key before trying to encrypt!');
+		}
+
 		try {
 			return Crypto::encrypt( $secretString, $this->key );
 		} catch ( \Defuse\Crypto\Exception\EnvironmentIsBrokenException $environment_is_broken_exception ) {
@@ -96,6 +100,10 @@ class StringCrypter implements CrypterInterface {
 	 * @return string The decrypted string.
 	 */
 	public function decrypt( string $cipherText ): string {
+		if ( empty( $this->key ) ) {
+			throw new CrypterEnvironmentIsBrokenException( 'Encryption key not loaded. Load a valid encryption key before trying to decrypt!');
+		}
+
 		try {
 			return Crypto::decrypt( $cipherText, $this->key );
 		} catch ( \Defuse\Crypto\Exception\BadFormatException $bad_format_exception ) {

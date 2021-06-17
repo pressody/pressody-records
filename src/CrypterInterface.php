@@ -11,7 +11,9 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
-use Psr\Log\LoggerInterface;
+use PixelgradeLT\Records\Exception\CrypterBadFormatException;
+use PixelgradeLT\Records\Exception\CrypterEnvironmentIsBrokenException;
+use PixelgradeLT\Records\Exception\CrypterWrongKeyOrModifiedCiphertextException;
 
 /**
  * String crypter interface.
@@ -20,13 +22,12 @@ use Psr\Log\LoggerInterface;
  */
 interface CrypterInterface {
 
-	public function __construct();
-
 	/**
 	 * Encode a given positive int into a string hash.
 	 *
 	 * @param string $secretString
 	 *
+	 * @throws CrypterEnvironmentIsBrokenException
 	 * @return string The cipher text corresponding to the provided string.
 	 */
 	public function encrypt( string $secretString ): string;
@@ -36,6 +37,9 @@ interface CrypterInterface {
 	 *
 	 * @param string $cipherText
 	 *
+	 * @throws CrypterBadFormatException
+	 * @throws CrypterEnvironmentIsBrokenException
+	 * @throws CrypterWrongKeyOrModifiedCiphertextException
 	 * @return string The decrypted string.
 	 */
 	public function decrypt( string $cipherText ): string;

@@ -1,0 +1,99 @@
+POST https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions
+Authorization: Basic R0P5Ca3YYLLREgeXJpo2pw5SVgp0LtwI pixelgradelt_records
+Accept: application/json
+Content-Type: application/json
+
+{
+  "siteId": "some-site id",
+  "userId": 123,
+  "orderId": [ 888, 2345, 213, 234 ],
+  "requirePackages": [
+	{
+	  "name": "pixelgradelt-records\/part_yet-another",
+	  "version": "*"
+	},
+	{
+	  "name": "pixelgradelt-records\/part_another-test",
+	  "version": "*, >=3.0.0"
+	},
+	{
+	  "name": "pixelgradelt-records\/part_test-test",
+	  "version": "*, ^4.0"
+	}
+  ],
+  "composer": {
+	"name": "pixelgradelt\/my-site",
+	"authors": [],
+	"homepage": "https://local.local",
+	"keywords": [],
+	"support": {},
+	"config": {
+	  "optimize-autoloader": false,
+	  "preferred-install": "dev"
+	},
+	"minimum-stability": "stable",
+	"prefer-stable": false,
+	"extra": {
+	  "something": "yet"
+	},
+	"scripts": {
+	  "test2": [
+		"phpcs"
+	  ]
+	}
+  }
+}
+
+###
+
+POST https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions
+Authorization: Basic R0P5Ca3YYLLREgeXJpo2pw5SVgp0LtwI pixelgradelt_records
+Accept: application/json
+Content-Type: application/json
+
+{
+  "siteId": "some-site id",
+  "userId": 123,
+  "orderId": [ 888, 2345, 213, 234 ],
+  "requirePackages": [
+	{
+	  "name": "pixelgradelt-records\/part_yet-another",
+	  "version": "*"
+	},
+	{
+	  "name": "pixelgradelt-records\/part_another-test",
+	  "version": "*, >=3.0.0"
+	},
+	{
+	  "name": "pixelgradelt-records\/part_test-test",
+	  "version": "*, ^4.0"
+	}
+  ]
+}
+
+###
+
+POST https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions
+Authorization: Basic R0P5Ca3YYLLREgeXJpo2pw5SVgp0LtwI pixelgradelt_records
+Accept: application/json
+Content-Type: application/json
+
+{
+  "siteId": "some-site id",
+  "userId": 123,
+  "orderId": [ 888, 2345, 213, 234 ]
+}
+
+###
+
+GET https://lt-records.local/wp-json/pixelgradelt_records/v1/packages
+Authorization: Basic R0P5Ca3YYLLREgeXJpo2pw5SVgp0LtwI pixelgradelt_records
+Accept: application/json
+
+###
+
+GET https://ltsatispress.local/ltpackagist/packages.json
+Accept: application/json
+Authorization: Basic R0P5Ca3YYLLREgeXJpo2pw5SVgp0LtwI pixelgradelt_records
+
+###

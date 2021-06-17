@@ -12,11 +12,16 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\REST;
 
 use Composer\Json\JsonFile;
+use Composer\Json\JsonValidationException;
+use Composer\Package\Locker;
+use JsonSchema\Constraints\BaseConstraint;
+use JsonSchema\Validator;
 use PixelgradeLT\Records\Authentication\ApiKey\Server;
 use PixelgradeLT\Records\Capabilities;
+use PixelgradeLT\Records\CrypterInterface;
+use PixelgradeLT\Records\Exception\CrypterEnvironmentIsBrokenException;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageRepositoryTransformer;
-use PixelgradeLT\Records\Transformer\PackageTransformer;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -43,6 +48,13 @@ class CompositionsController extends WP_REST_Controller {
 	const PACKAGE_NAME_PATTERN = '^[a-z0-9]([_.-]?[a-z0-9]+)*/[a-z0-9](([_.]?|-{0,2})[a-z0-9]+)*$';
 
 	/**
+	 * Package repository.
+	 *
+	 * @var PackageRepository
+	 */
+	protected PackageRepository $repository;
+
+	/**
 	 * Repository transformer.
 	 *
 	 * @var PackageRepositoryTransformer
@@ -50,11 +62,11 @@ class CompositionsController extends WP_REST_Controller {
 	protected PackageRepositoryTransformer $transformer;
 
 	/**
-	 * Package repository.
+	 * String crypter.
 	 *
-	 * @var PackageRepository
+	 * @var CrypterInterface
 	 */
-	protected PackageRepository $repository;
+	protected CrypterInterface $crypter;
 
 	/**
 	 * Constructor.
@@ -65,17 +77,21 @@ class CompositionsController extends WP_REST_Controller {
 	 * @param string                       $rest_base   The base of this controller's route.
 	 * @param PackageRepository            $repository  Package repository.
 	 * @param PackageRepositoryTransformer $transformer Package repository transformer.
+	 * @param CrypterInterface             $crypter     String crypter.
 	 */
 	public function __construct(
 		string $namespace,
 		string $rest_base,
 		PackageRepository $repository,
-		PackageRepositoryTransformer $transformer
+		PackageRepositoryTransformer $transformer,
+		CrypterInterface $crypter
 	) {
+
 		$this->namespace   = $namespace;
 		$this->rest_base   = $rest_base;
 		$this->repository  = $repository;
 		$this->transformer = $transformer;
+		$this->crypter     = $crypter;
 	}
 
 	/**
@@ -107,19 +123,19 @@ class CompositionsController extends WP_REST_Controller {
 							'required'          => true,
 						],
 						'userId'          => [
-							'description' => esc_html__( 'The ID of the e-commerce user the new composition is tied to.', 'pixelgradelt_records' ),
+							'description' => esc_html__( 'The ID of the user the new composition is tied to.', 'pixelgradelt_records' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
 						'orderId'         => [
-							'description' => esc_html__( 'The e-commerce order ID(s) the new composition is tied to.', 'pixelgradelt_records' ),
+							'description' => esc_html__( 'The e-commerce order ID(s) the new composition is to be tied to.', 'pixelgradelt_records' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
 							],
 							'context'     => [ 'view', 'edit' ],
-							'required'    => true,
+							'required'    => false,
 						],
 						'requirePackages' => [
 							'description' => esc_html__( 'A LT Records packages (actual LT packages or LT parts) list to include in the composition. All packages that don\'t exist will be ignored.', 'pixelgradelt_records' ),
@@ -195,10 +211,41 @@ class CompositionsController extends WP_REST_Controller {
 		// Add the required LT packages.
 		$composition = $this->add_required_packages( $composition, $request );
 
+		// Add the user details.
+		try {
+			$composition = $this->add_user_details( $composition, $request );
+		} catch ( CrypterEnvironmentIsBrokenException $e ) {
+			return new WP_Error(
+				'rest_unable_to_encrypt',
+				esc_html__( 'We could not encrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_records' ),
+				[
+					'status'  => 500,
+					'details' => $e->getMessage(),
+				]
+			);
+		}
+
+		$composition = $this->standardize_to_object( $composition );
+
+		// Fingerprint this composition. This should be run last!!!
+		$composition = $this->add_fingerprint( $composition, $request );
+
+		// Validate the composition according to composer-schema.json rules.
+		try {
+			$this->validate_schema( $composition, $request );
+		} catch ( JsonValidationException $e ) {
+			return new WP_Error(
+				'rest_json_invalid',
+				esc_html__( 'We could not produce a composition that would validate against the Composer JSON schema.', 'pixelgradelt_records' ),
+				[
+					'status'  => 500,
+					'details' => $e->getErrors(),
+				]
+			);
+		}
+
 		// Return the composition.
-		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $composition, $request );
-		$response = rest_ensure_response( $response );
+		$response = rest_ensure_response( $composition );
 		$response->set_status( 201 );
 
 		return $response;
@@ -297,20 +344,184 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Prepare a single composition output for response.
+	 * Add to the composition the user details available in the request.
 	 *
-	 * @since 0.10.0
+	 * @param array           $composition The current composition details.
+	 * @param WP_REST_Request $request     Full details about the request.
 	 *
-	 * @param array           $composition Composer.json contents.
-	 * @param WP_REST_Request $request     Request instance.
-	 *
-	 * @return WP_REST_Response Response instance.
+	 * @throws CrypterEnvironmentIsBrokenException
+	 * @return array The updated composition details.
 	 */
-	public function prepare_item_for_response( $composition, $request ): WP_REST_Response {
-		$data = $composition;
-		$data = $this->filter_response_by_context( $data, $request['context'] );
+	protected function add_user_details( array $composition, WP_REST_Request $request ): array {
+		if ( empty( $composition['extra'] ) ) {
+			$composition['extra'] = [];
+		}
 
-		return rest_ensure_response( $data );
+		// Add the encrypted user details.
+		$user_data = [
+			'siteid'  => 0,
+			'userid'  => 0,
+			'orderid' => 0,
+		];
+		if ( isset( $request['siteId'] ) ) {
+			$user_data['siteid'] = $request['siteId'];
+		}
+		if ( isset( $request['userId'] ) ) {
+			$user_data['userid'] = $request['userId'];
+		}
+		if ( isset( $request['orderId'] ) ) {
+			$user_data['orderid'] = $request['orderId'];
+		}
+
+		$composition['extra']['lt-user'] = $this->crypter->encrypt( json_encode( $user_data ) );
+
+		return $composition;
+	}
+
+	/**
+	 * Add to the composition the fingerprint to determine if a composition is to be trusted.
+	 *
+	 * @param object          $composition The current composition details.
+	 * @param WP_REST_Request $request     Full details about the request.
+	 *
+	 * @return object The updated composition details.
+	 */
+	protected function add_fingerprint( object $composition, WP_REST_Request $request ): object {
+		if ( empty( $composition->extra ) ) {
+			$composition->extra = new \stdClass();
+		}
+
+		$key = "lt-fingerprint";
+
+		// Make sure that we don't hash with the security details in place.
+		if ( isset( $composition->extra->$key ) ) {
+			unset( $composition->extra->$key );
+		}
+
+		$composition->extra->$key = $this->get_content_hash( $composition );
+
+		return $composition;
+	}
+
+	/**
+	 * Order the composition data to a standard to ensure hashes can be trusted.
+	 *
+	 * @param array $composition The current composition details.
+	 *
+	 * @return array The updated composition details.
+	 */
+	protected function standard_order( array $composition ): array {
+		$targetKeys = array(
+			'require',
+			'require-dev',
+			'conflict',
+			'replace',
+			'provide',
+			'repositories',
+			'extra',
+		);
+		foreach ( $targetKeys as $key ) {
+			if ( ! empty( $composition[ $key ] ) && is_array( $composition[ $key ] ) ) {
+				ksort( $composition[ $key ] );
+			}
+		}
+
+		return $composition;
+	}
+
+	/**
+	 * Returns the md5 hash of the sorted content of the composition details.
+	 *
+	 * Inspired by @see Locker::getContentHash()
+	 *
+	 * @param object|array $composition The current composition details.
+	 *
+	 * @return string
+	 */
+	protected function get_content_hash( $composition ): string {
+		if ( ! is_array( $composition ) ) {
+			$composition = json_decode( json_encode( $composition ), true );
+		}
+
+		$relevantKeys = array(
+			'name',
+			'version',
+			'require',
+			'require-dev',
+			'conflict',
+			'replace',
+			'provide',
+			'minimum-stability',
+			'prefer-stable',
+			'repositories',
+			'extra',
+		);
+
+		$relevantContent = array();
+
+		foreach ( array_intersect( $relevantKeys, array_keys( $composition ) ) as $key ) {
+			$relevantContent[ $key ] = $composition[ $key ];
+		}
+		if ( isset( $composition['config']['platform'] ) ) {
+			$relevantContent['config']['platform'] = $composition['config']['platform'];
+		}
+
+		ksort( $relevantContent );
+
+		return md5( json_encode( $relevantContent ) );
+	}
+
+	/**
+	 * Make sure that the composition details have the right type (especially empty ones).
+	 *
+	 * @param array $composition The current composition details.
+	 *
+	 * @return object The updated composition details.
+	 */
+	protected function standardize_to_object( array $composition ): object {
+		// Ensure a standard order.
+		$composition = $this->standard_order( $composition );
+
+		$compositionObject = BaseConstraint::arrayToObjectRecursive( $composition );
+
+		$objectsKeys = [
+			'require',
+			'require-dev',
+			'config',
+			'extra',
+			'scripts',
+			'support',
+		];
+		foreach ( $objectsKeys as $key ) {
+			if ( empty( $compositionObject->$key ) ) {
+				$compositionObject->$key = new \stdClass();
+			}
+		}
+
+		return $compositionObject;
+	}
+
+	/**
+	 * Validate the given composition against the composer-schema.json rules.
+	 *
+	 * @param object          $composition The current composition details in object.
+	 * @param WP_REST_Request $request     Full details about the request.
+	 *
+	 * @throws JsonValidationException
+	 * @return bool Success.
+	 */
+	protected function validate_schema( object $composition, WP_REST_Request $request ): bool {
+		$validator = new Validator();
+		$validator->check( $composition, $this->get_item_schema() );
+		if ( ! $validator->isValid() ) {
+			$errors = array();
+			foreach ( (array) $validator->getErrors() as $error ) {
+				$errors[] = ( $error['property'] ? $error['property'] . ' : ' : '' ) . $error['message'];
+			}
+			throw new JsonValidationException( 'The composition does not match the expected JSON schema', $errors );
+		}
+
+		return true;
 	}
 
 	protected function get_starter_composition(): array {
@@ -320,7 +531,7 @@ class CompositionsController extends WP_REST_Controller {
 			'license'           => 'MIT',
 			'description'       => 'A Pixelgrade LT WordPress site.',
 			'homepage'          => 'https://pixelgradelt.com',
-			'time'              => date( "Y-m-d H:i:s" ),
+			'time'              => date( DATE_RFC3339 ),
 			'authors'           => [
 				[
 					'name'     => 'Vlad Olaru',
@@ -345,30 +556,6 @@ class CompositionsController extends WP_REST_Controller {
 					'email'    => 'madalin@pixelgrade.com',
 					'homepage' => 'https://pixelgrade.com',
 					'role'     => 'Development',
-				],
-				[
-					'name'     => 'Oana Filip',
-					'email'    => 'oana@pixelgrade.com',
-					'homepage' => 'https://pixelgrade.com',
-					'role'     => 'Communication and community-growing',
-				],
-				[
-					'name'     => 'Andrei Ungurianu',
-					'email'    => 'andrei@pixelgrade.com',
-					'homepage' => 'https://pixelgrade.com',
-					'role'     => 'Marketing',
-				],
-				[
-					'name'     => 'Alin Clamba',
-					'email'    => 'alin@pixelgrade.com',
-					'homepage' => 'https://pixelgrade.com',
-					'role'     => 'Customer support',
-				],
-				[
-					'name'     => 'Alex Teodorescu',
-					'email'    => 'alex@pixelgrade.com',
-					'homepage' => 'https://pixelgrade.com',
-					'role'     => 'Customer support',
 				],
 			],
 			'keywords'          => [
