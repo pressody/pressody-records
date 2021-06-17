@@ -36,7 +36,7 @@ class Plugin extends BasePlugin implements Composable {
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_records_compose', $this, $container );
+		do_action( 'pixelgradelt_records/compose', $this, $container );
 
 		// Register hook providers.
 		$this
@@ -91,7 +91,7 @@ class Plugin extends BasePlugin implements Composable {
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_records_composed', $this, $container );
+		do_action( 'pixelgradelt_records/composed', $this, $container );
 	}
 
 	public function define_constants(): Plugin {

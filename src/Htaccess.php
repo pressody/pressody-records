@@ -80,7 +80,7 @@ class Htaccess {
 	 * @return array
 	 */
 	public function get_rules(): array {
-		return (array) apply_filters( 'pixelgradelt_records_htaccess_rules', $this->rules );
+		return (array) apply_filters( 'pixelgradelt_records/htaccess_rules', $this->rules );
 	}
 
 	/**

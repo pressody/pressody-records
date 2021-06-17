@@ -1071,7 +1071,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 			return;
 		}
 
-		$messages = apply_filters( 'pixelgradelt_records_editpackage_show_user_messages', $this->user_messages, $post );
+		$messages = apply_filters( 'pixelgradelt_records/editpackage_show_user_messages', $this->user_messages, $post );
 		if ( empty( $messages ) ) {
 			return;
 		}

@@ -240,7 +240,7 @@ class ComposerClient implements Client {
 		$config = $this->parseDynamicConfigArgs( $config, $args );
 
 		// Allow others to filter this and add or modify the Composer client config (like adding OAuth tokens).
-		return apply_filters( 'pixelgradelt_records_composer_client_config', $config, $args );
+		return apply_filters( 'pixelgradelt_records/composer_client_config', $config, $args );
 	}
 
 	/**
@@ -299,7 +299,7 @@ class ComposerClient implements Client {
 			$config['ignore-platform-reqs'] = $args['ignore-platform-reqs'];
 		}
 
-		return apply_filters( 'pixelgradelt_records_composer_client_config_parse_args', $config, $args, $originalConfig );
+		return apply_filters( 'pixelgradelt_records/composer_client_config_parse_args', $config, $args, $originalConfig );
 	}
 
 	public function getDefaultDynamicConfig(): array {
@@ -326,7 +326,7 @@ class ComposerClient implements Client {
 			$default_config['secure-http'] = false;
 		}
 
-		return apply_filters( 'pixelgradelt_records_composer_client_default_config', $default_config );
+		return apply_filters( 'pixelgradelt_records/composer_client_default_config', $default_config );
 	}
 
 	/**

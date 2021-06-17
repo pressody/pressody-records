@@ -226,7 +226,7 @@ class Settings extends AbstractHookProvider {
 			$value['github-oauth-token'] = trim( $value['github-oauth-token'] );
 		}
 
-		return (array) apply_filters( 'pixelgradelt_records_sanitize_settings', $value );
+		return (array) apply_filters( 'pixelgradelt_records/sanitize_settings', $value );
 	}
 
 	/**

@@ -23,7 +23,7 @@ class CustomVendor extends AbstractHookProvider {
 	 * Register hooks.
 	 */
 	public function register_hooks() {
-		add_filter( 'pixelgradelt_records_vendor', [ $this, 'filter_vendor' ], 5, 1 );
+		add_filter( 'pixelgradelt_records/vendor', [ $this, 'filter_vendor' ], 5, 1 );
 	}
 
 	/**

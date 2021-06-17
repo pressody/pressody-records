@@ -150,7 +150,7 @@ class Archiver {
 			];
 		}
 
-		return apply_filters( 'pixelgradelt_records_archive_excludes', $excludes, $release );
+		return apply_filters( 'pixelgradelt_records/archive_excludes', $excludes, $release );
 	}
 
 	/**
@@ -239,7 +239,7 @@ class Archiver {
 	 * @return string The temporary file path.
 	 */
 	public function download_url( string $url ): string {
-		$url = apply_filters( 'pixelgradelt_records_package_download_url', $url );
+		$url = apply_filters( 'pixelgradelt_records/package_download_url', $url );
 
 		// Since this is a local URL to a file, we don't need to download, just to create a temporary copy.
 		if ( $this->is_local_url( $url ) && $path = $this->local_url_to_path( $url ) ) {
@@ -274,12 +274,12 @@ class Archiver {
 		}
 
 		// Allow others to hook-in just before the download.
-		do_action( 'pixelgradelt_records_download_url_before', $url );
+		do_action( 'pixelgradelt_records/download_url_before', $url );
 
 		$tmpfname = download_url( $url );
 
 		// Allow others to hook-in just after the download.
-		do_action( 'pixelgradelt_records_download_url_after', $url );
+		do_action( 'pixelgradelt_records/download_url_after', $url );
 
 		if ( is_wp_error( $tmpfname ) ) {
 			$this->logger->error(

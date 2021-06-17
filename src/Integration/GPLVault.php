@@ -25,7 +25,7 @@ class GPLVault extends AbstractHookProvider {
 	 * @since 0.6.0
 	 */
 	public function register_hooks() {
-		add_filter( 'pixelgradelt_records_package_download_url', [ $this, 'filter_package_download_url' ] );
+		add_filter( 'pixelgradelt_records/package_download_url', [ $this, 'filter_package_download_url' ] );
 	}
 
 	/**

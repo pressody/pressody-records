@@ -397,7 +397,7 @@ class ReleaseManager {
 	 * @return Response
 	 */
 	public function send( Release $release ): Response {
-		do_action( 'pixelgradelt_records_send_release', $release );
+		do_action( 'pixelgradelt_records/send_release', $release );
 
 		return $this->storage->send( $release->get_file_path() );
 	}

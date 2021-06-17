@@ -49,7 +49,7 @@ class LogsManager extends AbstractHookProvider {
 	 * @since 0.9.0
 	 */
 	public function register_hooks() {
-		$this->add_action( 'pixelgradelt_records_cleanup_logs', 'cleanup_logs' );
+		$this->add_action( 'pixelgradelt_records/cleanup_logs', 'cleanup_logs' );
 	}
 
 	protected function cleanup_logs() {

@@ -148,7 +148,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 			$require = array_merge( $require, [ 'composer/installers' => '^1.0', ] );
 
 			// Finally, allow others to have a say.
-			$require = apply_filters( 'pixelgradelt_records_composer_package_require', $require, $package, $release );
+			$require = apply_filters( 'pixelgradelt_records/composer_package_require', $require, $package, $release );
 
 			// Start with the hard-coded replaces, if any.
 			// This order is important since we go from lower to higher importance. Each one overwrites the previous.
@@ -163,7 +163,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 			}
 
 			// Finally, allow others to have a say.
-			$replace = apply_filters( 'pixelgradelt_records_composer_package_replace', $replace, $package, $release );
+			$replace = apply_filters( 'pixelgradelt_records/composer_package_replace', $replace, $package, $release );
 
 			// We don't need the artifactmtime in the dist since that is only for internal use.
 			if ( isset( $meta['dist']['artifactmtime'] ) ) {

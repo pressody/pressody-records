@@ -400,7 +400,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param array $user_details The user details as decrypted from the composition details.
 		 * @param array $composition  The full composition details.
 		 */
-		$new_details = apply_filters( 'pixelgradelt_records_composition_new_details', [], $user_details, $composition );
+		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', [], $user_details, $composition );
 		if ( false === $new_details ) {
 			return new WP_Error(
 				'rest_rejected_refresh',
@@ -489,7 +489,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param array $data                The composition details to update.
 		 * @param array $initial_composition The initial composition details.
 		 */
-		return apply_filters( 'pixelgradelt_records_update_composition', $composition, $data, $initial_composition );
+		return apply_filters( 'pixelgradelt_records/update_composition', $composition, $data, $initial_composition );
 	}
 
 	/**
@@ -678,7 +678,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param array $details     The user details as decrypted from the composition details.
 		 * @param array $composition The full composition details.
 		 */
-		$valid = apply_filters( 'pixelgradelt_records_composition_validate_user_details', true, $details, $composition );
+		$valid = apply_filters( 'pixelgradelt_records/composition_validate_user_details', true, $details, $composition );
 		if ( is_wp_error( $valid ) ) {
 			$message = 'Third-party user details checks have found them invalid. Here is what happened: ' . PHP_EOL;
 			$message .= implode( ';' . PHP_EOL, $valid->get_error_messages() );
@@ -867,7 +867,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param object $compositionObject The standardized composition object.
 		 * @param array  $composition       The initial composition.
 		 */
-		return apply_filters( 'pixelgradelt_records_composition_standardize_to_object', $compositionObject, $composition );
+		return apply_filters( 'pixelgradelt_records/composition_standardize_to_object', $compositionObject, $composition );
 	}
 
 	/**

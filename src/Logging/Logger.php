@@ -66,7 +66,7 @@ final class Logger extends BaseIO {
 		$this->minimum_level_severity = LogLevels::get_level_severity( $minimum_level );
 
 		if ( null === $handlers ) {
-			$handlers = apply_filters( 'pixelgradelt_records_register_log_handlers', array() );
+			$handlers = apply_filters( 'pixelgradelt_records/register_log_handlers', array() );
 		}
 
 		$register_handlers = array();
@@ -114,7 +114,7 @@ final class Logger extends BaseIO {
 		}
 
 		$timestamp = current_time( 'timestamp', 1 );
-		$message   = apply_filters( 'pixelgradelt_records_logger_log_message', $message, $level, $context );
+		$message   = apply_filters( 'pixelgradelt_records/logger_log_message', $message, $level, $context );
 
 		foreach ( $this->handlers as $handler ) {
 			$handler->handle( $timestamp, $level, $message, $context );
@@ -295,7 +295,7 @@ final class Logger extends BaseIO {
 	 * @since 0.9.0
 	 */
 	public function clear_expired_logs() {
-		$days      = absint( apply_filters( 'pixelgradelt_records_logger_days_to_retain_logs', 30 ) );
+		$days      = absint( apply_filters( 'pixelgradelt_records/logger_days_to_retain_logs', 30 ) );
 		$timestamp = strtotime( "-{$days} days" );
 
 		foreach ( $this->handlers as $handler ) {

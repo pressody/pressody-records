@@ -105,8 +105,8 @@ class PackageArchiver extends AbstractHookProvider {
 
 		add_action( 'wp_trash_post', [ $this, 'clean_on_post_trash' ], 10, 1 );
 
-		$this->add_action( 'pixelgradelt_records_download_url_before', 'hook_before_download_url' );
-		$this->add_action( 'pixelgradelt_records_download_url_after', 'remove_hooks_after_download_url' );
+		$this->add_action( 'pixelgradelt_records/download_url_before', 'hook_before_download_url' );
+		$this->add_action( 'pixelgradelt_records/download_url_after', 'remove_hooks_after_download_url' );
 	}
 
 	/**

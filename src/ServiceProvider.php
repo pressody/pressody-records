@@ -66,7 +66,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['authentication.servers'] = function ( $container ) {
 			$servers = apply_filters(
-				'pixelgradelt_records_authentication_servers',
+				'pixelgradelt_records/authentication_servers',
 				[
 					20  => 'authentication.api_key',
 					100 => 'authentication.unauthorized', // The last server to take action.
@@ -419,7 +419,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $plugins Array of plugin basenames.
 			 */
-			$plugins = apply_filters( 'pixelgradelt_records_installed_plugins_in_use', $container['package.manager']->get_managed_installed_plugins() );
+			$plugins = apply_filters( 'pixelgradelt_records/installed_plugins_in_use', $container['package.manager']->get_managed_installed_plugins() );
 
 			/**
 			 * Filter the list of installed themes attached to a package (package type: local.theme).
@@ -430,7 +430,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $themes Array of theme slugs.
 			 */
-			$themes = apply_filters( 'pixelgradelt_records_installed_themes_in_use', $container['package.manager']->get_managed_installed_themes() );
+			$themes = apply_filters( 'pixelgradelt_records/installed_themes_in_use', $container['package.manager']->get_managed_installed_themes() );
 
 			return $container['repository.installed']
 				->with_filter(
@@ -626,7 +626,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			$upload_config = \wp_upload_dir();
 			$path          = \path_join( $upload_config['basedir'], $container['storage.working_directory_name'] );
 
-			return (string) trailingslashit( apply_filters( 'pixelgradelt_records_working_directory', $path ) );
+			return (string) trailingslashit( apply_filters( 'pixelgradelt_records/working_directory', $path ) );
 		};
 
 		$container['storage.working_directory_name'] = function () {
@@ -673,7 +673,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['validators.artifact'] = function ( $container ) {
 			$servers = \apply_filters(
-				'pixelgradelt_records_artifact_validators',
+				'pixelgradelt_records/artifact_validators',
 				[
 					10 => 'validator.zip',
 					20 => 'validator.hidden_directory',

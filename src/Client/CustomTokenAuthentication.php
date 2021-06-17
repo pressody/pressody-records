@@ -23,7 +23,7 @@ class CustomTokenAuthentication extends AbstractHookProvider {
 	 * Register hooks.
 	 */
 	public function register_hooks() {
-		add_filter( 'pixelgradelt_records_composer_client_config', [ $this, 'filter_config' ], 5 );
+		add_filter( 'pixelgradelt_records/composer_client_config', [ $this, 'filter_config' ], 5 );
 	}
 
 	/**

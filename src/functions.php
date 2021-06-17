@@ -157,7 +157,7 @@ function get_composer_vendor(): string {
 	/**
 	 * The custom vendor configured via the Settings page is hooked through @see CustomVendor::register_hooks()
 	 */
-	$vendor = apply_filters( 'pixelgradelt_records_vendor', 'pixelgradelt-records' );
+	$vendor = apply_filters( 'pixelgradelt_records/vendor', 'pixelgradelt-records' );
 	if ( empty( $vendor ) || ! is_string( $vendor ) ) {
 		throw new InvalidComposerVendor( "The PixelgradeLT Records Composer vendor must be a string and it can't be empty or falsy." );
 	}
@@ -263,7 +263,7 @@ function is_rest_request() {
 	$rest_prefix         = trailingslashit( rest_get_url_prefix() );
 	$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-	return apply_filters( 'pixelgradelt_records_is_rest_api_request', $is_rest_api_request );
+	return apply_filters( 'pixelgradelt_records/is_rest_api_request', $is_rest_api_request );
 }
 
 /**
