@@ -1,3 +1,83 @@
+POST https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions/refresh
+Authorization: Basic R0P5Ca3YYLLREgeXJpo2pw5SVgp0LtwI pixelgradelt_records
+Accept: application/json
+Content-Type: application/json
+
+{
+  "composer": {
+	"name": "pixelgradelt\/my-site",
+	"type": "project",
+	"license": "MIT",
+	"description": "A Pixelgrade LT WordPress site.",
+	"homepage": "https:\/\/local.local",
+	"time": "2021-06-17T10:55:28+00:00",
+	"authors": [],
+	"keywords": [],
+	"support": {
+	  "issues": "https:\/\/pixelgradelt.com",
+	  "forum": "https:\/\/pixelgradelt.com"
+	},
+	"repositories": [
+	  {
+		"type": "composer",
+		"url": "https:\/\/lt-records.local\/ltpackagist\/",
+		"options": {
+		  "ssl": {
+			"verify_peer": false
+		  },
+		  "http": {
+			"header": [
+			  "Authorization: Basic UjBQNUNhM1lZTExSRWdlWEpwbzJwdzVTVmdwMEx0d0k6cGl4ZWxncmFkZWx0X3JlY29yZHM="
+			]
+		  }
+		}
+	  },
+	  {
+		"type": "composer",
+		"url": "https:\/\/repo.packagist.org"
+	  }
+	],
+	"require": {
+	  "pixelgradelt-records\/part_another-test": "*, >=3.0.0",
+	  "pixelgradelt-records\/part_test-test": "*, ^4.0",
+	  "pixelgradelt-records\/part_yet-another": "*"
+	},
+	"require-dev": {},
+	"config": {
+	  "optimize-autoloader": true,
+	  "preferred-install": "dist"
+	},
+	"minimum-stability": "stable",
+	"prefer-stable": false,
+	"extra": {
+	  "installer-paths": {
+		"web\/app\/mu-plugins\/{$name}\/": [
+		  "type:wordpress-muplugin"
+		],
+		"web\/app\/plugins\/{$name}\/": [
+		  "type:wordpress-plugin"
+		],
+		"web\/app\/themes\/{$name}\/": [
+		  "type:wordpress-theme"
+		]
+	  },
+	  "lt-user": "def502001b6268c78749c5d24d6537843f8babe6813d860939e340c8c97ee4ee90cfd4b6fe671226950d15deb01b067a135bee22ed5cd05898ac5c67b77d347644fbdef1216b84e9b38faefa0176b453e9b5265d1339af2fc166eb78d65e8e2c8b12a3250139e12c3002f2180bee7595b3eb493b6d82e4727c9fa398cb2a85289054787abcdf6f20ab664ef5b2f95026d1e161947754",
+	  "wordpress-install-dir": "web\/wp",
+	  "lt-fingerprint": "2b90bdc18d17a28a2f56f35325536e99"
+	},
+	"scripts": {
+	  "post-root-package-install": [
+		"php -r \"copy('.env.example', '.env');\""
+	  ],
+	  "test": [
+		"phpcs"
+	  ]
+	}
+  }
+}
+
+###
+
 POST https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions
 Authorization: Basic R0P5Ca3YYLLREgeXJpo2pw5SVgp0LtwI pixelgradelt_records
 Accept: application/json
@@ -23,7 +103,14 @@ Content-Type: application/json
   ],
   "composer": {
 	"name": "pixelgradelt\/my-site",
-	"authors": [],
+	"authors": [
+      {
+        "name": "Vlad Olaru",
+        "email": "vlad@pixelgrade.com",
+        "homepage": "https://thinkwritecode.com",
+        "role": "Development, infrastructure, and product development"
+      }
+	],
 	"homepage": "https://local.local",
 	"keywords": [],
 	"support": {},
