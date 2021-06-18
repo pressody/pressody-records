@@ -12,6 +12,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use function PixelgradeLT\Records\get_setting;
 
 /**
  * Custom vendor provider class.
@@ -35,9 +36,8 @@ class CustomVendor extends AbstractHookProvider {
 	 * @return string
 	 */
 	public function filter_vendor( string $vendor ): string {
-		$option = get_option( 'pixelgradelt_records' );
-		if ( ! empty( $option['vendor'] ) ) {
-			$vendor = $option['vendor'];
+		if ( ! empty( $configured_vendor = get_setting( 'vendor' ) ) ) {
+			$vendor = $configured_vendor;
 		}
 
 		return $vendor;

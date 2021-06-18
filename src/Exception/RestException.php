@@ -25,7 +25,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 	 *
 	 * @var int
 	 */
-	protected $status_code;
+	protected int $status_code;
 
 	/**
 	 * Constructor.
@@ -44,7 +44,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 		Throwable $previous = null
 	) {
 		$this->status_code = $status_code;
-		$message           = $message ?: 'Internal Server Error';
+		$message           = $message ?: esc_html__( 'Internal Server Error', 'pixelgradelt_records' );
 
 		parent::__construct( $message, $code, $previous );
 	}
@@ -65,7 +65,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 		Throwable $previous = null
 	): RestException {
 		if ( empty( $message ) ) {
-			$message = "The provided composer JSON data has invalid LT user details.";
+			$message = esc_html__( 'The provided composer JSON data has invalid LT user details.', 'pixelgradelt_records' );
 		}
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
@@ -85,7 +85,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = "The provided composer JSON data is missing some LT user details.";
+		$message = esc_html__( 'The provided composer JSON data is missing some LT user details.', 'pixelgradelt_records' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
@@ -104,7 +104,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = "The provided composer JSON data has an invalid LT fingerprint.";
+		$message = esc_html__( 'The provided composer JSON data has an invalid LT fingerprint.', 'pixelgradelt_records' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
@@ -123,7 +123,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = "The provided composer JSON data is missing the LT fingerprint.";
+		$message = esc_html__( 'The provided composer JSON data is missing the LT fingerprint.', 'pixelgradelt_records' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
@@ -142,7 +142,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = "We could not run encryption. Please contact the administrator and let them know that something is wrong. Thanks in advance!";
+		$message = esc_html__( 'We could not run encryption. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_records' );
 
 		return new static( $message, HTTP::INTERNAL_SERVER_ERROR, $code, $previous );
 	}

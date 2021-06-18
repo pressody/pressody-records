@@ -14,7 +14,6 @@ namespace PixelgradeLT\Records\REST;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use InvalidArgumentException;
-use JsonSchema\Constraints\BaseConstraint;
 use JsonSchema\Validator;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\CrypterInterface;
@@ -457,26 +456,26 @@ class CompositionsController extends WP_REST_Controller {
 	 * @since 0.10.0
 	 *
 	 * @param array $composition The current composition details.
-	 * @param array $data        The new composition details.
+	 * @param array $new_details The new composition details.
 	 *
 	 * @throws CrypterEnvironmentIsBrokenException
 	 * @return array
 	 */
-	protected function update_composition( array $composition, array $data ): array {
+	protected function update_composition( array $composition, array $new_details ): array {
 		$initial_composition = $composition;
 
 		// Add any composer.json properties received.
-		if ( ! empty( $data['composer'] ) && is_array( $data['composer'] ) ) {
-			$composition = $this->add_composer_properties( $composition, $data['composer'] );
+		if ( ! empty( $new_details['composer'] ) && is_array( $new_details['composer'] ) ) {
+			$composition = $this->add_composer_properties( $composition, $new_details['composer'] );
 		}
 
 		// Add the required LT packages.
-		if ( ! empty( $data['requirePackages'] ) && is_array( $data['requirePackages'] ) ) {
-			$composition = $this->add_required_packages( $composition, $data['requirePackages'] );
+		if ( ! empty( $new_details['requirePackages'] ) && is_array( $new_details['requirePackages'] ) ) {
+			$composition = $this->add_required_packages( $composition, $new_details['requirePackages'] );
 		}
 
 		// Add the user details.
-		$composition = $this->add_user_details( $composition, $data );
+		$composition = $this->add_user_details( $composition, $new_details );
 
 		/**
 		 * Filter the updated composition.
@@ -486,10 +485,10 @@ class CompositionsController extends WP_REST_Controller {
 		 * @see   CompositionsController::update_composition()
 		 *
 		 * @param array $composition         The updated composition details.
-		 * @param array $data                The composition details to update.
+		 * @param array $new_details         The composition details to update.
 		 * @param array $initial_composition The initial composition details.
 		 */
-		return apply_filters( 'pixelgradelt_records/update_composition', $composition, $data, $initial_composition );
+		return apply_filters( 'pixelgradelt_records/update_composition', $composition, $new_details, $initial_composition );
 	}
 
 	/**
@@ -608,7 +607,7 @@ class CompositionsController extends WP_REST_Controller {
 		$user_data = [
 			'siteid'  => '',
 			'userid'  => 0,
-			'orderid' => 0,
+			'orderid' => [],
 		];
 		if ( isset( $data['siteId'] ) ) {
 			$user_data['siteid'] = (string) $data['siteId'];

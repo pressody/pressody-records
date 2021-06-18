@@ -41,6 +41,7 @@ class Plugin extends BasePlugin implements Composable {
 		// Register hook providers.
 		$this
 			->register_hooks( $container->get( 'hooks.i18n' ) )
+			->register_hooks( $container->get( 'hooks.ltretailer' ) )
 			->register_hooks( $container->get( 'hooks.capabilities' ) )
 			->register_hooks( $container->get( 'hooks.rewrite_rules' ) )
 			->register_hooks( $container->get( 'hooks.custom_vendor' ) )

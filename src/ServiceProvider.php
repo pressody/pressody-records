@@ -155,6 +155,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new I18n();
 		};
 
+		$container['hooks.ltretailer'] = function () {
+			return new Provider\LTRetailer();
+		};
+
 		$container['hooks.package_archiver'] = function ( $container ) {
 			return new Provider\PackageArchiver(
 				$container['repository.managed'],

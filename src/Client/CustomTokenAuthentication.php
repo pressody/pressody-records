@@ -12,6 +12,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Records\Client;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use function PixelgradeLT\Records\get_setting;
 
 /**
  * Composer Client Custom Token Authentication provider class.
@@ -35,14 +36,13 @@ class CustomTokenAuthentication extends AbstractHookProvider {
 	 * @return array
 	 */
 	public function filter_config( array $config ): array {
-		$option = get_option( 'pixelgradelt_records' );
-		if ( ! empty( $option['github-oauth-token'] ) ) {
+		if ( ! empty( $github_oauth_token = get_setting( 'github-oauth-token' ) ) ) {
 			if ( empty( $config['config'] ) ) {
 				$config['config'] = [];
 			}
 
 			$config['config']['github-oauth'] = [
-				'github.com' => $option['github-oauth-token'],
+				'github.com' => $github_oauth_token,
 			];
 		}
 

@@ -21,6 +21,7 @@ use PixelgradeLT\Records\Transformer\PackageTransformer;
 
 use function PixelgradeLT\Records\get_packages_permalink;
 use function PixelgradeLT\Records\get_parts_permalink;
+use function PixelgradeLT\Records\get_setting;
 use function PixelgradeLT\Records\preload_rest_data;
 
 /**
@@ -381,8 +382,6 @@ class Settings extends AbstractHookProvider {
 	 * @return mixed
 	 */
 	protected function get_setting( string $key, $default = null ) {
-		$option = get_option( 'pixelgradelt_records' );
-
-		return $option[ $key ] ?? $default;
+		return get_setting( $key, $default );
 	}
 }
