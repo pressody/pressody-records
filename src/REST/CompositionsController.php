@@ -141,7 +141,7 @@ class CompositionsController extends WP_REST_Controller {
 					'show_in_index'       => false,
 					'args'                => [
 						'context'         => $this->get_context_param( [ 'default' => 'edit' ] ),
-						'siteId'          => [
+						'siteid'          => [
 							'description'       => esc_html__( 'The ID of the site the new composition is to be used on.', 'pixelgradelt_records' ),
 							'type'              => 'string',
 							'sanitize_callback' => function ( $value ) {
@@ -150,13 +150,13 @@ class CompositionsController extends WP_REST_Controller {
 							'context'           => [ 'view', 'edit' ],
 							'required'          => true,
 						],
-						'userId'          => [
+						'userid'          => [
 							'description' => esc_html__( 'The ID of the user the new composition is tied to.', 'pixelgradelt_records' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
-						'orderId'         => [
+						'orderid'         => [
 							'description' => esc_html__( 'The e-commerce order ID(s) the new composition is to be tied to.', 'pixelgradelt_records' ),
 							'type'        => 'array',
 							'items'       => [
@@ -165,7 +165,7 @@ class CompositionsController extends WP_REST_Controller {
 							'context'     => [ 'view', 'edit' ],
 							'required'    => false,
 						],
-						'requirePackages' => [
+						'require' => [
 							'description' => esc_html__( 'A LT Records packages (actual LT packages or LT parts) list to include in the composition. All packages that don\'t exist will be ignored. These required packages will overwrite the same packages given through the "composer" param.', 'pixelgradelt_records' ),
 							'type'        => 'array',
 							'items'       => [
@@ -350,7 +350,7 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		try {
-			// Validate and receive the decrypted user details in the composition.
+			// Validate the decrypted user details in the composition.
 			// In case of invalid user details, exceptions are thrown.
 			$user_details = $this->validate_user_details( $composition );
 		} catch ( RestException $e ) {
@@ -443,11 +443,8 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		// Return the composition as the response.
-		$response = rest_ensure_response( $compositionObject );
-		$response->set_status( HTTP::CREATED );
-
-		return $response;
+		// Return the refreshed composition as the response.
+		return rest_ensure_response( $compositionObject );
 	}
 
 	/**
@@ -469,9 +466,14 @@ class CompositionsController extends WP_REST_Controller {
 			$composition = $this->add_composer_properties( $composition, $new_details['composer'] );
 		}
 
+		// Remove required packages.
+		if ( ! empty( $new_details['remove'] ) && is_array( $new_details['remove'] ) ) {
+			$composition = $this->remove_required_packages( $composition, $new_details['remove'] );
+		}
+
 		// Add the required LT packages.
-		if ( ! empty( $new_details['requirePackages'] ) && is_array( $new_details['requirePackages'] ) ) {
-			$composition = $this->add_required_packages( $composition, $new_details['requirePackages'] );
+		if ( ! empty( $new_details['require'] ) && is_array( $new_details['require'] ) ) {
+			$composition = $this->add_required_packages( $composition, $new_details['require'] );
 		}
 
 		// Add the user details.
@@ -549,7 +551,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Add to the composition the required packages in the request.
+	 * Add required packages to the composition.
 	 *
 	 * @since 0.10.0
 	 *
@@ -600,6 +602,39 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
+	 * Remove required packages from the composition.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @param array $composition      The current composition details.
+	 * @param array $remove_packages Package details to require.
+	 *
+	 * @return array The updated composition details.
+	 */
+	protected function remove_required_packages( array $composition, array $remove_packages ): array {
+		if ( empty( $remove_packages ) ) {
+			return $composition;
+		}
+
+		// For not, we are only interested in the package name and will remove it regardless of version constraints.
+		foreach ( $remove_packages as $package_details ) {
+			if ( empty( $package_details['name'] ) || ! isset( $composition['require'][ $package_details['name'] ] ) ) {
+				continue;
+			}
+
+			// Remove it from the `require` list.
+			unset( $composition['require'][ $package_details['name'] ] );
+
+			// Maybe remove it from the extra details.
+			if ( isset( $composition['extra']['lt-required-packages'][ $package_details['name'] ] ) ) {
+				unset( $composition['extra']['lt-required-packages'][ $package_details['name'] ] );
+			}
+		}
+
+		return $composition;
+	}
+
+	/**
 	 * Add to the composition the user details available in the request.
 	 *
 	 * @since 0.10.0
@@ -621,14 +656,14 @@ class CompositionsController extends WP_REST_Controller {
 			'userid'  => 0,
 			'orderid' => [],
 		];
-		if ( isset( $data['siteId'] ) ) {
-			$user_data['siteid'] = (string) $data['siteId'];
+		if ( isset( $data['siteid'] ) ) {
+			$user_data['siteid'] = (string) $data['siteid'];
 		}
-		if ( isset( $data['userId'] ) ) {
-			$user_data['userid'] = absint( $data['userId'] );
+		if ( isset( $data['userid'] ) ) {
+			$user_data['userid'] = absint( $data['userid'] );
 		}
-		if ( isset( $data['orderId'] ) ) {
-			$user_data['orderid'] = absint( $data['orderId'] );
+		if ( isset( $data['orderid'] ) ) {
+			$user_data['orderid'] = absint( $data['orderid'] );
 		}
 
 		$composition['extra'][ self::USER_DETAILS_KEY ] = $this->crypter->encrypt( json_encode( $user_data ) );
@@ -685,14 +720,14 @@ class CompositionsController extends WP_REST_Controller {
 		 *
 		 * Return true if the user details are valid, or a WP_Error in case we should reject them.
 		 *
-		 * @param bool  $valid       Whether the user details are valid.
-		 * @param array $user_details     The user details as decrypted from the composition details.
-		 * @param array $composition The full composition details.
+		 * @param bool  $valid        Whether the user details are valid.
+		 * @param array $user_details The user details as decrypted from the composition details.
+		 * @param array $composition  The full composition details.
 		 */
 		$valid = apply_filters( 'pixelgradelt_records/composition_validate_user_details', true, $user_details, $composition );
 		if ( is_wp_error( $valid ) ) {
 			$message = 'Third-party user details checks have found them invalid. Here is what happened: ' . PHP_EOL;
-			$message .= implode( ';' . PHP_EOL, $valid->get_error_messages() );
+			$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
 
 			throw RestException::forInvalidComposerUserDetails( $message );
 		} elseif ( true !== $valid ) {
@@ -937,7 +972,13 @@ class CompositionsController extends WP_REST_Controller {
 	 */
 	protected function validate_schema( object $composition ): bool {
 		$validator = new Validator();
-		$validator->check( $composition, $this->get_item_schema() );
+		$composer_schema = $this->get_item_schema();
+		if ( empty( $composer_schema ) ) {
+			// If we couldn't read the schema, let things pass.
+			return true;
+		}
+
+		$validator->check( $composition, $composer_schema );
 		if ( ! $validator->isValid() ) {
 			$errors = array();
 			foreach ( (array) $validator->getErrors() as $error ) {

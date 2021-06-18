@@ -16,6 +16,7 @@ use PixelgradeLT\Records\Authentication\ApiKey\ApiKey;
 use PixelgradeLT\Records\Authentication\ApiKey\ApiKeyRepository;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Provider\HealthCheck;
+use PixelgradeLT\Records\Provider\LTRetailer;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 
@@ -216,9 +217,9 @@ class Settings extends AbstractHookProvider {
 		);
 
 		add_settings_field(
-				'ltretailer-solutions-repo-endpoint',
-				'<label for="pixelgradelt_records-ltretailer-solutions-repo-endpoint">' . esc_html__( 'Solutions Repository Endpoint', 'pixelgradelt_records' ) . '</label>',
-				[ $this, 'render_field_ltretailer_solutions_repo_endpoint' ],
+				'ltretailer-compositions-root-endpoint',
+				'<label for="pixelgradelt_records-ltretailer-compositions-root-endpoint">' . esc_html__( 'Solutions Repository Endpoint', 'pixelgradelt_records' ) . '</label>',
+				[ $this, 'render_field_ltretailer_compositions_root_endpoint' ],
 				'pixelgradelt_records',
 				'ltretailer'
 		);
@@ -250,8 +251,8 @@ class Settings extends AbstractHookProvider {
 			$value['github-oauth-token'] = trim( $value['github-oauth-token'] );
 		}
 
-		if ( ! empty( $value['ltretailer-solutions-repo-endpoint'] ) ) {
-			$value['ltretailer-solutions-repo-endpoint'] = esc_url( $value['ltretailer-solutions-repo-endpoint'] );
+		if ( ! empty( $value['ltretailer-compositions-root-endpoint'] ) ) {
+			$value['ltretailer-compositions-root-endpoint'] = esc_url( $value['ltretailer-compositions-root-endpoint'] );
 		}
 
 		if ( ! empty( $value['ltretailer-api-key'] ) ) {
@@ -339,18 +340,20 @@ class Settings extends AbstractHookProvider {
 	}
 
 	/**
-	 * Display a field for defining the LT Retailer Solutions Repository endpoint.
+	 * Display a field for defining the LT Retailer Compositions root endpoint.
 	 *
 	 * @since 0.10.0
 	 */
-	public function render_field_ltretailer_solutions_repo_endpoint() {
-		$value = $this->get_setting( 'ltretailer-solutions-repo-endpoint', '' );
+	public function render_field_ltretailer_compositions_root_endpoint() {
+		$value = $this->get_setting( 'ltretailer-compositions-root-endpoint', '' );
 		?>
 		<p>
-			<input type="url" size="80" name="pixelgradelt_records[ltretailer-solutions-repo-endpoint]"
-			       id="pixelgradelt_records-ltretailer-solutions-repo-endpoint"
+			<input type="url" size="80" name="pixelgradelt_records[ltretailer-compositions-root-endpoint]"
+			       id="pixelgradelt_records-ltretailer-compositions-root-endpoint"
 			       value="<?php echo esc_attr( $value ); ?>"><br/>
-			<span class="description">Provide here the LT Retailer Solutions Repository endpoint URL.</span>
+			<span class="description">Provide here the LT Retailer Compositions root endpoint URL. We will append the following fragments:<br>
+				<?php echo '<code>' . LTRetailer::LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_USER_PARTIAL . '</code>, ' .
+				           '<code>' . LTRetailer::LTRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL . '</code>, '; ?></span>
 		</p>
 		<?php
 	}
