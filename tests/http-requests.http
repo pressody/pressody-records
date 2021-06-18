@@ -24,11 +24,6 @@ Content-Type: application/json
 		"options": {
 		  "ssl": {
 			"verify_peer": false
-		  },
-		  "http": {
-			"header": [
-			  "Authorization: Basic UjBQNUNhM1lZTExSRWdlWEpwbzJwdzVTVmdwMEx0d0k6cGl4ZWxncmFkZWx0X3JlY29yZHM="
-			]
 		  }
 		}
 	  },

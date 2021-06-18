@@ -183,6 +183,13 @@ class Settings extends AbstractHookProvider {
 				'__return_null',
 				'pixelgradelt_records'
 		);
+
+		add_settings_section(
+				'ltretailer',
+				esc_html__( 'LT Retailer Communication', 'pixelgradelt_records' ),
+				'__return_null',
+				'pixelgradelt_records'
+		);
 	}
 
 	/**
@@ -206,6 +213,22 @@ class Settings extends AbstractHookProvider {
 				'pixelgradelt_records',
 				'default'
 		);
+
+		add_settings_field(
+				'ltretailer-solutions-repo-endpoint',
+				'<label for="pixelgradelt_records-ltretailer-solutions-repo-endpoint">' . esc_html__( 'Solutions Repository Endpoint', 'pixelgradelt_records' ) . '</label>',
+				[ $this, 'render_field_ltretailer_solutions_repo_endpoint' ],
+				'pixelgradelt_records',
+				'ltretailer'
+		);
+
+		add_settings_field(
+				'ltretailer-api-key',
+				'<label for="pixelgradelt_records-ltretailer-api-key">' . esc_html__( 'Access API Key', 'pixelgradelt_records' ) . '</label>',
+				[ $this, 'render_field_ltretailer_api_key' ],
+				'pixelgradelt_records',
+				'ltretailer'
+		);
 	}
 
 	/**
@@ -224,6 +247,14 @@ class Settings extends AbstractHookProvider {
 
 		if ( ! empty( $value['github-oauth-token'] ) ) {
 			$value['github-oauth-token'] = trim( $value['github-oauth-token'] );
+		}
+
+		if ( ! empty( $value['ltretailer-solutions-repo-endpoint'] ) ) {
+			$value['ltretailer-solutions-repo-endpoint'] = esc_url( $value['ltretailer-solutions-repo-endpoint'] );
+		}
+
+		if ( ! empty( $value['ltretailer-api-key'] ) ) {
+			$value['ltretailer-api-key'] = trim( $value['ltretailer-api-key'] );
 		}
 
 		return (array) apply_filters( 'pixelgradelt_records/sanitize_settings', $value );
@@ -302,6 +333,39 @@ class Settings extends AbstractHookProvider {
 				Since most packages on Packagist.org have their source on Github, and you may be using actual Github repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
 				Learn more about <strong>the steps to take <a
 							href="https://getcomposer.org/doc/articles/authentication-for-private-packages.md#github-oauth">here</a>.</strong> <strong>Be careful about the permissions you grant on the generated token!</strong></span>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Display a field for defining the LT Retailer Solutions Repository endpoint.
+	 *
+	 * @since 0.10.0
+	 */
+	public function render_field_ltretailer_solutions_repo_endpoint() {
+		$value = $this->get_setting( 'ltretailer-solutions-repo-endpoint', '' );
+		?>
+		<p>
+			<input type="url" size="80" name="pixelgradelt_records[ltretailer-solutions-repo-endpoint]"
+			       id="pixelgradelt_records-ltretailer-solutions-repo-endpoint"
+			       value="<?php echo esc_attr( $value ); ?>"><br/>
+			<span class="description">Provide here the LT Retailer Solutions Repository endpoint URL.</span>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Display a field for defining the LT Retailer API Key.
+	 *
+	 * @since 0.10.0
+	 */
+	public function render_field_ltretailer_api_key() {
+		$value = $this->get_setting( 'ltretailer-api-key', '' );
+		?>
+		<p>
+			<input type="text" size="80" name="pixelgradelt_records[ltretailer-api-key]"
+			       id="pixelgradelt_records-ltretailer-api-key" value="<?php echo esc_attr( $value ); ?>"><br/>
+			<span class="description">Provide here <strong>a valid LT Retailer API key</strong> for LT Records to use to access the endpoints above.</span>
 		</p>
 		<?php
 	}
