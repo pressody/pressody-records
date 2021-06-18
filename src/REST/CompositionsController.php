@@ -582,6 +582,18 @@ class CompositionsController extends WP_REST_Controller {
 
 			// Add it to the `require` list.
 			$composition['require'][ $package_details['name'] ] = $package_details['version'];
+
+			// If we have other package details besides name and version, remember these details for future reference.
+			if ( count( $package_details ) > 2 ) {
+				if ( empty( $composition['extra'] ) ) {
+					$composition['extra'] = [];
+				}
+				if ( empty( $composition['extra']['lt-required-packages'] ) ) {
+					$composition['extra']['lt-required-packages'] = [];
+				}
+
+				$composition['extra']['lt-required-packages'][ $package_details['name'] ] = $package_details;
+			}
 		}
 
 		return $composition;
@@ -643,12 +655,12 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		try {
-			$details = json_decode( $this->crypter->decrypt( $composition['extra'][ self::USER_DETAILS_KEY ] ), true );
+			$user_details = json_decode( $this->crypter->decrypt( $composition['extra'][ self::USER_DETAILS_KEY ] ), true );
 		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException $e ) {
 			throw RestException::forInvalidComposerUserDetails();
 		}
 
-		if ( null === $details ) {
+		if ( null === $user_details ) {
 			throw RestException::forInvalidComposerUserDetails();
 		}
 
@@ -659,7 +671,7 @@ class CompositionsController extends WP_REST_Controller {
 			'orderid',
 		];
 		foreach ( $required as $key ) {
-			if ( ! isset( $details[ $key ] ) ) {
+			if ( ! isset( $user_details[ $key ] ) ) {
 				throw RestException::forMissingComposerUserDetails();
 			}
 		}
@@ -674,10 +686,10 @@ class CompositionsController extends WP_REST_Controller {
 		 * Return true if the user details are valid, or a WP_Error in case we should reject them.
 		 *
 		 * @param bool  $valid       Whether the user details are valid.
-		 * @param array $details     The user details as decrypted from the composition details.
+		 * @param array $user_details     The user details as decrypted from the composition details.
 		 * @param array $composition The full composition details.
 		 */
-		$valid = apply_filters( 'pixelgradelt_records/composition_validate_user_details', true, $details, $composition );
+		$valid = apply_filters( 'pixelgradelt_records/composition_validate_user_details', true, $user_details, $composition );
 		if ( is_wp_error( $valid ) ) {
 			$message = 'Third-party user details checks have found them invalid. Here is what happened: ' . PHP_EOL;
 			$message .= implode( ';' . PHP_EOL, $valid->get_error_messages() );
@@ -687,7 +699,7 @@ class CompositionsController extends WP_REST_Controller {
 			throw RestException::forInvalidComposerUserDetails();
 		}
 
-		return $details;
+		return $user_details;
 	}
 
 	/**
