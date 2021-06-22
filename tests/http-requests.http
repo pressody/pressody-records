@@ -10,7 +10,7 @@ Content-Type: application/json
 	"license": "MIT",
 	"description": "A Pixelgrade LT WordPress site.",
 	"homepage": "https:\/\/local.local",
-	"time": "2021-06-22T12:19:48+00:00",
+	"time": "2021-06-22T13:45:32+00:00",
 	"authors": [
 	  {
 		"name": "Vlad Olaru",
@@ -63,9 +63,10 @@ Content-Type: application/json
 		  "type:wordpress-theme"
 		]
 	  },
-	  "lt-user": "def502000a91e5cc20ebf22bc3a7fae3a6f0b9f66e4354da55847fb984988ecd677563ee0c8b394daad090e5ae41f13aa90699fe0e1cad4c7564c6e4b424c67382b3ebe36939cc5c3c09f937748a0b729cef176809ba3d8cd1a2339a0cb87dfc116e4979978d8e9e48221257d58b0c9533e9bcfc290fefcd4c7b6e2a33f33f453b604c470273a5fbe46a",
+	  "lt-user": "def502005762a1f7ab01944a6224811e40d61b97df9d0e155281b57a686c1cd9bf3dd1d7e636c69067bae573142d6b9560df6389000ba5e122bdee49947bfe09329ccb6b424c12d1e71416314661763df5d69ec3b5c7c84fad512b94c1fed6ee7df3b07a8b0b0aab80ac2ff855859286a417ffb9d927b7ce8d67b7989fc48c849b79e261f4e235201478d5613a8be7976bc301e45bdf17227d27f0133480",
+	  "lt-version": 1,
 	  "wordpress-install-dir": "web\/wp",
-	  "lt-fingerprint": "b21b3b6d26ae4d7b9f619c4a48bbab05"
+	  "lt-fingerprint": "c6930346926f3788aeaaaee84c36b71e"
 	},
 	"scripts": {
 	  "post-root-package-install": [
@@ -94,7 +95,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "user": "def502000a91e5cc20ebf22bc3a7fae3a6f0b9f66e4354da55847fb984988ecd677563ee0c8b394daad090e5ae41f13aa90699fe0e1cad4c7564c6e4b424c67382b3ebe36939cc5c3c09f937748a0b729cef176809ba3d8cd1a2339a0cb87dfc116e4979978d8e9e48221257d58b0c9533e9bcfc290fefcd4c7b6e2a33f33f453b604c470273a5fbe46a",
+  "user": "def502005762a1f7ab01944a6224811e40d61b97df9d0e155281b57a686c1cd9bf3dd1d7e636c69067bae573142d6b9560df6389000ba5e122bdee49947bfe09329ccb6b424c12d1e71416314661763df5d69ec3b5c7c84fad512b94c1fed6ee7df3b07a8b0b0aab80ac2ff855859286a417ffb9d927b7ce8d67b7989fc48c849b79e261f4e235201478d5613a8be7976bc301e45bdf17227d27f0133480",
   "require": [
 	{
 	  "name": "pixelgradelt-records\/part_yet-another",

@@ -244,7 +244,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Create a resource.
+	 * Create a new composition (the contents of composer.json).
 	 *
 	 * @since 0.10.0
 	 *
@@ -294,7 +294,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Maybe refresh a resource.
+	 * Maybe refresh a composition (the contents of composer.json).
 	 *
 	 * @since 0.10.0
 	 *
