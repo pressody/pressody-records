@@ -359,10 +359,9 @@ class CompositionsController extends WP_REST_Controller {
 		 * Return false or WP_Error if we should reject the refresh and error out.
 		 *
 		 * @param array  $new_details              The new composition details.
-		 * @param string $composition_user_details The composition encrypted user details.
 		 * @param array  $composition              The full composition details.
 		 */
-		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', [], $composition, $composition['extra'][ self::USER_DETAILS_KEY ] );
+		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', [], $composition );
 		if ( is_wp_error( $new_details ) ) {
 			$message = esc_html__( 'Your attempt to refresh the composition was rejected. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
 			$message .= implode( ' ; ' . PHP_EOL, $new_details->get_error_messages() );
@@ -380,17 +379,23 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		if ( is_array( $new_details ) && ! empty( $new_details ) ) {
-			// We have work to do.
-			try {
-				$composition = $this->update_composition( $composition, $new_details );
-			} catch ( RestException $e ) {
-				return new WP_Error(
-					'rest_update_composition_errors',
-					$e->getMessage(),
-					[ 'status' => $e->getStatusCode(), ]
-				);
-			}
+		if ( ! is_array( $new_details ) || empty( $new_details ) ) {
+			// There is nothing to update to the received composition. Respond accordingly.
+			$response = rest_ensure_response( [] );
+			$response->set_status( HTTP::NO_CONTENT );
+
+			return $response;
+		}
+
+		// We have work to do.
+		try {
+			$composition = $this->update_composition( $composition, $new_details );
+		} catch ( RestException $e ) {
+			return new WP_Error(
+				'rest_update_composition_errors',
+				$e->getMessage(),
+				[ 'status' => $e->getStatusCode(), ]
+			);
 		}
 
 		$compositionObject = $this->standardize_to_object( $composition );

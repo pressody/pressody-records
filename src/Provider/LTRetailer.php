@@ -37,7 +37,7 @@ class LTRetailer extends AbstractHookProvider {
 	 */
 	public function register_hooks() {
 		$this->add_filter( 'pixelgradelt_records/validate_encrypted_user_details', 'validate_encrypted_user_details', 10, 3 );
-		$this->add_filter( 'pixelgradelt_records/composition_new_details', 'composition_new_details', 10, 3 );
+		$this->add_filter( 'pixelgradelt_records/composition_new_details', 'composition_new_details', 10, 2 );
 	}
 
 	/**
@@ -119,11 +119,10 @@ class LTRetailer extends AbstractHookProvider {
 	 *
 	 * @param false|array $new_details            The new composition details.
 	 * @param array       $composition            The full composition details.
-	 * @param string      $encrypted_user_details The composition's encrypted user details.
 	 *
 	 * @return false|\WP_Error|array
 	 */
-	protected function composition_new_details( $new_details, array $composition, string $encrypted_user_details ) {
+	protected function composition_new_details( $new_details, array $composition ) {
 		// Don't do anything if we have a false or WP_Error value.
 		if ( false === $new_details || is_wp_error( $new_details ) ) {
 			return $new_details;
@@ -144,7 +143,6 @@ class LTRetailer extends AbstractHookProvider {
 			'timeout'   => 5,
 			'sslverify' => ! ( is_debug_mode() || is_dev_url( $url ) ),
 			'body'      => json_encode( [
-				'user'     => $encrypted_user_details,
 				'composer' => $composition,
 			] ),
 		];
