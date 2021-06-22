@@ -16,10 +16,6 @@ use Composer\Json\JsonValidationException;
 use InvalidArgumentException;
 use JsonSchema\Validator;
 use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\CrypterInterface;
-use PixelgradeLT\Records\Exception\CrypterBadFormatException;
-use PixelgradeLT\Records\Exception\CrypterEnvironmentIsBrokenException;
-use PixelgradeLT\Records\Exception\CrypterWrongKeyOrModifiedCiphertextException;
 use PixelgradeLT\Records\Exception\RestException;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageRepositoryTransformer;
@@ -70,6 +66,17 @@ class CompositionsController extends WP_REST_Controller {
 	const FINGERPRINT_KEY = 'lt-fingerprint';
 
 	/**
+	 * The key in composer.json `extra` used to store the composer.json LT version.
+	 *
+	 * We will use this in case we make breaking changes and wish to provide backwards compatibility.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @var string
+	 */
+	const VERSION_KEY = 'lt-version';
+
+	/**
 	 * Package repository.
 	 *
 	 * @since 0.10.0
@@ -88,15 +95,6 @@ class CompositionsController extends WP_REST_Controller {
 	protected PackageRepositoryTransformer $transformer;
 
 	/**
-	 * String crypter.
-	 *
-	 * @since 0.10.0
-	 *
-	 * @var CrypterInterface
-	 */
-	protected CrypterInterface $crypter;
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 0.10.0
@@ -105,21 +103,18 @@ class CompositionsController extends WP_REST_Controller {
 	 * @param string                       $rest_base   The base of this controller's route.
 	 * @param PackageRepository            $repository  Package repository.
 	 * @param PackageRepositoryTransformer $transformer Package repository transformer.
-	 * @param CrypterInterface             $crypter     String crypter.
 	 */
 	public function __construct(
 		string $namespace,
 		string $rest_base,
 		PackageRepository $repository,
-		PackageRepositoryTransformer $transformer,
-		CrypterInterface $crypter
+		PackageRepositoryTransformer $transformer
 	) {
 
 		$this->namespace   = $namespace;
 		$this->rest_base   = $rest_base;
 		$this->repository  = $repository;
 		$this->transformer = $transformer;
-		$this->crypter     = $crypter;
 	}
 
 	/**
@@ -140,39 +135,21 @@ class CompositionsController extends WP_REST_Controller {
 					'permission_callback' => [ $this, 'create_item_permissions_check' ],
 					'show_in_index'       => false,
 					'args'                => [
-						'context'         => $this->get_context_param( [ 'default' => 'edit' ] ),
-						'siteid'          => [
-							'description'       => esc_html__( 'The ID of the site the new composition is to be used on.', 'pixelgradelt_records' ),
-							'type'              => 'string',
-							'sanitize_callback' => function ( $value ) {
-								return preg_replace( '/[^A-Za-z0-9\-_]+/', '', $value );
-							},
-							'context'           => [ 'view', 'edit' ],
-							'required'          => true,
-						],
-						'userid'          => [
-							'description' => esc_html__( 'The ID of the user the new composition is tied to.', 'pixelgradelt_records' ),
-							'type'        => 'integer',
+						'context'  => $this->get_context_param( [ 'default' => 'edit' ] ),
+						'user'     => [
+							'description' => esc_html__( 'The encrypted LT user data to attach to the composition.', 'pixelgradelt_records' ),
+							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
-						'orderid'         => [
-							'description' => esc_html__( 'The e-commerce order ID(s) the new composition is to be tied to.', 'pixelgradelt_records' ),
-							'type'        => 'array',
-							'items'       => [
-								'type' => 'integer',
-							],
-							'context'     => [ 'view', 'edit' ],
-							'required'    => false,
-						],
-						'require' => [
+						'require'  => [
 							'description' => esc_html__( 'A LT Records packages (actual LT packages or LT parts) list to include in the composition. All packages that don\'t exist will be ignored. These required packages will overwrite the same packages given through the "composer" param.', 'pixelgradelt_records' ),
 							'type'        => 'array',
 							'items'       => [
 								'type'       => 'object',
 								'properties' => [
 									'name'    => [
-										'description'       => __( 'The LT Records package\'s full Composer package name.', 'pixelgradelt_records' ),
+										'description'       => esc_html__( 'The LT Records package\'s full Composer package name.', 'pixelgradelt_records' ),
 										'type'              => 'string',
 										'pattern'           => self::PACKAGE_NAME_PATTERN,
 										'sanitize_callback' => function ( $value ) {
@@ -188,9 +165,9 @@ class CompositionsController extends WP_REST_Controller {
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],
-						'composer'        => [
+						'composer' => [
 							'type'        => 'object',
-							'description' => __( 'composer.json project (root) properties according to the Composer 2.0 JSON schema. The "repositories", "require", "require-dev", "config", "extra","scripts" root-properties will be merged. The rest will overwrite existing properties.', 'pixelgradelt_records' ),
+							'description' => esc_html__( 'composer.json project (root) properties according to the Composer 2.0 JSON schema. The "repositories", "require", "require-dev", "config", "extra","scripts" root-properties will be merged. The rest will overwrite existing properties.', 'pixelgradelt_records' ),
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],
@@ -279,16 +256,14 @@ class CompositionsController extends WP_REST_Controller {
 		// Start with the default composition.
 		$composition = $this->get_starter_composition();
 
+		// Update the default composition with the received details.
 		try {
 			$composition = $this->update_composition( $composition, $request->get_params() );
-		} catch ( CrypterEnvironmentIsBrokenException $e ) {
+		} catch ( RestException $e ) {
 			return new WP_Error(
-				'rest_unable_to_encrypt',
-				esc_html__( 'We could not encrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_records' ),
-				[
-					'status'  => HTTP::INTERNAL_SERVER_ERROR,
-					'details' => $e->getMessage(),
-				]
+				'rest_update_composition_errors',
+				$e->getMessage(),
+				[ 'status' => $e->getStatusCode(), ]
 			);
 		}
 
@@ -349,29 +324,8 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
+		// Second, check the fingerprint.
 		try {
-			// Validate the decrypted user details in the composition.
-			// In case of invalid user details, exceptions are thrown.
-			$user_details = $this->validate_user_details( $composition );
-		} catch ( RestException $e ) {
-			return new WP_Error(
-				'rest_invalid_user_details',
-				$e->getMessage(),
-				[ 'status' => $e->getStatusCode(), ]
-			);
-		} catch ( CrypterEnvironmentIsBrokenException $e ) {
-			return new WP_Error(
-				'rest_unable_to_encrypt',
-				esc_html__( 'We could not decrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_records' ),
-				[
-					'status'  => HTTP::INTERNAL_SERVER_ERROR,
-					'details' => $e->getMessage(),
-				]
-			);
-		}
-
-		try {
-			// Check the fingerprint.
 			// In case of invalid fingerprint, exceptions are thrown.
 			$this->check_fingerprint( $composition );
 		} catch ( RestException $e ) {
@@ -382,8 +336,17 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
+		// Third, check if we have the encrypted user details.
+		if ( empty( $composition['extra'][ self::USER_DETAILS_KEY ] ) ) {
+			return new WP_Error(
+				'rest_missing_lt_user',
+				esc_html__( 'The provided composer JSON data is missing the LT user details.', 'pixelgradelt_records' ),
+				[ 'status' => HTTP::NOT_ACCEPTABLE ]
+			);
+		}
+
 		// If we have made it thus far, the received composition is OK.
-		// Proceed to updating it.
+		// Proceed to determine if we need to update something to it.
 
 		/**
 		 * Provide new composition details that we should update.
@@ -393,14 +356,23 @@ class CompositionsController extends WP_REST_Controller {
 		 * @see   CompositionsController::refresh_item()
 		 *
 		 * Return an empty array if we should leave the composition unchanged.
-		 * Return false if we should reject the refresh and error out.
+		 * Return false or WP_Error if we should reject the refresh and error out.
 		 *
-		 * @param array $new_details  The new composition details.
-		 * @param array $user_details The user details as decrypted from the composition details.
-		 * @param array $composition  The full composition details.
+		 * @param array  $new_details              The new composition details.
+		 * @param string $composition_user_details The composition encrypted user details.
+		 * @param array  $composition              The full composition details.
 		 */
-		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', [], $user_details, $composition );
-		if ( false === $new_details ) {
+		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', [], $composition, $composition['extra'][ self::USER_DETAILS_KEY ] );
+		if ( is_wp_error( $new_details ) ) {
+			$message = esc_html__( 'Your attempt to refresh the composition was rejected. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
+			$message .= implode( ' ; ' . PHP_EOL, $new_details->get_error_messages() );
+
+			return new WP_Error(
+				'rest_rejected_refresh',
+				$message,
+				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
+			);
+		} elseif ( false === $new_details ) {
 			return new WP_Error(
 				'rest_rejected_refresh',
 				esc_html__( 'Your attempt to refresh the composition was rejected.', 'pixelgradelt_records' ),
@@ -412,14 +384,11 @@ class CompositionsController extends WP_REST_Controller {
 			// We have work to do.
 			try {
 				$composition = $this->update_composition( $composition, $new_details );
-			} catch ( CrypterEnvironmentIsBrokenException $e ) {
+			} catch ( RestException $e ) {
 				return new WP_Error(
-					'rest_unable_to_encrypt',
-					esc_html__( 'We could not encrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_records' ),
-					[
-						'status'  => HTTP::INTERNAL_SERVER_ERROR,
-						'details' => $e->getMessage(),
-					]
+					'rest_update_composition_errors',
+					$e->getMessage(),
+					[ 'status' => $e->getStatusCode(), ]
 				);
 			}
 		}
@@ -455,29 +424,58 @@ class CompositionsController extends WP_REST_Controller {
 	 * @param array $composition The current composition details.
 	 * @param array $new_details The new composition details.
 	 *
-	 * @throws CrypterEnvironmentIsBrokenException
+	 * @throws RestException
 	 * @return array
 	 */
 	protected function update_composition( array $composition, array $new_details ): array {
 		$initial_composition = $composition;
 
-		// Add any composer.json properties received.
+		// The order below is important!
+
+		// First, add any composer.json properties received.
 		if ( ! empty( $new_details['composer'] ) && is_array( $new_details['composer'] ) ) {
 			$composition = $this->add_composer_properties( $composition, $new_details['composer'] );
 		}
 
-		// Remove required packages.
+		// Second, remove required packages, including packages sent through the composer config.
 		if ( ! empty( $new_details['remove'] ) && is_array( $new_details['remove'] ) ) {
 			$composition = $this->remove_required_packages( $composition, $new_details['remove'] );
 		}
 
-		// Add the required LT packages.
+		// Third, add the required LT packages.
 		if ( ! empty( $new_details['require'] ) && is_array( $new_details['require'] ) ) {
 			$composition = $this->add_required_packages( $composition, $new_details['require'] );
 		}
 
-		// Add the user details.
-		$composition = $this->add_user_details( $composition, $new_details );
+		// Before adding the encrypted user details, allow a third-party check.
+		// We don't want to add data that is later found to be invalid.
+		if ( isset( $new_details['user'] ) && is_string( $new_details['user'] ) ) {
+			/**
+			 * Filter the validation of encrypted user details.
+			 *
+			 * @since 0.10.0
+			 *
+			 * @see   CompositionsController::update_composition()
+			 *
+			 * Return true if the user details are valid, or a WP_Error in case we should reject them.
+			 *
+			 * @param bool   $valid       Whether the user details are valid.
+			 * @param string $encrypted_user_details
+			 * @param array  $composition The current composition details.
+			 */
+			$valid = apply_filters( 'pixelgradelt_records/validate_encrypted_user_details', true, $new_details['user'], $composition );
+			if ( is_wp_error( $valid ) ) {
+				$message = esc_html__( 'Third-party checks have found the encrypted LT user details invalid. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
+				$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
+
+				throw RestException::forInvalidComposerUserDetails( $message );
+			} elseif ( true !== $valid ) {
+				throw RestException::forInvalidComposerUserDetails();
+			}
+
+			// Now we can add/replace the user details in the composition.
+			$composition = $this->add_user_details( $composition, $new_details );
+		}
 
 		/**
 		 * Filter the updated composition.
@@ -573,7 +571,7 @@ class CompositionsController extends WP_REST_Controller {
 				continue;
 			}
 
-			// Check that the packages exists (and has releases) in our repository.
+			// Check that the LT packages exists (and has releases) in our repository.
 			if ( empty( $repo_packages['packages'][ $package_details['name'] ] ) ) {
 				continue;
 			}
@@ -606,7 +604,7 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $composition      The current composition details.
+	 * @param array $composition     The current composition details.
 	 * @param array $remove_packages Package details to require.
 	 *
 	 * @return array The updated composition details.
@@ -642,7 +640,6 @@ class CompositionsController extends WP_REST_Controller {
 	 * @param array $composition The current composition details.
 	 * @param array $data        Data containing user details.
 	 *
-	 * @throws CrypterEnvironmentIsBrokenException
 	 * @return array The updated composition details.
 	 */
 	protected function add_user_details( array $composition, array $data ): array {
@@ -651,90 +648,11 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		// Add the encrypted user details.
-		$user_data = [
-			'siteid'  => '',
-			'userid'  => 0,
-			'orderid' => [],
-		];
-		if ( isset( $data['siteid'] ) ) {
-			$user_data['siteid'] = (string) $data['siteid'];
+		if ( isset( $data['user'] ) && is_string( $data['user'] ) ) {
+			$composition['extra'][ self::USER_DETAILS_KEY ] = $data['user'];
 		}
-		if ( isset( $data['userid'] ) ) {
-			$user_data['userid'] = absint( $data['userid'] );
-		}
-		if ( isset( $data['orderid'] ) ) {
-			$user_data['orderid'] = absint( $data['orderid'] );
-		}
-
-		$composition['extra'][ self::USER_DETAILS_KEY ] = $this->crypter->encrypt( json_encode( $user_data ) );
 
 		return $composition;
-	}
-
-	/**
-	 * Validate the composition's user details.
-	 *
-	 * Decrypt and allow others to do further checks.
-	 *
-	 * @since 0.10.0
-	 *
-	 * @param array $composition The current composition details.
-	 *
-	 * @throws RestException
-	 * @throws CrypterEnvironmentIsBrokenException
-	 * @return array The decrypted user details on valid.
-	 */
-	protected function validate_user_details( array $composition ): array {
-		if ( empty( $composition['extra'][ self::USER_DETAILS_KEY ] ) ) {
-			throw RestException::forInvalidComposerUserDetails();
-		}
-
-		try {
-			$user_details = json_decode( $this->crypter->decrypt( $composition['extra'][ self::USER_DETAILS_KEY ] ), true );
-		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException $e ) {
-			throw RestException::forInvalidComposerUserDetails();
-		}
-
-		if ( null === $user_details ) {
-			throw RestException::forInvalidComposerUserDetails();
-		}
-
-		// Now check that all the details are present.
-		$required = [
-			'siteid',
-			'userid',
-			'orderid',
-		];
-		foreach ( $required as $key ) {
-			if ( ! isset( $user_details[ $key ] ) ) {
-				throw RestException::forMissingComposerUserDetails();
-			}
-		}
-
-		/**
-		 * Filter the validation of a composition's user details.
-		 *
-		 * @since 0.10.0
-		 *
-		 * @see   CompositionsController::validate_user_details()
-		 *
-		 * Return true if the user details are valid, or a WP_Error in case we should reject them.
-		 *
-		 * @param bool  $valid        Whether the user details are valid.
-		 * @param array $user_details The user details as decrypted from the composition details.
-		 * @param array $composition  The full composition details.
-		 */
-		$valid = apply_filters( 'pixelgradelt_records/composition_validate_user_details', true, $user_details, $composition );
-		if ( is_wp_error( $valid ) ) {
-			$message = 'Third-party user details checks have found them invalid. Here is what happened: ' . PHP_EOL;
-			$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
-
-			throw RestException::forInvalidComposerUserDetails( $message );
-		} elseif ( true !== $valid ) {
-			throw RestException::forInvalidComposerUserDetails();
-		}
-
-		return $user_details;
 	}
 
 	/**
@@ -950,7 +868,7 @@ class CompositionsController extends WP_REST_Controller {
 	protected function objectToArrayRecursive( object $object ): array {
 		$json = json_encode( $object );
 		if ( json_last_error() !== \JSON_ERROR_NONE ) {
-			$message = 'Unable to encode schema array as JSON';
+			$message = esc_html__( 'Unable to encode schema array as JSON', 'pixelgradelt_records' );
 			if ( function_exists( 'json_last_error_msg' ) ) {
 				$message .= ': ' . json_last_error_msg();
 			}
@@ -971,7 +889,7 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return bool Success.
 	 */
 	protected function validate_schema( object $composition ): bool {
-		$validator = new Validator();
+		$validator       = new Validator();
 		$composer_schema = $this->get_item_schema();
 		if ( empty( $composer_schema ) ) {
 			// If we couldn't read the schema, let things pass.
@@ -984,7 +902,7 @@ class CompositionsController extends WP_REST_Controller {
 			foreach ( (array) $validator->getErrors() as $error ) {
 				$errors[] = ( $error['property'] ? $error['property'] . ' : ' : '' ) . $error['message'];
 			}
-			throw new JsonValidationException( 'The composition does not match the expected JSON schema', $errors );
+			throw new JsonValidationException( esc_html__( 'The composition does not match the expected JSON schema', 'pixelgradelt_records' ), $errors );
 		}
 
 		return true;
@@ -1076,6 +994,7 @@ class CompositionsController extends WP_REST_Controller {
 					'web/app/themes/{$name}/'     => [ 'type:wordpress-theme' ],
 				],
 				'wordpress-install-dir' => 'web/wp',
+				self::VERSION_KEY => 1,
 			],
 			'scripts'           => [
 				'post-root-package-install' => [

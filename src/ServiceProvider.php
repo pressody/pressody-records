@@ -96,19 +96,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Client\CustomTokenAuthentication();
 		};
 
-		$container['crypter'] = function () {
-			$crypter = new StringCrypter();
-			// Load the encryption key from the environment.
-			try {
-				$crypter->loadEncryptionKey( $_ENV['LTRECORDS_ENCRYPTION_KEY'] );
-			} catch ( PixelgradeltRecordsException $e ) {
-				// Do nothing right now.
-				// We should handle a failed encryption setup through health checks and when attempting to encrypt or decrypt.
-			}
-
-			return $crypter;
-		};
-
 		$container['hash.generator'] = function ( $container ) {
 			// We will use the randomly generated storage directory name as the salt,
 			// so that if that changes the hashes are also invalidated.
@@ -514,8 +501,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				'pixelgradelt_records/v1',
 				'compositions',
 				$container['repository.all.managed'],
-				$container['transformer.composer_repository'],
-				$container['crypter']
+				$container['transformer.composer_repository']
 			);
 		};
 

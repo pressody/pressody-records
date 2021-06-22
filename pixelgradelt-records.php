@@ -60,7 +60,6 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 $dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
 $dotenv->load();
 $dotenv->required( 'LTRECORDS_PHP_AUTH_USER' )->notEmpty();
-$dotenv->required( 'LTRECORDS_ENCRYPTION_KEY' )->notEmpty();
 
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
