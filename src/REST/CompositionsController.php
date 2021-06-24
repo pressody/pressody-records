@@ -253,7 +253,7 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
-		// Start with the default composition.
+		// Start with the default composition contents.
 		$composition = $this->get_starter_composition();
 
 		// Update the default composition with the received details.

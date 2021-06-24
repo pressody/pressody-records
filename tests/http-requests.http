@@ -148,8 +148,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "userid": 123,
-  "compositionid": 2435,
+  "user": "def502005762a1f7ab01944a6224811e40d61b97df9d0e155281b57a686c1cd9bf3dd1d7e636c69067bae573142d6b9560df6389000ba5e122bdee49947bfe09329ccb6b424c12d1e71416314661763df5d69ec3b5c7c84fad512b94c1fed6ee7df3b07a8b0b0aab80ac2ff855859286a417ffb9d927b7ce8d67b7989fc48c849b79e261f4e235201478d5613a8be7976bc301e45bdf17227d27f0133480",
   "require": [
 	{
 	  "name": "pixelgradelt-records\/part_yet-another",
@@ -228,8 +227,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "userid": 123,
-  "compositionid": 547,
+  "user": "def502005762a1f7ab01944a6224811e40d61b97df9d0e155281b57a686c1cd9bf3dd1d7e636c69067bae573142d6b9560df6389000ba5e122bdee49947bfe09329ccb6b424c12d1e71416314661763df5d69ec3b5c7c84fad512b94c1fed6ee7df3b07a8b0b0aab80ac2ff855859286a417ffb9d927b7ce8d67b7989fc48c849b79e261f4e235201478d5613a8be7976bc301e45bdf17227d27f0133480",
   "require": [
 	{
 	  "name": "pixelgradelt-records\/part_yet-another",
@@ -254,8 +252,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "userid": 123,
-  "compositionid": 467
+  "user": "def502005762a1f7ab01944a6224811e40d61b97df9d0e155281b57a686c1cd9bf3dd1d7e636c69067bae573142d6b9560df6389000ba5e122bdee49947bfe09329ccb6b424c12d1e71416314661763df5d69ec3b5c7c84fad512b94c1fed6ee7df3b07a8b0b0aab80ac2ff855859286a417ffb9d927b7ce8d67b7989fc48c849b79e261f4e235201478d5613a8be7976bc301e45bdf17227d27f0133480"
 }
 
 ###
