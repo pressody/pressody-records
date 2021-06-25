@@ -341,3 +341,26 @@ function preload_rest_data( $paths ) {
 		'after'
 	);
 }
+
+// @todo This is a temporary fix for the CORS issue. We should think it over and move it to a proper place.
+add_action('init', function () {
+	$origin = get_http_origin();
+
+	header("Access-Control-Allow-Origin: " . $origin);
+	header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+	header("Access-Control-Allow-Credentials: true");
+	header('Access-Control-Allow-Headers: Origin, X-Requested-With, X-WP-Nonce, Content-Type, Accept, Authorization');
+	if ('OPTIONS' == $_SERVER['REQUEST_METHOD']) {
+		status_header(200);
+		exit();
+	}
+});
+
+//add_filter('rest_authentication_errors', function ($errors) {
+//	$request_server = $_SERVER['REMOTE_ADDR'];
+//	$origin = get_http_origin();
+//	if ($origin !== 'https://lt-retailer.local') return new \WP_Error('forbidden_access', $origin, array(
+//		'status' => 403
+//	));
+//	return $errors;
+//});
