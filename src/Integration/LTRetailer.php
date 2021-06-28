@@ -1,6 +1,6 @@
 <?php
 /**
- * LT Retailer input provider.
+ * LT Retailer integration provider.
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
@@ -9,7 +9,7 @@
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace PixelgradeLT\Records\Integration;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use function PixelgradeLT\Records\get_setting;
@@ -18,7 +18,7 @@ use function PixelgradeLT\Records\is_dev_url;
 use WP_Http as HTTP;
 
 /**
- * LT Retailer input provider class.
+ * LT Retailer integration provider class.
  *
  * When it is suitable, communicate with LT Retailer and let it have its say over matters.
  * We will only use hooks to intervene.

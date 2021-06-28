@@ -142,10 +142,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new I18n();
 		};
 
-		$container['hooks.ltretailer'] = function () {
-			return new Provider\LTRetailer();
-		};
-
 		$container['hooks.package_archiver'] = function ( $container ) {
 			return new Provider\PackageArchiver(
 				$container['repository.managed'],
@@ -220,6 +216,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			}
 
 			return $request;
+		};
+
+		$container['integration.ltretailer'] = function () {
+			return new Integration\LTRetailer();
 		};
 
 		$container['logs.logger'] = function ( $container ) {
