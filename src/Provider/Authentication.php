@@ -81,6 +81,9 @@ class Authentication extends AbstractHookProvider {
 
 		// Allow cookie authentication to work for our requests.
 		remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
+
+		// Allow CORS requests.
+		add_action('init', [ $this, 'allow_cors' ] );
 	}
 
 	/**
@@ -217,5 +220,23 @@ class Authentication extends AbstractHookProvider {
 		}
 
 		return $allcaps;
+	}
+
+	/**
+	 * Allow CORS requests.
+	 *
+	 * @since 0.11.0
+	 */
+	public function allow_cors() {
+		$origin = get_http_origin();
+
+		header("Access-Control-Allow-Origin: " . $origin);
+		header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+		header("Access-Control-Allow-Credentials: true");
+		header('Access-Control-Allow-Headers: Origin, X-Requested-With, X-WP-Nonce, Content-Type, Accept, Authorization');
+		if ('OPTIONS' == $_SERVER['REQUEST_METHOD']) {
+			status_header(200);
+			exit();
+		}
 	}
 }
