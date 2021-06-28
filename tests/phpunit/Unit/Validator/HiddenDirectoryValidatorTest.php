@@ -12,7 +12,7 @@ class HiddenDirectoryValidatorTest extends TestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->directory = PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages/validate';
+		$this->directory = \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages/validate';
 
 		$this->release = $this->getMockBuilder( Release::class )
 			->disableOriginalConstructor()

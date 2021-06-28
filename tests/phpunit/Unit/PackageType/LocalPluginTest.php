@@ -33,7 +33,7 @@ class LocalPluginTest extends TestCase {
 		Functions\when( 'get_site_transient' )->justReturn( new \stdClass() );
 
 		$archiver                = new Archiver( new NullLogger() );
-		$storage                 = new LocalStorage( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$storage                 = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 		$composer_client = new ComposerClient();
 		$logger = new NullIO();

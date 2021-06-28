@@ -22,7 +22,7 @@ class LocalThemeTest extends TestCase {
 		parent::setUp();
 
 		$this->original_theme_directories = $GLOBALS['wp_theme_directories'];
-		register_theme_directory( PIXELGRADELT_RECORDS_TESTS_DIR . '/Fixture/wp-content/themes' );
+		register_theme_directory( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/themes' );
 		delete_site_transient( 'theme_roots' );
 
 		$this->factory = plugin()->get_container()->get( 'package.factory' );
