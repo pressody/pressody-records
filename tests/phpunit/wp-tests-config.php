@@ -15,6 +15,8 @@ require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 $dotenv->required(['WP_TESTS_DB_NAME', 'WP_TESTS_DB_USER', 'WP_TESTS_DB_PASSWORD', 'WP_TESTS_DB_HOST']);
+// Read environment variables from the $_ENV array also.
+\Env\Env::$options |= \Env\Env::USE_ENV_ARRAY;
 
 /**
  * PROCEED
@@ -38,10 +40,10 @@ define( 'WP_DEBUG', true );
 // These tests will DROP ALL TABLES in the database with the prefix named below.
 // DO NOT use a production database or one that is shared with something else.
 
-define( 'DB_NAME', isset( $_ENV['WP_TESTS_DB_NAME'] ) ? $_ENV['WP_TESTS_DB_NAME'] : 'wordpress_test' );
-define( 'DB_USER', isset( $_ENV['WP_TESTS_DB_USER'] ) ? $_ENV['WP_TESTS_DB_USER'] : 'root' );
-define( 'DB_PASSWORD', isset( $_ENV['WP_TESTS_DB_PASSWORD'] ) ? $_ENV['WP_TESTS_DB_PASSWORD'] : '' );
-define( 'DB_HOST', isset( $_ENV['WP_TESTS_DB_HOST'] ) ? $_ENV['WP_TESTS_DB_HOST'] : 'localhost' );
+define( 'DB_NAME', \Env\Env::get( 'WP_TESTS_DB_NAME' ) !== null ? \Env\Env::get( 'WP_TESTS_DB_NAME' ) : 'wordpress_test' );
+define( 'DB_USER', \Env\Env::get( 'WP_TESTS_DB_USER' ) !== null ? \Env\Env::get( 'WP_TESTS_DB_USER' ) : 'root' );
+define( 'DB_PASSWORD', \Env\Env::get( 'WP_TESTS_DB_PASSWORD' ) !== null ? \Env\Env::get( 'WP_TESTS_DB_PASSWORD' ) : '' );
+define( 'DB_HOST', \Env\Env::get( 'WP_TESTS_DB_HOST' ) !== null ? \Env\Env::get( 'WP_TESTS_DB_HOST' ) : 'localhost' );
 define( 'DB_CHARSET', 'utf8mb4' );
 define( 'DB_COLLATE', '' );
 

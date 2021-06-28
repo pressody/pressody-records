@@ -60,6 +60,8 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 $dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
 $dotenv->load();
 $dotenv->required( 'LTRECORDS_PHP_AUTH_USER' )->notEmpty();
+// Read environment variables from the $_ENV array also.
+\Env\Env::$options |= \Env\Env::USE_ENV_ARRAY;
 
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';

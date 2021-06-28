@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
+use Env\Env;
 use Mockery\Exception;
 use PixelgradeLT\Records\Authentication\ApiKey\Server;
 use PixelgradeLT\Records\Client\ComposerClient;
@@ -949,8 +950,8 @@ class PackageManager {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( $_ENV['LTRECORDS_PHP_AUTH_USER'] ) ? [
-									'Authorization: Basic ' . base64_encode( $_ENV['LTRECORDS_PHP_AUTH_USER'] . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( Env::get('LTRECORDS_PHP_AUTH_USER') ) ? [
+									'Authorization: Basic ' . base64_encode( Env::get('LTRECORDS_PHP_AUTH_USER') . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],
