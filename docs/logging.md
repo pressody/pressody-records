@@ -4,7 +4,7 @@ PixelgradeLT Records implements a [PSR-3 Logger Interface](https://www.php-fig.o
 
 Messages are logged in daily logs in the `wp-content/uploads/pixelgradelt-records-logs/` directory when `WP_DEBUG` is enabled.
 
-The file-based logs are rotated if they exceed 5 Mb (by default; use the `pixelgradelt_records_log_file_size_limit` filter to change this), and also automatically cleaned if older than 30 days (by default; use the `pixelgradelt_records_logger_days_to_retain_logs` filter to change this).
+The file-based logs are rotated if they exceed 5 Mb (by default; use the `pixelgradelt_records/log_file_size_limit` filter to change this), and also automatically cleaned if older than 30 days (by default; use the `pixelgradelt_records/logger_days_to_retain_logs` filter to change this).
 
 ## Changing the Log Level
 
@@ -12,7 +12,7 @@ To log more or less information, the log level can be adjusted in the DI contain
 
 ```php
 <?php
-add_action( 'pixelgradelt_records_compose', function( $plugin, $container ) {
+add_action( 'pixelgradelt_records/compose', function( $plugin, $container ) {
 	$container['logger.level'] = 'debug';
 }, 10, 2 );
 ```
@@ -32,7 +32,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
 /**
  * Register the logger before PixelgradeLT Records is composed.
  */
-add_action( 'pixelgradelt_records_compose', function( $plugin, $container ) {
+add_action( 'pixelgradelt_records/compose', function( $plugin, $container ) {
 	$container['logger'] = function() {
 		$logger = new Logger( 'pixelgradelt-records' );
 		$logger->pushHandler( new ErrorLogHandler( ErrorLogHandler::OPERATING_SYSTEM, LOGGER::WARNING ) );
