@@ -54,9 +54,9 @@ class Activation extends AbstractHookProvider {
 	 * Create cron jobs (clear them first).
 	 */
 	private function create_cron_jobs() {
-		wp_clear_scheduled_hook( 'pixelgradelt_records_cleanup_logs' );
+		wp_clear_scheduled_hook( 'pixelgradelt_records/cleanup_logs' );
 
-		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'pixelgradelt_records_cleanup_logs' );
+		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'pixelgradelt_records/cleanup_logs' );
 	}
 
 	private function create_or_update_tables() {
