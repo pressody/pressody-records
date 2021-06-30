@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\REST;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use InvalidArgumentException;
+use JsonSchema\Constraints\Constraint;
 use JsonSchema\Validator;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Exception\RestException;
@@ -358,8 +359,8 @@ class CompositionsController extends WP_REST_Controller {
 		 * Return an empty array if we should leave the composition unchanged.
 		 * Return false or WP_Error if we should reject the refresh and error out.
 		 *
-		 * @param array  $new_details              The new composition details.
-		 * @param array  $composition              The full composition details.
+		 * @param array $new_details The new composition details.
+		 * @param array $composition The full composition details.
 		 */
 		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', [], $composition );
 		if ( is_wp_error( $new_details ) ) {
@@ -452,30 +453,38 @@ class CompositionsController extends WP_REST_Controller {
 			$composition = $this->add_required_packages( $composition, $new_details['require'] );
 		}
 
+		// We will add the new user details if they are different than what we have.
 		// Before adding the encrypted user details, allow a third-party check.
 		// We don't want to add data that is later found to be invalid.
-		if ( isset( $new_details['user'] ) && is_string( $new_details['user'] ) ) {
-			/**
-			 * Filter the validation of encrypted user details.
-			 *
-			 * @since 0.10.0
-			 *
-			 * @see   CompositionsController::update_composition()
-			 *
-			 * Return true if the user details are valid, or a WP_Error in case we should reject them.
-			 *
-			 * @param bool   $valid       Whether the user details are valid.
-			 * @param string $encrypted_user_details
-			 * @param array  $composition The current composition details.
-			 */
-			$valid = apply_filters( 'pixelgradelt_records/validate_encrypted_user_details', true, $new_details['user'], $composition );
-			if ( is_wp_error( $valid ) ) {
-				$message = esc_html__( 'Third-party checks have found the encrypted LT user details invalid. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
-				$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
+		if ( isset( $new_details['user'] )
+		     && isset( $composition['extra'][ self::USER_DETAILS_KEY ] )
+		     && $composition['extra'][ self::USER_DETAILS_KEY ] !== $new_details['user'] ) {
 
-				throw RestException::forInvalidComposerUserDetails( $message );
-			} elseif ( true !== $valid ) {
-				throw RestException::forInvalidComposerUserDetails();
+			// We will validate only if we are given a non-empty string.
+			// If we are given another value, we will just write it. Others should know better about what they are doing.
+			if ( ! empty( $new_details['user'] ) && is_string( $new_details['user'] ) ) {
+				/**
+				 * Filter the validation of encrypted user details.
+				 *
+				 * @since 0.10.0
+				 *
+				 * @see   CompositionsController::update_composition()
+				 *
+				 * Return true if the user details are valid, or a WP_Error in case we should reject them.
+				 *
+				 * @param bool   $valid       Whether the user details are valid.
+				 * @param string $encrypted_user_details
+				 * @param array  $composition The current composition details.
+				 */
+				$valid = apply_filters( 'pixelgradelt_records/validate_encrypted_user_details', true, $new_details['user'], $composition );
+				if ( is_wp_error( $valid ) ) {
+					$message = esc_html__( 'Third-party checks have found the encrypted LT user details invalid. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
+					$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
+
+					throw RestException::forInvalidComposerUserDetails( $message );
+				} elseif ( true !== $valid ) {
+					throw RestException::forInvalidComposerUserDetails();
+				}
 			}
 
 			// Now we can add/replace the user details in the composition.
@@ -653,7 +662,7 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		// Add the encrypted user details.
-		if ( isset( $data['user'] ) && is_string( $data['user'] ) ) {
+		if ( isset( $data['user'] ) ) {
 			$composition['extra'][ self::USER_DETAILS_KEY ] = $data['user'];
 		}
 
@@ -815,13 +824,20 @@ class CompositionsController extends WP_REST_Controller {
 		$objectsKeys = [
 			'require',
 			'require-dev',
-			'config',
+			'conflict',
 			'extra',
+			'provide',
+			'replace',
+			'suggest',
+			'config',
+			'autoload',
+			'autoload-dev',
 			'scripts',
+			'scripts-descriptions',
 			'support',
 		];
 		foreach ( $objectsKeys as $key ) {
-			if ( empty( $compositionObject->$key ) ) {
+			if ( isset( $compositionObject->$key ) && empty( $compositionObject->$key ) ) {
 				$compositionObject->$key = new \stdClass();
 			}
 		}
@@ -901,7 +917,7 @@ class CompositionsController extends WP_REST_Controller {
 			return true;
 		}
 
-		$validator->check( $composition, $composer_schema );
+		$validator->validate( $composition, $composer_schema );
 		if ( ! $validator->isValid() ) {
 			$errors = array();
 			foreach ( (array) $validator->getErrors() as $error ) {
@@ -921,6 +937,8 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return array
 	 */
 	protected function get_starter_composition(): array {
+		// This is mostly the contents of the composer.json in our WPSite Starter (https://github.com/pixelgradelt/wpsite-starter)
+		// We should keep important things in sync since these will overwrite the default composer.json in that repo.
 		return [
 			'name'              => 'pixelgradelt/site',
 			'type'              => 'project',
@@ -984,8 +1002,21 @@ class CompositionsController extends WP_REST_Controller {
 					'url'  => 'https://repo.packagist.org',
 				],
 			],
-			'require'           => [],
-			'require-dev'       => [],
+			'require'           => [
+				'php'                      => '>=7.1',
+				'ext-json'                 => '*',
+				'composer/installers'      => '^1.10',
+				'vlucas/phpdotenv'         => '^5.3',
+				'oscarotero/env'           => '^2.1',
+				'roots/bedrock-autoloader' => '^1.0',
+				'roots/wordpress'          => '^5.7',
+				'roots/wp-config'          => '1.0.0',
+				'roots/wp-password-bcrypt' => '1.0.0',
+			],
+			'require-dev'       => [
+				'squizlabs/php_codesniffer' => '^3.5.8',
+				'roave/security-advisories' => 'dev-latest',
+			],
 			'config'            => [
 				'optimize-autoloader' => true,
 				'preferred-install'   => 'dist',
@@ -999,7 +1030,7 @@ class CompositionsController extends WP_REST_Controller {
 					'web/app/themes/{$name}/'     => [ 'type:wordpress-theme' ],
 				],
 				'wordpress-install-dir' => 'web/wp',
-				self::VERSION_KEY => 1,
+				self::VERSION_KEY       => 1,
 			],
 			'scripts'           => [
 				'post-root-package-install' => [
