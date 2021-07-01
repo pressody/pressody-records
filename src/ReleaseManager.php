@@ -200,7 +200,7 @@ class ReleaseManager {
 							// Keep the dist type our package specifies, not the one in the source.
 							'override-dist-type' => false,
 							// Whether to do a Composer install and archive the contents, or to use the provided dist archive.
-							// Right now we don't want to rearchive since there are some issues with Composer and dynamic temp_dir paths.
+							// Right now we don't want to rearchive since there are some issues with Composer and dynamic temp_dir paths (e.g `/tmp/` is actually `/private/tmp/`).
 							'rearchive' => false,
 						],
 					] );
