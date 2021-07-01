@@ -20,6 +20,7 @@ use Composer\IO\BufferIO;
 use Composer\IO\IOInterface;
 use Composer\Json\JsonFile;
 use Composer\Package\BasePackage;
+use Composer\Package\CompletePackageInterface;
 use Composer\Package\Dumper\ArrayDumper;
 use Composer\Package\PackageInterface;
 use Composer\Semver\VersionParser;
@@ -95,7 +96,7 @@ class ComposerClient implements Client {
 		$packagesFilter = ! empty( $args['packages'] ) ? $args['packages'] : [];
 		$repositoryUrl  = ! empty( $args['repository-url'] ) ? $args['repository-url'] : null;
 		$skipErrors     = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
-		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : get_temp_dir();
+		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : rtrim( \get_temp_dir(), '/' );
 
 		if ( null !== $repositoryUrl && count( $packagesFilter ) > 0 ) {
 			throw new \InvalidArgumentException( 'The arguments "package" and "repository-url" can not be used together.' );
@@ -176,7 +177,7 @@ class ComposerClient implements Client {
 		$packagesFilter = ! empty( $args['packages'] ) ? $args['packages'] : [];
 		$repositoryUrl  = ! empty( $args['repository-url'] ) ? $args['repository-url'] : null;
 		$skipErrors     = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
-		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : get_temp_dir();
+		$outputDir      = ! empty( $args['output-dir'] ) ? $args['output-dir'] : rtrim( \get_temp_dir(), '/' );
 
 		if ( null !== $repositoryUrl && count( $packagesFilter ) > 0 ) {
 			throw new \InvalidArgumentException( 'The arguments "package" and "repository-url" can not be used together.' );
@@ -192,13 +193,13 @@ class ComposerClient implements Client {
 	}
 
 	/**
-	 * @param PackageInterface $package
-	 * @param array            $args Composer config args.
+	 * @param CompletePackageInterface $package
+	 * @param array                    $args Composer config args.
 	 *
 	 * @throws \Exception
 	 * @return string The patch to the package archive.
 	 */
-	public function archivePackage( PackageInterface $package, array $args = [] ): string {
+	public function archivePackage( CompletePackageInterface $package, array $args = [] ): string {
 		// load auth.json authentication information and pass it to the io interface
 		$io = $this->getIO();
 		$io->loadConfiguration( $this->getConfiguration() );
@@ -212,7 +213,7 @@ class ComposerClient implements Client {
 		}
 
 		$skipErrors = ! empty( $args['skip-errors'] ) ? $args['skip-errors'] : false;
-		$outputDir  = ! empty( $args['output-dir'] ) ? $args['output-dir'] : get_temp_dir();
+		$outputDir  = ! empty( $args['output-dir'] ) ? $args['output-dir'] : sys_get_temp_dir() . '/composer_archiver' . uniqid();
 
 		$composer = $this->getComposer( $config );
 
@@ -299,6 +300,10 @@ class ComposerClient implements Client {
 			$config['ignore-platform-reqs'] = $args['ignore-platform-reqs'];
 		}
 
+		if ( isset( $args['archive'] ) ) {
+			$config['archive'] = $args['archive'];
+		}
+
 		return apply_filters( 'pixelgradelt_records/composer_client_config_parse_args', $config, $args, $originalConfig );
 	}
 
@@ -317,6 +322,11 @@ class ComposerClient implements Client {
 			'prefer-lowest' => false,
 			// This is the default Composer config to pass when initializing Composer.
 			'config'        => [],
+			'archive'       => [
+				'directory' => '',
+				//				'absolute-directory' => '/path',
+				'rearchive' => true,
+			],
 		];
 
 		// If we are in a local/development environment, relax further.

@@ -360,6 +360,6 @@ class Archiver {
 	 * @return string
 	 */
 	protected function get_absolute_path_to_tmpdir( string $path = '' ): string {
-		return get_temp_dir() . 'pixelgradelt_records/' . ltrim( $path, '/' );
+		return \trailingslashit( \get_temp_dir() ) . 'pixelgradelt_records/' . ltrim( $path, '/' );
 	}
 }

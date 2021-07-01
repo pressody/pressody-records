@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\Transformer;
 
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\PackageTypes;
 use Psr\Log\LoggerInterface;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Package;
@@ -144,8 +145,14 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 			if ( ! empty( $meta['require_ltpackages'] ) ) {
 				$require = array_merge( $require, $this->composer_transformer->transform_dependency_packages( $meta['require_ltpackages'] ) );
 			}
-			// We want to enforce a certain composer/installers require.
-			$require = array_merge( $require, [ 'composer/installers' => '^1.0', ] );
+
+			if ( PackageTypes::WPCORE === $package->get_type() ) {
+				// We want to enforce a certain roots/wordpress-core-installer require.
+				$require = array_merge( $require, [ 'roots/wordpress-core-installer' => '>=1.0.0', ] );
+			} else {
+				// For all other package types, we want to enforce a certain composer/installers require.
+				$require = array_merge( $require, [ 'composer/installers' => '^1.10', ] );
+			}
 
 			// Finally, allow others to have a say.
 			$require = apply_filters( 'pixelgradelt_records/composer_package_require', $require, $package, $release );

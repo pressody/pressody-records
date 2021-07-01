@@ -28,6 +28,7 @@ use WP_REST_Server;
 use WP_Http as HTTP;
 use function PixelgradeLT\Records\get_packages_permalink;
 use function PixelgradeLT\Records\is_debug_mode;
+use function PixelgradeLT\Records\is_dev_url;
 use function PixelgradeLT\Records\plugin;
 
 /**
@@ -992,7 +993,7 @@ class CompositionsController extends WP_REST_Controller {
 					'url'     => get_packages_permalink( [ 'base' => true ] ),
 					'options' => [
 						'ssl' => [
-							'verify_peer' => ! is_debug_mode(),
+							'verify_peer' => ! ( is_debug_mode() || is_dev_url( get_packages_permalink( [ 'base' => true ] ) ) ),
 						],
 					],
 				],
@@ -1003,15 +1004,15 @@ class CompositionsController extends WP_REST_Controller {
 				],
 			],
 			'require'           => [
-				'php'                      => '>=7.1',
-				'ext-json'                 => '*',
-				'composer/installers'      => '^1.10',
-				'vlucas/phpdotenv'         => '^5.3',
-				'oscarotero/env'           => '^2.1',
-				'roots/bedrock-autoloader' => '^1.0',
-				'roots/wordpress'          => '^5.7',
-				'roots/wp-config'          => '1.0.0',
-				'roots/wp-password-bcrypt' => '1.0.0',
+				'php'                             => '>=7.1',
+				'ext-json'                        => '*',
+				'vlucas/phpdotenv'                => '^5.3',
+				'oscarotero/env'                  => '^2.1',
+				'roots/bedrock-autoloader'        => '^1.0',
+				'roots/bedrock-disallow-indexing' => '^2.0',
+				'roots/wordpress'                 => '*',
+				'roots/wp-config'                 => '1.0.0',
+				'roots/wp-password-bcrypt'        => '1.0.0',
 			],
 			'require-dev'       => [
 				'squizlabs/php_codesniffer' => '^3.5.8',
@@ -1024,12 +1025,15 @@ class CompositionsController extends WP_REST_Controller {
 			'minimum-stability' => 'dev',
 			'prefer-stable'     => true,
 			'extra'             => [
+				// @see https://packagist.org/packages/composer/installers
 				'installer-paths'       => [
 					'web/app/mu-plugins/{$name}/' => [ 'type:wordpress-muplugin' ],
 					'web/app/plugins/{$name}/'    => [ 'type:wordpress-plugin' ],
 					'web/app/themes/{$name}/'     => [ 'type:wordpress-theme' ],
 				],
+				// @see https://packagist.org/packages/roots/wordpress-core-installer
 				'wordpress-install-dir' => 'web/wp',
+				// LT Composition version
 				self::VERSION_KEY       => 1,
 			],
 			'scripts'           => [

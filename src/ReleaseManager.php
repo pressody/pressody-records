@@ -193,7 +193,17 @@ class ReleaseManager {
 				if ( ! empty( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] ) ) {
 					$loader           = new ArrayLoader();
 					$composer_package = $loader->load( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] );
-					$filename         = $client->archivePackage( $composer_package );
+					$filename         = $client->archivePackage( $composer_package, [
+						'archive' => [
+							// What directory to use as temporary directory.
+							'absolute-directory' => sys_get_temp_dir() . '/composer_archiver' . uniqid(),
+							// Keep the dist type our package specifies, not the one in the source.
+							'override-dist-type' => false,
+							// Whether to do a Composer install and archive the contents, or to use the provided dist archive.
+							// Right now we don't want to rearchive since there are some issues with Composer and dynamic temp_dir paths.
+							'rearchive' => false,
+						],
+					] );
 				} else {
 					throw InvalidReleaseSource::missingSourceCachedPackage( $release );
 				}

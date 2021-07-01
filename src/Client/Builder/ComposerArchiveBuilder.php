@@ -17,6 +17,7 @@ use Composer\Composer;
 use Composer\Downloader\DownloadManager;
 use Composer\Package\Archiver\ArchiveManager;
 use Composer\Package\CompletePackage;
+use Composer\Package\CompletePackageInterface;
 use Composer\Package\PackageInterface;
 use Composer\Util\Filesystem;
 
@@ -84,17 +85,17 @@ class ComposerArchiveBuilder extends ComposerBuilder {
 	}
 
 	/**
-	 * @param PackageInterface $package
+	 * @param CompletePackageInterface $package
 	 *
 	 * @throws \Exception
 	 * @return string The path to the package archive.
 	 */
-	public function dumpPackage( PackageInterface $package ): string {
+	public function dumpPackage( CompletePackageInterface $package ): string {
 		$helper  = new ComposerArchiveBuilderHelper( $this->output, $this->config['archive'] );
 		$basedir = $helper->getDirectory( $this->outputDir );
 		$this->output->write( sprintf( "<info>Creating local downloads in '%s'</info>", $basedir ) );
-		$downloadManager        = $this->composer->getDownloadManager();
-		$archiveManager         = $this->composer->getArchiveManager();
+		$downloadManager = $this->composer->getDownloadManager();
+		$archiveManager  = $this->composer->getArchiveManager();
 		$archiveManager->setOverwriteFiles( false );
 
 		$this->output->write(
@@ -114,8 +115,8 @@ class ComposerArchiveBuilder extends ComposerBuilder {
 				throw new \RuntimeException( 'The PEAR repository has been removed from Composer 2.0' );
 			}
 
-			$targetDir     = sprintf( '%s/%s', $basedir, $intermediatePath );
-			$path          = $this->archive( $downloadManager, $archiveManager, $package, $targetDir );
+			$targetDir = sprintf( '%s/%s', $basedir, $intermediatePath );
+			$path      = $this->archive( $downloadManager, $archiveManager, $package, $targetDir );
 		} catch ( \Exception $exception ) {
 			if ( ! $this->skipErrors ) {
 				throw $exception;
@@ -133,14 +134,15 @@ class ComposerArchiveBuilder extends ComposerBuilder {
 	}
 
 	/**
-	 * @param DownloadManager  $downloadManager
-	 * @param ArchiveManager   $archiveManager
-	 * @param PackageInterface $package
-	 * @param string           $targetDir
+	 * @param DownloadManager          $downloadManager
+	 * @param ArchiveManager           $archiveManager
+	 * @param CompletePackageInterface $package
+	 * @param string                   $targetDir
 	 *
+	 * @throws \Exception
 	 * @return string
 	 */
-	private function archive( DownloadManager $downloadManager, ArchiveManager $archiveManager, PackageInterface $package, string $targetDir ): string {
+	private function archive( DownloadManager $downloadManager, ArchiveManager $archiveManager, CompletePackageInterface $package, string $targetDir ): string {
 		$format           = (string) ( $this->config['archive']['format'] ?? 'zip' );
 		$ignoreFilters    = (bool) ( $this->config['archive']['ignore-filters'] ?? false );
 		$overrideDistType = (bool) ( $this->config['archive']['override-dist-type'] ?? false );
@@ -174,14 +176,24 @@ class ComposerArchiveBuilder extends ComposerBuilder {
 				return $path;
 			}
 
+			// This is not used right now, that is why we rely on the download result.
 			$downloadDir = sys_get_temp_dir() . '/composer_archiver' . uniqid();
 			$filesystem->ensureDirectoryExists( $downloadDir );
 			$downloader = $downloadManager->getDownloader( 'file' );
-			$downloader->download( $package, $downloadDir );
+			try {
+				$result = $downloader->download( $package, $downloadDir );
+				$this->composer->getLoop()->wait( array( $result ) );
+			} catch ( \Exception $e ) {
+				$filesystem->removeDirectory( $downloadDir );
+				throw  $e;
+			}
 
 			$filesystem->ensureDirectoryExists( dirname( $path ) );
-			$filesystem->rename( $downloadDir . '/' . pathinfo( $package->getDistUrl(), PATHINFO_BASENAME ), $path );
+			$result->then( function ( $tmp_path ) use ( $filesystem, $path ) {
+				$filesystem->rename( $tmp_path, $path );
+			} );
 			$filesystem->removeDirectory( $downloadDir );
+			$downloader->cleanup( 'download', $package, $downloadDir );
 
 			return $path;
 		}
