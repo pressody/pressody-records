@@ -13,6 +13,7 @@ namespace PixelgradeLT\Records;
 
 use Composer\Json\JsonFile;
 use Composer\Package\Loader\ArrayLoader;
+use Composer\Util\Filesystem;
 use PixelgradeLT\Records\Client\ComposerClient;
 use PixelgradeLT\Records\Exception\FileNotFound;
 use PixelgradeLT\Records\Exception\FileOperationFailed;
@@ -193,10 +194,11 @@ class ReleaseManager {
 				if ( ! empty( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] ) ) {
 					$loader           = new ArrayLoader();
 					$composer_package = $loader->load( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] );
+					$tmp_dir = sys_get_temp_dir() . '/composer_archiver' . uniqid();
 					$filename         = $client->archivePackage( $composer_package, [
 						'archive' => [
 							// What directory to use as temporary directory.
-							'absolute-directory' => sys_get_temp_dir() . '/composer_archiver' . uniqid(),
+							'absolute-directory' => $tmp_dir,
 							// Keep the dist type our package specifies, not the one in the source.
 							'override-dist-type' => false,
 							// Whether to do a Composer install and archive the contents, or to use the provided dist archive.
@@ -204,21 +206,37 @@ class ReleaseManager {
 							'rearchive' => false,
 						],
 					] );
+
+					// Move the downloaded file to its storage resting place.
+					if ( ! $this->storage->move( $filename, $release->get_file_path() ) ) {
+						throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
+					}
+
+					// Cleanup the tmp dir.
+					$filesystem = new Filesystem();
+					$filesystem->removeDirectory( $tmp_dir );
+
 				} else {
 					throw InvalidReleaseSource::missingSourceCachedPackage( $release );
 				}
 			} else {
 				// Otherwise, use the regular WordPress download logic.
 				$filename = $this->archiver->archive_from_url( $release );
+
+				// Move the downloaded file to its storage resting place.
+				if ( ! $this->storage->move( $filename, $release->get_file_path() ) ) {
+					throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
+				}
 			}
 		} elseif ( $parent_package instanceof LocalBasePackage && $parent_package->is_installed() && $parent_package->is_installed_release( $release ) ) {
 			$filename = $this->archiver->archive_from_source( $parent_package, $release->get_version() );
+
+			// Move the downloaded file to its storage resting place.
+			if ( ! $this->storage->move( $filename, $release->get_file_path() ) ) {
+				throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
+			}
 		} else {
 			throw InvalidReleaseSource::forRelease( $release );
-		}
-
-		if ( ! $this->storage->move( $filename, $release->get_file_path() ) ) {
-			throw FileOperationFailed::unableToMoveReleaseArtifactToStorage( $filename, $release->get_file_path() );
 		}
 
 		// We have safely stored the release.

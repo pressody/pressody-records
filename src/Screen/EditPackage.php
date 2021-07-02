@@ -238,7 +238,7 @@ class EditPackage extends AbstractHookProvider {
 		// Just output it since there is no way to add it other way. ?>
 		<p class="description">
 			<?php _e( '<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong> It is best to use <strong>the exact plugin or theme slug!</strong><br>
-Of equal importance is the fact that Composer will use the slug/name as <strong>the directory for the package files</strong> (i.e. <code>wp-content/plugins/slug</code>)!<br>
+Of equal importance is the fact that Composer will use the slug(name) as <strong>the directory for the package files</strong> (i.e. <code>wp-content/plugins/slug</code>), regardless of the directory name in the .zip file!<br>
 In the end, the slug will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>
 The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href="https://regexr.com/5sr9h" target="_blank">this regex</a>', 'pixelgradelt_records' ); ?>
 		</p>

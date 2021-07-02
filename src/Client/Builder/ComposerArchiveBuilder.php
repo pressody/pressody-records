@@ -190,6 +190,7 @@ class ComposerArchiveBuilder extends ComposerBuilder {
 
 			$filesystem->ensureDirectoryExists( dirname( $path ) );
 			$result->then( function ( $tmp_path ) use ( $filesystem, $path ) {
+				// Move the file to its final location.
 				$filesystem->rename( $tmp_path, $path );
 			} );
 			$filesystem->removeDirectory( $downloadDir );

@@ -56,7 +56,7 @@ class EditPart extends EditPackage {
 		// Just output it since there is no way to add it other way. ?>
 		<p class="description">
 			<?php _e( '<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong><br>
-Of equal importance is the fact that Composer will use the slug/name as <strong>the directory for the part\'s plugin files</strong> (i.e. <code>wp-content/plugins/slug</code>)!<br>
+Of equal importance is the fact that Composer will use the slug(name) as <strong>the directory for the part\'s plugin files</strong> (i.e. <code>wp-content/plugins/slug</code>), regardless of the directory name in the .zip file!<br>
 In the end this will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>
 <strong>The slug/name must be</strong> lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href="https://regexr.com/5sr9h" target="_blank">this regex</a>.<br>
 <em>Note: Add the <code>' . static::SLUG_PREFIX . '</code> prefix or <strong>it will be added automatically</strong> on update! This intends to separate part names from packages names.</em>', 'pixelgradelt_records' ); ?>
