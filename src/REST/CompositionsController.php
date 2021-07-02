@@ -79,6 +79,15 @@ class CompositionsController extends WP_REST_Controller {
 	const VERSION_KEY = 'lt-version';
 
 	/**
+	 * The version to be used for new compositions and to upgrade older ones.
+	 *
+	 * @since 0.11.0
+	 *
+	 * @var string
+	 */
+	const COMPOSITION_VERSION = '1.1.0';
+
+	/**
 	 * Package repository.
 	 *
 	 * @since 0.10.0
@@ -363,7 +372,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param array $new_details The new composition details.
 		 * @param array $composition The full composition details.
 		 */
-		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', [], $composition );
+		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', $this->get_default_new_details( $composition ), $composition );
 		if ( is_wp_error( $new_details ) ) {
 			$message = esc_html__( 'Your attempt to refresh the composition was rejected. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
 			$message .= implode( ' ; ' . PHP_EOL, $new_details->get_error_messages() );
@@ -371,7 +380,10 @@ class CompositionsController extends WP_REST_Controller {
 			return new WP_Error(
 				'rest_rejected_refresh',
 				$message,
-				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
+				[
+					'status' => HTTP::NOT_ACCEPTABLE,
+					$new_details->get_error_code() => $new_details->get_error_data(),
+				]
 			);
 		} elseif ( false === $new_details ) {
 			return new WP_Error(
@@ -458,8 +470,9 @@ class CompositionsController extends WP_REST_Controller {
 		// Before adding the encrypted user details, allow a third-party check.
 		// We don't want to add data that is later found to be invalid.
 		if ( isset( $new_details['user'] )
-		     && isset( $composition['extra'][ self::USER_DETAILS_KEY ] )
-		     && $composition['extra'][ self::USER_DETAILS_KEY ] !== $new_details['user'] ) {
+		     && ( ! isset( $composition['extra'][ self::USER_DETAILS_KEY ] )
+		        || $composition['extra'][ self::USER_DETAILS_KEY ] !== $new_details['user'] )
+		) {
 
 			// We will validate only if we are given a non-empty string.
 			// If we are given another value, we will just write it. Others should know better about what they are doing.
@@ -546,7 +559,7 @@ class CompositionsController extends WP_REST_Controller {
 		];
 
 		// All the allowed properties.
-		$allowed = $overwrite + $merge;
+		$allowed = array_unique( array_merge( $overwrite, $merge ) );
 
 		foreach ( $composer_config as $property => $value ) {
 			if ( ! in_array( $property, $allowed ) ) {
@@ -631,7 +644,13 @@ class CompositionsController extends WP_REST_Controller {
 
 		// For not, we are only interested in the package name and will remove it regardless of version constraints.
 		foreach ( $remove_packages as $package_details ) {
-			if ( empty( $package_details['name'] ) || ! isset( $composition['require'][ $package_details['name'] ] ) ) {
+			if ( is_string( $package_details ) ) {
+				$package_details = [
+					'name' => $package_details,
+				];
+			}
+
+			if ( ! is_array( $package_details ) || empty( $package_details['name'] ) || ! isset( $composition['require'][ $package_details['name'] ] ) ) {
 				continue;
 			}
 
@@ -1009,7 +1028,6 @@ class CompositionsController extends WP_REST_Controller {
 				'vlucas/phpdotenv'                => '^5.3',
 				'oscarotero/env'                  => '^2.1',
 				'roots/bedrock-autoloader'        => '^1.0',
-				'roots/bedrock-disallow-indexing' => '^2.0',
 				'roots/wordpress'                 => '*',
 				'roots/wp-config'                 => '1.0.0',
 				'roots/wp-password-bcrypt'        => '1.0.0',
@@ -1034,7 +1052,7 @@ class CompositionsController extends WP_REST_Controller {
 				// @see https://packagist.org/packages/roots/wordpress-core-installer
 				'wordpress-install-dir' => 'web/wp',
 				// LT Composition version
-				self::VERSION_KEY       => 1,
+				self::VERSION_KEY       => self::COMPOSITION_VERSION,
 			],
 			'scripts'           => [
 				'post-root-package-install' => [
@@ -1045,6 +1063,34 @@ class CompositionsController extends WP_REST_Controller {
 				],
 			],
 		];
+	}
+
+	/**
+	 * We will use these default new composition details to update past compositions and keep up with our development,
+	 * especially changes related to our WPSite Starter (https://github.com/pixelgradelt/wpsite-starter).
+	 *
+	 * @since 0.11.0
+	 *
+	 * @param array $composition
+	 *
+	 * @return array
+	 */
+	protected function get_default_new_details( array $composition ): array {
+		$default = [
+			'composer' => [],
+			'remove' => [],
+			'require' => [],
+		];
+
+		if ( isset( $composition['extra'][ self::VERSION_KEY ] ) && \version_compare( (string) $composition['extra'][ self::VERSION_KEY ], '1.1.0', '<' ) ) {
+			// Remove some packages.
+			$default['remove'][] = 'roots/bedrock-disallow-indexing';
+
+			// Update the version.
+			$default['composer']['extra'][ self::VERSION_KEY ] = '1.1.0';
+		}
+
+		return $default;
 	}
 
 	/**

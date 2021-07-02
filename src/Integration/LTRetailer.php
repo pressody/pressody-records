@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\Integration;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use PixelgradeLT\Records\Utils\ArrayHelpers;
 use function PixelgradeLT\Records\get_setting;
 use function PixelgradeLT\Records\is_debug_mode;
 use function PixelgradeLT\Records\is_dev_url;
@@ -98,7 +99,7 @@ class LTRetailer extends AbstractHookProvider {
 		];
 		// Add the data we received from LT Retailer.
 		$error['data'] = [
-			'ltretailer' => [
+			'ltretailer_response' => [
 				'code'    => $response_body['code'] ?? '',
 				'message' => $response_body['message'] ?? '',
 				'data'    => $response_body['data'] ?? '',
@@ -168,7 +169,7 @@ class LTRetailer extends AbstractHookProvider {
 			];
 			// Add the data we received from LT Retailer.
 			$error['data'] = [
-				'ltretailer' => [
+				'ltretailer_response' => [
 					'code'    => $response_body['code'] ?? '',
 					'message' => $response_body['message'] ?? '',
 					'data'    => $response_body['data'] ?? '',
@@ -186,7 +187,7 @@ class LTRetailer extends AbstractHookProvider {
 		}
 
 		// We have some details to update, in the response body
-		return $response_body;
+		return ArrayHelpers::array_merge_recursive_distinct( $new_details, $response_body );
 	}
 
 	/**
