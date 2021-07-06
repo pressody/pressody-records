@@ -28,8 +28,8 @@ use WP_Http as HTTP;
  */
 class LTRetailer extends AbstractHookProvider {
 
-	const LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_USER_PARTIAL = 'check_user_details';
-	const LTRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL = 'details_to_update';
+	const LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_LTDETAILS_PARTIAL = 'check_ltdetails';
+	const LTRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL = 'instructions_to_update';
 
 	const LTRETAILER_API_PWD = 'pixelgradelt_retailer';
 
@@ -37,22 +37,22 @@ class LTRetailer extends AbstractHookProvider {
 	 * Register hooks.
 	 */
 	public function register_hooks() {
-		$this->add_filter( 'pixelgradelt_records/validate_encrypted_user_details', 'validate_encrypted_user_details', 10, 3 );
-		$this->add_filter( 'pixelgradelt_records/composition_new_details', 'composition_new_details', 10, 2 );
+		$this->add_filter( 'pixelgradelt_records/validate_encrypted_ltdetails', 'validate_encrypted_ltdetails', 10, 3 );
+		$this->add_filter( 'pixelgradelt_records/composition_instructions_to_update', 'composition_instructions_to_update', 10, 2 );
 	}
 
 	/**
-	 * Validate the encrypted user details with LT Retailer.
+	 * Validate the encrypted composition LT details with LT Retailer.
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param bool|\WP_Error $valid                  Whether the user details are valid.
-	 * @param string         $encrypted_user_details Encrypted LT user details.
-	 * @param array          $composition            The full composition details.
+	 * @param bool|\WP_Error $valid               Whether the LT details are valid.
+	 * @param string         $encrypted_ltdetails Encrypted composition LT details.
+	 * @param array          $composition         The full composition data.
 	 *
 	 * @return bool|\WP_Error
 	 */
-	protected function validate_encrypted_user_details( $valid, string $encrypted_user_details, array $composition ) {
+	protected function validate_encrypted_ltdetails( $valid, string $encrypted_ltdetails, array $composition ) {
 		// Don't do anything if we have a WP_Error.
 		if ( is_wp_error( $valid ) ) {
 			return $valid;
@@ -63,8 +63,8 @@ class LTRetailer extends AbstractHookProvider {
 			return $valid;
 		}
 
-		// Make the check user details request to LT Retailer.
-		$url          = path_join( get_setting( 'ltretailer-compositions-root-endpoint' ), self::LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_USER_PARTIAL );
+		// Make the check LT details request to LT Retailer.
+		$url          = path_join( get_setting( 'ltretailer-compositions-root-endpoint' ), self::LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_LTDETAILS_PARTIAL );
 		$request_args = [
 			'headers'   => [
 				'Authorization' => 'Basic ' . base64_encode( get_setting( 'ltretailer-api-key' ) . ':' . self::LTRETAILER_API_PWD ),
@@ -72,8 +72,8 @@ class LTRetailer extends AbstractHookProvider {
 			'timeout'   => 5,
 			'sslverify' => ! ( is_debug_mode() || is_dev_url( $url ) ),
 			'body'      => [
-				'user'     => $encrypted_user_details,
-				'composer' => $composition,
+				'ltdetails' => $encrypted_ltdetails,
+				'composer'  => $composition,
 			],
 		];
 
@@ -92,8 +92,8 @@ class LTRetailer extends AbstractHookProvider {
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		$error            = [];
-		$error['code']    = 'ltretailer_invalid_user_details';
-		$error['message'] = esc_html__( 'Sorry, LT Retailer didn\'t validate the encrypted user details.', 'pixelgradelt_records' );
+		$error['code']    = 'ltretailer_invalid_ltdetails';
+		$error['message'] = esc_html__( 'Sorry, LT Retailer didn\'t validate the composition\'s encrypted LT details.', 'pixelgradelt_records' );
 		$error['data']    = [
 			'status' => HTTP::NOT_ACCEPTABLE,
 		];
@@ -114,27 +114,27 @@ class LTRetailer extends AbstractHookProvider {
 	}
 
 	/**
-	 * Maybe update the composition's details by LT Retailer.
+	 * Maybe get instructions to update the composition from LT Retailer.
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param false|array $new_details            The new composition details.
-	 * @param array       $composition            The full composition details.
+	 * @param false|array $instructions_to_update The instructions to update the composition by.
+	 * @param array       $composition            The full composition data.
 	 *
 	 * @return false|\WP_Error|array
 	 */
-	protected function composition_new_details( $new_details, array $composition ) {
+	protected function composition_instructions_to_update( $instructions_to_update, array $composition ) {
 		// Don't do anything if we have a false or WP_Error value.
-		if ( false === $new_details || is_wp_error( $new_details ) ) {
-			return $new_details;
+		if ( false === $instructions_to_update || is_wp_error( $instructions_to_update ) ) {
+			return $instructions_to_update;
 		}
 
 		// Don't do anything if we don't have the needed settings.
 		if ( ! $this->check_settings() ) {
-			return $new_details;
+			return $instructions_to_update;
 		}
 
-		// Make the check user details request to LT Retailer.
+		// Check the composition's LT details with LT Retailer.
 		$url          = path_join( get_setting( 'ltretailer-compositions-root-endpoint' ), self::LTRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL );
 		$request_args = [
 			'headers'   => [
@@ -151,19 +151,19 @@ class LTRetailer extends AbstractHookProvider {
 		$response = wp_remote_post( $url, $request_args );
 		if ( is_wp_error( $response ) ) {
 			// Something went wrong with the request. Bail.
-			return $new_details;
+			return $instructions_to_update;
 		}
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( HTTP::NO_CONTENT === $response_code ) {
 			// Nothing to update according to LT Retailer.
-			return $new_details;
+			return $instructions_to_update;
 		}
 
 		if ( $response_code >= HTTP::BAD_REQUEST ) {
 			$error            = [];
-			$error['code']    = 'ltretailer_composition_new_details_error';
-			$error['message'] = esc_html__( 'Sorry, LT Retailer didn\'t provide composition update details due to some errors.', 'pixelgradelt_records' );
+			$error['code']    = 'ltretailer_composition_instructions_to_update_error';
+			$error['message'] = esc_html__( 'Sorry, LT Retailer didn\'t provide composition update instructions due to some errors.', 'pixelgradelt_records' );
 			$error['data']    = [
 				'status' => HTTP::NOT_ACCEPTABLE,
 			];
@@ -183,11 +183,11 @@ class LTRetailer extends AbstractHookProvider {
 			);
 		} elseif ( $response_code !== HTTP::OK ) {
 			// Bail.
-			return $new_details;
+			return $instructions_to_update;
 		}
 
-		// We have some details to update, in the response body
-		return ArrayHelpers::array_merge_recursive_distinct( $new_details, $response_body );
+		// We have some instructions to update, in the response body
+		return ArrayHelpers::array_merge_recursive_distinct( $instructions_to_update, $response_body );
 	}
 
 	/**

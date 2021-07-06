@@ -10,7 +10,7 @@
  * Plugin Name: PixelgradeLT Records
  * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-records
  * Description: Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.
- * Version: 0.10.0
+ * Version: 0.11.0
  * Author: Pixelgrade
  * Author URI: https://pixelgrade.com/
  * License: GPL-2.0-or-later
@@ -37,7 +37,7 @@ if ( ! \defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-const VERSION = '0.10.0';
+const VERSION = '0.11.0';
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {

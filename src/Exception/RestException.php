@@ -50,7 +50,7 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 	}
 
 	/**
-	 * Create an exception for invalid composer.json LT user details.
+	 * Create an exception for invalid composer.json LT details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -59,20 +59,20 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 	 *
 	 * @return RestException
 	 */
-	public static function forInvalidComposerUserDetails(
+	public static function forInvalidCompositionLTDetails(
 		string $message = '',
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
 		if ( empty( $message ) ) {
-			$message = esc_html__( 'The provided composer JSON data has invalid LT user details.', 'pixelgradelt_records' );
+			$message = esc_html__( 'The provided composer JSON data has invalid LT details.', 'pixelgradelt_records' );
 		}
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
 
 	/**
-	 * Create an exception for missing composer.json LT user details.
+	 * Create an exception for missing composer.json LT details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -81,11 +81,11 @@ class RestException extends \Exception implements PixelgradeltRecordsException {
 	 *
 	 * @return RestException
 	 */
-	public static function forMissingComposerUserDetails(
+	public static function forMissingCompositionLTDetails(
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'The provided composer JSON data is missing some LT user details.', 'pixelgradelt_records' );
+		$message = esc_html__( 'The provided composer JSON data is missing some LT details.', 'pixelgradelt_records' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}

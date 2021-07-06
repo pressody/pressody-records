@@ -51,13 +51,13 @@ class CompositionsController extends WP_REST_Controller {
 	const PACKAGE_NAME_PATTERN = '^[a-z0-9]([_.-]?[a-z0-9]+)*/[a-z0-9](([_.]?|-{0,2})[a-z0-9]+)*$';
 
 	/**
-	 * The key in composer.json `extra` used to store the encrypted user details.
+	 * The key in composer.json `extra` used to store the encrypted LT details.
 	 *
 	 * @since 0.10.0
 	 *
 	 * @var string
 	 */
-	const USER_DETAILS_KEY = 'lt-user';
+	const LTDETAILS_KEY = 'lt-composition';
 
 	/**
 	 * The key in composer.json `extra` used to store the composer.json fingerprint.
@@ -147,14 +147,14 @@ class CompositionsController extends WP_REST_Controller {
 					'permission_callback' => [ $this, 'create_item_permissions_check' ],
 					'show_in_index'       => false,
 					'args'                => [
-						'context'  => $this->get_context_param( [ 'default' => 'edit' ] ),
-						'user'     => [
-							'description' => esc_html__( 'The encrypted LT user data to attach to the composition.', 'pixelgradelt_records' ),
+						'context'   => $this->get_context_param( [ 'default' => 'edit' ] ),
+						'ltdetails' => [
+							'description' => esc_html__( 'The encrypted composition LT details data to attach to the composition.', 'pixelgradelt_records' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
-						'require'  => [
+						'require'   => [
 							'description' => esc_html__( 'A LT Records packages (actual LT packages or LT parts) list to include in the composition. All packages that don\'t exist will be ignored. These required packages will overwrite the same packages given through the "composer" param.', 'pixelgradelt_records' ),
 							'type'        => 'array',
 							'items'       => [
@@ -177,7 +177,7 @@ class CompositionsController extends WP_REST_Controller {
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],
-						'composer' => [
+						'composer'  => [
 							'type'        => 'object',
 							'description' => esc_html__( 'composer.json project (root) properties according to the Composer 2.0 JSON schema. The "repositories", "require", "require-dev", "config", "extra","scripts" root-properties will be merged. The rest will overwrite existing properties.', 'pixelgradelt_records' ),
 							'default'     => [],
@@ -348,11 +348,11 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		// Third, check if we have the encrypted user details.
-		if ( empty( $composition['extra'][ self::USER_DETAILS_KEY ] ) ) {
+		// Third, check if we have the encrypted LT details.
+		if ( empty( $composition['extra'][ self::LTDETAILS_KEY ] ) ) {
 			return new WP_Error(
 				'rest_missing_lt_user',
-				esc_html__( 'The provided composer JSON data is missing the LT user details.', 'pixelgradelt_records' ),
+				esc_html__( 'The provided composer JSON data is missing the LT details.', 'pixelgradelt_records' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		}
@@ -361,7 +361,7 @@ class CompositionsController extends WP_REST_Controller {
 		// Proceed to determine if we need to update something to it.
 
 		/**
-		 * Provide new composition details that we should update.
+		 * Provide instructions to update the composition by.
 		 *
 		 * @since 0.10.0
 		 *
@@ -370,23 +370,23 @@ class CompositionsController extends WP_REST_Controller {
 		 * Return an empty array if we should leave the composition unchanged.
 		 * Return false or WP_Error if we should reject the refresh and error out.
 		 *
-		 * @param array $new_details The new composition details.
-		 * @param array $composition The full composition details.
+		 * @param array $instructions_to_update The instructions to update the composition by.
+		 * @param array $composition            The full composition data.
 		 */
-		$new_details = apply_filters( 'pixelgradelt_records/composition_new_details', $this->get_default_new_details( $composition ), $composition );
-		if ( is_wp_error( $new_details ) ) {
+		$instructions_to_update = apply_filters( 'pixelgradelt_records/composition_instructions_to_update', $this->get_default_instructions_to_update( $composition ), $composition );
+		if ( is_wp_error( $instructions_to_update ) ) {
 			$message = esc_html__( 'Your attempt to refresh the composition was rejected. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
-			$message .= implode( ' ; ' . PHP_EOL, $new_details->get_error_messages() );
+			$message .= implode( ' ; ' . PHP_EOL, $instructions_to_update->get_error_messages() );
 
 			return new WP_Error(
 				'rest_rejected_refresh',
 				$message,
 				[
-					'status' => HTTP::NOT_ACCEPTABLE,
-					$new_details->get_error_code() => $new_details->get_error_data(),
+					'status'                                  => HTTP::NOT_ACCEPTABLE,
+					$instructions_to_update->get_error_code() => $instructions_to_update->get_error_data(),
 				]
 			);
-		} elseif ( false === $new_details ) {
+		} elseif ( false === $instructions_to_update ) {
 			return new WP_Error(
 				'rest_rejected_refresh',
 				esc_html__( 'Your attempt to refresh the composition was rejected.', 'pixelgradelt_records' ),
@@ -394,7 +394,7 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		if ( ! is_array( $new_details ) || empty( $new_details ) ) {
+		if ( ! is_array( $instructions_to_update ) || empty( $instructions_to_update ) ) {
 			// There is nothing to update to the received composition. Respond accordingly.
 			$response = rest_ensure_response( [] );
 			$response->set_status( HTTP::NO_CONTENT );
@@ -404,7 +404,7 @@ class CompositionsController extends WP_REST_Controller {
 
 		// We have work to do.
 		try {
-			$updatedComposition = $this->update_composition( $composition, $new_details );
+			$updatedComposition = $this->update_composition( $composition, $instructions_to_update );
 		} catch ( RestException $e ) {
 			return new WP_Error(
 				'rest_update_composition_errors',
@@ -434,8 +434,8 @@ class CompositionsController extends WP_REST_Controller {
 
 		// If the updated composition and the initial composition have the same fingerprint it means that nothing was updated.
 		// Respond accordingly.
-		if ( ! empty( $composition['extra'][self::FINGERPRINT_KEY] )
-		     && $updatedCompositionObject->extra->{self::FINGERPRINT_KEY} === $composition['extra'][self::FINGERPRINT_KEY] ) {
+		if ( ! empty( $composition['extra'][ self::FINGERPRINT_KEY ] )
+		     && $updatedCompositionObject->extra->{self::FINGERPRINT_KEY} === $composition['extra'][ self::FINGERPRINT_KEY ] ) {
 
 			$response = rest_ensure_response( [] );
 			$response->set_status( HTTP::NO_CONTENT );
@@ -448,73 +448,73 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Update composition properties.
+	 * Update composition by instructions.
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $composition The current composition details.
-	 * @param array $new_details The new composition details.
+	 * @param array $composition  The current composition data.
+	 * @param array $instructions The instructions to update the composition by.
 	 *
 	 * @throws RestException
 	 * @return array
 	 */
-	protected function update_composition( array $composition, array $new_details ): array {
+	protected function update_composition( array $composition, array $instructions ): array {
 		$initial_composition = $composition;
 
 		// The order below is important!
 
 		// First, add any composer.json properties received.
-		if ( ! empty( $new_details['composer'] ) && is_array( $new_details['composer'] ) ) {
-			$composition = $this->add_composer_properties( $composition, $new_details['composer'] );
+		if ( ! empty( $instructions['composer'] ) && is_array( $instructions['composer'] ) ) {
+			$composition = $this->add_composer_properties( $composition, $instructions['composer'] );
 		}
 
 		// Second, remove required packages, including packages sent through the composer config.
-		if ( ! empty( $new_details['remove'] ) && is_array( $new_details['remove'] ) ) {
-			$composition = $this->remove_required_packages( $composition, $new_details['remove'] );
+		if ( ! empty( $instructions['remove'] ) && is_array( $instructions['remove'] ) ) {
+			$composition = $this->remove_required_packages( $composition, $instructions['remove'] );
 		}
 
 		// Third, add the required LT packages.
-		if ( ! empty( $new_details['require'] ) && is_array( $new_details['require'] ) ) {
-			$composition = $this->add_required_packages( $composition, $new_details['require'] );
+		if ( ! empty( $instructions['require'] ) && is_array( $instructions['require'] ) ) {
+			$composition = $this->add_required_packages( $composition, $instructions['require'] );
 		}
 
-		// We will add the new user details if they are different than what we have.
-		// Before adding the encrypted user details, allow a third-party check.
+		// We will add the new LT details if they are different than what we have.
+		// Before adding the encrypted LT details, allow a third-party check.
 		// We don't want to add data that is later found to be invalid.
-		if ( isset( $new_details['user'] )
-		     && ( ! isset( $composition['extra'][ self::USER_DETAILS_KEY ] )
-		        || $composition['extra'][ self::USER_DETAILS_KEY ] !== $new_details['user'] )
+		if ( isset( $instructions['ltdetails'] )
+		     && ( ! isset( $composition['extra'][ self::LTDETAILS_KEY ] )
+		          || $composition['extra'][ self::LTDETAILS_KEY ] !== $instructions['ltdetails'] )
 		) {
 
 			// We will validate only if we are given a non-empty string.
 			// If we are given another value, we will just write it. Others should know better about what they are doing.
-			if ( ! empty( $new_details['user'] ) && is_string( $new_details['user'] ) ) {
+			if ( ! empty( $instructions['ltdetails'] ) && is_string( $instructions['ltdetails'] ) ) {
 				/**
-				 * Filter the validation of encrypted user details.
+				 * Filter the validation of encrypted LT details.
 				 *
 				 * @since 0.10.0
 				 *
 				 * @see   CompositionsController::update_composition()
 				 *
-				 * Return true if the user details are valid, or a WP_Error in case we should reject them.
+				 * Return true if the composition's LT details are valid, or a WP_Error in case we should reject them.
 				 *
-				 * @param bool   $valid       Whether the user details are valid.
-				 * @param string $encrypted_user_details
-				 * @param array  $composition The current composition details.
+				 * @param bool   $valid       Whether the composition's LT details are valid.
+				 * @param string $encrypted_ltdetails
+				 * @param array  $composition The current composition data.
 				 */
-				$valid = apply_filters( 'pixelgradelt_records/validate_encrypted_user_details', true, $new_details['user'], $composition );
+				$valid = apply_filters( 'pixelgradelt_records/validate_encrypted_ltdetails', true, $instructions['ltdetails'], $composition );
 				if ( is_wp_error( $valid ) ) {
-					$message = esc_html__( 'Third-party checks have found the encrypted LT user details invalid. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
+					$message = esc_html__( 'Third-party checks have found the encrypted LT composition details invalid. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
 					$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
 
-					throw RestException::forInvalidComposerUserDetails( $message );
+					throw RestException::forInvalidCompositionLTDetails( $message );
 				} elseif ( true !== $valid ) {
-					throw RestException::forInvalidComposerUserDetails();
+					throw RestException::forInvalidCompositionLTDetails();
 				}
 			}
 
-			// Now we can add/replace the user details in the composition.
-			$composition = $this->add_user_details( $composition, $new_details );
+			// Now we can add/replace the LT details in the composition.
+			$composition = $this->add_ltdetails( $composition, $instructions );
 		}
 
 		// Update the timestamp
@@ -527,11 +527,11 @@ class CompositionsController extends WP_REST_Controller {
 		 *
 		 * @see   CompositionsController::update_composition()
 		 *
-		 * @param array $composition         The updated composition details.
-		 * @param array $new_details         The composition details to update.
-		 * @param array $initial_composition The initial composition details.
+		 * @param array $composition         The updated composition data.
+		 * @param array $instructions        The composition instructions to update by.
+		 * @param array $initial_composition The initial composition data.
 		 */
-		return apply_filters( 'pixelgradelt_records/update_composition', $composition, $new_details, $initial_composition );
+		return apply_filters( 'pixelgradelt_records/update_composition', $composition, $instructions, $initial_composition );
 	}
 
 	/**
@@ -539,7 +539,7 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $composition     The current composition details.
+	 * @param array $composition     The current composition data.
 	 * @param array $composer_config Composer.json properties.
 	 *
 	 * @return array The updated composition details.
@@ -596,7 +596,7 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $composition      The current composition details.
+	 * @param array $composition      The current composition data.
 	 * @param array $require_packages Package details to require.
 	 *
 	 * @return array The updated composition details.
@@ -647,7 +647,7 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $composition     The current composition details.
+	 * @param array $composition     The current composition data.
 	 * @param array $remove_packages Package details to require.
 	 *
 	 * @return array The updated composition details.
@@ -682,23 +682,23 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Add to the composition the user details available in the request.
+	 * Add to the composition the LT details available in the request.
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $composition The current composition details.
-	 * @param array $data        Data containing user details.
+	 * @param array $composition The current composition data.
+	 * @param array $data
 	 *
-	 * @return array The updated composition details.
+	 * @return array The updated composition data.
 	 */
-	protected function add_user_details( array $composition, array $data ): array {
+	protected function add_ltdetails( array $composition, array $data ): array {
 		if ( empty( $composition['extra'] ) ) {
 			$composition['extra'] = [];
 		}
 
-		// Add the encrypted user details.
-		if ( isset( $data['user'] ) ) {
-			$composition['extra'][ self::USER_DETAILS_KEY ] = $data['user'];
+		// Add the encrypted composition LT details.
+		if ( isset( $data['ltdetails'] ) ) {
+			$composition['extra'][ self::LTDETAILS_KEY ] = $data['ltdetails'];
 		}
 
 		return $composition;
@@ -1038,14 +1038,14 @@ class CompositionsController extends WP_REST_Controller {
 				],
 			],
 			'require'           => [
-				'php'                             => '>=7.1',
-				'ext-json'                        => '*',
-				'vlucas/phpdotenv'                => '^5.3',
-				'oscarotero/env'                  => '^2.1',
-				'roots/bedrock-autoloader'        => '^1.0',
-				'roots/wordpress'                 => '*',
-				'roots/wp-config'                 => '1.0.0',
-				'roots/wp-password-bcrypt'        => '1.0.0',
+				'php'                      => '>=7.1',
+				'ext-json'                 => '*',
+				'vlucas/phpdotenv'         => '^5.3',
+				'oscarotero/env'           => '^2.1',
+				'roots/bedrock-autoloader' => '^1.0',
+				'roots/wordpress'          => '*',
+				'roots/wp-config'          => '1.0.0',
+				'roots/wp-password-bcrypt' => '1.0.0',
 			],
 			'require-dev'       => [
 				'squizlabs/php_codesniffer' => '^3.5.8',
@@ -1081,7 +1081,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * We will use these default new composition details to update past compositions and keep up with our development,
+	 * We will use these default instructions to update the composition by in order to update past compositions and keep up with our development,
 	 * especially changes related to our WPSite Starter (https://github.com/pixelgradelt/wpsite-starter).
 	 *
 	 * @since 0.11.0
@@ -1090,11 +1090,11 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return array
 	 */
-	protected function get_default_new_details( array $composition ): array {
+	protected function get_default_instructions_to_update( array $composition ): array {
 		$default = [
 			'composer' => [],
-			'remove' => [],
-			'require' => [],
+			'remove'   => [],
+			'require'  => [],
 		];
 
 		if ( isset( $composition['extra'][ self::VERSION_KEY ] ) && \version_compare( (string) $composition['extra'][ self::VERSION_KEY ], '1.1.0', '<' ) ) {
