@@ -337,4 +337,16 @@ class ArrayHelpers {
 
 		return array_pop( $args );
 	}
+
+	public static function ksortRecursive( &$array, $sort_flags = SORT_REGULAR ) {
+		if ( ! is_array( $array ) ) {
+			return false;
+		}
+		ksort( $array, $sort_flags );
+		foreach ( $array as &$arr ) {
+			self::ksortRecursive( $arr, $sort_flags );
+		}
+
+		return true;
+	}
 }

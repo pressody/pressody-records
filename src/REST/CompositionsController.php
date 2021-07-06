@@ -20,6 +20,7 @@ use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Exception\RestException;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageRepositoryTransformer;
+use PixelgradeLT\Records\Utils\ArrayHelpers;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -403,7 +404,7 @@ class CompositionsController extends WP_REST_Controller {
 
 		// We have work to do.
 		try {
-			$composition = $this->update_composition( $composition, $new_details );
+			$updatedComposition = $this->update_composition( $composition, $new_details );
 		} catch ( RestException $e ) {
 			return new WP_Error(
 				'rest_update_composition_errors',
@@ -412,14 +413,14 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		$compositionObject = $this->standardize_to_object( $composition );
+		$updatedCompositionObject = $this->standardize_to_object( $updatedComposition );
 
 		// Fingerprint the updated composition. This should be run last!!!
-		$compositionObject = $this->add_fingerprint( $compositionObject );
+		$updatedCompositionObject = $this->add_fingerprint( $updatedCompositionObject );
 
 		try {
 			// Validate the updated composition according to composer-schema.json rules.
-			$this->validate_schema( $compositionObject );
+			$this->validate_schema( $updatedCompositionObject );
 		} catch ( JsonValidationException $e ) {
 			return new WP_Error(
 				'rest_json_invalid',
@@ -431,8 +432,19 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
+		// If the updated composition and the initial composition have the same fingerprint it means that nothing was updated.
+		// Respond accordingly.
+		if ( ! empty( $composition['extra'][self::FINGERPRINT_KEY] )
+		     && $updatedCompositionObject->extra->{self::FINGERPRINT_KEY} === $composition['extra'][self::FINGERPRINT_KEY] ) {
+
+			$response = rest_ensure_response( [] );
+			$response->set_status( HTTP::NO_CONTENT );
+
+			return $response;
+		}
+
 		// Return the refreshed composition as the response.
-		return rest_ensure_response( $compositionObject );
+		return rest_ensure_response( $updatedCompositionObject );
 	}
 
 	/**
@@ -504,6 +516,9 @@ class CompositionsController extends WP_REST_Controller {
 			// Now we can add/replace the user details in the composition.
 			$composition = $this->add_user_details( $composition, $new_details );
 		}
+
+		// Update the timestamp
+		$composition['time'] = date( DATE_RFC3339 );
 
 		/**
 		 * Filter the updated composition.
@@ -819,7 +834,7 @@ class CompositionsController extends WP_REST_Controller {
 			$relevantContent['config']['platform'] = $composition['config']['platform'];
 		}
 
-		ksort( $relevantContent );
+		ArrayHelpers::ksortRecursive( $relevantContent );
 
 		return md5( json_encode( $relevantContent ) );
 	}
