@@ -184,7 +184,7 @@ class ListPackages extends AbstractHookProvider {
 				}
 
 				if ( ! empty( $package_details['managed_post_id'] ) ) {
-					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $package_details['managed_post_id'] ) ) . '" title="Edit Required LT Package">' . $item . '</a>';
+					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $package_details['managed_post_id'] ) ) . '" title="Edit Required LT Package">' . get_the_title( $package_details['managed_post_id'] ) . ' (' . $item . ')</a>';
 				}
 
 				$list[] = $item;
