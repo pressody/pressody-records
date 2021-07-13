@@ -32,6 +32,12 @@ class PartManager extends PackageManager {
 	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpart_keyword';
 
 	/**
+	 * Used to create the pseudo IDs saved as values for a part's required packages/parts.
+	 * Don't change this without upgrading the data in the DB!
+	 */
+	const PSEUDO_ID_DELIMITER = ' #';
+
+	/**
 	 * @since 0.9.0
 	 *
 	 * @param array $args Optional. Any provided args will be merged and overwrite default ones.
@@ -195,10 +201,14 @@ class PartManager extends PackageManager {
 		return true;
 	}
 
-	public function get_post_package_required_parts( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_package_required_parts( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
 		$required_parts = carbon_get_post_meta( $post_ID, 'package_required_parts', $container_id );
 		if ( empty( $required_parts ) || ! is_array( $required_parts ) ) {
 			return [];
+		}
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
 		// Make sure only the fields we are interested in are left.
@@ -229,10 +239,14 @@ class PartManager extends PackageManager {
 		carbon_set_post_meta( $post_ID, 'package_required_parts', $required_parts, $container_id );
 	}
 
-	public function get_post_package_replaced_parts( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_package_replaced_parts( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
 		$replaced_parts = carbon_get_post_meta( $post_ID, 'package_replaced_parts', $container_id );
 		if ( empty( $replaced_parts ) || ! is_array( $replaced_parts ) ) {
 			return [];
+		}
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
 		// Make sure only the fields we are interested in are left.

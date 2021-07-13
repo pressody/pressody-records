@@ -37,6 +37,12 @@ class PackageManager {
 	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpackage_keyword';
 
 	/**
+	 * Used to create the pseudo IDs saved as values for a package's required packages.
+	 * Don't change this without upgrading the data in the DB!
+	 */
+	const PSEUDO_ID_DELIMITER = ' #';
+
+	/**
 	 * External Composer repository client.
 	 *
 	 * @var ComposerClient
@@ -850,10 +856,14 @@ class PackageManager {
 		return $releases;
 	}
 
-	public function get_post_package_required_packages( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_package_required_packages( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
 		$required_packages = carbon_get_post_meta( $post_ID, 'package_required_packages', $container_id );
 		if ( empty( $required_packages ) || ! is_array( $required_packages ) ) {
 			return [];
+		}
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
 		// Make sure only the fields we are interested in are left.
@@ -884,10 +894,14 @@ class PackageManager {
 		carbon_set_post_meta( $post_ID, 'package_required_packages', $required_packages, $container_id );
 	}
 
-	public function get_post_package_replaced_packages( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_package_replaced_packages( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
 		$replaced_packages = carbon_get_post_meta( $post_ID, 'package_replaced_packages', $container_id );
 		if ( empty( $replaced_packages ) || ! is_array( $replaced_packages ) ) {
 			return [];
+		}
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
 		// Make sure only the fields we are interested in are left.
@@ -918,7 +932,11 @@ class PackageManager {
 		carbon_set_post_meta( $post_ID, 'package_replaced_packages', $replaced_packages, $container_id );
 	}
 
-	public function get_post_package_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_package_composer_require( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
+		}
+
 		// We don't currently allow defining a per-package Composer require list.
 		return [];
 	}

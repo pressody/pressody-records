@@ -440,8 +440,6 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 	public function get_available_required_packages_options(): array {
 		$options = [];
 
-		$pseudo_id_delimiter = ' #';
-
 		$exclude_post_ids = [];
 		// We can't exclude the currently required packages because if we use carbon_get_post_meta()
 		// to fetch the current complex field value, we enter an infinite loop since that requires the field options.
@@ -453,7 +451,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 		] );
 
 		foreach ( $package_ids as $post_id ) {
-			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $pseudo_id_delimiter . $post_id;
+			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_id;
 
 			$options[ $package_pseudo_id ] = sprintf( __( '%s - %s', 'pixelgradelt_records' ), $this->package_manager->get_post_package_name( $post_id ), $package_pseudo_id );
 		}
@@ -475,8 +473,6 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 	public function get_available_required_parts_options(): array {
 		$options = [];
 
-		$pseudo_id_delimiter = ' #';
-
 		// We exclude the current part post ID, of course.
 		$exclude_post_ids = [ get_the_ID(), ];
 		// We can't exclude the currently required parts because if we use carbon_get_post_meta()
@@ -485,7 +481,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 		$package_ids = $this->package_manager->get_package_ids_by( [ 'exclude_post_ids' => $exclude_post_ids, ] );
 
 		foreach ( $package_ids as $post_id ) {
-			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $pseudo_id_delimiter . $post_id;
+			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_id;
 
 			$options[ $package_pseudo_id ] = sprintf( __( '%s - %s', 'pixelgradelt_records' ), $this->package_manager->get_post_package_name( $post_id ), $package_pseudo_id );
 		}

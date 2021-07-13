@@ -789,6 +789,10 @@ class BasePackageBuilder {
 				continue;
 			}
 
+			// Enforce the some details from the actual package data since the selected source name may have changed,
+			// but the post ID less so.
+			$normalized[ $package['pseudo_id'] ]['source_name'] = $package_data['source_name'];
+
 			/**
 			 * Construct the Composer-like package name (the same way @see ComposerPackageTransformer::transform() does it).
 			 */

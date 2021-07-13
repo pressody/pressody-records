@@ -18,7 +18,9 @@ use Carbon_Fields\Helper\Helper;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\Package;
 use PixelgradeLT\Records\PackageManager;
+use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 use function PixelgradeLT\Records\get_packages_permalink;
@@ -37,6 +39,13 @@ class EditPackage extends AbstractHookProvider {
 	 * @var PackageManager
 	 */
 	protected PackageManager $package_manager;
+
+	/**
+	 * Release manager.
+	 *
+	 * @var ReleaseManager
+	 */
+	protected ReleaseManager $release_manager;
 
 	/**
 	 * Packages repository.
@@ -78,16 +87,19 @@ class EditPackage extends AbstractHookProvider {
 	 * @since 0.5.0
 	 *
 	 * @param PackageManager     $package_manager      Packages manager.
+	 * @param ReleaseManager    $release_manager Release manager.
 	 * @param PackageRepository  $packages             Packages repository.
 	 * @param PackageTransformer $composer_transformer Package transformer.
 	 */
 	public function __construct(
 			PackageManager $package_manager,
+			ReleaseManager $release_manager,
 			PackageRepository $packages,
 			PackageTransformer $composer_transformer
 	) {
 
 		$this->package_manager      = $package_manager;
+		$this->release_manager = $release_manager;
 		$this->packages             = $packages;
 		$this->composer_transformer = $composer_transformer;
 	}
@@ -120,6 +132,10 @@ class EditPackage extends AbstractHookProvider {
 		// ADD CUSTOM POST META VIA CARBON FIELDS.
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
+		// Handle old releases on post update, first.
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_clean_stored_releases_on_external_source_change', 3, 2 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_migrate_releases_on_manual_source_switch', 3, 2 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_update_dependants_on_source_change', 3, 2 );
 		// Fetch external packages releases and cache them (the artifacts will not be cached here).
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fetch_external_packages_on_post_save', 5, 2 );
 		// Fill empty package details from source.
@@ -130,7 +146,6 @@ class EditPackage extends AbstractHookProvider {
 		// Handle post data transform before the post is updated in the DB (like changing the source type)
 		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
 		$this->add_action( 'pre_post_update', 'maybe_clean_up_manual_release_post_data', 10, 1 );
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_migrate_releases_on_manual_source_switch', 10, 2 );
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_package_post', 5 );
@@ -841,6 +856,73 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 	}
 
 	/**
+	 * If the source name changes, we need to update the pseudo IDs meta-data for dependants.
+	 *
+	 * We only do this for external sources.
+	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param int                           $post_ID
+	 * @param Container\Post_Meta_Container $meta_container
+	 */
+	protected function maybe_update_dependants_on_source_change( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+		// At the moment, we are only interested in the source_configuration container.
+		// This way we avoid running this logic unnecessarily for other containers.
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
+			return;
+		}
+
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
+			return;
+		}
+
+		if ( empty( $this->pre_save_package ) ) {
+			return;
+		}
+
+		// Get the CarbonFields $_POST input.
+		$cb_input = Helper::input();
+
+		// We only want to deal with external-source packages.
+		if ( empty( $cb_input['_package_source_type'] )
+		     || ! in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'wpackagist.org', 'vcs', ] )
+		) {
+			return;
+		}
+
+		// Determine if the source (type or name) hasn't changed. Bail if so.
+		if (
+		     ( ! empty( $cb_input['_package_source_name'] )
+		       && in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'vcs', ] )
+		       && $cb_input['_package_source_name'] === $this->pre_save_package->get_source_name() )
+		     || ( ! empty( $cb_input['_package_source_project_name'] )
+		          && $cb_input['_package_source_type'] === 'wpackagist.org'
+		          && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
+		) {
+			return;
+		}
+
+		// We have work to do.
+
+		// At the moment, we are only interested in certain meta entries.
+		// Replace pseudo IDs.
+		$prev_package_pseudo_id = $this->pre_save_package->get_source_name() . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
+		$new_package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_ID ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
+
+		global $wpdb;
+		$wpdb->get_results( $wpdb->prepare( "
+UPDATE $wpdb->postmeta m
+JOIN $wpdb->posts p ON m.post_id = p.ID
+SET m.meta_value = REPLACE(m.meta_value, %s, %s)
+WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_package_pseudo_id, $new_package_pseudo_id ) );
+
+		// Flush the entire cache since we don't know what post IDs might have been affected.
+		// It is OK since this is a rare operation.
+		wp_cache_flush();
+	}
+
+	/**
 	 * If we are switching to a manual source type, attempt to transform any existing stored releases to manual ones
 	 * so they can be managed, and not simply lost.
 	 *
@@ -850,7 +932,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
 	protected function maybe_migrate_releases_on_manual_source_switch( int $post_ID, Container\Post_Meta_Container $meta_container ) {
-		// At the moment, we are only interested in the source_configuration container.
+		// At the moment, we are only interested in the dependencies_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
 		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
 			return;
@@ -868,44 +950,105 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 		$cb_input = Helper::input();
 
 		// We want to migrate already stored releases to manual managed ones when the package source changes to local.manual.
-		if ( ! empty( $cb_input['_package_source_type'] )
-		     && 'local.manual' === $cb_input['_package_source_type']
-		     && 'local.manual' !== $this->pre_save_package->get_source_type()
-		     && $this->pre_save_package->has_releases()
+		if ( empty( $cb_input['_package_source_type'] )
+		     || 'local.manual' !== $cb_input['_package_source_type']
+		     || 'local.manual' === $this->pre_save_package->get_source_type()
+		     || ! $this->pre_save_package->has_releases()
 		) {
-			// We have work to do.
+			return;
+		}
 
-			// Get all package releases and merge them with any existing manually managed releases.
-			$manual_releases_data      = $this->package_manager->get_post_package_manual_releases( $post_ID );
-			$updated                   = false;
-			$manual_releases_meta_data = carbon_get_post_meta( $post_ID, 'package_manual_releases' );
-			foreach ( $this->pre_save_package->get_releases() as $release ) {
-				try {
-					$normalized_version = $this->package_manager->normalize_version( $release->get_version() );
-				} catch ( \UnexpectedValueException $e ) {
-					continue;
-				}
+		// We have work to do.
 
-				if ( in_array( $normalized_version, array_keys( $manual_releases_data ) ) ) {
-					// We don't want to overwrite existing releases. Just add the existing data.
-					continue;
-				}
-
-				$updated                     = true;
-				$manual_releases_meta_data[] = [
-						'version' => $release->get_version(),
-						'file'    => $release->get_source_url(),
-				];
+		// Get all package releases and merge them with any existing manually managed releases.
+		$manual_releases_data      = $this->package_manager->get_post_package_manual_releases( $post_ID );
+		$updated                   = false;
+		$manual_releases_meta_data = carbon_get_post_meta( $post_ID, 'package_manual_releases' );
+		foreach ( $this->pre_save_package->get_releases() as $release ) {
+			try {
+				$normalized_version = $this->package_manager->normalize_version( $release->get_version() );
+			} catch ( \UnexpectedValueException $e ) {
+				continue;
 			}
 
-			if ( $updated ) {
-				// Order the manual releases by version, descending.
-				usort( $manual_releases_meta_data, function ( $a, $b ) {
-					return version_compare( $b['version'], $a['version'] );
-				} );
-
-				carbon_set_post_meta( $post_ID, 'package_manual_releases', $manual_releases_meta_data );
+			if ( in_array( $normalized_version, array_keys( $manual_releases_data ) ) ) {
+				// We don't want to overwrite existing releases. Just add the existing data.
+				continue;
 			}
+
+			$updated                     = true;
+			$manual_releases_meta_data[] = [
+					'version' => $release->get_version(),
+					'file'    => $release->get_source_url(),
+			];
+		}
+
+		if ( $updated ) {
+			// Order the manual releases by version, descending.
+			usort( $manual_releases_meta_data, function ( $a, $b ) {
+				return version_compare( $b['version'], $a['version'] );
+			} );
+
+			carbon_set_post_meta( $post_ID, 'package_manual_releases', $manual_releases_meta_data );
+		}
+	}
+
+	/**
+	 * If the source name changes, we need to clean all stored releases to avoid leaving previous releases that may still satisfy the version constraint.
+	 *
+	 * We only do this for external sources.
+	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param int                           $post_ID
+	 * @param Container\Post_Meta_Container $meta_container
+	 */
+	protected function maybe_clean_stored_releases_on_external_source_change( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+		// At the moment, we are only interested in the source_configuration container.
+		// This way we avoid running this logic unnecessarily for other containers.
+		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_source_configuration_' . $this->package_manager::PACKAGE_POST_TYPE !== $meta_container->get_id() ) {
+			return;
+		}
+
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
+			return;
+		}
+
+		if ( empty( $this->pre_save_package ) ) {
+			return;
+		}
+
+		// Get the CarbonFields $_POST input.
+		$cb_input = Helper::input();
+
+		// We only want to deal with external-source packages and packages that have releases already stored.
+		if ( empty( $cb_input['_package_source_type'] )
+		     || ! in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'wpackagist.org', 'vcs', ] )
+		     || ! $this->pre_save_package->has_releases()
+		) {
+			return;
+		}
+
+		// Determine if the source (type or name) hasn't changed. Bail if so.
+		if ( $cb_input['_package_source_type'] === $this->pre_save_package->get_source_type()
+		     && (
+			     ( ! empty( $cb_input['_package_source_name'] )
+			       && in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'vcs', ] )
+			       && $cb_input['_package_source_name'] === $this->pre_save_package->get_source_name() )
+			     || ( ! empty( $cb_input['_package_source_project_name'] )
+			          && $cb_input['_package_source_type'] === 'wpackagist.org'
+			          && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
+				)
+		) {
+			return;
+		}
+
+		// We have work to do.
+
+		// Simply delete all the previously stored releases.
+		foreach ( $this->pre_save_package->get_releases() as $release ) {
+			$this->release_manager->delete( $release );
 		}
 	}
 
@@ -939,8 +1082,6 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 	public function get_available_required_packages_options(): array {
 		$options = [];
 
-		$pseudo_id_delimiter = ' #';
-
 		// We exclude the current package post ID, of course.
 		$exclude_post_ids = [ get_the_ID(), ];
 		// We can't exclude the currently required packages because if we use carbon_get_post_meta()
@@ -949,7 +1090,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 		$package_ids = $this->package_manager->get_package_ids_by( [ 'exclude_post_ids' => $exclude_post_ids, ] );
 
 		foreach ( $package_ids as $post_id ) {
-			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $pseudo_id_delimiter . $post_id;
+			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_id;
 
 			$options[ $package_pseudo_id ] = sprintf( __( '%s - %s', 'pixelgradelt_records' ), $this->package_manager->get_post_package_name( $post_id ), $package_pseudo_id );
 		}

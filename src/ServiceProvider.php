@@ -560,6 +560,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['screen.edit_package'] = function ( $container ) {
 			return new Screen\EditPackage(
 				$container['package.manager'],
+				$container['release.manager'],
 				$container['repository.managed'],
 				$container['transformer.composer_package']
 			);
@@ -568,6 +569,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['screen.edit_part'] = function ( $container ) {
 			return new Screen\EditPart(
 				$container['part.manager'],
+				$container['release.manager'],
 				$container['repository.parts'],
 				$container['transformer.composer_package']
 			);
