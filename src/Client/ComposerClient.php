@@ -322,11 +322,6 @@ class ComposerClient implements Client {
 			'prefer-lowest' => false,
 			// This is the default Composer config to pass when initializing Composer.
 			'config'        => [],
-			'archive'       => [
-				'directory' => '',
-				//				'absolute-directory' => '/path',
-				'rearchive' => true,
-			],
 		];
 
 		// If we are in a local/development environment, relax further.

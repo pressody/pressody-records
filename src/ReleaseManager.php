@@ -194,7 +194,7 @@ class ReleaseManager {
 				if ( ! empty( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] ) ) {
 					$loader           = new ArrayLoader();
 					$composer_package = $loader->load( $source_cached_release_packages[ $parent_package->get_source_name() ][ $release->get_version() ] );
-					$tmp_dir = sys_get_temp_dir() . '/composer_archiver' . uniqid();
+					$tmp_dir          = sys_get_temp_dir() . '/composer_archiver' . uniqid();
 					$filename         = $client->archivePackage( $composer_package, [
 						'archive' => [
 							// What directory to use as temporary directory.
@@ -203,7 +203,7 @@ class ReleaseManager {
 							'override-dist-type' => false,
 							// Whether to do a Composer install and archive the contents, or to use the provided dist archive.
 							// Right now we don't want to rearchive since there are some issues with Composer and dynamic temp_dir paths (e.g `/tmp/` is actually `/private/tmp/`).
-							'rearchive' => false,
+							'rearchive'          => false,
 						],
 					] );
 

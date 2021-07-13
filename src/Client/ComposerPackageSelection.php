@@ -386,7 +386,19 @@ class ComposerPackageSelection {
 		$this->excludeTypes               = $config['exclude-types'] ?? [];
 
 		$this->stripHosts      = $this->createStripHostsPatterns( $config['strip-hosts'] ?? false );
-		$this->archiveEndpoint = isset( $config['archive']['directory'] ) ? ( $config['archive']['prefix-url'] ?? $config['homepage'] ) . '/' : null;
+		$this->archiveEndpoint = null;
+
+		if ( ! empty( $config['archive']['absolute-directory'] ) ) {
+			$this->archiveEndpoint = $config['archive']['absolute-directory'];
+		} else
+		if ( isset( $config['archive']['directory'] ) ) {
+			$this->archiveEndpoint = $config['archive']['prefix-url'] ?? $config['homepage'] ?? '';
+			if ( empty( $this->archiveEndpoint ) ) {
+				$this->archiveEndpoint = null;
+			} else {
+				$this->archiveEndpoint .= '/';
+			}
+		}
 
 		$this->homepage = $config['homepage'] ?? null;
 	}

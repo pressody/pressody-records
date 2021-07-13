@@ -34,7 +34,7 @@ class ComposerArchiveBuilder extends ComposerBuilder {
 		$helper  = new ComposerArchiveBuilderHelper( $this->output, $this->config['archive'] );
 		$basedir = $helper->getDirectory( $this->outputDir );
 		$this->output->write( sprintf( "<info>Creating local downloads in '%s'</info>", $basedir ) );
-		$endpoint               = $this->config['archive']['prefix-url'] ?? $this->config['homepage'];
+		$endpoint               = $this->config['archive']['prefix-url'] ?? $this->config['homepage'] ?? '';
 		$includeArchiveChecksum = (bool) ( $this->config['archive']['checksum'] ?? true );
 		$downloadManager        = $this->composer->getDownloadManager();
 		$archiveManager         = $this->composer->getArchiveManager();
