@@ -14,7 +14,6 @@ namespace PixelgradeLT\Records\REST;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use InvalidArgumentException;
-use JsonSchema\Constraints\Constraint;
 use JsonSchema\Validator;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Exception\RestException;
@@ -155,7 +154,7 @@ class CompositionsController extends WP_REST_Controller {
 							'required'    => true,
 						],
 						'require'   => [
-							'description' => esc_html__( 'A LT Records packages (actual LT packages or LT parts) list to include in the composition. All packages that don\'t exist will be ignored. These required packages will overwrite the same packages given through the "composer" param.', 'pixelgradelt_records' ),
+							'description' => esc_html__( 'A LT Records packages list (actual LT packages or LT parts) to include in the composition. All packages that don\'t exist will be ignored. These required packages will overwrite the same packages given through the "composer" param.', 'pixelgradelt_records' ),
 							'type'        => 'array',
 							'items'       => [
 								'type'       => 'object',

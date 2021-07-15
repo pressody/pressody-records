@@ -5,35 +5,35 @@ Content-Type: application/json
 
 {
   "composer": {
-	"name": "pixelgradelt\/site",
+	"name": "pixelgradelt/site",
 	"type": "project",
 	"license": "MIT",
 	"description": "A Pixelgrade LT WordPress site.",
-	"homepage": "https:\/\/pixelgradelt.com",
-	"time": "2021-07-06T15:40:19+00:00",
+	"homepage": "https://pixelgradelt.com",
+	"time": "2021-07-13T14:28:26+00:00",
 	"authors": [
 	  {
 		"name": "Vlad Olaru",
 		"email": "vlad@pixelgrade.com",
-		"homepage": "https:\/\/thinkwritecode.com",
+		"homepage": "https://thinkwritecode.com",
 		"role": "Development, infrastructure, and product development"
 	  },
 	  {
 		"name": "George Olaru",
 		"email": "george@pixelgrade.com",
-		"homepage": "https:\/\/pixelgrade.com",
+		"homepage": "https://pixelgrade.com",
 		"role": "Design and product development"
 	  },
 	  {
 		"name": "Răzvan Onofrei",
 		"email": "razvan@pixelgrade.com",
-		"homepage": "https:\/\/pixelgrade.com",
+		"homepage": "https://pixelgrade.com",
 		"role": "Development and product development"
 	  },
 	  {
 		"name": "Mădălin Gorbănescu",
 		"email": "madalin@pixelgrade.com",
-		"homepage": "https:\/\/pixelgrade.com",
+		"homepage": "https://pixelgrade.com",
 		"role": "Development"
 	  }
 	],
@@ -47,13 +47,13 @@ Content-Type: application/json
 	  "wp-config"
 	],
 	"support": {
-	  "issues": "https:\/\/pixelgradelt.com",
-	  "forum": "https:\/\/pixelgradelt.com"
+	  "issues": "https://pixelgradelt.com",
+	  "forum": "https://pixelgradelt.com"
 	},
 	"repositories": [
 	  {
 		"type": "composer",
-		"url": "https:\/\/lt-records.local\/ltpackagist\/",
+		"url": "https://lt-records.local/ltpackagist/",
 		"options": {
 		  "ssl": {
 			"verify_peer": false
@@ -62,22 +62,26 @@ Content-Type: application/json
 	  },
 	  {
 		"type": "composer",
-		"url": "https:\/\/repo.packagist.org"
+		"url": "https://repo.packagist.org"
 	  }
 	],
 	"require": {
 	  "ext-json": "*",
-	  "oscarotero\/env": "^2.1",
+	  "oscarotero/env": "^2.1",
 	  "php": ">=7.1",
-	  "roots\/bedrock-autoloader": "^1.0",
-	  "roots\/wordpress": "*",
-	  "roots\/wp-config": "1.0.0",
-	  "roots\/wp-password-bcrypt": "1.0.0",
-	  "vlucas\/phpdotenv": "^5.3"
+	  "pixelgradelt-records/part_another-test": "*, >=1.4",
+	  "pixelgradelt-records/part_spanky": "1.0.0",
+	  "pixelgradelt-records/part_test-test": "*, ^1.0",
+	  "pixelgradelt-records/part_yet-another": "*",
+	  "roots/bedrock-autoloader": "^1.0",
+	  "roots/wordpress": "*",
+	  "roots/wp-config": "1.0.0",
+	  "roots/wp-password-bcrypt": "1.0.0",
+	  "vlucas/phpdotenv": "^5.3"
 	},
 	"require-dev": {
-	  "roave\/security-advisories": "dev-latest",
-	  "squizlabs\/php_codesniffer": "^3.5.8"
+	  "roave/security-advisories": "dev-latest",
+	  "squizlabs/php_codesniffer": "^3.5.8"
 	},
 	"config": {
 	  "optimize-autoloader": true,
@@ -87,30 +91,79 @@ Content-Type: application/json
 	"prefer-stable": true,
 	"extra": {
 	  "installer-paths": {
-		"web\/app\/mu-plugins\/{$name}\/": [
+		"web/app/mu-plugins/{$name}/": [
 		  "type:wordpress-muplugin"
 		],
-		"web\/app\/plugins\/{$name}\/": [
+		"web/app/plugins/{$name}/": [
 		  "type:wordpress-plugin"
 		],
-		"web\/app\/themes\/{$name}\/": [
+		"web/app/themes/{$name}/": [
 		  "type:wordpress-theme"
 		]
 	  },
-	  "lt-composition": "def502008b590b343fbac515087976bfdab17466b1b9ac2be8dd7f257cfd8c0edbbe67378a2fdba577d914443b1e01cf9a622ccf00c5eb5e31ee6e0f7e30df66a2498a36f2da649aaf712b25fac0cca1b61cb39eae3404784a946acccbbb5c4232daa4e4802995e17dca0446f73d022950f1dd6a691f5a295c88b7434dbbb109073643696d6192ffca05c6bd84fb2edbeb89f66f49171cead428a153d3",
+	  "lt-composition": "def5020051bc8670e75a30e3b93beef0a949370dec51667bdc61ce004b5d8c07202ed9d9a4ee138f3622de86af1a1fe692555a8dc86f9ea107c06cfc2834470746a76813d48a8aa83fa63fd664adde8dd9420ea4952569295be670c7bb3fdb624463f4781ccd077c6de009d08398524ee2cacacc4b75b0270fdd2b820c8241c5e8676a6eab6831e5c58220ae9e1f76dc28ae4cb26814e21ed7f9d77c10507f6181054df2f258884b9e1cca6d852ce0aae1584c4ebb75301a842d",
+	  "lt-required-packages": {
+		"pixelgradelt-records/part_yet-another": {
+		  "name": "pixelgradelt-records/part_yet-another",
+		  "version": "*",
+		  "requiredBy": [
+			{
+			  "name": "pixelgradelt-retailer/first-solution",
+			  "requiredVersion": "*"
+			}
+		  ]
+		},
+		"pixelgradelt-records/part_another-test": {
+		  "name": "pixelgradelt-records/part_another-test",
+		  "version": "*, >=1.4",
+		  "requiredBy": [
+			{
+			  "name": "pixelgradelt-retailer/fourth-solution",
+			  "requiredVersion": "*"
+			},
+			{
+			  "name": "pixelgradelt-retailer/second-solution",
+			  "requiredVersion": ">=1.4"
+			}
+		  ]
+		},
+		"pixelgradelt-records/part_spanky": {
+		  "name": "pixelgradelt-records/part_spanky",
+		  "version": "1.0.0",
+		  "requiredBy": [
+			{
+			  "name": "pixelgradelt-retailer/fourth-solution",
+			  "requiredVersion": "1.0.0"
+			}
+		  ]
+		},
+		"pixelgradelt-records/part_test-test": {
+		  "name": "pixelgradelt-records/part_test-test",
+		  "version": "*, ^1.0",
+		  "requiredBy": [
+			{
+			  "name": "pixelgradelt-retailer/fourth-solution",
+			  "requiredVersion": "*"
+			},
+			{
+			  "name": "pixelgradelt-retailer/second-solution",
+			  "requiredVersion": "^1.0"
+			}
+		  ]
+		}
+	  },
 	  "lt-version": "1.1.0",
-	  "wordpress-install-dir": "web\/wp",
-	  "lt-fingerprint": "85b31c452431090159d1be860f5b1a90"
+	  "wordpress-install-dir": "web/wp",
+	  "lt-fingerprint": "f94bd64f455c48012218507b33e7c741"
 	},
 	"scripts": {
-	  "post-root-package-install": [
-		"php -r \"copy('.env.example', '.env');\""
-	  ],
+	  "post-root-package-install": [],
 	  "test": [
 		"phpcs"
 	  ]
 	}
   }
+
 }
 
 ###
@@ -286,7 +339,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "ltdetails": "def502008b590b343fbac515087976bfdab17466b1b9ac2be8dd7f257cfd8c0edbbe67378a2fdba577d914443b1e01cf9a622ccf00c5eb5e31ee6e0f7e30df66a2498a36f2da649aaf712b25fac0cca1b61cb39eae3404784a946acccbbb5c4232daa4e4802995e17dca0446f73d022950f1dd6a691f5a295c88b7434dbbb109073643696d6192ffca05c6bd84fb2edbeb89f66f49171cead428a153d3"
+  "ltdetails": "def5020051bc8670e75a30e3b93beef0a949370dec51667bdc61ce004b5d8c07202ed9d9a4ee138f3622de86af1a1fe692555a8dc86f9ea107c06cfc2834470746a76813d48a8aa83fa63fd664adde8dd9420ea4952569295be670c7bb3fdb624463f4781ccd077c6de009d08398524ee2cacacc4b75b0270fdd2b820c8241c5e8676a6eab6831e5c58220ae9e1f76dc28ae4cb26814e21ed7f9d77c10507f6181054df2f258884b9e1cca6d852ce0aae1584c4ebb75301a842d"
 }
 
 ###
