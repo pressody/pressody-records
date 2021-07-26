@@ -1031,34 +1031,45 @@ class CompositionsController extends WP_REST_Controller {
 					],
 				],
 				[
+					'type' => 'vcs',
+					'url'  => 'https://github.com/pixelgradelt/pixelgradelt-conductor',
+				],
+				[
 					// The Packagist repo.
 					'type' => 'composer',
 					'url'  => 'https://repo.packagist.org',
 				],
 			],
 			'require'           => [
-				'php'                      => '>=7.1',
-				'ext-json'                 => '*',
-				'vlucas/phpdotenv'         => '^5.3',
-				'oscarotero/env'           => '^2.1',
-				'roots/bedrock-autoloader' => '^1.0',
-				'roots/wordpress'          => '*',
-				'roots/wp-config'          => '1.0.0',
-				'roots/wp-password-bcrypt' => '1.0.0',
+				'ext-json'                            => '*',
+				'php'                                 => '>=7.1',
+				'oscarotero/env'                      => '^2.1',
+				'pixelgradelt/pixelgradelt-conductor' => 'dev-main',
+				'roots/bedrock-autoloader'            => '^1.0',
+				'roots/wordpress'                     => '*',
+				'roots/wp-config'                     => '1.0.0',
+				'roots/wp-password-bcrypt'            => '1.0.0',
+				'vlucas/phpdotenv'                    => '^5.3',
 			],
 			'require-dev'       => [
 				'squizlabs/php_codesniffer' => '^3.5.8',
 				'roave/security-advisories' => 'dev-latest',
 			],
 			'config'            => [
+				// Lock the vendor directory name so we don't get any surprises.
+				'vendor-dir'          => 'vendor',
 				'optimize-autoloader' => true,
 				'preferred-install'   => 'dist',
+				'sort-packages'       => true,
 			],
 			'minimum-stability' => 'dev',
 			'prefer-stable'     => true,
 			'extra'             => [
 				// @see https://packagist.org/packages/composer/installers
 				'installer-paths'       => [
+					// Since the ActionScheduler is of the wordpress-plugin type, but we don't use it as such,
+					// we want it placed in the vendor directory. This rule needs to come first to take priority.
+					'vendor/{$vendor}/{$name}/'   => [ 'woocommerce/action-scheduler', ],
 					'web/app/mu-plugins/{$name}/' => [ 'type:wordpress-muplugin' ],
 					'web/app/plugins/{$name}/'    => [ 'type:wordpress-plugin' ],
 					'web/app/themes/{$name}/'     => [ 'type:wordpress-theme' ],
@@ -1069,11 +1080,18 @@ class CompositionsController extends WP_REST_Controller {
 				self::VERSION_KEY       => self::COMPOSITION_VERSION,
 			],
 			'scripts'           => [
-				'post-root-package-install' => [
-					"php -r \"copy('.env.example', '.env');\"",
+				'cache:clear'            => [
+					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
 				],
-				'test'                      => [
-					'phpcs',
+				// Schedule the clearing of the site cache everytime there is a package alteration.
+				'post-package-install'   => [
+					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
+				],
+				'post-package-update'    => [
+					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
+				],
+				'post-package-uninstall' => [
+					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
 				],
 			],
 		];
