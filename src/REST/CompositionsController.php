@@ -1042,6 +1042,7 @@ class CompositionsController extends WP_REST_Controller {
 			],
 			'require'           => [
 				'ext-json'                            => '*',
+				'gordalina/cachetool'                 => '~6.3',
 				'php'                                 => '>=7.1',
 				'oscarotero/env'                      => '^2.1',
 				'pixelgradelt/pixelgradelt-conductor' => 'dev-main',
