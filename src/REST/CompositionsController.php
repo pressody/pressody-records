@@ -1081,18 +1081,37 @@ class CompositionsController extends WP_REST_Controller {
 				self::VERSION_KEY       => self::COMPOSITION_VERSION,
 			],
 			'scripts'           => [
-				'cache:clear'            => [
-					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
+				'cache:schedule:clear'   => [
+					'PixelgradeLT\Conductor\Cache\CacheDispatcher::schedule_cache_clear',
 				],
-				// Schedule the clearing of the site cache everytime there is a package alteration.
+				// CacheTool wrapper commands. See https://github.com/gordalina/cachetool
+				'cache:opcache:status'   => [
+					'./vendor/bin/cachetool opcache:status',
+				],
+				'cache:opcache:clear'    => [
+					'./vendor/bin/cachetool opcache:reset',
+				],
+				'cache:opcache:warm'     => [
+					'./vendor/bin/cachetool opcache:compile:scripts -q ./web/',
+				],
+				// Allow the CatchDispatcher to take action on package modifications.
+				'pre-package-install'    => [
+					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+				],
 				'post-package-install'   => [
-					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
+					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+				],
+				'pre-package-update'     => [
+					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 				'post-package-update'    => [
-					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
+					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+				],
+				'pre-package-uninstall'  => [
+					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 				'post-package-uninstall' => [
-					'PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear',
+					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 			],
 		];
