@@ -56,6 +56,8 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'client.composer.custom_token_auth' ) )
 
 			->register_hooks( $container->get( 'logs.manager' ) )
+			->register_hooks( $container->get( 'package.manager' ) )
+			->register_hooks( $container->get( 'part.manager' ) )
 
 			->register_hooks( $container->get( 'screen.edit_package' ) )
 			->register_hooks( $container->get( 'screen.list_packages' ) )

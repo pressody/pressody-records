@@ -14,6 +14,7 @@ namespace PixelgradeLT\Records\Screen;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Utils\ArrayHelpers;
 
 /**
@@ -31,16 +32,28 @@ class ListPackages extends AbstractHookProvider {
 	protected PackageManager $package_manager;
 
 	/**
+	 * Packages repository.
+	 *
+	 * This is (should be) the repo that holds all the packages that we manage.
+	 *
+	 * @var PackageRepository
+	 */
+	protected PackageRepository $packages;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.5.0
 	 *
-	 * @param PackageManager    $package_manager   Packages manager.
+	 * @param PackageManager    $package_manager Packages manager.
+	 * @param PackageRepository $packages        Packages repository.
 	 */
 	public function __construct(
-		PackageManager $package_manager
+		PackageManager $package_manager,
+		PackageRepository $packages
 	) {
-		$this->package_manager   = $package_manager;
+		$this->package_manager = $package_manager;
+		$this->packages        = $packages;
 	}
 
 	/**
@@ -58,7 +71,7 @@ class ListPackages extends AbstractHookProvider {
 
 		// Add custom columns to post list.
 		$this->add_action( 'manage_' . $this->package_manager::PACKAGE_POST_TYPE . '_posts_columns', 'add_custom_columns' );
-		$this->add_action( 'manage_' . $this->package_manager::PACKAGE_POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2);
+		$this->add_action( 'manage_' . $this->package_manager::PACKAGE_POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2 );
 	}
 
 	/**
@@ -120,7 +133,8 @@ class ListPackages extends AbstractHookProvider {
 		// Insert after the title a column for package source details and columns for dependency details.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
 			[
-				'package_source' => esc_html__( 'Package Source', 'pixelgradelt_records' ),
+				'package_source'            => esc_html__( 'Package Source', 'pixelgradelt_records' ),
+				'new_releases'              => esc_html__( 'New Releases', 'pixelgradelt_records' ),
 				'package_required_packages' => esc_html__( 'Required Packages', 'pixelgradelt_records' ),
 			]
 		);
@@ -129,12 +143,18 @@ class ListPackages extends AbstractHookProvider {
 	}
 
 	protected function populate_custom_columns( string $column, int $post_id ): void {
-		if ( ! in_array( $column, [ 'package_source', 'package_required_packages', ] ) ) {
+		if ( ! in_array( $column, [ 'package_source', 'new_releases', 'package_required_packages', ] ) ) {
 			return;
 		}
 
 		$output = '—';
 
+		$package = $this->packages->first_where( [ 'managed_post_id' => $post_id ] );
+		if ( empty( $package ) ) {
+			echo $output;
+
+			return;
+		}
 		$package_data = $this->package_manager->get_package_id_data( $post_id );
 		if ( 'package_source' === $column ) {
 			// Add details to the title regarding the package configured source.
@@ -172,6 +192,30 @@ class ListPackages extends AbstractHookProvider {
 						// Nothing
 						break;
 				}
+			}
+		}
+
+		if ( 'new_releases' === $column ) {
+			$seen_list = get_post_meta( $post_id, '_pixelgradelt_package_seen_releases', true );
+			if ( empty( $seen_list ) ) {
+				$seen_list = [];
+			}
+
+			$current_list = [];
+			foreach ( $package->get_releases() as $release ) {
+				$current_list[] = $release->get_version();
+			}
+
+			uasort(
+				$current_list,
+				function ( $a, $b ) {
+					return version_compare( $b, $a );
+				}
+			);
+
+			$not_seen_list = array_diff( $current_list, $seen_list );
+			if ( ! empty( $not_seen_list ) ) {
+				$output = '<span class="bubble wp-ui-highlight">' . implode( '</span><span class="bubble wp-ui-highlight">', $not_seen_list ) . '</span>';
 			}
 		}
 

@@ -245,7 +245,10 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['logs.manager'] = function ( $container ) {
-			return new LogsManager( $container['logs.logger'] );
+			return new LogsManager(
+				$container['logs.logger'],
+				$container['queue.action']
+			);
 		};
 
 		$container['package.factory'] = function ( $container ) {
@@ -264,6 +267,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['wordpress.readme_parser'],
 				$container['logs.logger'],
 				$container['hash.generator'],
+				$container['queue.action']
 			);
 		};
 
@@ -283,6 +287,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['wordpress.readme_parser'],
 				$container['logs.logger'],
 				$container['hash.generator'],
+				$container['queue.action']
 			);
 		};
 
@@ -296,6 +301,10 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['plugin.gpl_vault'] = function () {
 			return new Integration\GPLVault();
+		};
+
+		$container['queue.action'] = function () {
+			return new Queue\ActionQueue();
 		};
 
 		$container['release.manager'] = function ( $container ) {
@@ -577,12 +586,14 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['screen.list_packages'] = function ( $container ) {
 			return new Screen\ListPackages(
-				$container['package.manager']
+				$container['package.manager'],
+				$container['repository.managed'],
 			);
 		};
 		$container['screen.list_parts']    = function ( $container ) {
 			return new Screen\Listparts(
-				$container['part.manager']
+				$container['part.manager'],
+				$container['repository.parts']
 			);
 		};
 

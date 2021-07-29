@@ -49,7 +49,13 @@ abstract class LogHandler implements LogHandlerInterface {
 	protected function format_entry( int $timestamp, string $level, string $message, array $context ): string {
 		$time_string  = $this->format_time( $timestamp );
 		$level_string = strtoupper( $level );
-		$entry        = "{$time_string} {$level_string} {$message}";
+		$category     = '';
+		// If we have been provided with a log entry category, include it.
+		if ( isset( $context['logCategory'] ) && ! empty( trim( $context['logCategory'] ) ) ) {
+			$category = '[' . strtoupper( trim( $context['logCategory'] ) ) . '] ';
+		}
+
+		$entry = "{$time_string} {$level_string} {$category}{$message}";
 
 		$search  = [];
 		$replace = [];
@@ -69,10 +75,13 @@ abstract class LogHandler implements LogHandlerInterface {
 
 		$entry = str_replace( $search, $replace, $entry );
 
-//		// Append additional context data.
-//		if ( ! empty( $temp_context ) ) {
-//			$entry .= ' ' . wp_json_encode( $temp_context, \JSON_UNESCAPED_SLASHES );
-//		}
+		// Append additional context data.
+		if ( isset( $temp_context['logCategory'] ) ) {
+			unset( $temp_context['logCategory'] );
+		}
+		if ( ! empty( $temp_context ) ) {
+			$entry .= ' ' . wp_json_encode( $temp_context, \JSON_UNESCAPED_SLASHES );
+		}
 
 		return apply_filters(
 			'pixelgradelt_records/format_log_entry',

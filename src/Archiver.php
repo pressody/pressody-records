@@ -121,6 +121,7 @@ class Archiver {
 			[
 				'package' => $package->get_name(),
 				'version' => $version,
+				'logCategory' => 'package_archiver',
 			]
 		);
 
@@ -224,6 +225,7 @@ class Archiver {
 			[
 				'package' => $release->get_package()->get_name(),
 				'version' => $release->get_version(),
+				'logCategory' => 'package_archiver',
 			]
 		);
 
@@ -251,6 +253,7 @@ class Archiver {
 					[
 						'filename' => $url_filename,
 						'url'   => $url,
+						'logCategory' => 'package_archiver',
 					]
 				);
 
@@ -263,6 +266,7 @@ class Archiver {
 					[
 						'path' => $path,
 						'tmpfname'   => $tmpfname,
+						'logCategory' => 'package_archiver',
 					]
 				);
 
@@ -287,6 +291,7 @@ class Archiver {
 				[
 					'error' => $tmpfname,
 					'url'   => $url,
+					'logCategory' => 'package_archiver',
 				]
 			);
 

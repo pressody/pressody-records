@@ -95,6 +95,17 @@ final class Logger extends BaseIO {
 	}
 
 	/**
+	 * Change the minimum level to log.
+	 *
+	 * @param string $minimum_level Minimum level to log. If not a valid level, nothing will be changed.
+	 */
+	public function setMinimumLevelSeverity( string $minimum_level ) {
+		if ( LogLevels::is_valid_level( $minimum_level ) ) {
+			$this->minimum_level_severity = LogLevels::get_level_severity( $minimum_level );
+		}
+	}
+
+	/**
 	 * Log a message.
 	 *
 	 * @since 0.1.0
@@ -117,7 +128,9 @@ final class Logger extends BaseIO {
 		$message   = apply_filters( 'pixelgradelt_records/logger_log_message', $message, $level, $context );
 
 		foreach ( $this->handlers as $handler ) {
-			$handler->handle( $timestamp, $level, $message, $context );
+			if ( $handler->handle( $timestamp, $level, $message, $context ) ) {
+				break;
+			}
 		}
 	}
 

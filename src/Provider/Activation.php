@@ -21,7 +21,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 class Activation extends AbstractHookProvider {
 
 	// use this in case you need to update the table structures
-	const DB_VERSION = '0.9.0';
+	const DB_VERSION = '0.15.0';
 
 	/**
 	 * Register hooks.
@@ -54,9 +54,7 @@ class Activation extends AbstractHookProvider {
 	 * Create cron jobs (clear them first).
 	 */
 	private function create_cron_jobs() {
-		wp_clear_scheduled_hook( 'pixelgradelt_records/cleanup_logs' );
-
-		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'pixelgradelt_records/cleanup_logs' );
+		// None so far.
 	}
 
 	private function create_or_update_tables() {

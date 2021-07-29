@@ -87,7 +87,7 @@ class EditPackage extends AbstractHookProvider {
 	 * @since 0.5.0
 	 *
 	 * @param PackageManager     $package_manager      Packages manager.
-	 * @param ReleaseManager    $release_manager Release manager.
+	 * @param ReleaseManager     $release_manager      Release manager.
 	 * @param PackageRepository  $packages             Packages repository.
 	 * @param PackageTransformer $composer_transformer Package transformer.
 	 */
@@ -99,7 +99,7 @@ class EditPackage extends AbstractHookProvider {
 	) {
 
 		$this->package_manager      = $package_manager;
-		$this->release_manager = $release_manager;
+		$this->release_manager      = $release_manager;
 		$this->packages             = $packages;
 		$this->composer_transformer = $composer_transformer;
 	}
@@ -159,8 +159,10 @@ class EditPackage extends AbstractHookProvider {
 		$this->add_action( 'wp_restore_post_revision', 'maybe_update_dependants_on_source_change_from_revision_revert', 99, 1 );
 
 
-		// Show edit post screen error messages.
+		// Check post and show edit post screen messages.
 		$this->add_action( 'edit_form_top', 'check_package_post', 5 );
+		$this->add_action( 'edit_form_top', 'maybe_notify_about_new_releases', 10 );
+		$this->add_action( 'edit_form_top', 'remember_current_releases_list', 20 );
 		$this->add_action( 'edit_form_top', 'show_user_messages', 50 );
 
 		// Add a message to the post publish metabox.
@@ -736,13 +738,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 			return;
 		}
 
-		$packages = $this->package_manager->fetch_external_package_remote_releases( $post_ID );
-
-		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
-		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\Builder\PackageBuilder::build() to do the work.
-		if ( ! empty( $packages ) ) {
-			update_post_meta( $post_ID, '_package_source_cached_release_packages', $packages );
-		}
+		$this->package_manager->post_fetch_external_packages( $post_ID );
 	}
 
 	/**
@@ -871,9 +867,9 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 	 * If the source name changes, we need to update the pseudo IDs meta-data for dependants.
 	 *
 	 * We only do this for external sources.
-	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 * The stored releases that don't satisfy the version constraint are purged via @since 0.9.0
 	 *
-	 * @since 0.9.0
+	 * @see BasePackageBuilder::prune_releases().
 	 *
 	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
@@ -905,12 +901,12 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 
 		// Determine if the source (type or name) hasn't changed. Bail if so.
 		if (
-		     ( ! empty( $cb_input['_package_source_name'] )
-		       && in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'vcs', ] )
-		       && $cb_input['_package_source_name'] === $this->pre_save_package->get_source_name() )
-		     || ( ! empty( $cb_input['_package_source_project_name'] )
-		          && $cb_input['_package_source_type'] === 'wpackagist.org'
-		          && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
+				( ! empty( $cb_input['_package_source_name'] )
+				  && in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'vcs', ] )
+				  && $cb_input['_package_source_name'] === $this->pre_save_package->get_source_name() )
+				|| ( ! empty( $cb_input['_package_source_project_name'] )
+				     && $cb_input['_package_source_type'] === 'wpackagist.org'
+				     && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
 		) {
 			return;
 		}
@@ -920,7 +916,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 		// At the moment, we are only interested in certain meta entries.
 		// Replace pseudo IDs.
 		$prev_package_pseudo_id = $this->pre_save_package->get_source_name() . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
-		$new_package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_ID ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
+		$new_package_pseudo_id  = $this->package_manager->get_post_package_source_name( $post_ID ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
 
 		global $wpdb;
 		$wpdb->get_results( $wpdb->prepare( "
@@ -938,11 +934,11 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 	 * If the source name changes, we need to update the pseudo IDs meta-data for dependants.
 	 *
 	 * We only do this for external sources.
-	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 * The stored releases that don't satisfy the version constraint are purged via @since 0.14.0
 	 *
-	 * @since 0.14.0
+	 * @see BasePackageBuilder::prune_releases().
 	 *
-	 * @param int                           $post_ID
+	 * @param int $post_ID
 	 */
 	protected function maybe_update_dependants_on_source_change_from_revision_revert( int $post_ID ) {
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
@@ -966,7 +962,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		}
 
 		// Determine if the source (type or name) hasn't changed. Bail if so.
-		$package_source_name = get_post_meta( $post_ID, '_package_source_name', true );
+		$package_source_name         = get_post_meta( $post_ID, '_package_source_name', true );
 		$package_source_project_name = get_post_meta( $post_ID, '_package_source_project_name', true );
 		if (
 				( ! empty( $package_source_name )
@@ -984,7 +980,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		// At the moment, we are only interested in certain meta entries.
 		// Replace pseudo IDs.
 		$prev_package_pseudo_id = $this->pre_save_package->get_source_name() . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
-		$new_package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_ID ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
+		$new_package_pseudo_id  = $this->package_manager->get_post_package_source_name( $post_ID ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
 
 		global $wpdb;
 		$wpdb->get_results( $wpdb->prepare( "
@@ -1073,9 +1069,9 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 	 * If the source name changes, we need to clean all stored releases to avoid leaving previous releases that may still satisfy the version constraint.
 	 *
 	 * We only do this for external sources.
-	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 * The stored releases that don't satisfy the version constraint are purged via @since 0.9.0
 	 *
-	 * @since 0.9.0
+	 * @see BasePackageBuilder::prune_releases().
 	 *
 	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
@@ -1109,13 +1105,13 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		// Determine if the source (type or name) hasn't changed. Bail if so.
 		if ( $cb_input['_package_source_type'] === $this->pre_save_package->get_source_type()
 		     && (
-			     ( ! empty( $cb_input['_package_source_name'] )
-			       && in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'vcs', ] )
-			       && $cb_input['_package_source_name'] === $this->pre_save_package->get_source_name() )
-			     || ( ! empty( $cb_input['_package_source_project_name'] )
-			          && $cb_input['_package_source_type'] === 'wpackagist.org'
-			          && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
-				)
+				     ( ! empty( $cb_input['_package_source_name'] )
+				       && in_array( $cb_input['_package_source_type'], [ 'packagist.org', 'vcs', ] )
+				       && $cb_input['_package_source_name'] === $this->pre_save_package->get_source_name() )
+				     || ( ! empty( $cb_input['_package_source_project_name'] )
+				          && $cb_input['_package_source_type'] === 'wpackagist.org'
+				          && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
+		     )
 		) {
 			return;
 		}
@@ -1132,11 +1128,11 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 	 * If the source name changes, we need to clean all stored releases to avoid leaving previous releases that may still satisfy the version constraint.
 	 *
 	 * We only do this for external sources.
-	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 * The stored releases that don't satisfy the version constraint are purged via @since 0.14.0
 	 *
-	 * @since 0.14.0
+	 * @see BasePackageBuilder::prune_releases().
 	 *
-	 * @param int                           $post_ID
+	 * @param int $post_ID
 	 */
 	protected function maybe_clean_stored_releases_on_external_source_change_from_revision_revert( int $post_ID ) {
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
@@ -1161,7 +1157,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		}
 
 		// Determine if the source (type or name) hasn't changed. Bail if so.
-		$package_source_name = get_post_meta( $post_ID, '_package_source_name', true );
+		$package_source_name         = get_post_meta( $post_ID, '_package_source_name', true );
 		$package_source_project_name = get_post_meta( $post_ID, '_package_source_project_name', true );
 		if ( $package_source_type === $this->pre_save_package->get_source_type()
 		     && (
@@ -1336,6 +1332,107 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 	}
 
 	/**
+	 * Compare the current releases list with the stored seen ones.
+	 *
+	 * If there are new releases, show a user message.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param \WP_Post The current post object.
+	 */
+	protected function maybe_notify_about_new_releases( \WP_Post $post ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+			return;
+		}
+
+		$package = $this->packages->first_where( [ 'managed_post_id' => $post->ID ] );
+		if ( empty( $package ) ) {
+			return;
+		}
+
+		$seen_list = get_post_meta( $post->ID, '_pixelgradelt_package_seen_releases', true );
+		if ( empty( $seen_list ) ) {
+			$seen_list = [];
+		}
+
+		$current_list = [];
+		foreach ( $package->get_releases() as $release ) {
+			$current_list[] = $release->get_version();
+		}
+
+		uasort(
+				$current_list,
+				function ( $a, $b ) {
+					return version_compare( $b, $a );
+				}
+		);
+
+		$not_seen_list = array_diff( $current_list, $seen_list );
+		// Nothing to notify about.
+		if ( empty( $not_seen_list ) ) {
+			return;
+		}
+
+		$count   = count( $not_seen_list );
+		$message = sprintf(
+				wp_kses_post( __( 'Now, <em>look here you!</em> Yes, <em>you!</em><br>
+Since the last time any manager looked at this, <strong>%s</strong> %s been automagically 🧞‍♀️  made available: %s. <br>
+Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in charge 💪', 'pixelgradelt_records' ) ),
+				$count > 1 ? $count . ' new releases' : $count . ' new release',
+				$count > 1 ? 'have' : 'has',
+				'<span class="bubble wp-ui-highlight">' . implode( '</span>, <span class="bubble wp-ui-highlight">', $not_seen_list ) . '</span>'
+		);
+		$this->add_user_message( 'info', sprintf(
+				'<p>%s</p>',
+				$message
+		) );
+	}
+
+	/**
+	 * Store the current releases (only the version strings) in the post meta for later reference.
+	 *
+	 * We will use this list to determine what new releases have been added since the last time a user has viewed a certain package post.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param \WP_Post The current post object.
+	 */
+	protected function remember_current_releases_list( \WP_Post $post ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+			return;
+		}
+
+		$package = $this->packages->first_where( [ 'managed_post_id' => $post->ID ] );
+		if ( empty( $package ) ) {
+			return;
+		}
+
+		$current_list = get_post_meta( $post->ID, '_pixelgradelt_package_seen_releases', true );
+		if ( empty( $current_list ) ) {
+			$current_list = [];
+		}
+
+		$new_list = [];
+		foreach ( $package->get_releases() as $release ) {
+			$new_list[] = $release->get_version();
+		}
+
+		uasort(
+				$new_list,
+				function ( $a, $b ) {
+					return version_compare( $b, $a );
+				}
+		);
+
+		// Nothing to update.
+		if ( $current_list === $new_list ) {
+			return;
+		}
+
+		update_post_meta( $post->ID, '_pixelgradelt_package_seen_releases', $new_list );
+	}
+
+	/**
 	 * Display user messages at the top of the post edit screen.
 	 *
 	 * @param \WP_Post The current post object.
@@ -1353,7 +1450,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		if ( ! empty( $messages['error'] ) ) {
 			foreach ( $messages['error'] as $message ) {
 				if ( ! empty( $message ) ) {
-					printf( '<div class="%1$s">%2$s</div>', 'notice notice-error below-h2', $message );
+					printf( '<div class="%1$s">%2$s</div>', 'notice notice-error below-h2 is-dismissible', $message );
 				}
 			}
 		}
@@ -1361,7 +1458,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		if ( ! empty( $messages['warning'] ) ) {
 			foreach ( $messages['warning'] as $message ) {
 				if ( ! empty( $message ) ) {
-					printf( '<div class="%1$s">%2$s</div>', 'notice notice-warning below-h2', $message );
+					printf( '<div class="%1$s">%2$s</div>', 'notice notice-warning below-h2 is-dismissible', $message );
 				}
 			}
 		}
@@ -1369,7 +1466,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		if ( ! empty( $messages['info'] ) ) {
 			foreach ( $messages['info'] as $message ) {
 				if ( ! empty( $message ) ) {
-					printf( '<div class="%1$s">%2$s</div>', 'notice notice-info below-h2', $message );
+					printf( '<div class="%1$s">%2$s</div>', 'notice notice-info below-h2 is-dismissible', $message );
 				}
 			}
 		}

@@ -755,6 +755,7 @@ class BasePackageBuilder {
 					[
 						'package'          => $this->package->get_name(),
 						'required_package' => $package,
+						'logCategory' => 'package_builder',
 					]
 				);
 
@@ -782,6 +783,7 @@ class BasePackageBuilder {
 					[
 						'managed_post_id' => $package['managed_post_id'],
 						'package'         => $this->package->get_name(),
+						'logCategory' => 'package_builder',
 					]
 				);
 
@@ -1162,6 +1164,7 @@ class BasePackageBuilder {
 					'exception' => $e,
 					'version'   => $version,
 					'package'   => $this->package->get_name(),
+					'logCategory' => 'package_builder',
 				]
 			);
 
@@ -1203,6 +1206,7 @@ class BasePackageBuilder {
 					[
 						'exception' => $e,
 						'package'   => $this->package->get_name(),
+						'logCategory' => 'package_builder',
 					]
 				);
 			}

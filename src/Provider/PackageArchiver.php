@@ -205,6 +205,7 @@ class PackageArchiver extends AbstractHookProvider {
 						'exception' => $e,
 						'package'   => $package->get_name(),
 						'release'   => $release->get_version(),
+						'logCategory' => 'package_archiver',
 					]
 				);
 			}
@@ -273,6 +274,7 @@ class PackageArchiver extends AbstractHookProvider {
 						'exception' => $e,
 						'package'   => $package->get_name(),
 						'release'   => $release->get_version(),
+						'logCategory' => 'package_archiver',
 					]
 				);
 			}
@@ -310,6 +312,7 @@ class PackageArchiver extends AbstractHookProvider {
 				[
 					'exception' => $e,
 					'package'   => $package->get_name(),
+					'logCategory' => 'package_archiver',
 				]
 			);
 		}

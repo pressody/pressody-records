@@ -10,7 +10,7 @@
  * Plugin Name: PixelgradeLT Records
  * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-records
  * Description: Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.
- * Version: 0.14.0
+ * Version: 0.15.0
  * Author: Pixelgrade
  * Author URI: https://pixelgrade.com/
  * License: GPL-2.0-or-later
@@ -37,7 +37,7 @@ if ( ! \defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-const VERSION = '0.14.0';
+const VERSION = '0.15.0';
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
@@ -65,6 +65,12 @@ $dotenv->required( 'LTRECORDS_PHP_AUTH_USER' )->notEmpty();
 
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+// Load the Action Scheduler directly since it does not use Composer autoload.
+// @link https://github.com/woocommerce/action-scheduler/issues/471
+if ( file_exists( __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php' ) ) {
+	require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
+}
 
 // Create a container and register a service provider.
 $pixelgradelt_records_container = new Container();

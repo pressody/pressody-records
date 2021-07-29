@@ -270,7 +270,7 @@ input.pixelgradelt_records-cli-field {
 	max-width: 720px;
 }
 
-/* Edit package screen
+/* Edit package/part screen
 ----------------------------------------------------------------------------- */
 .package-authors__list .package-author {
 	float: left;
@@ -286,6 +286,21 @@ input.pixelgradelt_records-cli-field {
 
 .pixelgradelt_records-package-preview a.edit-package {
 	display: none;
+}
+
+.notice span.bubble {
+	padding: 3px 7px;
+	border-radius: 4px;
+}
+
+/* List packages/parts screen
+----------------------------------------------------------------------------- */
+#the-list td span.bubble {
+	float:left;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	padding: 3px 7px;
+	border-radius: 4px;
 }
 
 /* Other

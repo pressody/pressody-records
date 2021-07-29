@@ -43,7 +43,7 @@ class Release {
 	 * This is (Composer) data that is specific to this release.
 	 * This data is likely to be cached so that, once published, a release doesn't change in behavior over time (like changing requirements).
 	 * We aim to make published releases non-editable (of-course one can delete the cache and force a rebuild,
-	 * but that is nuclear and you should be wearing protective equipment :) ).
+	 * but that is nuclear, and you should be wearing protective equipment :) while doing so ).
 	 * This way we can be sure that any changes made to a parent package are only applied to future releases,
 	 * not existing ones. To do such a thing is dangerous since it would possibly break existing uses,
 	 * and hinder our ability to change a package's behavior since we would always need to account for backwards compatibility.

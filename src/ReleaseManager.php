@@ -143,6 +143,7 @@ class ReleaseManager {
 							'package'   => $package->get_source_name(),
 							'version'   => $version,
 							'file'      => $meta_file_path,
+							'logCategory' => 'release_manager',
 						]
 					);
 				}
@@ -285,11 +286,11 @@ class ReleaseManager {
 			return $release;
 		}
 
-		// We need create a release with the authenticated source URL so the stored zip file is used as the source.
+		// We need to create a release with the authenticated source URL so the stored zip file is used as the source.
 		$meta = $release->get_meta();
 
 		// If we already have the right 'dist' details (maybe from some cache; JSON?), don't recalculate the checksum.
-		// But only if the artifact file (.zip) wasn't modified in the mean time.
+		// But only if the artifact file (.zip) wasn't modified in the meantime.
 		if ( ! empty( $meta['dist']['url'] )
 		     && ! empty( $meta['dist']['shasum'] )
 		     && $meta['dist']['url'] === $release->get_download_url()
@@ -314,6 +315,7 @@ class ReleaseManager {
 					'exception' => $e,
 					'package'   => $release->get_package()->get_name(),
 					'version'   => $release->get_version(),
+					'logCategory' => 'release_manager',
 				]
 			);
 		}

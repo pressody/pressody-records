@@ -15,6 +15,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\PartManager;
+use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Utils\ArrayHelpers;
 
 /**
@@ -32,16 +33,28 @@ class ListParts extends AbstractHookProvider {
 	protected PartManager $part_manager;
 
 	/**
+	 * Packages repository.
+	 *
+	 * This is (should be) the repo that holds all the packages that we manage.
+	 *
+	 * @var PackageRepository
+	 */
+	protected PackageRepository $packages;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param PartManager $part_manager Parts manager.
+	 * @param PartManager       $part_manager Parts manager.
+	 * @param PackageRepository $packages     Packages repository.
 	 */
 	public function __construct(
-		PartManager $part_manager
+		PartManager $part_manager,
+		PackageRepository $packages
 	) {
 		$this->part_manager = $part_manager;
+		$this->packages     = $packages;
 	}
 
 	/**
@@ -59,7 +72,7 @@ class ListParts extends AbstractHookProvider {
 
 		// Add custom columns to post list.
 		$this->add_action( 'manage_' . $this->part_manager::PACKAGE_POST_TYPE . '_posts_columns', 'add_custom_columns' );
-		$this->add_action( 'manage_' . $this->part_manager::PACKAGE_POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2);
+		$this->add_action( 'manage_' . $this->part_manager::PACKAGE_POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2 );
 	}
 
 	/**
@@ -121,8 +134,10 @@ class ListParts extends AbstractHookProvider {
 		// Insert after the title columns with dependency details.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
 			[
+				'package_source'            => esc_html__( 'Part Plugin Source', 'pixelgradelt_records' ),
+				'new_releases'              => esc_html__( 'New Releases', 'pixelgradelt_records' ),
 				'package_required_packages' => esc_html__( 'Required Packages', 'pixelgradelt_records' ),
-				'package_required_parts' => esc_html__( 'Required Parts', 'pixelgradelt_records' ),
+				'package_required_parts'    => esc_html__( 'Required Parts', 'pixelgradelt_records' ),
 			]
 		);
 
@@ -130,13 +145,88 @@ class ListParts extends AbstractHookProvider {
 	}
 
 	protected function populate_custom_columns( string $column, int $post_id ): void {
-		if ( ! in_array( $column, [ 'package_required_packages', 'package_required_parts', ] ) ) {
+		if ( ! in_array( $column, [
+			'package_source',
+			'new_releases',
+			'package_required_packages',
+			'package_required_parts',
+		] ) ) {
 			return;
 		}
 
 		$output = '—';
 
+		$package = $this->packages->first_where( [ 'managed_post_id' => $post_id ] );
+		if ( empty( $package ) ) {
+			echo $output;
+
+			return;
+		}
+
 		$part_data = $this->part_manager->get_package_id_data( $post_id );
+		if ( 'package_source' === $column ) {
+			// Add details to the title regarding the package configured source.
+			if ( ! empty( $part_data ) && ! empty( $part_data['source_type'] ) ) {
+				switch ( $part_data['source_type'] ) {
+					case 'packagist.org':
+						$output = 'Packagist.org - ' . $part_data['source_name'];
+						break;
+					case 'wpackagist.org':
+						$output = 'WPackagist.org - ' . $part_data['source_name'];
+						break;
+					case 'vcs':
+						if ( false !== strpos( $part_data['vcs_url'], 'github.com' ) ) {
+							$output = 'Github - ';
+						} else {
+							$output = 'VCS - ';
+						}
+
+						$output .= $part_data['source_name'];
+						break;
+					case 'local.plugin':
+						$output = 'Local Plugin - ' . $part_data['slug'];
+						break;
+					case 'local.theme':
+						$output = 'Local Theme - ' . $part_data['slug'];
+						break;
+					case 'local.manual':
+						if ( PackageTypes::THEME === $part_data['type'] ) {
+							$output = 'Manual Theme - ' . $part_data['slug'];
+						} else {
+							$output = 'Manual Plugin - ' . $part_data['slug'];
+						}
+						break;
+					default:
+						// Nothing
+						break;
+				}
+			}
+		}
+
+		if ( 'new_releases' === $column ) {
+			$seen_list = get_post_meta( $post_id, '_pixelgradelt_package_seen_releases', true );
+			if ( empty( $seen_list ) ) {
+				$seen_list = [];
+			}
+
+			$current_list = [];
+			foreach ( $package->get_releases() as $release ) {
+				$current_list[] = $release->get_version();
+			}
+
+			uasort(
+				$current_list,
+				function ( $a, $b ) {
+					return version_compare( $b, $a );
+				}
+			);
+
+			$not_seen_list = array_diff( $current_list, $seen_list );
+			if ( ! empty( $not_seen_list ) ) {
+				$output = '<span class="bubble wp-ui-highlight">' . implode( '</span><span class="bubble wp-ui-highlight">', $not_seen_list ) . '</span>';
+			}
+		}
+
 		if ( 'package_required_packages' === $column && ! empty( $part_data['required_packages'] ) ) {
 			$list = [];
 			foreach ( $part_data['required_packages'] as $package_details ) {

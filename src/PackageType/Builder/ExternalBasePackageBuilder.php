@@ -80,6 +80,7 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 					[
 						'exception' => $e,
 						'package'   => $this->package->get_name(),
+						'logCategory' => 'package_builder',
 					]
 				);
 			}
@@ -148,6 +149,10 @@ class ExternalBasePackageBuilder extends BasePackageBuilder {
 
 			if ( ! empty( $release_package['require'] ) ) {
 				$release_meta['require'] = $release_package['require'];
+			}
+
+			if ( ! empty( $release_package['autoload'] ) ) {
+				$release_meta['autoload'] = $release_package['autoload'];
 			}
 
 			if ( ! empty( $release_package['time'] ) ) {

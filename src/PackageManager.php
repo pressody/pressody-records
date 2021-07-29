@@ -11,11 +11,12 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records;
 
+use Cedaro\WP\Plugin\AbstractHookProvider;
 use Env\Env;
-use Mockery\Exception;
 use PixelgradeLT\Records\Authentication\ApiKey\Server;
 use PixelgradeLT\Records\Client\ComposerClient;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\Queue\QueueInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,7 +26,7 @@ use Psr\Log\LoggerInterface;
  *
  * @since 0.1.0
  */
-class PackageManager {
+class PackageManager extends AbstractHookProvider {
 
 	const PACKAGE_POST_TYPE = 'ltpackage';
 	const PACKAGE_POST_TYPE_PLURAL = 'ltpackages';
@@ -78,6 +79,15 @@ class PackageManager {
 	protected HasherInterface $hasher;
 
 	/**
+	 * Queue.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @var QueueInterface
+	 */
+	protected QueueInterface $queue;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
@@ -86,14 +96,16 @@ class PackageManager {
 	 * @param ComposerVersionParser $composer_version_parser
 	 * @param WordPressReadmeParser $wordpress_readme_parser
 	 * @param LoggerInterface       $logger Logger.
-	 * @param HasherInterface       $hasher
+	 * @param HasherInterface       $hasher Hasher.
+	 * @param QueueInterface        $queue  Queue.
 	 */
 	public function __construct(
 		ComposerClient $composer_client,
 		ComposerVersionParser $composer_version_parser,
 		WordPressReadmeParser $wordpress_readme_parser,
 		LoggerInterface $logger,
-		HasherInterface $hasher
+		HasherInterface $hasher,
+		QueueInterface $queue
 	) {
 
 		$this->composer_client         = $composer_client;
@@ -101,6 +113,98 @@ class PackageManager {
 		$this->wordpress_readme_parser = $wordpress_readme_parser;
 		$this->logger                  = $logger;
 		$this->hasher                  = $hasher;
+		$this->queue                   = $queue;
+	}
+
+	/**
+	 * Register hooks.
+	 *
+	 * @since 0.15.0
+	 */
+	public function register_hooks() {
+		$this->add_action( 'init', 'schedule_recurring_events' );
+
+		// We want to refresh external source packages twice a day: at midday (noon) and midnight.
+		add_action( 'pixelgradelt_records/midnight', [ $this, 'schedule_external_packages_refresh' ] );
+		add_action( 'pixelgradelt_records/midday', [ $this, 'schedule_external_packages_refresh' ] );
+
+		// Hook the actual logic to refresh external source packages.
+		add_action( 'pixelgradelt_records/external_package_refresh', [ $this, 'post_fetch_external_packages' ], 10, 1 );
+	}
+
+	/**
+	 * Maybe schedule the recurring actions/events, if it is not already scheduled.
+	 *
+	 * @since 0.15.0
+	 */
+	protected function schedule_recurring_events() {
+		if ( ! $this->queue->get_next( 'pixelgradelt_records/midnight' ) ) {
+			$this->queue->schedule_recurring( strtotime( 'tomorrow' ), DAY_IN_SECONDS, 'pixelgradelt_records/midnight', [], 'plt_rec' );
+		}
+
+		if ( ! $this->queue->get_next( 'pixelgradelt_records/midday' ) ) {
+			$this->queue->schedule_recurring( strtotime( 'tomorrow' ) + 12 * HOUR_IN_SECONDS, DAY_IN_SECONDS, 'pixelgradelt_records/midday', [], 'plt_rec' );
+		}
+
+		if ( ! $this->queue->get_next( 'pixelgradelt_records/hourly' ) ) {
+			$this->queue->schedule_recurring( (int) floor( ( time() + HOUR_IN_SECONDS ) / HOUR_IN_SECONDS ), HOUR_IN_SECONDS, 'pixelgradelt_records/hourly', [], 'plt_rec' );
+		}
+	}
+
+	/**
+	 * Schedule one-time tasks to refresh each package with external sources.
+	 *
+	 * Rather than doing all the processing synchronously,
+	 * we favor this async approach to avoid timeout or single points of failure.
+	 *
+	 * @since 0.15.0
+	 */
+	public function schedule_external_packages_refresh() {
+		// Get all package post IDs with external sources.
+		$post_ids = $this->get_package_ids_by( [
+			'package_source_type' => [
+				'packagist.org',
+				'wpackagist.org',
+				'vcs',
+			],
+		] );
+
+		foreach ( $post_ids as $post_id ) {
+			// Schedule 30 seconds into the future.
+			$this->queue->schedule_single(
+				time() + 30,
+				'pixelgradelt_records/external_package_refresh',
+				[ $post_id ],
+				'plt_rec_package_refresh'
+			);
+		}
+	}
+
+	/**
+	 * Attempt to fetch external packages and save them in the post meta to be used for release caching and such.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int $post_id
+	 */
+	public function post_fetch_external_packages( int $post_id ) {
+
+		$packages = $this->fetch_external_package_remote_releases( $post_id );
+
+		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
+		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\Builder\PackageBuilder::build() to do the work.
+		if ( ! empty( $packages ) ) {
+			update_post_meta( $post_id, '_package_source_cached_release_packages', $packages );
+
+			$this->logger->info(
+				'Updated the source cached release packages for "{package_name}" (post ID #{post_id}).',
+				[
+					'package_name' => $this->get_post_package_name( $post_id ),
+					'post_id' => $post_id,
+					'logCategory' => 'package_manager',
+				]
+			);
+		}
 	}
 
 	/**
@@ -509,7 +613,6 @@ class PackageManager {
 	 *
 	 * @param int $post_ID
 	 *
-	 * @throws \Exception
 	 * @return array
 	 */
 	public function fetch_external_package_remote_releases( int $post_ID ): array {
@@ -607,6 +710,7 @@ class PackageManager {
 					'exception'   => $e,
 					'package'     => $package_data['source_name'],
 					'source_type' => $package_data['source_type'],
+					'logCategory' => 'package_manager',
 				]
 			);
 		}
@@ -818,6 +922,7 @@ class PackageManager {
 						'exception' => $e,
 						'version'   => $release_data['version'],
 						'post_id'   => $post_ID,
+						'logCategory' => 'package_manager',
 					]
 				);
 				continue;
@@ -968,8 +1073,8 @@ class PackageManager {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( Env::get('LTRECORDS_PHP_AUTH_USER') ) ? [
-									'Authorization: Basic ' . base64_encode( Env::get('LTRECORDS_PHP_AUTH_USER') . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( Env::get( 'LTRECORDS_PHP_AUTH_USER' ) ) ? [
+									'Authorization: Basic ' . base64_encode( Env::get( 'LTRECORDS_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],
@@ -1000,6 +1105,7 @@ class PackageManager {
 					'exception' => $e,
 					'package'   => $package->get_name(),
 					'type'      => $package->get_type(),
+					'logCategory' => 'package_manager',
 				]
 			);
 
@@ -1068,9 +1174,9 @@ class PackageManager {
 	 *
 	 * @since 0.9.0
 	 *
-	 * @throws \UnexpectedValueException
 	 * @param string $version
 	 *
+	 * @throws \UnexpectedValueException
 	 * @return string
 	 */
 	public function normalize_version( string $version ): string {
