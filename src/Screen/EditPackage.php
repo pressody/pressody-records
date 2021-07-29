@@ -129,7 +129,9 @@ class EditPackage extends AbstractHookProvider {
 		$this->add_action( 'add_meta_boxes_' . $this->package_manager::PACKAGE_POST_TYPE, 'add_package_current_state_meta_box', 10 );
 		$this->add_action( 'add_meta_boxes_' . $this->package_manager::PACKAGE_POST_TYPE, 'adjust_core_metaboxes', 99 );
 
-		// ADD CUSTOM POST META VIA CARBON FIELDS.
+		/**
+		 * ADD CUSTOM POST META VIA CARBON FIELDS.
+		 */
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 		// Handle old releases on post update, first.
@@ -146,6 +148,16 @@ class EditPackage extends AbstractHookProvider {
 		// Handle post data transform before the post is updated in the DB (like changing the source type)
 		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
 		$this->add_action( 'pre_post_update', 'maybe_clean_up_manual_release_post_data', 10, 1 );
+
+		/**
+		 * Handle post revision revert separately since `carbon_fields_post_meta_container_saved` is not fired.
+		 * We need to hook late to allow CarbonFields to copy the meta from the revision.
+		 * @see \Carbon_Fields\Service\Revisions_Service::enabled()
+		 * @see \Carbon_Fields\Service\Revisions_Service::restore_post_revision()
+		 */
+		$this->add_action( 'wp_restore_post_revision', 'maybe_clean_stored_releases_on_external_source_change_from_revision_revert', 99, 1 );
+		$this->add_action( 'wp_restore_post_revision', 'maybe_update_dependants_on_source_change_from_revision_revert', 99, 1 );
+
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_package_post', 5 );
@@ -923,6 +935,70 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 	}
 
 	/**
+	 * If the source name changes, we need to update the pseudo IDs meta-data for dependants.
+	 *
+	 * We only do this for external sources.
+	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int                           $post_ID
+	 */
+	protected function maybe_update_dependants_on_source_change_from_revision_revert( int $post_ID ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
+			return;
+		}
+
+		if ( empty( $this->pre_save_package ) ) {
+			return;
+		}
+
+		// Since there is a lot of interaction with the post_meta, the cached post data may not be quite right.
+		// So clean the cache for this post, just to safe. Expensive operation, but we are doing this rarely, so it is worth it.
+		clean_post_cache( $post_ID );
+
+		// We only want to deal with external-source packages.
+		$package_source_type = get_post_meta( $post_ID, '_package_source_type', true );
+		if ( empty( $package_source_type )
+		     || ! in_array( $package_source_type, [ 'packagist.org', 'wpackagist.org', 'vcs', ] )
+		) {
+			return;
+		}
+
+		// Determine if the source (type or name) hasn't changed. Bail if so.
+		$package_source_name = get_post_meta( $post_ID, '_package_source_name', true );
+		$package_source_project_name = get_post_meta( $post_ID, '_package_source_project_name', true );
+		if (
+				( ! empty( $package_source_name )
+				  && in_array( $package_source_type, [ 'packagist.org', 'vcs', ] )
+				  && $package_source_name === $this->pre_save_package->get_source_name() )
+				|| ( ! empty( $package_source_project_name )
+				     && $package_source_type === 'wpackagist.org'
+				     && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
+		) {
+			return;
+		}
+
+		// We have work to do.
+
+		// At the moment, we are only interested in certain meta entries.
+		// Replace pseudo IDs.
+		$prev_package_pseudo_id = $this->pre_save_package->get_source_name() . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
+		$new_package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_ID ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_ID;
+
+		global $wpdb;
+		$wpdb->get_results( $wpdb->prepare( "
+UPDATE $wpdb->postmeta m
+JOIN $wpdb->posts p ON m.post_id = p.ID
+SET m.meta_value = REPLACE(m.meta_value, %s, %s)
+WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_package_pseudo_id, $new_package_pseudo_id ) );
+
+		// Flush the entire cache since we don't know what post IDs might have been affected.
+		// It is OK since this is a rare operation.
+		wp_cache_flush();
+	}
+
+	/**
 	 * If we are switching to a manual source type, attempt to transform any existing stored releases to manual ones
 	 * so they can be managed, and not simply lost.
 	 *
@@ -1040,6 +1116,62 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 			          && $cb_input['_package_source_type'] === 'wpackagist.org'
 			          && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
 				)
+		) {
+			return;
+		}
+
+		// We have work to do.
+
+		// Simply delete all the previously stored releases.
+		foreach ( $this->pre_save_package->get_releases() as $release ) {
+			$this->release_manager->delete( $release );
+		}
+	}
+
+	/**
+	 * If the source name changes, we need to clean all stored releases to avoid leaving previous releases that may still satisfy the version constraint.
+	 *
+	 * We only do this for external sources.
+	 * The stored releases that don't satisfy the version constraint are purged via @see BasePackageBuilder::prune_releases().
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int                           $post_ID
+	 */
+	protected function maybe_clean_stored_releases_on_external_source_change_from_revision_revert( int $post_ID ) {
+		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post_ID ) ) {
+			return;
+		}
+
+		if ( empty( $this->pre_save_package ) ) {
+			return;
+		}
+
+		// Since there is a lot of interaction with the post_meta, the cached post data may not be quite right.
+		// So clean the cache for this post, just to safe. Expensive operation, but we are doing this rarely, so it is worth it.
+		clean_post_cache( $post_ID );
+
+		// We only want to deal with external-source packages and packages that have releases already stored.
+		$package_source_type = get_post_meta( $post_ID, '_package_source_type', true );
+		if ( empty( $package_source_type )
+		     || ! in_array( $package_source_type, [ 'packagist.org', 'wpackagist.org', 'vcs', ] )
+		     || ! $this->pre_save_package->has_releases()
+		) {
+			return;
+		}
+
+		// Determine if the source (type or name) hasn't changed. Bail if so.
+		$package_source_name = get_post_meta( $post_ID, '_package_source_name', true );
+		$package_source_project_name = get_post_meta( $post_ID, '_package_source_project_name', true );
+		if ( $package_source_type === $this->pre_save_package->get_source_type()
+		     && (
+				     ( ! empty( $package_source_name )
+				       && in_array( $package_source_type, [ 'packagist.org', 'vcs', ] )
+				       && $package_source_name === $this->pre_save_package->get_source_name() )
+				     || ( ! empty( $package_source_project_name )
+				          && $package_source_type === 'wpackagist.org'
+				          && $this->package_manager->get_post_package_source_name( $post_ID ) === $this->pre_save_package->get_source_name() )
+		     )
 		) {
 			return;
 		}
