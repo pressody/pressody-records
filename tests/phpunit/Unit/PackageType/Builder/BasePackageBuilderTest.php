@@ -14,6 +14,7 @@ use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\BasePackage;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\PackageTypes;
+use PixelgradeLT\Records\Queue\ActionQueue;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\StringHashes;
@@ -45,10 +46,11 @@ class BasePackageBuilderTest extends TestCase {
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 		$composer_client         = new ComposerClient();
 		$logger                  = new NullIO();
+		$queue                   = new ActionQueue();
 
-		$hasher = new StringHashes();
-		$readme_parser = new WordPressReadmeParser();
-		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher );
+		$hasher          = new StringHashes();
+		$readme_parser   = new WordPressReadmeParser();
+		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher, $queue );
 
 		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client, $logger );
 

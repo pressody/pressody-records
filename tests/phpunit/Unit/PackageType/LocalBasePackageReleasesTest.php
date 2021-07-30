@@ -1,5 +1,5 @@
 <?php
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Tests\Unit\PackageType;
 
@@ -10,6 +10,7 @@ use PixelgradeLT\Records\ComposerVersionParser;
 use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
+use PixelgradeLT\Records\Queue\ActionQueue;
 use PixelgradeLT\Records\StringHashes;
 use PixelgradeLT\Records\WordPressReadmeParser;
 use Psr\Log\NullLogger;
@@ -27,16 +28,17 @@ class LocalBasePackageReleasesTest extends TestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$archiver = new Archiver( new NullLogger() );
-		$storage  = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
-		$package  = new LocalBasePackage();
+		$archiver                = new Archiver( new NullLogger() );
+		$storage                 = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$package                 = new LocalBasePackage();
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
-		$composer_client = new ComposerClient();
-		$logger = new NullIO();
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+		$queue                   = new ActionQueue();
 
-		$hasher = new StringHashes();
-		$readme_parser = new WordPressReadmeParser();
-		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher );
+		$hasher          = new StringHashes();
+		$readme_parser   = new WordPressReadmeParser();
+		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher, $queue );
 
 		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client, $logger );
 

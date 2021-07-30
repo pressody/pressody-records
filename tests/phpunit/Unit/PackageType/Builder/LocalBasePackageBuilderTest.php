@@ -1,5 +1,5 @@
 <?php
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
 
@@ -13,6 +13,7 @@ use PixelgradeLT\Records\PackageManager;
 use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
 use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
 use PixelgradeLT\Records\PackageType\LocalBasePackage;
+use PixelgradeLT\Records\Queue\ActionQueue;
 use PixelgradeLT\Records\ReleaseManager;
 use PixelgradeLT\Records\Storage\Local as LocalStorage;
 use PixelgradeLT\Records\StringHashes;
@@ -34,15 +35,16 @@ class LocalBasePackageBuilderTest extends TestCase {
 		};
 
 
-		$archiver = new Archiver( new NullLogger() );
-		$storage  = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$archiver                = new Archiver( new NullLogger() );
+		$storage                 = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
-		$composer_client = new ComposerClient();
-		$logger = new NullIO();
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+		$queue                   = new ActionQueue();
 
-		$hasher = new StringHashes();
-		$readme_parser = new WordPressReadmeParser();
-		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher );
+		$hasher          = new StringHashes();
+		$readme_parser   = new WordPressReadmeParser();
+		$package_manager = new PackageManager( $composer_client, $composer_version_parser, $readme_parser, $logger, $hasher, $queue );
 
 		$release_manager = new ReleaseManager( $storage, $archiver, $composer_version_parser, $composer_client, $logger );
 
@@ -83,22 +85,23 @@ class LocalBasePackageBuilderTest extends TestCase {
 
 	public function test_invalid_installed_version() {
 		$invalid = '2-0-0';
-		$package  = $this->builder->set_installed( true )->set_installed_version( $invalid )->build();
+		$package = $this->builder->set_installed( true )->set_installed_version( $invalid )->build();
 
 		$this->assertSame( '', $package->installed_version );
 	}
 
 	public function test_with_package() {
-		$expected = new class extends LocalBasePackage {
+		$expected                    = new class extends LocalBasePackage {
 			public function __get( $name ) {
 				return $this->$name;
 			}
+
 			public function __set( $name, $value ) {
 				$this->$name = $value;
 			}
 		};
-		$expected->is_installed = true;
-		$expected->directory = 'directory/';
+		$expected->is_installed      = true;
+		$expected->directory         = 'directory/';
 		$expected->installed_version = '2.0.0';
 
 		$package = $this->builder->with_package( $expected )->build();
