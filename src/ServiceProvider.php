@@ -142,6 +142,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new I18n();
 		};
 
+		$container['hooks.maintenance'] = function () {
+			return new Provider\Maintenance();
+		};
+
 		$container['hooks.package_archiver'] = function ( $container ) {
 			return new Provider\PackageArchiver(
 				$container['repository.managed'],
@@ -234,10 +238,10 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['logs.level'] = function () {
 			// Log warnings and above when WP_DEBUG is enabled.
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				$level = LogLevel::WARNING;
+				$level = LogLevel::DEBUG;
 			}
 
-			return $level ?? '';
+			return $level ?? LogLevel::INFO;
 		};
 
 		$container['logs.handlers.file'] = function () {

@@ -174,7 +174,7 @@ class PackageManager extends AbstractHookProvider {
 			$this->queue->schedule_single(
 				time() + 30,
 				'pixelgradelt_records/external_package_refresh',
-				[ $post_id ],
+				[ 'post_id' => $post_id ],
 				'plt_rec_package_refresh'
 			);
 		}
