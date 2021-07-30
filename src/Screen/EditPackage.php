@@ -134,6 +134,10 @@ class EditPackage extends AbstractHookProvider {
 		 */
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
+
+		// Handle post data transform before the post is updated in the DB (like changing the source type)
+		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
+		$this->add_action( 'pre_post_update', 'maybe_clean_up_manual_release_post_data', 10, 1 );
 		// Handle old releases on post update, first.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_clean_stored_releases_on_external_source_change', 3, 2 );
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'maybe_migrate_releases_on_manual_source_switch', 3, 2 );
@@ -144,10 +148,8 @@ class EditPackage extends AbstractHookProvider {
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_empty_package_config_details_on_post_save', 10, 2 );
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_dependency_packages', 20, 2 );
-
-		// Handle post data transform before the post is updated in the DB (like changing the source type)
-		$this->add_action( 'pre_post_update', 'remember_post_package', 10, 1 );
-		$this->add_action( 'pre_post_update', 'maybe_clean_up_manual_release_post_data', 10, 1 );
+		// Remember any new releases.
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'remember_current_releases_list', 30, 1 );
 
 		/**
 		 * Handle post revision revert separately since `carbon_fields_post_meta_container_saved` is not fired.
@@ -1395,9 +1397,13 @@ Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in cha
 	 *
 	 * @since 0.15.0
 	 *
-	 * @param \WP_Post The current post object.
+	 * @param \WP_Post|int The post object or ID.
 	 */
-	protected function remember_current_releases_list( \WP_Post $post ) {
+	protected function remember_current_releases_list( $post ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return;
+		}
 		if ( $this->package_manager::PACKAGE_POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
 			return;
 		}
