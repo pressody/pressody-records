@@ -593,7 +593,7 @@ class BasePackageBuilder {
 			$package_data = $this->package_manager->get_managed_package_data_by( $args );
 		}
 		// No data, no play.
-		if ( empty( $package_data ) ) {
+		if ( empty( $package_data ) || empty( $package_data['managed_post_id'] ) ) {
 			// Mark this package as not being managed by us, yet.
 			$this->set_is_managed( false );
 
@@ -603,6 +603,20 @@ class BasePackageBuilder {
 		// Since we have data, it is a managed package.
 		$this->set_is_managed( true );
 		$this->set_visibility( $this->package_manager->get_package_visibility( $this->package ) );
+		$this->set_managed_post_id( $package_data['managed_post_id'] );
+		$this->set_managed_post_id_hash( $this->package_manager->hash_encode_id( $package_data['managed_post_id'] ) );
+
+		/**
+		 * Since we manage this package, we want our managed package slug (the post slug/name) or name to take precedence over others.
+		 * For example to overwrite the slug set by an installed plugin.
+		 * @see LocalPluginBuilder::from_basename()
+		 */
+		if ( ! empty( $package_data['name'] ) ) {
+			$this->set_name( $package_data['name'] );
+		}
+		if ( ! empty( $package_data['slug'] ) ) {
+			$this->set_slug( $package_data['slug'] );
+		}
 
 		$this->from_package_data( $package_data );
 
