@@ -24,9 +24,9 @@ class ExternalBasePackage extends BasePackage {
 	/**
 	 * The constraint for available releases by.
 	 *
-	 * @var ConstraintInterface
+	 * @var ConstraintInterface|null
 	 */
-	protected $source_constraint = null;
+	protected ?ConstraintInterface $source_constraint = null;
 
 	/**
 	 * Retrieve the package source constraint.

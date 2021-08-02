@@ -29,21 +29,21 @@ class LocalBasePackage extends BasePackage {
 	 *
 	 * @var string
 	 */
-	protected $directory;
+	protected string $directory;
 
 	/**
 	 * Whether the package is installed in the current WordPress installation.
 	 *
 	 * @var bool
 	 */
-	protected $is_installed = false;
+	protected bool $is_installed = false;
 
 	/**
 	 * The currently installed version.
 	 *
 	 * @var string
 	 */
-	protected $installed_version = '';
+	protected string $installed_version = '';
 
 	/**
 	 * Retrieve the package installed directory.

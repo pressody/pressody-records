@@ -26,7 +26,7 @@ final class LocalPlugin extends LocalBasePackage {
 	 *
 	 * @var string
 	 */
-	protected $basename;
+	protected string $basename;
 
 	/**
 	 * Retrieve the relative path to the main plugin file from the plugins

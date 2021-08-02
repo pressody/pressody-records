@@ -464,7 +464,7 @@ class BasePackageBuilder {
 	}
 
 	/**
-	 * Set the the required PHP version, but only if the given version string is valid.
+	 * Set the required PHP version, but only if the given version string is valid.
 	 *
 	 * @since 0.5.0
 	 *
@@ -791,7 +791,7 @@ class BasePackageBuilder {
 				continue;
 			}
 
-			// Enforce the some details from the actual package data since the selected source name may have changed,
+			// Enforce the details from the actual package data since the selected source name may have changed,
 			// but the post ID less so.
 			$normalized[ $package['pseudo_id'] ]['source_name'] = $package_data['source_name'];
 
