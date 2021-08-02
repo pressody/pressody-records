@@ -16,7 +16,7 @@ use PixelgradeLT\Records\Authentication\ApiKey\ApiKey;
 use PixelgradeLT\Records\Authentication\ApiKey\ApiKeyRepository;
 use PixelgradeLT\Records\Capabilities;
 use PixelgradeLT\Records\Provider\HealthCheck;
-use PixelgradeLT\Records\Provider\LTRetailer;
+use PixelgradeLT\Records\Integration\LTRetailer;
 use PixelgradeLT\Records\Repository\PackageRepository;
 use PixelgradeLT\Records\Transformer\PackageTransformer;
 
@@ -352,7 +352,7 @@ class Settings extends AbstractHookProvider {
 			       id="pixelgradelt_records-ltretailer-compositions-root-endpoint"
 			       value="<?php echo esc_attr( $value ); ?>"><br/>
 			<span class="description">Provide here the LT Retailer Compositions root endpoint URL. We will append the following fragments:<br>
-				<?php echo '<code>' . LTRetailer::LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_USER_PARTIAL . '</code>, ' .
+				<?php echo '<code>' . LTRetailer::LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_LTDETAILS_PARTIAL . '</code>, ' .
 				           '<code>' . LTRetailer::LTRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL . '</code>, '; ?></span>
 		</p>
 		<?php

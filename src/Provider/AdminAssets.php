@@ -103,8 +103,8 @@ class AdminAssets extends AbstractHookProvider {
 	public function filter_script_type( string $tag, string $handle ): string {
 		$modules = [
 			'pixelgradelt_records-access',
-			'pixelgradelt_records-repository',
 			'pixelgradelt_records-edit-package',
+			'pixelgradelt_records-repository',
 		];
 
 		if ( in_array( $handle, $modules, true ) ) {
