@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d86e38776faee681c021a467d2fe61a5",
+    "content-hash": "c72d96b5fb4b132ea2513dbb4ad6f3d0",
     "packages": [
         {
             "name": "automattic/jetpack-constants",
@@ -1279,6 +1279,99 @@
                 "source": "https://github.com/silexphp/Pimple/tree/v3.4.0"
             },
             "time": "2021-03-06T08:28:00+00:00"
+        },
+        {
+            "name": "pixelgrade/wp-post-notes",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../../_temp/wp-post-notes",
+                "reference": "0fbf49062fc1577a48d5ebf5438dec0a3c28ecad"
+            },
+            "require": {
+                "php": "^7.4"
+            },
+            "require-dev": {
+                "brain/monkey": "^2.2",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+                "phpcompatibility/phpcompatibility-wp": "^2",
+                "phpunit/phpunit": "^7.5",
+                "roave/security-advisories": "dev-master",
+                "squizlabs/php_codesniffer": "^3.3",
+                "wordpress/wordpress": "^5.6",
+                "wp-cli/i18n-command": "dev-master",
+                "wp-coding-standards/wpcs": "^1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Pixelgrade\\WPPostNotes\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Pixelgrade\\WPPostNotes\\Tests\\": "tests/phpunit/"
+                },
+                "files": []
+            },
+            "scripts": {
+                "install-codestandards": [
+                    "Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
+                ],
+                "phpcs": [
+                    "./vendor/bin/phpcs"
+                ],
+                "tests": [
+                    "./vendor/bin/phpunit --colors=always"
+                ],
+                "tests-unit": [
+                    "./vendor/bin/phpunit --testsuite=Unit --colors=always"
+                ],
+                "tests-integration": [
+                    "./vendor/bin/phpunit --testsuite=Integration --colors=always"
+                ],
+                "makepot": [
+                    "./vendor/bin/wp i18n make-pot . languages/pixelgradelt-records.pot"
+                ],
+                "prepare-for-release": [
+                    "composer install",
+                    "composer makepot",
+                    "composer install --no-dev --prefer-dist",
+                    "composer dump-autoload --no-dev --optimize"
+                ]
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Vlad Olaru",
+                    "email": "vlad@pixelgrade.com",
+                    "homepage": "https://pixelgrade.com/"
+                }
+            ],
+            "description": "WordPress library for adding public and private notes to posts, pages, or any custom post type.",
+            "homepage": "https://github.com/pixelgrade/wp-post-notes",
+            "keywords": [
+                "cpt-notes",
+                "custom-post-type-notes",
+                "notes",
+                "pixelgrade",
+                "pixelgradelt",
+                "post-notes",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/pixelgrade/wp-post-notes/issues",
+                "source": "https://github.com/pixelgrade/wp-post-notes"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "psr/container",
@@ -5868,6 +5961,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "pixelgrade/wp-post-notes": 20,
         "roave/security-advisories": 20,
         "wp-cli/i18n-command": 20
     },

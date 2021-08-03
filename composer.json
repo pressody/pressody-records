@@ -35,6 +35,13 @@
 			"type": "vcs",
 			"url": "https://github.com/WordPress/wordpress-develop",
 			"no-api": true
+		},
+		"wp-post-notes": {
+		  "type": "path",
+		  "url": "../../_temp/wp-post-notes",
+		  "options": {
+			"symlink": true
+		  }
 		}
 	},
 	"require": {
@@ -53,7 +60,8 @@
 		"psr/container": "^1.0",
 		"psr/log": "^1.0",
 		"vlucas/phpdotenv": "^5.3",
-	  	"woocommerce/action-scheduler": "^3.2"
+	  	"woocommerce/action-scheduler": "^3.2",
+	  	"pixelgrade/wp-post-notes": "@dev"
 	},
 	"require-dev": {
 		"brain/monkey": "^2.2",

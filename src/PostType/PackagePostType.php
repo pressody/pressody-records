@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Records\PostType;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use Pixelgrade\WPPostNotes\PostNotes;
 use PixelgradeLT\Records\PackageType\PackageTypes;
 use PixelgradeLT\Records\PackageManager;
 
@@ -30,6 +31,13 @@ class PackagePostType extends AbstractHookProvider {
 	protected PackageManager $package_manager;
 
 	/**
+	 * Post notes functionality.
+	 *
+	 * @var PostNotes
+	 */
+	protected PostNotes $post_notes;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
@@ -40,6 +48,8 @@ class PackagePostType extends AbstractHookProvider {
 			PackageManager $package_manager
 	) {
 		$this->package_manager = $package_manager;
+
+		$this->post_notes = new PostNotes( $this->package_manager::PACKAGE_POST_TYPE );
 	}
 
 	public function register_hooks() {
