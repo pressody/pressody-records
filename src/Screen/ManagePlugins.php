@@ -102,7 +102,7 @@ class ManagePlugins extends AbstractHookProvider {
 
 		$output = '<span>';
 		if ( $this->repository->contains( [ 'slug' => $plugin_file ] ) ) {
-			$output .= '<span class="dashicons dashicons-yes"></span>';
+			$output .= '<span class="dashicons dashicons-yes-alt wp-ui-text-highlight"></span>';
 		} else {
 			$output .= '&nbsp;';
 		}
