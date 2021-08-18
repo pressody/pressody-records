@@ -293,9 +293,35 @@ input.pixelgradelt_records-cli-field {
 	border-radius: 4px;
 }
 
-/* List packages/parts screen
+/* List packages screen
 ----------------------------------------------------------------------------- */
-#the-list td span.bubble {
+
+.post-type-ltpackage table.table-view-list.posts {
+	table-layout: auto;
+}
+.column-package_source, .column-package_required_packages {
+	white-space: nowrap;
+}
+
+.post-type-ltpackage #the-list td span.bubble {
+	float:left;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	padding: 3px 7px;
+	border-radius: 4px;
+}
+
+/* List parts screen
+----------------------------------------------------------------------------- */
+
+.post-type-ltpart table.table-view-list.posts {
+	table-layout: auto;
+}
+.column-package_source, .column-package_required_packages {
+	white-space: nowrap;
+}
+
+.post-type-ltpart #the-list td span.bubble {
 	float:left;
 	margin-right: 5px;
 	margin-bottom: 5px;
