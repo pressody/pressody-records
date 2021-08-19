@@ -74,6 +74,7 @@ class PartManager extends PackageManager {
 			'rest_base'          => self::PACKAGE_POST_TYPE_PLURAL,
 			'show_ui'            => true,
 			'show_in_menu'       => true,
+			'menu_icon'          => 'dashicons-media-audio',
 			'show_in_nav_menus'  => false,
 			'show_in_rest'       => true,
 			'map_meta_cap'       => true,
