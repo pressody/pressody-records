@@ -5,55 +5,29 @@ Content-Type: application/json
 
 {
   "composer": {
-	"name": "pixelgradelt/site",
+	"name": "pixelgradelt\/my-site",
 	"type": "project",
 	"license": "MIT",
 	"description": "A Pixelgrade LT WordPress site.",
-	"homepage": "https://pixelgradelt.com",
-	"time": "2021-07-13T14:28:26+00:00",
+	"homepage": "https:\/\/local.local",
+	"time": "2021-08-26T13:02:43+00:00",
 	"authors": [
 	  {
 		"name": "Vlad Olaru",
 		"email": "vlad@pixelgrade.com",
-		"homepage": "https://thinkwritecode.com",
+		"homepage": "https:\/\/thinkwritecode.com",
 		"role": "Development, infrastructure, and product development"
-	  },
-	  {
-		"name": "George Olaru",
-		"email": "george@pixelgrade.com",
-		"homepage": "https://pixelgrade.com",
-		"role": "Design and product development"
-	  },
-	  {
-		"name": "Răzvan Onofrei",
-		"email": "razvan@pixelgrade.com",
-		"homepage": "https://pixelgrade.com",
-		"role": "Development and product development"
-	  },
-	  {
-		"name": "Mădălin Gorbănescu",
-		"email": "madalin@pixelgrade.com",
-		"homepage": "https://pixelgrade.com",
-		"role": "Development"
 	  }
 	],
-	"keywords": [
-	  "pixelgradelt",
-	  "bedrock",
-	  "composer",
-	  "roots",
-	  "wordpress",
-	  "wp",
-	  "wp-config"
-	],
+	"keywords": [],
 	"support": {
-	  "issues": "https://pixelgradelt.com",
-	  "forum": "https://pixelgradelt.com"
+	  "issues": "https:\/\/pixelgradelt.com",
+	  "forum": "https:\/\/pixelgradelt.com"
 	},
 	"repositories": [
 	  {
 		"type": "composer",
-		"url": "https://lt-records.local/ltpackagist/",
+		"url": "https:\/\/lt-records.local\/ltpackagist\/",
 		"options": {
 		  "ssl": {
 			"verify_peer": false
@@ -61,104 +35,94 @@ Content-Type: application/json
 		}
 	  },
 	  {
+		"type": "vcs",
+		"url": "https:\/\/github.com\/pixelgradelt\/pixelgradelt-conductor"
+	  },
+	  {
 		"type": "composer",
-		"url": "https://repo.packagist.org"
+		"url": "https:\/\/repo.packagist.org"
 	  }
 	],
 	"require": {
 	  "ext-json": "*",
-	  "oscarotero/env": "^2.1",
+	  "gordalina\/cachetool": "~6.3",
+	  "oscarotero\/env": "^2.1",
 	  "php": ">=7.1",
-	  "pixelgradelt-records/part_another-test": "*, >=1.4",
-	  "pixelgradelt-records/part_spanky": "1.0.0",
-	  "pixelgradelt-records/part_test-test": "*, ^1.0",
-	  "pixelgradelt-records/part_yet-another": "*",
-	  "roots/bedrock-autoloader": "^1.0",
-	  "roots/wordpress": "*",
-	  "roots/wp-config": "1.0.0",
-	  "roots/wp-password-bcrypt": "1.0.0",
-	  "vlucas/phpdotenv": "^5.3"
+	  "pixelgradelt-records\/part_another-test": "*, >=3.0.0",
+	  "pixelgradelt-records\/part_test-test": "*, ^4.0",
+	  "pixelgradelt-records\/part_yet-another": "*",
+	  "pixelgradelt\/pixelgradelt-conductor": "dev-main",
+	  "roots\/bedrock-autoloader": "^1.0",
+	  "roots\/wordpress": "*",
+	  "roots\/wp-config": "1.0.0",
+	  "roots\/wp-password-bcrypt": "1.0.0",
+	  "vlucas\/phpdotenv": "^5.3"
 	},
 	"require-dev": {
-	  "roave/security-advisories": "dev-latest",
-	  "squizlabs/php_codesniffer": "^3.5.8"
+	  "roave\/security-advisories": "dev-latest",
+	  "squizlabs\/php_codesniffer": "^3.5.8"
 	},
 	"config": {
-	  "optimize-autoloader": true,
-	  "preferred-install": "dist"
+	  "vendor-dir": "vendor",
+	  "optimize-autoloader": false,
+	  "preferred-install": "dev",
+	  "sort-packages": true
 	},
-	"minimum-stability": "dev",
-	"prefer-stable": true,
+	"minimum-stability": "stable",
+	"prefer-stable": false,
 	"extra": {
 	  "installer-paths": {
-		"web/app/mu-plugins/{$name}/": [
+		"vendor\/{$vendor}\/{$name}\/": [
+		  "woocommerce\/action-scheduler"
+		],
+		"web\/app\/mu-plugins\/{$name}\/": [
 		  "type:wordpress-muplugin"
 		],
-		"web/app/plugins/{$name}/": [
+		"web\/app\/plugins\/{$name}\/": [
 		  "type:wordpress-plugin"
 		],
-		"web/app/themes/{$name}/": [
+		"web\/app\/themes\/{$name}\/": [
 		  "type:wordpress-theme"
 		]
 	  },
-	  "lt-composition": "def5020051bc8670e75a30e3b93beef0a949370dec51667bdc61ce004b5d8c07202ed9d9a4ee138f3622de86af1a1fe692555a8dc86f9ea107c06cfc2834470746a76813d48a8aa83fa63fd664adde8dd9420ea4952569295be670c7bb3fdb624463f4781ccd077c6de009d08398524ee2cacacc4b75b0270fdd2b820c8241c5e8676a6eab6831e5c58220ae9e1f76dc28ae4cb26814e21ed7f9d77c10507f6181054df2f258884b9e1cca6d852ce0aae1584c4ebb75301a842d",
-	  "lt-required-packages": {
-		"pixelgradelt-records/part_yet-another": {
-		  "name": "pixelgradelt-records/part_yet-another",
-		  "version": "*",
-		  "requiredBy": [
-			{
-			  "name": "pixelgradelt-retailer/first-solution",
-			  "requiredVersion": "*"
-			}
-		  ]
-		},
-		"pixelgradelt-records/part_another-test": {
-		  "name": "pixelgradelt-records/part_another-test",
-		  "version": "*, >=1.4",
-		  "requiredBy": [
-			{
-			  "name": "pixelgradelt-retailer/fourth-solution",
-			  "requiredVersion": "*"
-			},
-			{
-			  "name": "pixelgradelt-retailer/second-solution",
-			  "requiredVersion": ">=1.4"
-			}
-		  ]
-		},
-		"pixelgradelt-records/part_spanky": {
-		  "name": "pixelgradelt-records/part_spanky",
-		  "version": "1.0.0",
-		  "requiredBy": [
-			{
-			  "name": "pixelgradelt-retailer/fourth-solution",
-			  "requiredVersion": "1.0.0"
-			}
-		  ]
-		},
-		"pixelgradelt-records/part_test-test": {
-		  "name": "pixelgradelt-records/part_test-test",
-		  "version": "*, ^1.0",
-		  "requiredBy": [
-			{
-			  "name": "pixelgradelt-retailer/fourth-solution",
-			  "requiredVersion": "*"
-			},
-			{
-			  "name": "pixelgradelt-retailer/second-solution",
-			  "requiredVersion": "^1.0"
-			}
-		  ]
-		}
-	  },
+	  "lt-composition": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3",
 	  "lt-version": "1.1.0",
-	  "wordpress-install-dir": "web/wp",
-	  "lt-fingerprint": "f94bd64f455c48012218507b33e7c741"
+	  "something": "yet",
+	  "wordpress-install-dir": "web\/wp",
+	  "lt-fingerprint": "3da7205c33d88ff1d30bb8ace8b99900"
 	},
 	"scripts": {
-	  "post-root-package-install": [],
-	  "test": [
+	  "cache:schedule:clear": [
+		"PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::schedule_cache_clear"
+	  ],
+	  "cache:opcache:status": [
+		".\/vendor\/bin\/cachetool opcache:status"
+	  ],
+	  "cache:opcache:clear": [
+		".\/vendor\/bin\/cachetool opcache:reset"
+	  ],
+	  "cache:opcache:warm": [
+		".\/vendor\/bin\/cachetool opcache:compile:scripts -q .\/web\/"
+	  ],
+	  "pre-package-install": [
+		"PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::handle_event"
+	  ],
+	  "post-package-install": [
+		"PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::handle_event"
+	  ],
+	  "pre-package-update": [
+		"PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::handle_event"
+	  ],
+	  "post-package-update": [
+		"PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::handle_event"
+	  ],
+	  "pre-package-uninstall": [
+		"PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::handle_event"
+	  ],
+	  "post-package-uninstall": [
+		"PixelgradeLT\\Conductor\\Cache\\CacheDispatcher::handle_event"
+	  ],
+	  "test2": [
 		"phpcs"
 	  ]
 	}
@@ -170,11 +134,21 @@ Content-Type: application/json
 
 # Properly encrypted user details:
 # {
-#  "userid": 1,
+#  "userids": [1],
 #  "compositionid": 123,
+#  "extra": {
+#	"users": [
+#	  {
+#		"status": "valid",
+#		"id": 1,
+#		"email": "test1@test.com",
+#		"username": ""
+#	  }
+#	]
+#  }
 # }
-# is encrypted by LT Retailer in
-# "def502000a91e5cc20ebf22bc3a7fae3a6f0b9f66e4354da55847fb984988ecd677563ee0c8b394daad090e5ae41f13aa90699fe0e1cad4c7564c6e4b424c67382b3ebe36939cc5c3c09f937748a0b729cef176809ba3d8cd1a2339a0cb87dfc116e4979978d8e9e48221257d58b0c9533e9bcfc290fefcd4c7b6e2a33f33f453b604c470273a5fbe46a"
+# is encrypted by LT Retailer as
+# "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3"
 
 POST https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions
 Authorization: Basic SnhPcVRsVGdCdmRPVzFtMWVKYXA3cnk2RW8wRGFvcW86cGl4ZWxncmFkZWx0X3JlY29yZHM=
@@ -182,7 +156,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "ltdetails": "def5020046731ba3bee3dedcee2a8799e593b9bae26e0f82918209117ca8ef2d0b6f483b516c3b25b53a8fb0138835fdef7e5a759132158aa21e05d021217217ffee8585e27e12a1df65ee33f31b6e2a5fd35119911e06838a11aa98d9b2bcd6d2adf9e4ac6df8577ddb3d20a726fa51524e7d9d98f02afc7fe36c0ad1d178b7fa4e99cede7707ff4bccd6b6412cbfcb54fd8862b44c29dc135e6605a8",
+  "ltdetails": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3",
   "require": [
 	{
 	  "name": "pixelgradelt-records\/part_yet-another",
@@ -235,7 +209,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "ltdetails": "def502005762a1f7ab01944a6224811e40d61b97df9d0e155281b57a686c1cd9bf3dd1d7e636c69067bae573142d6b9560df6389000ba5e122bdee49947bfe09329ccb6b424c12d1e71416314661763df5d69ec3b5c7c84fad512b94c1fed6ee7df3b07a8b0b0aab80ac2ff855859286a417ffb9d927b7ce8d67b7989fc48c849b79e261f4e235201478d5613a8be7976bc301e45bdf17227d27f0133480",
+  "ltdetails": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3",
   "require": [
 	{
 	  "name": "pixelgradelt-records\/part_yet-another",
@@ -314,7 +288,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "ltdetails": "def502008b590b343fbac515087976bfdab17466b1b9ac2be8dd7f257cfd8c0edbbe67378a2fdba577d914443b1e01cf9a622ccf00c5eb5e31ee6e0f7e30df66a2498a36f2da649aaf712b25fac0cca1b61cb39eae3404784a946acccbbb5c4232daa4e4802995e17dca0446f73d022950f1dd6a691f5a295c88b7434dbbb109073643696d6192ffca05c6bd84fb2edbeb89f66f49171cead428a153d3",
+  "ltdetails": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3",
   "require": [
 	{
 	  "name": "pixelgradelt-records\/part_yet-another",
@@ -339,7 +313,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "ltdetails": "def5020051bc8670e75a30e3b93beef0a949370dec51667bdc61ce004b5d8c07202ed9d9a4ee138f3622de86af1a1fe692555a8dc86f9ea107c06cfc2834470746a76813d48a8aa83fa63fd664adde8dd9420ea4952569295be670c7bb3fdb624463f4781ccd077c6de009d08398524ee2cacacc4b75b0270fdd2b820c8241c5e8676a6eab6831e5c58220ae9e1f76dc28ae4cb26814e21ed7f9d77c10507f6181054df2f258884b9e1cca6d852ce0aae1584c4ebb75301a842d"
+  "ltdetails": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3"
 }
 
 ###
