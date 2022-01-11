@@ -999,12 +999,6 @@ class CompositionsController extends WP_REST_Controller {
 					'homepage' => 'https://pixelgrade.com',
 					'role'     => 'Development and product development',
 				],
-				[
-					'name'     => 'Mădălin Gorbănescu',
-					'email'    => 'madalin@pixelgrade.com',
-					'homepage' => 'https://pixelgrade.com',
-					'role'     => 'Development',
-				],
 			],
 			'keywords'          => [
 				'pixelgradelt',
