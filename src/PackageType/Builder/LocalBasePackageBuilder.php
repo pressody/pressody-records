@@ -4,17 +4,17 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PackageType\Builder;
+namespace Pressody\Records\PackageType\Builder;
 
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\Release;
+use Pressody\Records\Package;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\LocalTheme;
+use Pressody\Records\Release;
 
 /**
  * Local package builder class for locally installed themes and plugins.

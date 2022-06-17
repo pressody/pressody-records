@@ -34,10 +34,10 @@
     "requires_at_least_wp": "",
     "tested_up_to_wp": "",
     "requires_php": "",
-    "require_ltpackages": [],
+    "require_pdpackages": [],
     "dist": {
         "type": "zip",
-        "url": "https://ltsatispress.local/ltpackagist/wp-minions/4.1.0",
+        "url": "https://ltsatispress.local/pdpackagist/wp-minions/4.1.0",
         "shasum": "a770243c52b32872f6b394b5056940ca72d9fff4",
         "artifactmtime": 1620293307
     }

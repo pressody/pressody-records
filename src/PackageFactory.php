@@ -4,25 +4,25 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
-use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\Builder\ExternalWPCorePackageBuilder;
-use PixelgradeLT\Records\PackageType\Builder\ManualWPCorePackageBuilder;
-use PixelgradeLT\Records\PackageType\ExternalBasePackage;
-use PixelgradeLT\Records\PackageType\Builder\ExternalBasePackageBuilder;
-use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
-use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\PackageType\Builder\LocalThemeBuilder;
-use PixelgradeLT\Records\PackageType\Builder\ManualBasePackageBuilder;
-use PixelgradeLT\Records\PackageType\PackageTypes;
+use Pressody\Records\PackageType\BasePackage;
+use Pressody\Records\PackageType\Builder\ExternalWPCorePackageBuilder;
+use Pressody\Records\PackageType\Builder\ManualWPCorePackageBuilder;
+use Pressody\Records\PackageType\ExternalBasePackage;
+use Pressody\Records\PackageType\Builder\ExternalBasePackageBuilder;
+use Pressody\Records\PackageType\Builder\BasePackageBuilder;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\Builder\LocalPluginBuilder;
+use Pressody\Records\PackageType\LocalTheme;
+use Pressody\Records\PackageType\Builder\LocalThemeBuilder;
+use Pressody\Records\PackageType\Builder\ManualBasePackageBuilder;
+use Pressody\Records\PackageType\PackageTypes;
 use Psr\Log\LoggerInterface;
 
 /**

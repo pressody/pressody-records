@@ -1,6 +1,6 @@
 # Whitelisting Installed Plugins and Themes
 
-PixelgradeLT Records supports standard plugins and themes. These must be whitelisted (managed via Records) to be exposed as Composer packages.
+Pressody Records supports standard plugins and themes. These must be whitelisted (managed via Records) to be exposed as Composer packages.
 
 Plugins and themes are cached when they're whitelisted and new releases are downloaded and saved as soon as WordPress is notified they're available.
 

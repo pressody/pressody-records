@@ -4,22 +4,22 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Route;
+namespace Pressody\Records\Route;
 
-use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\Exception\HttpException;
-use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
-use PixelgradeLT\Records\HTTP\Request;
-use PixelgradeLT\Records\HTTP\Response;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Repository\PackageRepository;
+use Pressody\Records\Capabilities;
+use Pressody\Records\Exception\HttpException;
+use Pressody\Records\Exception\InvalidReleaseVersion;
+use Pressody\Records\HTTP\Request;
+use Pressody\Records\HTTP\Response;
+use Pressody\Records\Package;
+use Pressody\Records\PackageManager;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Repository\PackageRepository;
 
 /**
  * Class to handle download package requests.

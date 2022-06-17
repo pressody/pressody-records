@@ -4,17 +4,17 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PostType;
+namespace Pressody\Records\PostType;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pixelgrade\WPPostNotes\PostNotes;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\PackageManager;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\PackageManager;
 
 /**
  * The Package custom post type provider: provides the interface for and stores the information about each managed package.

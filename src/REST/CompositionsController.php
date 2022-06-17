@@ -4,32 +4,32 @@
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\REST;
+namespace Pressody\Records\REST;
 
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use InvalidArgumentException;
 use JsonSchema\Validator;
-use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\Exception\RestException;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use PixelgradeLT\Records\Transformer\PackageRepositoryTransformer;
-use PixelgradeLT\Records\Utils\ArrayHelpers;
+use Pressody\Records\Capabilities;
+use Pressody\Records\Exception\RestException;
+use Pressody\Records\Repository\PackageRepository;
+use Pressody\Records\Transformer\PackageRepositoryTransformer;
+use Pressody\Records\Utils\ArrayHelpers;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Http as HTTP;
-use function PixelgradeLT\Records\get_packages_permalink;
-use function PixelgradeLT\Records\is_debug_mode;
-use function PixelgradeLT\Records\is_dev_url;
-use function PixelgradeLT\Records\plugin;
+use function Pressody\Records\get_packages_permalink;
+use function Pressody\Records\is_debug_mode;
+use function Pressody\Records\is_dev_url;
+use function Pressody\Records\plugin;
 
 /**
  * Compositions REST controller class.
@@ -50,13 +50,13 @@ class CompositionsController extends WP_REST_Controller {
 	const PACKAGE_NAME_PATTERN = '^[a-z0-9]([_.-]?[a-z0-9]+)*/[a-z0-9](([_.]?|-{0,2})[a-z0-9]+)*$';
 
 	/**
-	 * The key in composer.json `extra` used to store the encrypted LT details.
+	 * The key in composer.json `extra` used to store the encrypted PD details.
 	 *
 	 * @since 0.10.0
 	 *
 	 * @var string
 	 */
-	const LTDETAILS_KEY = 'lt-composition';
+	const PDDETAILS_KEY = 'pd-composition';
 
 	/**
 	 * The key in composer.json `extra` used to store the composer.json fingerprint.
@@ -65,10 +65,10 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	const FINGERPRINT_KEY = 'lt-fingerprint';
+	const FINGERPRINT_KEY = 'pd-fingerprint';
 
 	/**
-	 * The key in composer.json `extra` used to store the composer.json LT version.
+	 * The key in composer.json `extra` used to store the composer.json PD version.
 	 *
 	 * We will use this in case we make breaking changes and wish to provide backwards compatibility.
 	 *
@@ -76,7 +76,7 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	const VERSION_KEY = 'lt-version';
+	const VERSION_KEY = 'pd-version';
 
 	/**
 	 * The version to be used for new compositions and to upgrade older ones.
@@ -147,20 +147,20 @@ class CompositionsController extends WP_REST_Controller {
 					'show_in_index'       => false,
 					'args'                => [
 						'context'   => $this->get_context_param( [ 'default' => 'edit' ] ),
-						'ltdetails' => [
-							'description' => esc_html__( 'The encrypted composition LT details data to attach to the composition.', 'pixelgradelt_records' ),
+						'pddetails' => [
+							'description' => esc_html__( 'The encrypted composition PD details data to attach to the composition.', 'pressody_records' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
 						'require'   => [
-							'description' => esc_html__( 'A LT Records packages list (actual LT packages or LT parts) to include in the composition. All packages that don\'t exist will be ignored. These required packages will overwrite the same packages given through the "composer" param.', 'pixelgradelt_records' ),
+							'description' => esc_html__( 'A PD Records packages list (actual PD packages or PD parts) to include in the composition. All packages that don\'t exist will be ignored. These required packages will overwrite the same packages given through the "composer" param.', 'pressody_records' ),
 							'type'        => 'array',
 							'items'       => [
 								'type'       => 'object',
 								'properties' => [
 									'name'    => [
-										'description'       => esc_html__( 'The LT Records package\'s full Composer package name.', 'pixelgradelt_records' ),
+										'description'       => esc_html__( 'The PD Records package\'s full Composer package name.', 'pressody_records' ),
 										'type'              => 'string',
 										'pattern'           => self::PACKAGE_NAME_PATTERN,
 										'sanitize_callback' => function ( $value ) {
@@ -168,7 +168,7 @@ class CompositionsController extends WP_REST_Controller {
 										},
 									],
 									'version' => [
-										'description' => esc_html__( 'The package\'s version constraint.', 'pixelgradelt_records' ),
+										'description' => esc_html__( 'The package\'s version constraint.', 'pressody_records' ),
 										'type'        => 'string',
 									],
 								],
@@ -178,7 +178,7 @@ class CompositionsController extends WP_REST_Controller {
 						],
 						'composer'  => [
 							'type'        => 'object',
-							'description' => esc_html__( 'composer.json project (root) properties according to the Composer 2.0 JSON schema. The "repositories", "require", "require-dev", "config", "extra","scripts" root-properties will be merged. The rest will overwrite existing properties.', 'pixelgradelt_records' ),
+							'description' => esc_html__( 'composer.json project (root) properties according to the Composer 2.0 JSON schema. The "repositories", "require", "require-dev", "config", "extra","scripts" root-properties will be merged. The rest will overwrite existing properties.', 'pressody_records' ),
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],
@@ -200,7 +200,7 @@ class CompositionsController extends WP_REST_Controller {
 					'args'                => [
 						'context'  => $this->get_context_param( [ 'default' => 'edit' ] ),
 						'composer' => [
-							'description' => esc_html__( 'The full composer.json contents to attempt to refresh.', 'pixelgradelt_records' ),
+							'description' => esc_html__( 'The full composer.json contents to attempt to refresh.', 'pressody_records' ),
 							'type'        => 'object',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
@@ -225,7 +225,7 @@ class CompositionsController extends WP_REST_Controller {
 		if ( ! current_user_can( Capabilities::VIEW_PACKAGES ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
-				esc_html__( 'Sorry, you are not allowed to create compositions.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to create compositions.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -246,7 +246,7 @@ class CompositionsController extends WP_REST_Controller {
 		if ( ! current_user_can( Capabilities::VIEW_PACKAGES ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
-				esc_html__( 'Sorry, you are not allowed to update compositions.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to update compositions.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -289,7 +289,7 @@ class CompositionsController extends WP_REST_Controller {
 		} catch ( JsonValidationException $e ) {
 			return new WP_Error(
 				'rest_json_invalid',
-				esc_html__( 'We could not produce a composition that would validate against the Composer JSON schema.', 'pixelgradelt_records' ),
+				esc_html__( 'We could not produce a composition that would validate against the Composer JSON schema.', 'pressody_records' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
 					'details' => $e->getErrors(),
@@ -327,7 +327,7 @@ class CompositionsController extends WP_REST_Controller {
 		} catch ( JsonValidationException $e ) {
 			return new WP_Error(
 				'rest_json_invalid',
-				esc_html__( 'Could not validate the received composition against the Composer JSON schema.', 'pixelgradelt_records' ),
+				esc_html__( 'Could not validate the received composition against the Composer JSON schema.', 'pressody_records' ),
 				[
 					'status'  => HTTP::NOT_ACCEPTABLE,
 					'details' => $e->getErrors(),
@@ -347,11 +347,11 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		// Third, check if we have the encrypted LT details.
-		if ( empty( $composition['extra'][ self::LTDETAILS_KEY ] ) ) {
+		// Third, check if we have the encrypted PD details.
+		if ( empty( $composition['extra'][ self::PDDETAILS_KEY ] ) ) {
 			return new WP_Error(
 				'rest_missing_lt_user',
-				esc_html__( 'The provided composer JSON data is missing the LT details.', 'pixelgradelt_records' ),
+				esc_html__( 'The provided composer JSON data is missing the PD details.', 'pressody_records' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		}
@@ -372,9 +372,9 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param array $instructions_to_update The instructions to update the composition by.
 		 * @param array $composition            The full composition data.
 		 */
-		$instructions_to_update = apply_filters( 'pixelgradelt_records/composition_instructions_to_update', $this->get_default_instructions_to_update( $composition ), $composition );
+		$instructions_to_update = apply_filters( 'pressody_records/composition_instructions_to_update', $this->get_default_instructions_to_update( $composition ), $composition );
 		if ( is_wp_error( $instructions_to_update ) ) {
-			$message = esc_html__( 'Your attempt to refresh the composition was rejected. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
+			$message = esc_html__( 'Your attempt to refresh the composition was rejected. Here is what happened: ', 'pressody_records' ) . PHP_EOL;
 			$message .= implode( ' ; ' . PHP_EOL, $instructions_to_update->get_error_messages() );
 
 			return new WP_Error(
@@ -388,7 +388,7 @@ class CompositionsController extends WP_REST_Controller {
 		} elseif ( false === $instructions_to_update ) {
 			return new WP_Error(
 				'rest_rejected_refresh',
-				esc_html__( 'Your attempt to refresh the composition was rejected.', 'pixelgradelt_records' ),
+				esc_html__( 'Your attempt to refresh the composition was rejected.', 'pressody_records' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		}
@@ -423,7 +423,7 @@ class CompositionsController extends WP_REST_Controller {
 		} catch ( JsonValidationException $e ) {
 			return new WP_Error(
 				'rest_json_invalid',
-				esc_html__( 'We could not produce a composition that would validate against the Composer JSON schema.', 'pixelgradelt_records' ),
+				esc_html__( 'We could not produce a composition that would validate against the Composer JSON schema.', 'pressody_records' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
 					'details' => $e->getErrors(),
@@ -472,48 +472,48 @@ class CompositionsController extends WP_REST_Controller {
 			$composition = $this->remove_required_packages( $composition, $instructions['remove'] );
 		}
 
-		// Third, add the required LT packages.
+		// Third, add the required PD packages.
 		if ( ! empty( $instructions['require'] ) && is_array( $instructions['require'] ) ) {
 			$composition = $this->add_required_packages( $composition, $instructions['require'] );
 		}
 
-		// We will add the new LT details if they are different from what we have.
-		// Before adding the encrypted LT details, allow a third-party check.
+		// We will add the new PD details if they are different from what we have.
+		// Before adding the encrypted PD details, allow a third-party check.
 		// We don't want to add data that is later found to be invalid.
-		if ( isset( $instructions['ltdetails'] )
-		     && ( ! isset( $composition['extra'][ self::LTDETAILS_KEY ] )
-		          || $composition['extra'][ self::LTDETAILS_KEY ] !== $instructions['ltdetails'] )
+		if ( isset( $instructions['pddetails'] )
+		     && ( ! isset( $composition['extra'][ self::PDDETAILS_KEY ] )
+		          || $composition['extra'][ self::PDDETAILS_KEY ] !== $instructions['pddetails'] )
 		) {
 
 			// We will validate only if we are given a non-empty string.
 			// If we are given another value, we will just write it. Others should know better about what they are doing.
-			if ( ! empty( $instructions['ltdetails'] ) && is_string( $instructions['ltdetails'] ) ) {
+			if ( ! empty( $instructions['pddetails'] ) && is_string( $instructions['pddetails'] ) ) {
 				/**
-				 * Filter the validation of encrypted LT details.
+				 * Filter the validation of encrypted PD details.
 				 *
 				 * @since 0.10.0
 				 *
 				 * @see   CompositionsController::update_composition()
 				 *
-				 * Return true if the composition's LT details are valid, or a WP_Error in case we should reject them.
+				 * Return true if the composition's PD details are valid, or a WP_Error in case we should reject them.
 				 *
-				 * @param bool   $valid       Whether the composition's LT details are valid.
-				 * @param string $encrypted_ltdetails
+				 * @param bool   $valid       Whether the composition's PD details are valid.
+				 * @param string $encrypted_pddetails
 				 * @param array  $composition The current composition data.
 				 */
-				$valid = apply_filters( 'pixelgradelt_records/validate_encrypted_ltdetails', true, $instructions['ltdetails'], $composition );
+				$valid = apply_filters( 'pressody_records/validate_encrypted_pddetails', true, $instructions['pddetails'], $composition );
 				if ( is_wp_error( $valid ) ) {
-					$message = esc_html__( 'Third-party checks have found the encrypted LT composition details invalid. Here is what happened: ', 'pixelgradelt_records' ) . PHP_EOL;
+					$message = esc_html__( 'Third-party checks have found the encrypted PD composition details invalid. Here is what happened: ', 'pressody_records' ) . PHP_EOL;
 					$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
 
-					throw RestException::forInvalidCompositionLTDetails( $message );
+					throw RestException::forInvalidCompositionPDDetails( $message );
 				} elseif ( true !== $valid ) {
-					throw RestException::forInvalidCompositionLTDetails();
+					throw RestException::forInvalidCompositionPDDetails();
 				}
 			}
 
-			// Now we can add/replace the LT details in the composition.
-			$composition = $this->add_ltdetails( $composition, $instructions );
+			// Now we can add/replace the PD details in the composition.
+			$composition = $this->add_pddetails( $composition, $instructions );
 		}
 
 		// Update the timestamp
@@ -530,7 +530,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param array $instructions        The composition instructions to update by.
 		 * @param array $initial_composition The initial composition data.
 		 */
-		return apply_filters( 'pixelgradelt_records/update_composition', $composition, $instructions, $initial_composition );
+		return apply_filters( 'pressody_records/update_composition', $composition, $instructions, $initial_composition );
 	}
 
 	/**
@@ -613,7 +613,7 @@ class CompositionsController extends WP_REST_Controller {
 				continue;
 			}
 
-			// Check that the LT packages exists (and has releases) in our repository.
+			// Check that the PD packages exists (and has releases) in our repository.
 			if ( empty( $repo_packages['packages'][ $package_details['name'] ] ) ) {
 				continue;
 			}
@@ -630,11 +630,11 @@ class CompositionsController extends WP_REST_Controller {
 				if ( empty( $composition['extra'] ) ) {
 					$composition['extra'] = [];
 				}
-				if ( empty( $composition['extra']['lt-required-packages'] ) ) {
-					$composition['extra']['lt-required-packages'] = [];
+				if ( empty( $composition['extra']['pd-required-packages'] ) ) {
+					$composition['extra']['pd-required-packages'] = [];
 				}
 
-				$composition['extra']['lt-required-packages'][ $package_details['name'] ] = $package_details;
+				$composition['extra']['pd-required-packages'][ $package_details['name'] ] = $package_details;
 			}
 		}
 
@@ -672,8 +672,8 @@ class CompositionsController extends WP_REST_Controller {
 			unset( $composition['require'][ $package_details['name'] ] );
 
 			// Maybe remove it from the extra details.
-			if ( isset( $composition['extra']['lt-required-packages'][ $package_details['name'] ] ) ) {
-				unset( $composition['extra']['lt-required-packages'][ $package_details['name'] ] );
+			if ( isset( $composition['extra']['pd-required-packages'][ $package_details['name'] ] ) ) {
+				unset( $composition['extra']['pd-required-packages'][ $package_details['name'] ] );
 			}
 		}
 
@@ -681,7 +681,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Add to the composition the LT details available in the request.
+	 * Add to the composition the PD details available in the request.
 	 *
 	 * @since 0.10.0
 	 *
@@ -690,14 +690,14 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return array The updated composition data.
 	 */
-	protected function add_ltdetails( array $composition, array $data ): array {
+	protected function add_pddetails( array $composition, array $data ): array {
 		if ( empty( $composition['extra'] ) ) {
 			$composition['extra'] = [];
 		}
 
-		// Add the encrypted composition LT details.
-		if ( isset( $data['ltdetails'] ) ) {
-			$composition['extra'][ self::LTDETAILS_KEY ] = $data['ltdetails'];
+		// Add the encrypted composition PD details.
+		if ( isset( $data['pddetails'] ) ) {
+			$composition['extra'][ self::PDDETAILS_KEY ] = $data['pddetails'];
 		}
 
 		return $composition;
@@ -886,7 +886,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param object $compositionObject The standardized composition object.
 		 * @param array  $composition       The initial composition.
 		 */
-		return apply_filters( 'pixelgradelt_records/composition_standardize_to_object', $compositionObject, $composition );
+		return apply_filters( 'pressody_records/composition_standardize_to_object', $compositionObject, $composition );
 	}
 
 	/**
@@ -923,7 +923,7 @@ class CompositionsController extends WP_REST_Controller {
 	protected function objectToArrayRecursive( object $object ): array {
 		$json = json_encode( $object );
 		if ( json_last_error() !== \JSON_ERROR_NONE ) {
-			$message = esc_html__( 'Unable to encode schema array as JSON', 'pixelgradelt_records' );
+			$message = esc_html__( 'Unable to encode schema array as JSON', 'pressody_records' );
 			if ( function_exists( 'json_last_error_msg' ) ) {
 				$message .= ': ' . json_last_error_msg();
 			}
@@ -957,7 +957,7 @@ class CompositionsController extends WP_REST_Controller {
 			foreach ( (array) $validator->getErrors() as $error ) {
 				$errors[] = ( $error['property'] ? $error['property'] . ' : ' : '' ) . $error['message'];
 			}
-			throw new JsonValidationException( esc_html__( 'The composition does not match the expected JSON schema', 'pixelgradelt_records' ), $errors );
+			throw new JsonValidationException( esc_html__( 'The composition does not match the expected JSON schema', 'pressody_records' ), $errors );
 		}
 
 		return true;
@@ -971,37 +971,37 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return array
 	 */
 	protected function get_starter_composition(): array {
-		// This is mostly the contents of the composer.json in our WPSite Starter (https://github.com/pixelgradelt/wpsite-starter)
+		// This is mostly the contents of the composer.json in our WPSite Starter (https://github.com/pressody/wpsite-starter)
 		// We should keep important things in sync since these will overwrite the default composer.json in that repo.
 		return [
-			'name'              => 'pixelgradelt/site',
+			'name'              => 'pressody/site',
 			'type'              => 'project',
 			'license'           => 'MIT',
-			'description'       => 'A Pixelgrade LT WordPress site.',
-			'homepage'          => 'https://pixelgradelt.com',
+			'description'       => 'A Pressody WordPress site.',
+			'homepage'          => 'https://getpressody.com',
 			'time'              => date( DATE_RFC3339 ),
 			'authors'           => [
 				[
 					'name'     => 'Vlad Olaru',
-					'email'    => 'vlad@pixelgrade.com',
+					'email'    => 'vladpotter85@gmail.com',
 					'homepage' => 'https://thinkwritecode.com',
 					'role'     => 'Development, infrastructure, and product development',
 				],
 				[
 					'name'     => 'George Olaru',
 					'email'    => 'george@pixelgrade.com',
-					'homepage' => 'https://pixelgrade.com',
+					'homepage' => 'https://pressody.com',
 					'role'     => 'Design and product development',
 				],
 				[
 					'name'     => 'Răzvan Onofrei',
 					'email'    => 'razvan@pixelgrade.com',
-					'homepage' => 'https://pixelgrade.com',
+					'homepage' => 'https://pressody.com',
 					'role'     => 'Development and product development',
 				],
 			],
 			'keywords'          => [
-				'pixelgradelt',
+				'pressody',
 				'bedrock',
 				'composer',
 				'roots',
@@ -1010,8 +1010,8 @@ class CompositionsController extends WP_REST_Controller {
 				'wp-config',
 			],
 			'support'           => [
-				'issues' => 'https://pixelgradelt.com',
-				'forum'  => 'https://pixelgradelt.com',
+				'issues' => 'https://getpressody.com',
+				'forum'  => 'https://getpressody.com',
 			],
 			'repositories'      => [
 				[
@@ -1026,7 +1026,7 @@ class CompositionsController extends WP_REST_Controller {
 				],
 				[
 					'type' => 'vcs',
-					'url'  => 'https://github.com/pixelgradelt/pixelgradelt-conductor',
+					'url'  => 'https://github.com/pressody/pressody-conductor',
 				],
 				[
 					// The Packagist repo.
@@ -1039,7 +1039,7 @@ class CompositionsController extends WP_REST_Controller {
 				'gordalina/cachetool'                 => '~6.3',
 				'php'                                 => '>=7.1',
 				'oscarotero/env'                      => '^2.1',
-				'pixelgradelt/pixelgradelt-conductor' => 'dev-main',
+				'pressody/pressody-conductor' => 'dev-main',
 				'roots/bedrock-autoloader'            => '^1.0',
 				'roots/wordpress'                     => '*',
 				'roots/wp-config'                     => '1.0.0',
@@ -1071,12 +1071,12 @@ class CompositionsController extends WP_REST_Controller {
 				],
 				// @see https://packagist.org/packages/roots/wordpress-core-installer
 				'wordpress-install-dir' => 'web/wp',
-				// LT Composition version
+				// PD Composition version
 				self::VERSION_KEY       => self::COMPOSITION_VERSION,
 			],
 			'scripts'           => [
 				'cache:schedule:clear'   => [
-					'PixelgradeLT\Conductor\Cache\CacheDispatcher::schedule_cache_clear',
+					'Pressody\Conductor\Cache\CacheDispatcher::schedule_cache_clear',
 				],
 				// CacheTool wrapper commands. See https://github.com/gordalina/cachetool
 				'cache:opcache:status'   => [
@@ -1090,22 +1090,22 @@ class CompositionsController extends WP_REST_Controller {
 				],
 				// Allow the CatchDispatcher to take action on package modifications.
 				'pre-package-install'    => [
-					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+					'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 				'post-package-install'   => [
-					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+					'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 				'pre-package-update'     => [
-					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+					'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 				'post-package-update'    => [
-					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+					'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 				'pre-package-uninstall'  => [
-					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+					'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 				'post-package-uninstall' => [
-					'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+					'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 				],
 			],
 		];
@@ -1113,7 +1113,7 @@ class CompositionsController extends WP_REST_Controller {
 
 	/**
 	 * We will use these default instructions to update the composition by in order to update past compositions and keep up with our development,
-	 * especially changes related to our WPSite Starter (https://github.com/pixelgradelt/wpsite-starter).
+	 * especially changes related to our WPSite Starter (https://github.com/pressody/wpsite-starter).
 	 *
 	 * @since 0.11.0
 	 *

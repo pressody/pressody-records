@@ -6,12 +6,12 @@
  *
  * @since   0.9.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 /**
  * Part manager class.
@@ -22,14 +22,14 @@ namespace PixelgradeLT\Records;
  */
 class PartManager extends PackageManager {
 
-	const PACKAGE_POST_TYPE = 'ltpart';
-	const PACKAGE_POST_TYPE_PLURAL = 'ltparts';
+	const PACKAGE_POST_TYPE = 'pdpart';
+	const PACKAGE_POST_TYPE_PLURAL = 'pdparts';
 
-	const PACKAGE_TYPE_TAXONOMY = 'ltpart_types';
-	const PACKAGE_TYPE_TAXONOMY_SINGULAR = 'ltpart_type';
+	const PACKAGE_TYPE_TAXONOMY = 'pdpart_types';
+	const PACKAGE_TYPE_TAXONOMY_SINGULAR = 'pdpart_type';
 
-	const PACKAGE_KEYWORD_TAXONOMY = 'ltpart_keywords';
-	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpart_keyword';
+	const PACKAGE_KEYWORD_TAXONOMY = 'pdpart_keywords';
+	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'pdpart_keyword';
 
 	/**
 	 * Used to create the pseudo IDs saved as values for a part's required packages/parts.
@@ -46,27 +46,27 @@ class PartManager extends PackageManager {
 	 */
 	public function get_package_post_type_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'LT Parts', 'pixelgradelt_records' ),
-			'singular_name'         => esc_html__( 'LT Part', 'pixelgradelt_records' ),
-			'menu_name'             => esc_html_x( 'LT Parts', 'Admin Menu text', 'pixelgradelt_records' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Part', 'pixelgradelt_records' ),
-			'add_new_item'          => esc_html__( 'Add New LT Part', 'pixelgradelt_records' ),
-			'new_item'              => esc_html__( 'New LT Part', 'pixelgradelt_records' ),
-			'edit_item'             => esc_html__( 'Edit LT Part', 'pixelgradelt_records' ),
-			'view_item'             => esc_html__( 'View LT Part', 'pixelgradelt_records' ),
-			'all_items'             => esc_html__( 'All Parts', 'pixelgradelt_records' ),
-			'search_items'          => esc_html__( 'Search Parts', 'pixelgradelt_records' ),
-			'not_found'             => esc_html__( 'No parts found.', 'pixelgradelt_records' ),
-			'not_found_in_trash'    => esc_html__( 'No parts found in Trash.', 'pixelgradelt_records' ),
-			'uploaded_to_this_item' => esc_html__( 'Uploaded to this package', 'pixelgradelt_records' ),
-			'filter_items_list'     => esc_html__( 'Filter parts list', 'pixelgradelt_records' ),
-			'items_list_navigation' => esc_html__( 'Parts list navigation', 'pixelgradelt_records' ),
-			'items_list'            => esc_html__( 'LT Parts list', 'pixelgradelt_records' ),
+			'name'                  => esc_html__( 'PD Parts', 'pressody_records' ),
+			'singular_name'         => esc_html__( 'PD Part', 'pressody_records' ),
+			'menu_name'             => esc_html_x( 'PD Parts', 'Admin Menu text', 'pressody_records' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Part', 'pressody_records' ),
+			'add_new_item'          => esc_html__( 'Add New PD Part', 'pressody_records' ),
+			'new_item'              => esc_html__( 'New PD Part', 'pressody_records' ),
+			'edit_item'             => esc_html__( 'Edit PD Part', 'pressody_records' ),
+			'view_item'             => esc_html__( 'View PD Part', 'pressody_records' ),
+			'all_items'             => esc_html__( 'All Parts', 'pressody_records' ),
+			'search_items'          => esc_html__( 'Search Parts', 'pressody_records' ),
+			'not_found'             => esc_html__( 'No parts found.', 'pressody_records' ),
+			'not_found_in_trash'    => esc_html__( 'No parts found in Trash.', 'pressody_records' ),
+			'uploaded_to_this_item' => esc_html__( 'Uploaded to this package', 'pressody_records' ),
+			'filter_items_list'     => esc_html__( 'Filter parts list', 'pressody_records' ),
+			'items_list_navigation' => esc_html__( 'Parts list navigation', 'pressody_records' ),
+			'items_list'            => esc_html__( 'PD Parts list', 'pressody_records' ),
 		];
 
 		return array_merge( [
 			'labels'             => $labels,
-			'description'        => esc_html__( 'Composer (special) packages to be used as the basis for PixelgradeLT solutions offered to PixelgradeLT users.', 'pixelgradelt_records' ),
+			'description'        => esc_html__( 'Composer (special) packages to be used as the basis for Pressody solutions offered to Pressody users.', 'pressody_records' ),
 			'hierarchical'       => false,
 			'public'             => false,
 			'publicly_queryable' => false,
@@ -95,22 +95,22 @@ class PartManager extends PackageManager {
 	 */
 	public function get_package_type_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'Part Types', 'pixelgradelt_records' ),
-			'singular_name'         => esc_html__( 'Part Type', 'pixelgradelt_records' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Part Type', 'pixelgradelt_records' ),
-			'add_new_item'          => esc_html__( 'Add New Part Type', 'pixelgradelt_records' ),
-			'update_item'           => esc_html__( 'Update Part Type', 'pixelgradelt_records' ),
-			'new_item_name'         => esc_html__( 'New Part Type Name', 'pixelgradelt_records' ),
-			'edit_item'             => esc_html__( 'Edit Part Type', 'pixelgradelt_records' ),
-			'all_items'             => esc_html__( 'All Part Types', 'pixelgradelt_records' ),
-			'search_items'          => esc_html__( 'Search Part Types', 'pixelgradelt_records' ),
-			'parent_item'           => esc_html__( 'Parent Part Type', 'pixelgradelt_records' ),
-			'parent_item_colon'     => esc_html__( 'Parent Part Type:', 'pixelgradelt_records' ),
-			'not_found'             => esc_html__( 'No part types found.', 'pixelgradelt_records' ),
-			'no_terms'              => esc_html__( 'No part types.', 'pixelgradelt_records' ),
-			'items_list_navigation' => esc_html__( 'Part Types list navigation', 'pixelgradelt_records' ),
-			'items_list'            => esc_html__( 'Part Types list', 'pixelgradelt_records' ),
-			'back_to_items'         => esc_html__( '&larr; Go to Part Types', 'pixelgradelt_records' ),
+			'name'                  => esc_html__( 'Part Types', 'pressody_records' ),
+			'singular_name'         => esc_html__( 'Part Type', 'pressody_records' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Part Type', 'pressody_records' ),
+			'add_new_item'          => esc_html__( 'Add New Part Type', 'pressody_records' ),
+			'update_item'           => esc_html__( 'Update Part Type', 'pressody_records' ),
+			'new_item_name'         => esc_html__( 'New Part Type Name', 'pressody_records' ),
+			'edit_item'             => esc_html__( 'Edit Part Type', 'pressody_records' ),
+			'all_items'             => esc_html__( 'All Part Types', 'pressody_records' ),
+			'search_items'          => esc_html__( 'Search Part Types', 'pressody_records' ),
+			'parent_item'           => esc_html__( 'Parent Part Type', 'pressody_records' ),
+			'parent_item_colon'     => esc_html__( 'Parent Part Type:', 'pressody_records' ),
+			'not_found'             => esc_html__( 'No part types found.', 'pressody_records' ),
+			'no_terms'              => esc_html__( 'No part types.', 'pressody_records' ),
+			'items_list_navigation' => esc_html__( 'Part Types list navigation', 'pressody_records' ),
+			'items_list'            => esc_html__( 'Part Types list', 'pressody_records' ),
+			'back_to_items'         => esc_html__( '&larr; Go to Part Types', 'pressody_records' ),
 		];
 
 		return array_merge( [
@@ -137,23 +137,23 @@ class PartManager extends PackageManager {
 	 */
 	public function get_package_keyword_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                       => esc_html__( 'Part Keywords', 'pixelgradelt_records' ),
-			'singular_name'              => esc_html__( 'Part Keyword', 'pixelgradelt_records' ),
-			'add_new'                    => esc_html_x( 'Add New', 'LT Part Keyword', 'pixelgradelt_records' ),
-			'add_new_item'               => esc_html__( 'Add New Part Keyword', 'pixelgradelt_records' ),
-			'update_item'                => esc_html__( 'Update Part Keyword', 'pixelgradelt_records' ),
-			'new_item_name'              => esc_html__( 'New Part Keyword Name', 'pixelgradelt_records' ),
-			'edit_item'                  => esc_html__( 'Edit Part Keyword', 'pixelgradelt_records' ),
-			'all_items'                  => esc_html__( 'All Part Keywords', 'pixelgradelt_records' ),
-			'search_items'               => esc_html__( 'Search Part Keywords', 'pixelgradelt_records' ),
-			'not_found'                  => esc_html__( 'No part keywords found.', 'pixelgradelt_records' ),
-			'no_terms'                   => esc_html__( 'No part keywords.', 'pixelgradelt_records' ),
-			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pixelgradelt_records' ),
-			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pixelgradelt_records' ),
-			'most_used'                  => esc_html__( 'Most used.', 'pixelgradelt_records' ),
-			'items_list_navigation'      => esc_html__( 'Part Keywords list navigation', 'pixelgradelt_records' ),
-			'items_list'                 => esc_html__( 'Part Keywords list', 'pixelgradelt_records' ),
-			'back_to_items'              => esc_html__( '&larr; Go to Part Keywords', 'pixelgradelt_records' ),
+			'name'                       => esc_html__( 'Part Keywords', 'pressody_records' ),
+			'singular_name'              => esc_html__( 'Part Keyword', 'pressody_records' ),
+			'add_new'                    => esc_html_x( 'Add New', 'PD Part Keyword', 'pressody_records' ),
+			'add_new_item'               => esc_html__( 'Add New Part Keyword', 'pressody_records' ),
+			'update_item'                => esc_html__( 'Update Part Keyword', 'pressody_records' ),
+			'new_item_name'              => esc_html__( 'New Part Keyword Name', 'pressody_records' ),
+			'edit_item'                  => esc_html__( 'Edit Part Keyword', 'pressody_records' ),
+			'all_items'                  => esc_html__( 'All Part Keywords', 'pressody_records' ),
+			'search_items'               => esc_html__( 'Search Part Keywords', 'pressody_records' ),
+			'not_found'                  => esc_html__( 'No part keywords found.', 'pressody_records' ),
+			'no_terms'                   => esc_html__( 'No part keywords.', 'pressody_records' ),
+			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pressody_records' ),
+			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pressody_records' ),
+			'most_used'                  => esc_html__( 'Most used.', 'pressody_records' ),
+			'items_list_navigation'      => esc_html__( 'Part Keywords list navigation', 'pressody_records' ),
+			'items_list'                 => esc_html__( 'Part Keywords list', 'pressody_records' ),
+			'back_to_items'              => esc_html__( '&larr; Go to Part Keywords', 'pressody_records' ),
 		];
 
 		return array_merge( [

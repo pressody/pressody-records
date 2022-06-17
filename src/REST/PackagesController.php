@@ -4,22 +4,22 @@
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\REST;
+namespace Pressody\Records\REST;
 
-use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\Exception\FileNotFound;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\PartManager;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use PixelgradeLT\Records\Transformer\PackageTransformer;
+use Pressody\Records\Capabilities;
+use Pressody\Records\Exception\FileNotFound;
+use Pressody\Records\Package;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\LocalTheme;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\PartManager;
+use Pressody\Records\Repository\PackageRepository;
+use Pressody\Records\Transformer\PackageTransformer;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -111,7 +111,7 @@ class PackagesController extends WP_REST_Controller {
 		if ( ! current_user_can( Capabilities::VIEW_PACKAGES ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to view packages.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to view packages.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -174,7 +174,7 @@ class PackagesController extends WP_REST_Controller {
 		];
 
 		$params['postId'] = [
-			'description'       => esc_html__( 'Limit results to packages by one or more (managed) post IDs.', 'pixelgradelt_records' ),
+			'description'       => esc_html__( 'Limit results to packages by one or more (managed) post IDs.', 'pressody_records' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'integer',
@@ -184,7 +184,7 @@ class PackagesController extends WP_REST_Controller {
 		];
 
 		$params['postSlug'] = [
-			'description'       => esc_html__( 'Limit results to packages by one or more (managed) post slugs.', 'pixelgradelt_records' ),
+			'description'       => esc_html__( 'Limit results to packages by one or more (managed) post slugs.', 'pressody_records' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'string',
@@ -194,7 +194,7 @@ class PackagesController extends WP_REST_Controller {
 		];
 
 		$params['packageName'] = [
-			'description'       => esc_html__( 'Limit results to packages by one or more Composer package names (including the vendor). Use the "postSlug" parameter if you want to provide only the name, without the vendor.', 'pixelgradelt_records' ),
+			'description'       => esc_html__( 'Limit results to packages by one or more Composer package names (including the vendor). Use the "postSlug" parameter if you want to provide only the name, without the vendor.', 'pressody_records' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'string',
@@ -204,7 +204,7 @@ class PackagesController extends WP_REST_Controller {
 		];
 
 		$params['type'] = [
-			'description'       => esc_html__( 'Limit results to packages of one or more types.', 'pixelgradelt_records' ),
+			'description'       => esc_html__( 'Limit results to packages of one or more types.', 'pressody_records' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'string',
@@ -376,25 +376,25 @@ class PackagesController extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'authors'          => [
-					'description' => esc_html__( 'The package authors details.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package authors details.', 'pressody_records' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'composer'         => [
-					'description' => esc_html__( 'Package data formatted for Composer.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'Package data formatted for Composer.', 'pressody_records' ),
 					'type'        => 'object',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 					'properties'  => [
 						'name' => [
-							'description' => __( 'Composer package name.', 'pixelgradelt_records' ),
+							'description' => __( 'Composer package name.', 'pressody_records' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'type' => [
-							'description' => __( 'Composer package type.', 'pixelgradelt_records' ),
+							'description' => __( 'Composer package type.', 'pressody_records' ),
 							'type'        => 'string',
 							'enum'        => [ 'wordpress-plugin', 'wordpress-theme' ],
 							'context'     => [ 'view', 'edit' ],
@@ -403,20 +403,20 @@ class PackagesController extends WP_REST_Controller {
 					],
 				],
 				'description'      => [
-					'description' => esc_html__( 'The package description.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package description.', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'homepage'         => [
-					'description' => esc_html__( 'The package URL.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package URL.', 'pressody_records' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'keywords'         => [
-					'description' => esc_html__( 'The package keywords.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package keywords.', 'pressody_records' ),
 					'type'        => 'array',
 					'items'             => [
 						'type' => 'string',
@@ -425,13 +425,13 @@ class PackagesController extends WP_REST_Controller {
 					'readonly'    => true,
 				],
 				'name'             => [
-					'description' => esc_html__( 'The name of the package.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The name of the package.', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'releases'         => [
-					'description' => esc_html__( 'A list of package releases.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'A list of package releases.', 'pressody_records' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
@@ -440,13 +440,13 @@ class PackagesController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'url'     => [
-								'description' => esc_html__( 'A URL to download the release.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'A URL to download the release.', 'pressody_records' ),
 								'type'        => 'string',
 								'format'      => 'uri',
 								'readonly'    => true,
 							],
 							'version' => [
-								'description' => esc_html__( 'The release version.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The release version.', 'pressody_records' ),
 								'type'        => 'string',
 								'readonly'    => true,
 							],
@@ -454,7 +454,7 @@ class PackagesController extends WP_REST_Controller {
 					],
 				],
 				'requiredPackages' => [
-					'description' => esc_html__( 'A list of required packages.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'A list of required packages.', 'pressody_records' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
@@ -463,32 +463,32 @@ class PackagesController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'name'        => [
-								'description' => __( 'Composer package name.', 'pixelgradelt_records' ),
+								'description' => __( 'Composer package name.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'version'     => [
-								'description' => esc_html__( 'The required package version constraint.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The required package version constraint.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
-								'description' => esc_html__( 'The required package stability constraint.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The required package stability constraint.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
-								'description' => esc_html__( 'The required package post edit link.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The required package post edit link.', 'pressody_records' ),
 								'type'        => 'string',
 								'format'      => 'uri',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
-								'description' => esc_html__( 'The required package display name/string.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The required package display name/string.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
@@ -497,7 +497,7 @@ class PackagesController extends WP_REST_Controller {
 					],
 				],
 				'replacedPackages' => [
-					'description' => esc_html__( 'A list of replaced packages.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'A list of replaced packages.', 'pressody_records' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
@@ -506,31 +506,31 @@ class PackagesController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'name'        => [
-								'description' => __( 'Composer package name.', 'pixelgradelt_records' ),
+								'description' => __( 'Composer package name.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'version'     => [
-								'description' => esc_html__( 'The replaced package version constraint.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The replaced package version constraint.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
-								'description' => esc_html__( 'The replaced package stability constraint.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The replaced package stability constraint.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
-								'description' => esc_html__( 'The replaced package post edit link.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The replaced package post edit link.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
-								'description' => esc_html__( 'The replaced package display name/string.', 'pixelgradelt_records' ),
+								'description' => esc_html__( 'The replaced package display name/string.', 'pressody_records' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
@@ -539,14 +539,14 @@ class PackagesController extends WP_REST_Controller {
 					],
 				],
 				'slug'             => [
-					'description' => esc_html__( 'The package slug.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package slug.', 'pressody_records' ),
 					'type'        => 'string',
 					'pattern'     => self::SLUG_PATTERN,
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,
 				],
 				'type'             => [
-					'description' => esc_html__( 'Type of package.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'Type of package.', 'pressody_records' ),
 					'type'        => 'string',
 					'enum'        => [
 						PackageTypes::PLUGIN,
@@ -559,20 +559,20 @@ class PackagesController extends WP_REST_Controller {
 					'required'    => true,
 				],
 				'visibility'       => [
-					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'editLink'    => [
-					'description' => esc_html__( 'The package post edit link.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package post edit link.', 'pressody_records' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'ltType'       => [
-					'description' => esc_html__( 'The LT package type (package or part).', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The PD package type (package or part).', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,

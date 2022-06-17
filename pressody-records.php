@@ -1,31 +1,31 @@
 <?php
 /**
- * PixelgradeLT Records
+ * Pressody Records
  *
- * @package PixelgradeLT
- * @author  Vlad Olaru <vlad@pixelgrade.com>
+ * @package Pressody
+ * @author  Vlad Olaru <vladpotter85@gmail.com>
  * @license GPL-2.0-or-later
  *
  * @wordpress-plugin
- * Plugin Name: PixelgradeLT Records
- * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-records
- * Description: Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.
- * Version: 0.16.1
- * Author: Pixelgrade
- * Author URI: https://pixelgrade.com/
+ * Plugin Name: Pressody Records
+ * Plugin URI: https://github.com/pressody/pressody-records
+ * Description: Define and manage Pressody modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.
+ * Version: 0.17.0
+ * Author: Pressody
+ * Author URI: https://getpressody.com/
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: pixelgradelt_records
+ * Text Domain: pressody_records
  * Domain Path: /languages
  * Requires PHP: 7.4
  * Network: false
- * GitHub Plugin URI: pixelgradelt/pixelgradelt-records
+ * GitHub Plugin URI: pressody/pressody-records
  * Release Asset: true
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 // Exit if accessed directly.
 if ( ! \defined( 'ABSPATH' ) ) {
@@ -37,7 +37,7 @@ if ( ! \defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-const VERSION = '0.16.1';
+const VERSION = '0.17.0';
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
@@ -59,7 +59,7 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 // We use immutable since we don't want to overwrite variables already set.
 $dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
 $dotenv->load();
-$dotenv->required( 'LTRECORDS_PHP_AUTH_USER' )->notEmpty();
+$dotenv->required( 'PDRECORDS_PHP_AUTH_USER' )->notEmpty();
 // Read environment variables from the $_ENV array also.
 \Env\Env::$options |= \Env\Env::USE_ENV_ARRAY;
 
@@ -73,20 +73,20 @@ if ( file_exists( __DIR__ . '/vendor/woocommerce/action-scheduler/action-schedul
 }
 
 // Create a container and register a service provider.
-$pixelgradelt_records_container = new Container();
-$pixelgradelt_records_container->register( new ServiceProvider() );
+$pressody_records_container = new Container();
+$pressody_records_container->register( new ServiceProvider() );
 
 // Initialize the plugin and inject the container.
-$pixelgradelt_records = plugin()
+$pressody_records = plugin()
 	->set_basename( plugin_basename( __FILE__ ) )
 	->set_directory( plugin_dir_path( __FILE__ ) )
-	->set_file( __DIR__ . '/pixelgradelt-records.php' )
-	->set_slug( 'pixelgradelt-records' )
+	->set_file( __DIR__ . '/pressody-records.php' )
+	->set_slug( 'pressody-records' )
 	->set_url( plugin_dir_url( __FILE__ ) )
 	->define_constants()
-	->set_container( $pixelgradelt_records_container )
-	->register_hooks( $pixelgradelt_records_container->get( 'hooks.activation' ) )
-	->register_hooks( $pixelgradelt_records_container->get( 'hooks.deactivation' ) )
-	->register_hooks( $pixelgradelt_records_container->get( 'hooks.authentication' ) );
+	->set_container( $pressody_records_container )
+	->register_hooks( $pressody_records_container->get( 'hooks.activation' ) )
+	->register_hooks( $pressody_records_container->get( 'hooks.deactivation' ) )
+	->register_hooks( $pressody_records_container->get( 'hooks.authentication' ) );
 
-add_action( 'plugins_loaded', [ $pixelgradelt_records, 'compose' ], 5 );
+add_action( 'plugins_loaded', [ $pressody_records, 'compose' ], 5 );

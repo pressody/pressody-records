@@ -4,10 +4,10 @@
  *
  * @since   0.5.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 /**
  * WordPress.org readme(.txt) parser.

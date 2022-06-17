@@ -4,27 +4,27 @@
  *
  * @since   0.5.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Screen;
+namespace Pressody\Records\Screen;
 
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Carbon_Fields\Helper\Helper;
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use PixelgradeLT\Records\Transformer\PackageTransformer;
-use function PixelgradeLT\Records\get_packages_permalink;
-use function PixelgradeLT\Records\preload_rest_data;
+use Pressody\Records\Package;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\Builder\BasePackageBuilder;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Repository\PackageRepository;
+use Pressody\Records\Transformer\PackageTransformer;
+use function Pressody\Records\get_packages_permalink;
+use function Pressody\Records\preload_rest_data;
 
 /**
  * Edit Package screen provider class.
@@ -191,21 +191,21 @@ class EditPackage extends AbstractHookProvider {
 	 * @since 0.5.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_records-admin' );
-		wp_enqueue_style( 'pixelgradelt_records-admin' );
+		wp_enqueue_script( 'pressody_records-admin' );
+		wp_enqueue_style( 'pressody_records-admin' );
 
-		wp_enqueue_script( 'pixelgradelt_records-edit-package' );
+		wp_enqueue_script( 'pressody_records-edit-package' );
 
 		wp_localize_script(
-				'pixelgradelt_records-edit-package',
-				'_pixelgradeltRecordsEditPackageData',
+				'pressody_records-edit-package',
+				'_pressodyRecordsEditPackageData',
 				[
 						'editedPostId' => get_the_ID(),
 				]
 		);
 
 		$preload_paths = [
-				'/pixelgradelt_records/v1/packages',
+				'/pressody_records/v1/packages',
 		];
 
 		preload_rest_data( $preload_paths );
@@ -253,7 +253,7 @@ class EditPackage extends AbstractHookProvider {
 			return $placeholder;
 		}
 
-		return esc_html__( 'Add package title', 'pixelgradelt_records' );
+		return esc_html__( 'Add package title', 'pressody_records' );
 	}
 
 	protected function add_post_slug_description( string $post_name, $post ): string {
@@ -271,7 +271,7 @@ class EditPackage extends AbstractHookProvider {
 			<?php _e( '<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong> It is best to use <strong>the exact plugin or theme slug!</strong><br>
 Of equal importance is the fact that Composer will use the slug(name) as <strong>the directory for the package files</strong> (i.e. <code>wp-content/plugins/slug</code>), regardless of the directory name in the .zip file!<br>
 In the end, the slug will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>
-The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href="https://regexr.com/5sr9h" target="_blank">this regex</a>', 'pixelgradelt_records' ); ?>
+The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href="https://regexr.com/5sr9h" target="_blank">this regex</a>', 'pressody_records' ); ?>
 		</p>
 		<style>
 			input#post_name {
@@ -303,7 +303,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 			}
 
 			// Prevent the package type metabox from being hidden.
-			if ( false !== ( $key = array_search( 'tagsdiv-ltpackage_types', $hidden ) ) ) {
+			if ( false !== ( $key = array_search( 'tagsdiv-pdpackage_types', $hidden ) ) ) {
 				unset( $hidden[ $key ] );
 			}
 		}
@@ -327,8 +327,8 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 		}
 
 		// Since we are here, modify the package type title to be singular, rather than plural.
-		if ( ! empty( $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types'] ) ) {
-			$wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['side']['core']['tagsdiv-ltpackage_types']['title'] = esc_html__( 'Package Type', 'pixelgradelt_records' ) . '<span style="color: red; flex: auto">*</span>';
+		if ( ! empty( $wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['side']['core']['tagsdiv-pdpackage_types'] ) ) {
+			$wp_meta_boxes[ $this->package_manager::PACKAGE_POST_TYPE ]['side']['core']['tagsdiv-pdpackage_types']['title'] = esc_html__( 'Package Type', 'pressody_records' ) . '<span style="color: red; flex: auto">*</span>';
 		}
 	}
 
@@ -338,31 +338,31 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the source details of the package.
-		Container::make( 'post_meta', 'carbon_fields_container_source_configuration_' . $this->package_manager::PACKAGE_POST_TYPE, esc_html__( 'Source Configuration', 'pixelgradelt_records' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_source_configuration_' . $this->package_manager::PACKAGE_POST_TYPE, esc_html__( 'Source Configuration', 'pressody_records' ) )
 		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-				         Field::make( 'html', 'source_configuration_html', __( 'Section Description', 'pixelgradelt_records' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'First, configure details about <strong>where from should we get package/versions</strong> for this package.', 'pixelgradelt_records' ) ) ),
+				         Field::make( 'html', 'source_configuration_html', __( 'Section Description', 'pressody_records' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'First, configure details about <strong>where from should we get package/versions</strong> for this package.', 'pressody_records' ) ) ),
 
-				         Field::make( 'select', 'package_source_type', __( 'Set the package source type', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Composer works with packages and repositories to find the core to use for the defined dependencies. We will strive to keep as close to that in terms of concepts. Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				         Field::make( 'select', 'package_source_type', __( 'Set the package source type', 'pressody_records' ) )
+				              ->set_help_text( __( 'Composer works with packages and repositories to find the core to use for the defined dependencies. We will strive to keep as close to that in terms of concepts. Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#repository" target="_blank">here</a>.', 'pressody_records' ) )
 				              ->set_options( [
-						              null             => esc_html__( 'Pick your package source, carefully..', 'pixelgradelt_records' ),
-						              'packagist.org'  => esc_html__( 'A Packagist.org public repo', 'pixelgradelt_records' ),
-						              'wpackagist.org' => esc_html__( 'A WPackagist.org repo (mirror of wordpress.org)', 'pixelgradelt_records' ),
-						              'vcs'            => esc_html__( 'A VCS repo (git, SVN, fossil or hg)', 'pixelgradelt_records' ),
-						              'local.plugin'   => esc_html__( 'A plugin installed on this WordPress installation', 'pixelgradelt_records' ),
-						              'local.theme'    => esc_html__( 'A theme installed on this WordPress installation', 'pixelgradelt_records' ),
-						              'local.manual'   => esc_html__( 'A local repo: package releases/versions are managed here, manually', 'pixelgradelt_records' ),
+						              null             => esc_html__( 'Pick your package source, carefully..', 'pressody_records' ),
+						              'packagist.org'  => esc_html__( 'A Packagist.org public repo', 'pressody_records' ),
+						              'wpackagist.org' => esc_html__( 'A WPackagist.org repo (mirror of wordpress.org)', 'pressody_records' ),
+						              'vcs'            => esc_html__( 'A VCS repo (git, SVN, fossil or hg)', 'pressody_records' ),
+						              'local.plugin'   => esc_html__( 'A plugin installed on this WordPress installation', 'pressody_records' ),
+						              'local.theme'    => esc_html__( 'A theme installed on this WordPress installation', 'pressody_records' ),
+						              'local.manual'   => esc_html__( 'A local repo: package releases/versions are managed here, manually', 'pressody_records' ),
 				              ] )
 				              ->set_default_value( null )
 				              ->set_required( true )
 				              ->set_width( 50 ),
 
-				         Field::make( 'text', 'package_source_name', __( 'Package Source Name', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>. Most often you will find the correct project name in the project\'s <code>composer.json</code> file, under the <code>"name"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket</code>)!</strong>', 'pixelgradelt_records' ) )
+				         Field::make( 'text', 'package_source_name', __( 'Package Source Name', 'pressody_records' ) )
+				              ->set_help_text( __( 'Composer identifies a certain package (the package name) by its project name and vendor, resulting in a <code>vendor/projectname</code> package name. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>. Most often you will find the correct project name in the project\'s <code>composer.json</code> file, under the <code>"name"</code> JSON key.<br>The vendor and project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide the whole package name (e.g. <code>wp-media/wp-rocket</code>)!</strong>', 'pressody_records' ) )
 				              ->set_width( 50 )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
@@ -373,8 +373,8 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              ],
 				              ] ),
 
-				         Field::make( 'text', 'package_source_project_name', __( 'Package Source Project Name', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Composer identifies a certain package by its project name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide only the project name (e.g. <code>akismet</code>), not the whole package name (e.g. <code>wpackagist-plugin/akismet</code>)!</strong>', 'pixelgradelt_records' ) )
+				         Field::make( 'text', 'package_source_project_name', __( 'Package Source Project Name', 'pressody_records' ) )
+				              ->set_help_text( __( 'Composer identifies a certain package by its project name and vendor, resulting in a <code>vendor/name</code> identifier. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#name" target="_blank">here</a>.<br>The project name must be lowercased and consist of words separated by <code>-</code>, <code>.</code> or <code>_</code>.<br><strong>Provide only the project name (e.g. <code>akismet</code>), not the whole package name (e.g. <code>wpackagist-plugin/akismet</code>)!</strong>', 'pressody_records' ) )
 				              ->set_width( 50 )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
@@ -385,10 +385,10 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              ],
 				              ] ),
 
-				         Field::make( 'text', 'package_source_version_range', __( 'Package Source Version Range', 'pixelgradelt_records' ) )
+				         Field::make( 'text', 'package_source_version_range', __( 'Package Source Version Range', 'pressody_records' ) )
 				              ->set_help_text( __( 'A certain source can contain tens or even hundreds of historical versions/releases. <strong>It is wasteful to pull all those in</strong> (and cache them) if we are only interested in the latest major version, for example.<br>
  Specify a version range to <strong>limit the available versions/releases for this package.</strong> Most likely you will only lower-bound your range (e.g. <code>>2.0</code>), but that is up to you.<br>
- Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) )
+ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pressody_records' ) )
 				              ->set_width( 75 )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
@@ -398,16 +398,16 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 								              'compare' => 'IN',
 						              ],
 				              ] ),
-				         Field::make( 'select', 'package_source_stability', __( 'Package Source Stability', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Limit the minimum stability required for versions. <code>Stable</code> is the most restrictive one, while <code>dev</code> the most all encompassing.<br><code>Stable</code> is the recommended (and default) one.', 'pixelgradelt_records' ) )
+				         Field::make( 'select', 'package_source_stability', __( 'Package Source Stability', 'pressody_records' ) )
+				              ->set_help_text( __( 'Limit the minimum stability required for versions. <code>Stable</code> is the most restrictive one, while <code>dev</code> the most all encompassing.<br><code>Stable</code> is the recommended (and default) one.', 'pressody_records' ) )
 				              ->set_width( 25 )
 				              ->set_options( [
-						              'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
+						              'stable' => esc_html__( 'Stable', 'pressody_records' ),
 					              /** The uppercase 'RC' key is important. @see BasePackage::$stabilities */
-						              'RC'     => esc_html__( 'RC', 'pixelgradelt_records' ),
-						              'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
-						              'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
-						              'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+						              'RC'     => esc_html__( 'RC', 'pressody_records' ),
+						              'beta'   => esc_html__( 'Beta', 'pressody_records' ),
+						              'alpha'  => esc_html__( 'Alpha', 'pressody_records' ),
+						              'dev'    => esc_html__( 'Dev', 'pressody_records' ),
 				              ] )
 				              ->set_default_value( 'stable' )
 				              ->set_conditional_logic( [
@@ -419,8 +419,8 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              ],
 				              ] ),
 
-				         Field::make( 'text', 'package_vcs_url', __( 'Package VCS URL', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pixelgradelt/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				         Field::make( 'text', 'package_vcs_url', __( 'Package VCS URL', 'pressody_records' ) )
+				              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pressody/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pressody_records' ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
@@ -430,8 +430,8 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              ],
 				              ] ),
 
-				         Field::make( 'select', 'package_local_plugin_file', __( 'Choose one of the installed plugins', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Installed plugins that are already attached to a package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
+				         Field::make( 'select', 'package_local_plugin_file', __( 'Choose one of the installed plugins', 'pressody_records' ) )
+				              ->set_help_text( __( 'Installed plugins that are already attached to a package are NOT part of the list of choices.', 'pressody_records' ) )
 				              ->set_options( [ $this, 'get_available_installed_plugins_options' ] )
 				              ->set_default_value( null )
 				              ->set_required( true )
@@ -444,8 +444,8 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 								              'compare' => '=',
 						              ],
 				              ] ),
-				         Field::make( 'select', 'package_local_theme_slug', __( 'Choose one of the installed themes', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'Installed themes that are already attached to a package are NOT part of the list of choices.', 'pixelgradelt_records' ) )
+				         Field::make( 'select', 'package_local_theme_slug', __( 'Choose one of the installed themes', 'pressody_records' ) )
+				              ->set_help_text( __( 'Installed themes that are already attached to a package are NOT part of the list of choices.', 'pressody_records' ) )
 				              ->set_options( [ $this, 'get_available_installed_themes_options' ] )
 				              ->set_default_value( null )
 				              ->set_required( true )
@@ -459,20 +459,20 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 						              ],
 				              ] ),
 
-				         Field::make( 'complex', 'package_manual_releases', __( 'Package Releases', 'pixelgradelt_records' ) )
+				         Field::make( 'complex', 'package_manual_releases', __( 'Package Releases', 'pressody_records' ) )
 				              ->set_help_text( __( 'The manually uploaded package releases (zips).<br>
 <strong>These zip files will be cached</strong> just like external or installed sources. If you remove a certain release and update the post, the cache will keep up and auto-clean itself.<br>
 <strong>If you upload a different zip to a previously published release, the cache will not auto-update itself</strong> (for performance reasons). In this case, first delete the release, hit "Update" for the post and them add a new release.<br>
 Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip files.</strong> That is up to you, if you can\'t stand some mess.<br><br>
-<em>TIP: If you <strong>switch the package type to manual entries,</strong> hit "Update" and all existing, stored releases will be migrated for you to manually manage.</em>', 'pixelgradelt_records' ) )
+<em>TIP: If you <strong>switch the package type to manual entries,</strong> hit "Update" and all existing, stored releases will be migrated for you to manually manage.</em>', 'pressody_records' ) )
 				              ->set_classes( 'package-manual-releases' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'text', 'version', __( 'Version', 'pixelgradelt_records' ) )
-						                   ->set_help_text( __( 'Semver-formatted version string. Bear in mind that we currently don\'t do any check regarding the version. It is up to you to <strong>make sure that the zip file contents match the version specified.</strong>', 'pixelgradelt_records' ) )
+						              Field::make( 'text', 'version', __( 'Version', 'pressody_records' ) )
+						                   ->set_help_text( __( 'Semver-formatted version string. Bear in mind that we currently don\'t do any check regarding the version. It is up to you to <strong>make sure that the zip file contents match the version specified.</strong>', 'pressody_records' ) )
 						                   ->set_required( true )
 						                   ->set_width( 25 ),
-						              Field::make( 'file', 'file', __( 'Zip File', 'pixelgradelt_records' ) )
+						              Field::make( 'file', 'file', __( 'Zip File', 'pressody_records' ) )
 						                   ->set_type( 'zip' ) // The allowed mime-types (see wp_get_mime_types())
 						                   ->set_value_type( 'id' ) // Change to 'url' to store the file/attachment URL instead of the attachment ID.
 						                   ->set_required( true )
@@ -511,8 +511,8 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 								              'compare' => 'IN',
 						              ],
 				              ] ),
-				         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pixelgradelt_records' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pixelgradelt_records' ) ) )
+				         Field::make( 'html', 'package_details_html', __( 'Section Description', 'pressody_records' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the package itself,</strong> as it will be exposed for consumption.<br><strong>Leave empty</strong> and we will try to figure them out on save; after that you can modify them however you like.', 'pressody_records' ) ) )
 				              ->set_conditional_logic( [
 						              [
 								              'field'   => 'package_source_type',
@@ -527,7 +527,7 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 								              'compare' => 'IN',
 						              ],
 				              ] ),
-				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pixelgradelt_records' ) )
+				         Field::make( 'textarea', 'package_details_description', __( 'Package Description', 'pressody_records' ) )
 				              ->set_conditional_logic( [
 						              [
 								              'field'   => 'package_source_type',
@@ -542,7 +542,7 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 								              'compare' => 'IN',
 						              ],
 				              ] ),
-				         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pixelgradelt_records' ) )
+				         Field::make( 'text', 'package_details_homepage', __( 'Package Homepage URL', 'pressody_records' ) )
 				              ->set_conditional_logic( [
 						              [
 								              'field'   => 'package_source_type',
@@ -557,8 +557,8 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 								              'compare' => 'IN',
 						              ],
 				              ] ),
-				         Field::make( 'text', 'package_details_license', __( 'Package License', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				         Field::make( 'text', 'package_details_license', __( 'Package License', 'pressody_records' ) )
+				              ->set_help_text( __( 'The package license in a standard format (e.g. <code>GPL-3.0-or-later</code>). If there are multiple licenses, comma separate them. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#license" target="_blank">here</a>.', 'pressody_records' ) )
 				              ->set_conditional_logic( [
 						              [
 								              'field'   => 'package_source_type',
@@ -573,13 +573,13 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 								              'compare' => 'IN',
 						              ],
 				              ] ),
-				         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pixelgradelt_records' ) )
-				              ->set_help_text( __( 'The package authors details. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#authors" target="_blank">here</a>.', 'pixelgradelt_records' ) )
+				         Field::make( 'complex', 'package_details_authors', __( 'Package Authors', 'pressody_records' ) )
+				              ->set_help_text( __( 'The package authors details. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#authors" target="_blank">here</a>.', 'pressody_records' ) )
 				              ->add_fields( [
-						              Field::make( 'text', 'name', __( 'Author Name', 'pixelgradelt_records' ) )->set_required( true )->set_width( 50 ),
-						              Field::make( 'text', 'email', __( 'Author Email', 'pixelgradelt_records' ) )->set_width( 50 ),
-						              Field::make( 'text', 'homepage', __( 'Author Homepage', 'pixelgradelt_records' ) )->set_width( 50 ),
-						              Field::make( 'text', 'role', __( 'Author Role', 'pixelgradelt_records' ) )->set_width( 50 ),
+						              Field::make( 'text', 'name', __( 'Author Name', 'pressody_records' ) )->set_required( true )->set_width( 50 ),
+						              Field::make( 'text', 'email', __( 'Author Email', 'pressody_records' ) )->set_width( 50 ),
+						              Field::make( 'text', 'homepage', __( 'Author Homepage', 'pressody_records' ) )->set_width( 50 ),
+						              Field::make( 'text', 'role', __( 'Author Role', 'pressody_records' ) )->set_width( 50 ),
 				              ] )
 				              ->set_header_template( '
 							    <% if (name) { %>
@@ -603,38 +603,38 @@ Also, bear in mind that <strong>we do not clean the Media Gallery of unused zip 
 		         ] );
 
 		// Register the metabox for managing the packages the current package depends on (dependencies that will translate in composer `require`s).
-		Container::make( 'post_meta', 'carbon_fields_container_dependencies_configuration_' . $this->package_manager::PACKAGE_POST_TYPE, esc_html__( 'Dependencies Configuration', 'pixelgradelt_records' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_dependencies_configuration_' . $this->package_manager::PACKAGE_POST_TYPE, esc_html__( 'Dependencies Configuration', 'pressody_records' ) )
 		         ->where( 'post_type', '=', $this->package_manager::PACKAGE_POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-				         Field::make( 'html', 'dependencies_configuration_html', __( 'Dependencies Description', 'pixelgradelt_records' ) )
+				         Field::make( 'html', 'dependencies_configuration_html', __( 'Dependencies Description', 'pressody_records' ) )
 				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of other managed packages</strong> the current package depends on (required packages that translate into entries in Composer\'s <code>require</code> entries).<br>
 For each required package you can <strong>specify a version range</strong> to better control the package releases/versions required. Set to <code>*</code> to <strong>use the latest available required-package release that matches all constraints</strong> (other packages in a module might impose stricter limits).<br>
-Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) ) ),
+Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pressody_records' ) ) ),
 
-				         Field::make( 'complex', 'package_required_packages', __( 'Required Packages', 'pixelgradelt_records' ) )
+				         Field::make( 'complex', 'package_required_packages', __( 'Required Packages', 'pressody_records' ) )
 				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same package multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
-<strong>FYI:</strong> Each required package label is comprised of the standardized <code>source_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
+<strong>FYI:</strong> Each required package label is comprised of the standardized <code>source_name</code> and the <code>#post_id</code>.', 'pressody_records' ) )
 				              ->set_classes( 'package-required-packages' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pressody_records' ) )
 						                   ->set_options( [ $this, 'get_available_required_packages_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
 						                   ->set_width( 50 ),
-						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_records' ) )
+						              Field::make( 'text', 'version_range', __( 'Version Range', 'pressody_records' ) )
 						                   ->set_default_value( '*' )
 						                   ->set_required( true )
 						                   ->set_width( 25 ),
-						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'stability', __( 'Stability', 'pressody_records' ) )
 						                   ->set_options( [
-								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
-								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
-								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
-								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
-								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+								                   'stable' => esc_html__( 'Stable', 'pressody_records' ),
+								                   'rc'     => esc_html__( 'RC', 'pressody_records' ),
+								                   'beta'   => esc_html__( 'Beta', 'pressody_records' ),
+								                   'alpha'  => esc_html__( 'Alpha', 'pressody_records' ),
+								                   'dev'    => esc_html__( 'Dev', 'pressody_records' ),
 						                   ] )
 						                   ->set_required( true )
 						                   ->set_default_value( 'stable' )
@@ -645,29 +645,29 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 								        <%- pseudo_id %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
 								    <% } %>
 								' ),
-				         Field::make( 'complex', 'package_replaced_packages', __( 'Replaced Packages', 'pixelgradelt_records' ) )
+				         Field::make( 'complex', 'package_replaced_packages', __( 'Replaced Packages', 'pressody_records' ) )
 				              ->set_help_text( __( 'These are packages that are <strong>automatically ignored from a site\'s composition</strong> when the current package is included. The order is not important, from a logic standpoint.<br>
 These apply the Composer <code>replace</code> logic, meaning that the current package already includes the replaced packages. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#replace" target="_blank">here</a>.<br>
-<strong>FYI:</strong> Each replaced package label is comprised of the standardized package <code>source_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
+<strong>FYI:</strong> Each replaced package label is comprised of the standardized package <code>source_name</code> and the <code>#post_id</code>.', 'pressody_records' ) )
 				              ->set_classes( 'package-required-packages' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the managed packages', 'pressody_records' ) )
 						                   ->set_options( [ $this, 'get_available_required_packages_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
 						                   ->set_width( 50 ),
-						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_records' ) )
+						              Field::make( 'text', 'version_range', __( 'Version Range', 'pressody_records' ) )
 						                   ->set_default_value( '*' )
 						                   ->set_required( true )
 						                   ->set_width( 25 ),
-						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'stability', __( 'Stability', 'pressody_records' ) )
 						                   ->set_options( [
-								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
-								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
-								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
-								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
-								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+								                   'stable' => esc_html__( 'Stable', 'pressody_records' ),
+								                   'rc'     => esc_html__( 'RC', 'pressody_records' ),
+								                   'beta'   => esc_html__( 'Beta', 'pressody_records' ),
+								                   'alpha'  => esc_html__( 'Alpha', 'pressody_records' ),
+								                   'dev'    => esc_html__( 'Dev', 'pressody_records' ),
 						                   ] )
 						                   ->set_required( true )
 						                   ->set_default_value( 'stable' )
@@ -686,7 +686,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 		$container_id = $post_type . '_current_state_details';
 		add_meta_box(
 				$container_id,
-				esc_html__( 'Current Package State Details', 'pixelgradelt_records' ),
+				esc_html__( 'Current Package State Details', 'pressody_records' ),
 				array( $this, 'display_package_current_state_meta_box' ),
 				$this->package_manager::PACKAGE_POST_TYPE,
 				'normal',
@@ -720,7 +720,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 	public function display_package_current_state_meta_box( \WP_Post $post ) {
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
-		echo '<p>This is <strong>the same info</strong> shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_records#pixelgradelt_records-packages' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
+		echo '<p>This is <strong>the same info</strong> shown in the full package-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pressody_records#pressody_records-packages' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . esc_url( get_packages_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/package-preview.php' );
 		echo '</div></div>';
 	}
@@ -819,7 +819,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current pa
 			if ( $result instanceof \Exception ) {
 				$message .= '<pre>' . $result->getMessage() . '</pre><br>';
 			}
-			$message .= 'There should be additional information in the PixelgradeLT Records logs.';
+			$message .= 'There should be additional information in the Pressody Records logs.';
 			$message .= '</p>';
 			update_post_meta( $post_ID, '_package_require_dry_run_result', [
 					'type'    => 'error',
@@ -1192,13 +1192,13 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 				continue;
 			}
 
-			$options[ $plugin_file ] = sprintf( __( '%s (by %s) - %s', 'pixelgradelt_records' ), $plugin_data['Name'], $plugin_data['Author'], $this->get_slug_from_plugin_file( $plugin_file ) );
+			$options[ $plugin_file ] = sprintf( __( '%s (by %s) - %s', 'pressody_records' ), $plugin_data['Name'], $plugin_data['Author'], $this->get_slug_from_plugin_file( $plugin_file ) );
 		}
 
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick your installed plugin, carefully..', 'pixelgradelt_records' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick your installed plugin, carefully..', 'pressody_records' ) ] + $options;
 
 		return $options;
 	}
@@ -1222,13 +1222,13 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		foreach ( $package_ids as $post_id ) {
 			$package_pseudo_id = $this->package_manager->get_post_package_source_name( $post_id ) . $this->package_manager::PSEUDO_ID_DELIMITER . $post_id;
 
-			$options[ $package_pseudo_id ] = sprintf( __( '%s - %s', 'pixelgradelt_records' ), $this->package_manager->get_post_package_name( $post_id ), $package_pseudo_id );
+			$options[ $package_pseudo_id ] = sprintf( __( '%s - %s', 'pressody_records' ), $this->package_manager->get_post_package_name( $post_id ), $package_pseudo_id );
 		}
 
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick your required package, carefully..', 'pixelgradelt_records' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick your required package, carefully..', 'pressody_records' ) ] + $options;
 
 		return $options;
 	}
@@ -1263,13 +1263,13 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 				continue;
 			}
 
-			$options[ $theme_slug ] = sprintf( __( '%s (by %s) - %s', 'pixelgradelt_records' ), $theme_data->get( 'Name' ), $theme_data->get( 'Author' ), $theme_slug );
+			$options[ $theme_slug ] = sprintf( __( '%s (by %s) - %s', 'pressody_records' ), $theme_data->get( 'Name' ), $theme_data->get( 'Author' ), $theme_slug );
 		}
 
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick your installed theme, carefully..', 'pixelgradelt_records' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick your installed theme, carefully..', 'pressody_records' ) ] + $options;
 
 		return $options;
 	}
@@ -1288,7 +1288,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		if ( empty( $post->post_title ) ) {
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
-					esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pixelgradelt_records' )
+					esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pressody_records' )
 			) );
 		}
 
@@ -1301,7 +1301,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 			$taxonomy_args = $this->package_manager->get_package_type_taxonomy_args();
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
-					sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pixelgradelt_records' ), $taxonomy_args['labels']['singular_name'] )
+					sprintf( esc_html__( 'You MUST choose a %s for creating a new package.', 'pressody_records' ), $taxonomy_args['labels']['singular_name'] )
 			) );
 		} else {
 			$package_type = reset( $package_type );
@@ -1313,7 +1313,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 			if ( ! in_array( $package_source_type, [ 'packagist.org', 'vcs', 'local.manual' ] ) ) {
 				$this->add_user_message( 'error', sprintf(
 						'<p>%s</p>',
-						esc_html__( 'For WordPress-Core-type packages, you can only use choose the following source types: Packagist.org, VCS (e.g. Github repo), or manually uploaded zips.', 'pixelgradelt_records' )
+						esc_html__( 'For WordPress-Core-type packages, you can only use choose the following source types: Packagist.org, VCS (e.g. Github repo), or manually uploaded zips.', 'pressody_records' )
 				) );
 			}
 		}
@@ -1352,7 +1352,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 			return;
 		}
 
-		$seen_list = get_post_meta( $post->ID, '_pixelgradelt_package_seen_releases', true );
+		$seen_list = get_post_meta( $post->ID, '_pressody_package_seen_releases', true );
 		if ( empty( $seen_list ) ) {
 			$seen_list = [];
 		}
@@ -1379,7 +1379,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 		$message = sprintf(
 				wp_kses_post( __( 'Now, <em>look here you!</em> Yes, <em>you!</em><br>
 Since the last time any manager looked at this, <strong>%s</strong> %s been automagically 🧞‍♀️  made available: %s. <br>
-Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in charge 💪', 'pixelgradelt_records' ) ),
+Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in charge 💪', 'pressody_records' ) ),
 				$count > 1 ? $count . ' new releases' : $count . ' new release',
 				$count > 1 ? 'have' : 'has',
 				'<span class="bubble wp-ui-highlight">' . implode( '</span>, <span class="bubble wp-ui-highlight">', $not_seen_list ) . '</span>'
@@ -1413,7 +1413,7 @@ Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in cha
 			return;
 		}
 
-		$current_list = get_post_meta( $post->ID, '_pixelgradelt_package_seen_releases', true );
+		$current_list = get_post_meta( $post->ID, '_pressody_package_seen_releases', true );
 		if ( empty( $current_list ) ) {
 			$current_list = [];
 		}
@@ -1435,7 +1435,7 @@ Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in cha
 			return;
 		}
 
-		update_post_meta( $post->ID, '_pixelgradelt_package_seen_releases', $new_list );
+		update_post_meta( $post->ID, '_pressody_package_seen_releases', $new_list );
 	}
 
 	/**
@@ -1448,7 +1448,7 @@ Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in cha
 			return;
 		}
 
-		$messages = apply_filters( 'pixelgradelt_records/editpackage_show_user_messages', $this->user_messages, $post );
+		$messages = apply_filters( 'pressody_records/editpackage_show_user_messages', $this->user_messages, $post );
 		if ( empty( $messages ) ) {
 			return;
 		}
@@ -1490,7 +1490,7 @@ Maybe you should <em>check them out</em> 🤷‍♂️ .. or not. You are in cha
 
 		printf(
 				'<div class="message patience"><p>%s</p></div>',
-				wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉<br><em>On trash the stored artifacts are deleted!</em>', 'pixelgradelt_records' ) )
+				wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉<br><em>On trash the stored artifacts are deleted!</em>', 'pressody_records' ) )
 		);
 	}
 

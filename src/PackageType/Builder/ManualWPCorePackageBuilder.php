@@ -4,12 +4,12 @@
  *
  * @since   0.9.1
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PackageType\Builder;
+namespace Pressody\Records\PackageType\Builder;
 
 /**
  * Manual WP Core package builder class for packages with zips manually uploaded to the post.

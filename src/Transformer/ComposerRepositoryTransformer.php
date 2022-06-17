@@ -4,21 +4,21 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Transformer;
+namespace Pressody\Records\Transformer;
 
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\PackageTypes;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\PackageTypes;
 use Psr\Log\LoggerInterface;
-use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use PixelgradeLT\Records\VersionParser;
+use Pressody\Records\Capabilities;
+use Pressody\Records\Package;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Repository\PackageRepository;
+use Pressody\Records\VersionParser;
 
 /**
  * Composer repository transformer class.
@@ -142,8 +142,8 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 				$require = array_merge( $require, $meta['require'] );
 			}
 			// Merge the managed required packages, if any.
-			if ( ! empty( $meta['require_ltpackages'] ) ) {
-				$require = array_merge( $require, $this->composer_transformer->transform_dependency_packages( $meta['require_ltpackages'] ) );
+			if ( ! empty( $meta['require_pdpackages'] ) ) {
+				$require = array_merge( $require, $this->composer_transformer->transform_dependency_packages( $meta['require_pdpackages'] ) );
 			}
 
 			if ( PackageTypes::WPCORE === $package->get_type() ) {
@@ -155,7 +155,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 			}
 
 			// Finally, allow others to have a say.
-			$require = apply_filters( 'pixelgradelt_records/composer_package_require', $require, $package, $release );
+			$require = apply_filters( 'pressody_records/composer_package_require', $require, $package, $release );
 
 			// Start with the hard-coded replaces, if any.
 			// This order is important since we go from lower to higher importance. Each one overwrites the previous.
@@ -165,12 +165,12 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 				$replace = array_merge( $replace, $meta['replace'] );
 			}
 			// Merge the managed replaced packages, if any.
-			if ( ! empty( $meta['replace_ltpackages'] ) ) {
-				$replace = array_merge( $replace, $this->composer_transformer->transform_dependency_packages( $meta['replace_ltpackages'] ) );
+			if ( ! empty( $meta['replace_pdpackages'] ) ) {
+				$replace = array_merge( $replace, $this->composer_transformer->transform_dependency_packages( $meta['replace_pdpackages'] ) );
 			}
 
 			// Finally, allow others to have a say.
-			$replace = apply_filters( 'pixelgradelt_records/composer_package_replace', $replace, $package, $release );
+			$replace = apply_filters( 'pressody_records/composer_package_replace', $replace, $package, $release );
 
 			// We don't need the artifactmtime in the dist since that is only for internal use.
 			if ( isset( $meta['dist']['artifactmtime'] ) ) {

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace PixelgradeLT\Records\Client\Builder;
+namespace Pressody\Records\Client\Builder;
 
 use Composer\IO\IOInterface;
 

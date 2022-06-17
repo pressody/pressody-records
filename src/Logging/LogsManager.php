@@ -4,15 +4,15 @@
  *
  * @since   0.9.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Logging;
+namespace Pressody\Records\Logging;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Queue\QueueInterface;
+use Pressody\Records\Queue\QueueInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -63,7 +63,7 @@ class LogsManager extends AbstractHookProvider {
 	 */
 	public function register_hooks() {
 		$this->add_action( 'init', 'schedule_cleanup_logs_event' );
-		$this->add_action( 'pixelgradelt_records/midnight', 'cleanup_logs' );
+		$this->add_action( 'pressody_records/midnight', 'cleanup_logs' );
 	}
 
 	/**
@@ -72,8 +72,8 @@ class LogsManager extends AbstractHookProvider {
 	 * @since 0.15.0
 	 */
 	protected function schedule_cleanup_logs_event() {
-		if ( ! $this->queue->get_next( 'pixelgradelt_records/midnight' ) ) {
-			$this->queue->schedule_recurring( strtotime( 'tomorrow' ), DAY_IN_SECONDS, 'pixelgradelt_records/midnight', [], 'plt_rec' );
+		if ( ! $this->queue->get_next( 'pressody_records/midnight' ) ) {
+			$this->queue->schedule_recurring( strtotime( 'tomorrow' ), DAY_IN_SECONDS, 'pressody_records/midnight', [], 'plt_rec' );
 		}
 	}
 

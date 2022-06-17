@@ -4,20 +4,20 @@
  *
  * Code borrowed and modified from WooCommerce.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.9.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Logging\Handler;
+namespace Pressody\Records\Logging\Handler;
 
 use Automattic\Jetpack\Constants;
 use Exception;
-use PixelgradeLT\Records\Utils\JSONCleaner;
-use function PixelgradeLT\Records\doing_it_wrong;
-use const PixelgradeLT\Records\LOG_DIR;
+use Pressody\Records\Utils\JSONCleaner;
+use function Pressody\Records\doing_it_wrong;
+use const Pressody\Records\LOG_DIR;
 
 /**
  * Handles log entries by writing to a file.
@@ -60,7 +60,7 @@ class FileLogHandler extends LogHandler {
 			$log_size_limit = 5 * 1024 * 1024;
 		}
 
-		$this->log_size_limit = apply_filters( 'pixelgradelt_records/log_file_size_limit', $log_size_limit );
+		$this->log_size_limit = apply_filters( 'pressody_records/log_file_size_limit', $log_size_limit );
 
 		add_action( 'plugins_loaded', array( $this, 'write_cached_logs' ) );
 	}
@@ -281,7 +281,7 @@ class FileLogHandler extends LogHandler {
 			$result = true;
 		}
 
-		do_action( 'pixelgradelt_records/log_clear', $handle );
+		do_action( 'pressody_records/log_clear', $handle );
 
 		return $result;
 	}
@@ -304,7 +304,7 @@ class FileLogHandler extends LogHandler {
 				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
-			do_action( 'pixelgradelt_records/log_remove', $handle, $removed );
+			do_action( 'pressody_records/log_remove', $handle, $removed );
 		}
 		return $removed;
 	}
@@ -397,7 +397,7 @@ class FileLogHandler extends LogHandler {
 		if ( function_exists( 'wp_hash' ) ) {
 			return trailingslashit( LOG_DIR ) . self::get_log_file_name( $handle );
 		} else {
-			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pixelgradelt_records' ), '0.9.0' );
+			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pressody_records' ), '0.9.0' );
 			return false;
 		}
 	}
@@ -417,7 +417,7 @@ class FileLogHandler extends LogHandler {
 			$hash_suffix = wp_hash( $handle );
 			return sanitize_file_name( implode( '-', [ $handle, $date_suffix, $hash_suffix ] ) . '.log' );
 		} else {
-			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pixelgradelt_records' ), '0.9.0' );
+			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pressody_records' ), '0.9.0' );
 			return false;
 		}
 	}

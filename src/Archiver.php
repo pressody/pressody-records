@@ -8,23 +8,23 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 use LogicException;
 use PclZip;
 use Pimple\ServiceIterator;
 use Psr\Log\LoggerInterface;
-use PixelgradeLT\Records\Exception\FileDownloadFailed;
-use PixelgradeLT\Records\Exception\FileOperationFailed;
-use PixelgradeLT\Records\Exception\InvalidPackageArtifact;
-use PixelgradeLT\Records\Exception\PackageNotInstalled;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\Validator\ArtifactValidator;
+use Pressody\Records\Exception\FileDownloadFailed;
+use Pressody\Records\Exception\FileOperationFailed;
+use Pressody\Records\Exception\InvalidPackageArtifact;
+use Pressody\Records\Exception\PackageNotInstalled;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\Validator\ArtifactValidator;
 
 /**
  * Archiver class.
@@ -151,7 +151,7 @@ class Archiver {
 			];
 		}
 
-		return apply_filters( 'pixelgradelt_records/archive_excludes', $excludes, $release );
+		return apply_filters( 'pressody_records/archive_excludes', $excludes, $release );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class Archiver {
 
 		foreach ( $this->validators as $validator ) {
 			if ( ! $validator instanceof ArtifactValidator ) {
-				throw new LogicException( 'Artifact validators must implement \PixelgradeLT\Records\Validator\ArtifactValidator.' );
+				throw new LogicException( 'Artifact validators must implement \Pressody\Records\Validator\ArtifactValidator.' );
 			}
 
 			if ( ! $validator->validate( $tmpfname, $release ) ) {
@@ -241,7 +241,7 @@ class Archiver {
 	 * @return string The temporary file path.
 	 */
 	public function download_url( string $url ): string {
-		$url = apply_filters( 'pixelgradelt_records/package_download_url', $url );
+		$url = apply_filters( 'pressody_records/package_download_url', $url );
 
 		// Since this is a local URL to a file, we don't need to download, just to create a temporary copy.
 		if ( $this->is_local_url( $url ) && $path = $this->local_url_to_path( $url ) ) {
@@ -278,12 +278,12 @@ class Archiver {
 		}
 
 		// Allow others to hook-in just before the download.
-		do_action( 'pixelgradelt_records/download_url_before', $url );
+		do_action( 'pressody_records/download_url_before', $url );
 
 		$tmpfname = download_url( $url );
 
 		// Allow others to hook-in just after the download.
-		do_action( 'pixelgradelt_records/download_url_after', $url );
+		do_action( 'pressody_records/download_url_after', $url );
 
 		if ( is_wp_error( $tmpfname ) ) {
 			$this->logger->error(
@@ -365,6 +365,6 @@ class Archiver {
 	 * @return string
 	 */
 	protected function get_absolute_path_to_tmpdir( string $path = '' ): string {
-		return \trailingslashit( \get_temp_dir() ) . 'pixelgradelt_records/' . ltrim( $path, '/' );
+		return \trailingslashit( \get_temp_dir() ) . 'pressody_records/' . ltrim( $path, '/' );
 	}
 }

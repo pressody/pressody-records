@@ -2,18 +2,18 @@
 /**
  * Hidden directory validator.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Validator;
+namespace Pressody\Records\Validator;
 
 use PclZip;
-use PixelgradeLT\Records\Exception\InvalidPackageArtifact;
-use PixelgradeLT\Records\Release;
+use Pressody\Records\Exception\InvalidPackageArtifact;
+use Pressody\Records\Release;
 
 /**
  * Hidden directory validator class.

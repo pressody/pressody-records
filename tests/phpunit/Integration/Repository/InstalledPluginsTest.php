@@ -1,12 +1,12 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Integration\Repository;
+namespace Pressody\Records\Tests\Integration\Repository;
 
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\Tests\Integration\TestCase;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\Tests\Integration\TestCase;
 
-use function PixelgradeLT\Records\plugin;
+use function Pressody\Records\plugin;
 
 class InstalledPluginsTest extends TestCase {
 

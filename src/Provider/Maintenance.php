@@ -2,14 +2,14 @@
 /**
  * Maintenance routines.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.16.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace Pressody\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 

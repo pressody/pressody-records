@@ -1,16 +1,16 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\Transformer;
+namespace Pressody\Records\Tests\Unit\Transformer;
 
 use Composer\IO\NullIO;
-use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Transformer\ComposerPackageTransformer;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Pressody\Records\Archiver;
+use Pressody\Records\PackageFactory;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Transformer\ComposerPackageTransformer;
+use Pressody\Records\Tests\Unit\TestCase;
 use Psr\Log\NullLogger;
 
 class ComposerPackageTransformerTest extends TestCase {
@@ -42,6 +42,6 @@ class ComposerPackageTransformerTest extends TestCase {
 
 	public function test_package_name_is_lowercased() {
 		$package = $this->transformer->transform( $this->package );
-		$this->assertSame( 'pixelgradelt-records/acmecode', $package->get_name() );
+		$this->assertSame( 'pressody-records/acmecode', $package->get_name() );
 	}
 }

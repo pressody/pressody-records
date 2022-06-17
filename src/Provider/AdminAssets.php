@@ -2,14 +2,14 @@
 /**
  * Assets provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace Pressody\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 
@@ -34,7 +34,7 @@ class AdminAssets extends AbstractHookProvider {
 	 */
 	public function register_assets() {
 		wp_register_script(
-			'pixelgradelt_records-admin',
+			'pressody_records-admin',
 			$this->plugin->get_url( 'assets/js/admin.js' ),
 			[ 'jquery' ],
 			'20210524',
@@ -42,7 +42,7 @@ class AdminAssets extends AbstractHookProvider {
 		);
 
 		wp_register_script(
-			'pixelgradelt_records-access',
+			'pressody_records-access',
 			$this->plugin->get_url( 'assets/js/access.js' ),
 			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
 			'20210211',
@@ -50,13 +50,13 @@ class AdminAssets extends AbstractHookProvider {
 		);
 
 		wp_set_script_translations(
-			'pixelgradelt_records-access',
-			'pixelgradelt_records',
+			'pressody_records-access',
+			'pressody_records',
 			$this->plugin->get_path( 'languages' )
 		);
 
 		wp_register_script(
-			'pixelgradelt_records-repository',
+			'pressody_records-repository',
 			$this->plugin->get_url( 'assets/js/repository.js' ),
 			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
 			'20210211',
@@ -64,13 +64,13 @@ class AdminAssets extends AbstractHookProvider {
 		);
 
 		wp_set_script_translations(
-			'pixelgradelt_records-repository',
-			'pixelgradelt_records',
+			'pressody_records-repository',
+			'pressody_records',
 			$this->plugin->get_path( 'languages' )
 		);
 
 		wp_register_script(
-			'pixelgradelt_records-edit-package',
+			'pressody_records-edit-package',
 			$this->plugin->get_url( 'assets/js/edit-package.js' ),
 			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
 			'20210524',
@@ -78,13 +78,13 @@ class AdminAssets extends AbstractHookProvider {
 		);
 
 		wp_set_script_translations(
-			'pixelgradelt_records-edit-package',
-			'pixelgradelt_records',
+			'pressody_records-edit-package',
+			'pressody_records',
 			$this->plugin->get_path( 'languages' )
 		);
 
 		wp_register_style(
-			'pixelgradelt_records-admin',
+			'pressody_records-admin',
 			$this->plugin->get_url( 'assets/css/admin.css' ),
 			[ 'wp-components' ],
 			'20210210'
@@ -102,9 +102,9 @@ class AdminAssets extends AbstractHookProvider {
 	 */
 	public function filter_script_type( string $tag, string $handle ): string {
 		$modules = [
-			'pixelgradelt_records-access',
-			'pixelgradelt_records-edit-package',
-			'pixelgradelt_records-repository',
+			'pressody_records-access',
+			'pressody_records-edit-package',
+			'pressody_records-repository',
 		];
 
 		if ( in_array( $handle, $modules, true ) ) {

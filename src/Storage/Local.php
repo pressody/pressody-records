@@ -2,18 +2,18 @@
 /**
  * Local storage adapter.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Storage;
+namespace Pressody\Records\Storage;
 
 use DirectoryIterator;
-use PixelgradeLT\Records\Exception\FileNotFound;
-use PixelgradeLT\Records\HTTP\Response;
+use Pressody\Records\Exception\FileNotFound;
+use Pressody\Records\HTTP\Response;
 
 /**
  * Local storage adapter class.

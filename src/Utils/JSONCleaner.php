@@ -4,18 +4,18 @@
  *
  * @since   0.5.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Utils;
+namespace Pressody\Records\Utils;
 
 /**
  * JSON cleaner class.
  *
  * @since   0.5.0
- * @package PixelgradeLT
+ * @package Pressody
  */
 class JSONCleaner {
 	private static $_objects;

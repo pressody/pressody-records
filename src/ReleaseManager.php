@@ -4,24 +4,24 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 use Composer\Json\JsonFile;
 use Composer\Package\Loader\ArrayLoader;
 use Composer\Util\Filesystem;
-use PixelgradeLT\Records\Client\ComposerClient;
-use PixelgradeLT\Records\Exception\FileNotFound;
-use PixelgradeLT\Records\Exception\FileOperationFailed;
-use PixelgradeLT\Records\Exception\InvalidReleaseSource;
-use PixelgradeLT\Records\HTTP\Response;
-use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\LocalBasePackage;
-use PixelgradeLT\Records\Storage\Storage;
+use Pressody\Records\Client\ComposerClient;
+use Pressody\Records\Exception\FileNotFound;
+use Pressody\Records\Exception\FileOperationFailed;
+use Pressody\Records\Exception\InvalidReleaseSource;
+use Pressody\Records\HTTP\Response;
+use Pressody\Records\PackageType\BasePackage;
+use Pressody\Records\PackageType\LocalBasePackage;
+use Pressody\Records\Storage\Storage;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -427,7 +427,7 @@ class ReleaseManager {
 	 * @return Response
 	 */
 	public function send( Release $release ): Response {
-		do_action( 'pixelgradelt_records/send_release', $release );
+		do_action( 'pressody_records/send_release', $release );
 
 		return $this->storage->send( $release->get_file_path() );
 	}

@@ -7,8 +7,8 @@ const { __ } = i18n;
 function PackagePlaceholder( props ) {
 	return html`
 		<${ Placeholder }
-			label=${ __( 'No package details', 'pixelgradelt_records' ) }
-			instructions=${ __( 'Probably you need to do some configuring first. Go on.. don\'t be shy..', 'pixelgradelt_records' ) }
+			label=${ __( 'No package details', 'pressody_records' ) }
+			instructions=${ __( 'Probably you need to do some configuring first. Go on.. don\'t be shy..', 'pressody_records' ) }
 		>
 		</${ Placeholder }>
 	`;

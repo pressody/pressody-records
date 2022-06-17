@@ -1,20 +1,20 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Integration\Provider;
+namespace Pressody\Records\Tests\Integration\Provider;
 
 use Pimple\ServiceIterator;
-use PixelgradeLT\Records\Capabilities as Caps;
-use PixelgradeLT\Records\Exception\AuthenticationException;
-use PixelgradeLT\Records\HTTP\Request;
-use PixelgradeLT\Records\Provider\Authentication;
-use PixelgradeLT\Records\Tests\Integration\TestCase;
+use Pressody\Records\Capabilities as Caps;
+use Pressody\Records\Exception\AuthenticationException;
+use Pressody\Records\HTTP\Request;
+use Pressody\Records\Provider\Authentication;
+use Pressody\Records\Tests\Integration\TestCase;
 use WP_Error;
 
 use function Patchwork\{always, redefine, restore};
-use function PixelgradeLT\Records\get_packages_permalink;
-use function PixelgradeLT\Records\get_parts_permalink;
-use function PixelgradeLT\Records\plugin;
+use function Pressody\Records\get_packages_permalink;
+use function Pressody\Records\get_parts_permalink;
+use function Pressody\Records\plugin;
 
 class AuthenticationTest extends TestCase {
 	protected static $api_key;
@@ -58,7 +58,7 @@ class AuthenticationTest extends TestCase {
 		$this->set_request_headers( [
 			'Authorization' => 'Basic ' . base64_encode( self::$api_key . ':lt' ),
 			'PHP_AUTH_USER' => self::$api_key,
-			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -75,7 +75,7 @@ class AuthenticationTest extends TestCase {
 		$this->set_request_headers( [
 			'Authorization' => 'Bearer ' . base64_encode( self::$api_key . ':lt' ),
 			'PHP_AUTH_USER' => self::$api_key,
-			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -116,7 +116,7 @@ class AuthenticationTest extends TestCase {
 	public function test_authentication_fails_with_missing_key() {
 		$this->set_request_headers( [
 			'Authorization' => 'Basic ' . base64_encode( ':lt' ),
-			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -130,7 +130,7 @@ class AuthenticationTest extends TestCase {
 		$this->set_request_headers( [
 			'Authorization' => 'Basic ' . base64_encode( 'abcdef:lt' ),
 			'PHP_AUTH_USER' => 'abcdef',
-			'PHP_AUTH_PW'   => 'pixelgradelt_records', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_records', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();

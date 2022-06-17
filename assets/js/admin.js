@@ -4,7 +4,7 @@
 	'use strict';
 
 	var $tabs = $( '.nav-tab-wrapper .nav-tab' ),
-		$panels = $( '.pixelgradelt_records-tab-panel' ),
+		$panels = $( '.pressody_records-tab-panel' ),
 		updateTabs;
 
 	updateTabs = function() {

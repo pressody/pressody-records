@@ -1,16 +1,16 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Integration\Repository;
+namespace Pressody\Records\Tests\Integration\Repository;
 
-use PixelgradeLT\Records\PackageType\ExternalBasePackage;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\Release;
-use PixelgradeLT\Records\Tests\Framework\PHPUnitUtil;
-use PixelgradeLT\Records\Tests\Integration\TestCase;
+use Pressody\Records\PackageType\ExternalBasePackage;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\Release;
+use Pressody\Records\Tests\Framework\PHPUnitUtil;
+use Pressody\Records\Tests\Integration\TestCase;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Records\plugin;
+use function Pressody\Records\plugin;
 
 class ExternalPluginsTest extends TestCase {
 	protected static $posts_data;
@@ -26,7 +26,7 @@ class ExternalPluginsTest extends TestCase {
 		/** @var ContainerInterface $old_container */
 		self::$old_container = plugin()->get_container();
 
-		// Register ltpackage post type
+		// Register pdpackage post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.package_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$old_container['hooks.package_post_type'] );
 
@@ -106,7 +106,7 @@ class ExternalPluginsTest extends TestCase {
 			],
 		];
 
-		// Create the test ltpackages posts.
+		// Create the test pdpackages posts.
 		foreach ( self::$posts_data as $data ) {
 			$factory->post->create_object( $data );
 		}
@@ -116,7 +116,7 @@ class ExternalPluginsTest extends TestCase {
 	}
 
 	public function test_get_non_existent_plugin() {
-		/** @var \PixelgradeLT\Records\Repository\CachedRepository $repository */
+		/** @var \Pressody\Records\Repository\CachedRepository $repository */
 		$repository = plugin()->get_container()['repository.external.plugins'];
 		$repository->reinitialize();
 
@@ -125,7 +125,7 @@ class ExternalPluginsTest extends TestCase {
 	}
 
 	public function test_get_plugin_without_cached_releases() {
-		/** @var \PixelgradeLT\Records\Repository\CachedRepository $repository */
+		/** @var \Pressody\Records\Repository\CachedRepository $repository */
 		$repository = plugin()->get_container()['repository.external.plugins'];
 		$repository->reinitialize();
 
@@ -149,7 +149,7 @@ class ExternalPluginsTest extends TestCase {
 	}
 
 	public function test_get_plugin_with_cached_releases() {
-		/** @var \PixelgradeLT\Records\Repository\CachedRepository $repository */
+		/** @var \Pressody\Records\Repository\CachedRepository $repository */
 		$repository = plugin()->get_container()['repository.external.plugins'];
 		$repository->reinitialize();
 
@@ -175,7 +175,7 @@ class ExternalPluginsTest extends TestCase {
 	}
 
 	public function test_release_cached_json() {
-		/** @var \PixelgradeLT\Records\Repository\CachedRepository $repository */
+		/** @var \Pressody\Records\Repository\CachedRepository $repository */
 		$repository = plugin()->get_container()['repository.external.plugins'];
 		$repository->reinitialize();
 
@@ -191,6 +191,6 @@ class ExternalPluginsTest extends TestCase {
 		$this->assertSame( '5.5', $release->get_meta_entry('requires_at_least_wp') );
 		$this->assertSame( '5.6', $release->get_meta_entry('tested_up_to_wp') );
 		$this->assertSame( '7.4', $release->get_meta_entry('requires_php') );
-		$this->assertCount( 1, $release->get_meta_entry('require_ltpackages') );
+		$this->assertCount( 1, $release->get_meta_entry('require_pdpackages') );
 	}
 }

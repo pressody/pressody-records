@@ -1,10 +1,10 @@
 # Settings
 
-At _Settings &rarr; LT Records_, you'll find the settings page:
+At _Settings &rarr; PD Records_, you'll find the settings page:
 
 ## Vendor
 
-When requiring a package from PixelgradeLT Records, the default would be a package name like `pixelgradelt-records/genesis`.
+When requiring a package from Pressody Records, the default would be a package name like `pressody-records/genesis`.
 
 The "Vendor" field allows this to be changed; a value of `mypremiumcode` would mean the `require` package name would be like `mypremiumcode/genesis`.
 

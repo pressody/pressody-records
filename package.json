@@ -1,21 +1,21 @@
 {
-	"name": "pixelgradelt-records",
+	"name": "pressody-records",
 	"version": "0.15.0",
-	"description": "Define and manage PixelgradeLT parts (modules) and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins, themes, parts, etc.",
+	"description": "Define and manage Pressody parts (modules) and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins, themes, parts, etc.",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/pixelgradelt/pixelgradelt-records.git"
+		"url": "https://github.com/pressody/pressody-records.git"
 	},
 	"author": {
 		"name": "Vlad Olaru",
-		"email": "vlad@pixelgrade.com",
-		"url": "https://pixelgrade.com/"
+		"email": "vladpotter85@gmail.com",
+		"url": "https://thinkwritecode.com/"
 	},
 	"license": "GPL-2.0+",
 	"bugs": {
-		"url": "https://github.com/pixelgradelt/pixelgradelt-records/issues"
+		"url": "https://github.com/pressody/pressody-records/issues"
 	},
-	"homepage": "https://github.com/pixelgradelt/pixelgradelt-records",
+	"homepage": "https://github.com/pressody/pressody-records",
 	"devDependencies": {
 		"archiver": "^5.2.0",
 		"fs-extra": "^9.0.1",
@@ -27,7 +27,7 @@
 		"makepot": "wpi18n makepot --poedit"
 	},
 	"distFiles": [
-		"pixelgradelt-records.php",
+		"pressody-records.php",
 		"README.md",
 		"{assets,languages,src,views}/**",
 		"vendor/autoload.php",

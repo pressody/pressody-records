@@ -2,21 +2,21 @@
 /**
  * Authentication provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace Pressody\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pimple\ServiceIterator;
-use PixelgradeLT\Records\Authentication\ServerInterface;
-use PixelgradeLT\Records\Capabilities as Caps;
-use PixelgradeLT\Records\Exception\AuthenticationException;
-use PixelgradeLT\Records\HTTP\Request;
+use Pressody\Records\Authentication\ServerInterface;
+use Pressody\Records\Capabilities as Caps;
+use Pressody\Records\Exception\AuthenticationException;
+use Pressody\Records\HTTP\Request;
 use WP_Error;
 
 /**
@@ -72,7 +72,7 @@ class Authentication extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		if ( ! $this->is_pixelgradelt_records_request() ) {
+		if ( ! $this->is_pressody_records_request() ) {
 			return;
 		}
 
@@ -104,7 +104,7 @@ class Authentication extends AbstractHookProvider {
 
 		foreach ( $this->servers as $server ) {
 			if ( ! $server instanceof ServerInterface ) {
-				throw new \LogicException( 'Authentication servers must implement \PixelgradeLT\Records\Authentication\ServerInterface.' );
+				throw new \LogicException( 'Authentication servers must implement \Pressody\Records\Authentication\ServerInterface.' );
 			}
 
 			if ( ! $server->check_scheme( $this->request ) ) {
@@ -154,25 +154,25 @@ class Authentication extends AbstractHookProvider {
 	}
 
 	/**
-	 * Whether the current request is for a PixelgradeLT Records route or REST endpoint.
+	 * Whether the current request is for a Pressody Records route or REST endpoint.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool
 	 */
-	protected function is_pixelgradelt_records_request(): bool {
+	protected function is_pressody_records_request(): bool {
 		$request_path = $this->get_request_path();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-		if ( ! empty( $_GET['pixelgradelt_records_route'] ) ) {
+		if ( ! empty( $_GET['pressody_records_route'] ) ) {
 			return true;
 		}
 
-		if ( 0 === strpos( $request_path, '/ltpackagist' ) || 0 === strpos( $request_path, '/ltparts' ) ) {
+		if ( 0 === strpos( $request_path, '/pdpackagist' ) || 0 === strpos( $request_path, '/pdparts' ) ) {
 			return true;
 		}
 
-		if ( 0 === strpos( $request_path, '/wp-json/pixelgradelt_records/' ) ) {
+		if ( 0 === strpos( $request_path, '/wp-json/pressody_records/' ) ) {
 			return true;
 		}
 
@@ -204,8 +204,8 @@ class Authentication extends AbstractHookProvider {
 	/**
 	 * Sets and returns all the capabilities the current user has and should have.
 	 *
-	 * Appends `allcaps` with pixelgradelt_records_download_packages
-	 * as well as pixelgradelt_records_view_packages if there are no servers,
+	 * Appends `allcaps` with pressody_records_download_packages
+	 * as well as pressody_records_view_packages if there are no servers,
 	 * meaning that authentication should be skipped.
 	 *
 	 * @since 0.1.0

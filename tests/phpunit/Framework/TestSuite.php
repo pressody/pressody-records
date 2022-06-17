@@ -2,14 +2,14 @@
 /**
  * Test suite.
  *
- * @package   PixelgradeLT\Records\Tests
+ * @package   Pressody\Records\Tests
  * @copyright Copyright (c) 2019 Cedaro, LLC
  * @license   MIT
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Framework;
+namespace Pressody\Records\Tests\Framework;
 
 use Exception;
 use PHPUnit\Framework\TestSuite as PHPUnitTestSuite;
@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestSuite as PHPUnitTestSuite;
 /**
  * Test suite class.
  *
- * @package PixelgradeLT\Records\Tests
+ * @package Pressody\Records\Tests
  */
 class TestSuite extends PHPUnitTestSuite {
 	/**

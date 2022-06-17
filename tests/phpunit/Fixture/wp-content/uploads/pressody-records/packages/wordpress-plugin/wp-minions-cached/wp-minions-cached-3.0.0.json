@@ -12,8 +12,8 @@
     "source_name": "10up/wp-minions",
     "authors": [
         {
-            "name": "Pixelgrade",
-            "homepage": "https://pixelgrade.com"
+            "name": "Pressody",
+            "homepage": "https://getpressody.com"
         }
     ],
     "description": "Custom release description.",
@@ -26,9 +26,9 @@
     "requires_at_least_wp": "5.5",
     "tested_up_to_wp": "5.6",
     "requires_php": "7.4",
-    "require_ltpackages": {
+    "require_pdpackages": {
         "local-plugin/automatewoo #102": {
-            "composer_package_name": "pixelgradelt_records/automatewoo",
+            "composer_package_name": "pressody_records/automatewoo",
             "version_range": "*",
             "stability": "stable",
             "source_name": "local-plugin/automatewoo",
@@ -38,7 +38,7 @@
     },
     "dist": {
         "type": "zip",
-        "url": "http://example.org/ltpackagist/9VJPW/wp-minions-cached/3.0.0",
+        "url": "http://example.org/pdpackagist/9VJPW/wp-minions-cached/3.0.0",
         "shasum": "a95d10ce78b9900b413716b0cb52344a5cc87303",
         "artifactmtime": 1620293308
     }

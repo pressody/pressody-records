@@ -2,18 +2,18 @@
 /**
  * Manage Plugins screen provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Screen;
+namespace Pressody\Records\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Capabilities;
-use PixelgradeLT\Records\Repository\PackageRepository;
+use Pressody\Records\Capabilities;
+use Pressody\Records\Repository\PackageRepository;
 
 /**
  * Manage Plugins screen provider class.
@@ -65,8 +65,8 @@ class ManagePlugins extends AbstractHookProvider {
 			return;
 		}
 
-		wp_enqueue_script( 'pixelgradelt_records-admin' );
-		wp_enqueue_style( 'pixelgradelt_records-admin' );
+		wp_enqueue_script( 'pressody_records-admin' );
+		wp_enqueue_style( 'pressody_records-admin' );
 	}
 
 	/**
@@ -79,7 +79,7 @@ class ManagePlugins extends AbstractHookProvider {
 	 */
 	public function register_columns( array $columns ): array {
 		if ( current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
-			$columns['pixelgradelt_records'] = 'LT Package Source';
+			$columns['pressody_records'] = 'PD Package Source';
 		}
 
 		return $columns;
@@ -96,7 +96,7 @@ class ManagePlugins extends AbstractHookProvider {
 	 * @param string $plugin_file Plugin file basename.
 	 */
 	public function display_columns( string $column_name, string $plugin_file ) {
-		if ( 'pixelgradelt_records' !== $column_name ) {
+		if ( 'pressody_records' !== $column_name ) {
 			return;
 		}
 

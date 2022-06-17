@@ -4,23 +4,23 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PackageType\Builder;
+namespace Pressody\Records\PackageType\Builder;
 
-use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\Utils\ArrayHelpers;
+use Pressody\Records\Archiver;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\Release;
-use PixelgradeLT\Records\ReleaseManager;
-use function PixelgradeLT\Records\get_composer_vendor;
+use Pressody\Records\Package;
+use Pressody\Records\Release;
+use Pressody\Records\ReleaseManager;
+use function Pressody\Records\get_composer_vendor;
 
 /**
  * Base package builder class.
@@ -920,16 +920,16 @@ class BasePackageBuilder {
 						$tmp_package_data['Description'] = 'Just another package';
 					}
 					if ( empty( $tmp_package_data['ThemeURI'] ) && empty( $tmp_package_data['PluginURI'] ) ) {
-						$tmp_package_data['PluginURI'] = 'https://pixelgradelt.com';
+						$tmp_package_data['PluginURI'] = 'https://getpressody.com';
 					}
 					if ( empty( $tmp_package_data['License'] ) ) {
 						$tmp_package_data['License'] = 'GPL-2.0-or-later';
 					}
 					if ( empty( $tmp_package_data['Author'] ) ) {
-						$tmp_package_data['Author'] = 'Pixelgrade';
+						$tmp_package_data['Author'] = 'Pressody';
 					}
 					if ( empty( $tmp_package_data['AuthorURI'] ) ) {
-						$tmp_package_data['AuthorURI'] = 'https://pixelgradelt.com';
+						$tmp_package_data['AuthorURI'] = 'https://getpressody.com';
 					}
 
 					// Now fill any missing package data from the headers data.

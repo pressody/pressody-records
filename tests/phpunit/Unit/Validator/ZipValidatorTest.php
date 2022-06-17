@@ -1,18 +1,18 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\Validator;
+namespace Pressody\Records\Tests\Unit\Validator;
 
-use PixelgradeLT\Records\Exception\InvalidPackageArtifact;
-use PixelgradeLT\Records\Release;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
-use PixelgradeLT\Records\Validator\ZipValidator;
+use Pressody\Records\Exception\InvalidPackageArtifact;
+use Pressody\Records\Release;
+use Pressody\Records\Tests\Unit\TestCase;
+use Pressody\Records\Validator\ZipValidator;
 
 class ZipValidatorTest extends TestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->directory = \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages/validate';
+		$this->directory = \Pressody\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pressody-records/packages/validate';
 
 		$this->release = $this->getMockBuilder( Release::class )
 			->disableOriginalConstructor()

@@ -3,9 +3,9 @@ import { data, dataControls } from '../utils/index.js';
 const { dispatch, registerStore, select } = data;
 const { apiFetch, controls } = dataControls;
 
-const STORE_KEY = 'pixelgradelt_records/access';
+const STORE_KEY = 'pressody_records/access';
 
-const DEFAULT_STATE = {
+const DEFAUPD_STATE = {
 	apiKeys: [],
 	userId: null,
 };
@@ -14,7 +14,7 @@ function* createApiKey( name, userId ) {
 	const apiKeys = select( STORE_KEY ).getApiKeys();
 
 	const result = yield apiFetch( {
-		path: '/pixelgradelt_records/v1/apikeys',
+		path: '/pressody_records/v1/apikeys',
 		method: 'POST',
 		data: {
 			name,
@@ -37,7 +37,7 @@ function* revokeApiKey( token, userId ) {
 	const apiKeys = select( STORE_KEY ).getApiKeys();
 
 	const result = yield apiFetch( {
-		path: `/pixelgradelt_records/v1/apikeys/${ token }?user=${ userId }`,
+		path: `/pressody_records/v1/apikeys/${ token }?user=${ userId }`,
 		method: 'DELETE',
 	} );
 
@@ -65,12 +65,12 @@ function setUserId( userId ) {
 
 function* getApiKeys() {
 	const userId = select( STORE_KEY ).getUserId();
-	const apiKeys = yield apiFetch( { path: `/pixelgradelt_records/v1/apikeys?user=${ userId }` } );
+	const apiKeys = yield apiFetch( { path: `/pressody_records/v1/apikeys?user=${ userId }` } );
 	dispatch( STORE_KEY ).setApiKeys( apiKeys );
 }
 
 const store = {
-	reducer( state = DEFAULT_STATE, action ) {
+	reducer( state = DEFAUPD_STATE, action ) {
 		switch ( action.type ) {
 			case 'SET_API_KEYS' :
 				return {

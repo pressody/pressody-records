@@ -4,14 +4,14 @@
  *
  * @since   0.9.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PackageType\Builder;
+namespace Pressody\Records\PackageType\Builder;
 
-use PixelgradeLT\Records\Utils\ArrayHelpers;
+use Pressody\Records\Utils\ArrayHelpers;
 
 /**
  * Manual part (package) builder class for parts with zips manually uploaded to the post.

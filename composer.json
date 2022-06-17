@@ -1,28 +1,27 @@
 {
-	"name": "pixelgradelt/pixelgradelt-records",
+	"name": "pressody/pressody-records",
   	"version": "0.15.0",
-	"description": "Define and manage PixelgradeLT parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.",
+	"description": "Define and manage Pressody parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.",
 	"keywords": [
-		"pixelgradelt",
-		"pixelgrade",
+		"pressody",
 		"infrastructure",
 		"wordpress",
 		"composer",
 		"satis"
 	],
 	"type": "wordpress-plugin",
-	"homepage": "https://github.com/pixelgradelt/pixelgradelt-records",
+	"homepage": "https://github.com/pressody/pressody-records",
 	"license": "GPL-2.0-or-later",
 	"authors": [
 		{
 		  "name": "Vlad Olaru",
-		  "email": "vlad@pixelgrade.com",
-		  "homepage": "https://pixelgrade.com/"
+		  "email": "vladpotter85@gmail.com",
+		  "homepage": "https://thinkwritecode.com/"
 		}
 	],
 	"support": {
-		"issues": "https://github.com/pixelgradelt/pixelgradelt-records/issues",
-		"source": "https://github.com/pixelgradelt/pixelgradelt-records"
+		"issues": "https://github.com/pressody/pressody-records/issues",
+		"source": "https://github.com/pressody/pressody-records"
 	},
 	"config": {
 	  	"optimize-autoloader": true,
@@ -76,7 +75,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"PixelgradeLT\\Records\\": "src/"
+			"Pressody\\Records\\": "src/"
 		},
 		"files": [
 			"src/functions.php"
@@ -84,7 +83,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"PixelgradeLT\\Records\\Tests\\": "tests/phpunit/"
+			"Pressody\\Records\\Tests\\": "tests/phpunit/"
 		},
 		"files": [
 
@@ -103,7 +102,7 @@
 		"tests": "./vendor/bin/phpunit --colors=always",
 		"tests-unit": "./vendor/bin/phpunit --testsuite=Unit --colors=always",
 		"tests-integration": "./vendor/bin/phpunit --testsuite=Integration --colors=always",
-	  	"makepot": "./vendor/bin/wp i18n make-pot . languages/pixelgradelt-records.pot",
+	  	"makepot": "./vendor/bin/wp i18n make-pot . languages/pressody-records.pot",
 		"prepare-for-release": [
 		  "composer install",
 		  "composer makepot",

@@ -2,7 +2,7 @@
 /**
  * Configuration for the WordPress testing suite.
  *
- * @package   PixelgradeLT\Records\Tests
+ * @package   Pressody\Records\Tests
  * @copyright Copyright (c) 2019 Cedaro, LLC
  * @license   MIT
  */
@@ -26,7 +26,7 @@ $dotenv->required(['WP_TESTS_DB_NAME', 'WP_TESTS_DB_USER', 'WP_TESTS_DB_PASSWORD
 define( 'ABSPATH', realpath( dirname( __DIR__, 2 ) . '/vendor/wordpress/wordpress/src' ) . '/' );
 
 // Path to the theme to test with.
-define( 'WP_DEFAULT_THEME', 'default' );
+define( 'WP_DEFAUPD_THEME', 'default' );
 
 // Test with WordPress debug mode (default).
 define( 'WP_DEBUG', true );

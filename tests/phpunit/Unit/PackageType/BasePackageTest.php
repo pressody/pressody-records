@@ -1,12 +1,12 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType;
+namespace Pressody\Records\Tests\Unit\PackageType;
 
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Pressody\Records\Package;
+use Pressody\Records\PackageType\BasePackage;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\Tests\Unit\TestCase;
 
 class BasePackageTest extends TestCase {
 	protected $package = null;
@@ -26,7 +26,7 @@ class BasePackageTest extends TestCase {
 	}
 
 	public function test_name() {
-		$expected            = 'PixelgradeLT Records';
+		$expected            = 'Pressody Records';
 		$this->package->name = $expected;
 
 		$this->assertSame( $expected, $this->package->get_name() );
@@ -54,7 +54,7 @@ class BasePackageTest extends TestCase {
 	}
 
 	public function test_slug() {
-		$expected            = 'pixelgradelt_records';
+		$expected            = 'pressody_records';
 		$this->package->slug = $expected;
 
 		$this->assertSame( $expected, $this->package->get_slug() );
@@ -63,9 +63,9 @@ class BasePackageTest extends TestCase {
 	public function test_authors() {
 		$expected               = [
 			[
-				'name'     => 'Pixelgrade',
+				'name'     => 'Pressody',
 				'email'    => 'contact@pixelgrade.com',
-				'homepage' => 'https://pixelgrade.com',
+				'homepage' => 'https://pressody.com',
 				'role'     => 'Maker',
 			],
 		];

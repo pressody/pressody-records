@@ -1,14 +1,14 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType;
+namespace Pressody\Records\Tests\Unit\PackageType;
 
 use Composer\Semver\Constraint\MatchAllConstraint;
-use PixelgradeLT\Records\Exception\PackageNotInstalled;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\ExternalBasePackage;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Pressody\Records\Exception\PackageNotInstalled;
+use Pressody\Records\Package;
+use Pressody\Records\PackageType\BasePackage;
+use Pressody\Records\PackageType\ExternalBasePackage;
+use Pressody\Records\Tests\Unit\TestCase;
 
 class ExternalBasePackageTest extends TestCase {
 	protected $package = null;

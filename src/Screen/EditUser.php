@@ -2,23 +2,23 @@
 /**
  * Edit User screen provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Screen;
+namespace Pressody\Records\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Authentication\ApiKey\ApiKey;
-use PixelgradeLT\Records\Authentication\ApiKey\ApiKeyRepository;
-use PixelgradeLT\Records\Capabilities;
+use Pressody\Records\Authentication\ApiKey\ApiKey;
+use Pressody\Records\Authentication\ApiKey\ApiKeyRepository;
+use Pressody\Records\Capabilities;
 use WP_User;
 
-use function PixelgradeLT\Records\get_edited_user_id;
-use function PixelgradeLT\Records\preload_rest_data;
+use function Pressody\Records\get_edited_user_id;
+use function Pressody\Records\preload_rest_data;
 
 /**
  * Edit User screen provider class.
@@ -79,14 +79,14 @@ class EditUser extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_records-admin' );
-		wp_enqueue_style( 'pixelgradelt_records-admin' );
+		wp_enqueue_script( 'pressody_records-admin' );
+		wp_enqueue_style( 'pressody_records-admin' );
 
-		wp_enqueue_script( 'pixelgradelt_records-access' );
+		wp_enqueue_script( 'pressody_records-access' );
 
 		wp_localize_script(
-			'pixelgradelt_records-access',
-			'_pixelgradeltRecordsAccessData',
+			'pressody_records-access',
+			'_pressodyRecordsAccessData',
 			[
 				'editedUserId' => get_edited_user_id(),
 			]
@@ -94,7 +94,7 @@ class EditUser extends AbstractHookProvider {
 
 		preload_rest_data(
 			[
-				'/pixelgradelt_records/v1/apikeys?user=' . get_edited_user_id(),
+				'/pressody_records/v1/apikeys?user=' . get_edited_user_id(),
 			]
 		);
 	}
@@ -105,14 +105,14 @@ class EditUser extends AbstractHookProvider {
 	 * @param WP_User $user WordPress user instance.
 	 */
 	public function render_api_keys_section( WP_User $user ) {
-		printf( '<h2>%s</h2>', esc_html__( 'PixelgradeLT Records API Keys', 'pixelgradelt_records' ) );
+		printf( '<h2>%s</h2>', esc_html__( 'Pressody Records API Keys', 'pressody_records' ) );
 
 		printf(
 			'<p><strong>%s</strong></p>',
-			/* translators: %s: <code>pixelgradelt_records</code> */
-			sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_records' ), '<code>pixelgradelt_records</code>' )
+			/* translators: %s: <code>pressody_records</code> */
+			sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pressody_records' ), '<code>pressody_records</code>' )
 		);
 
-		echo '<div id="pixelgradelt_records-api-key-manager"></div>';
+		echo '<div id="pressody_records-api-key-manager"></div>';
 	}
 }

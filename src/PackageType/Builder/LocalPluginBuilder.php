@@ -2,20 +2,20 @@
 /**
  * Local plugin builder.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\PackageType\Builder;
+namespace Pressody\Records\PackageType\Builder;
 
-use PixelgradeLT\Records\Package;
+use Pressody\Records\Package;
 
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use function PixelgradeLT\Records\is_plugin_file;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\PackageTypes;
+use function Pressody\Records\is_plugin_file;
 
 /**
  * Local plugin builder class.

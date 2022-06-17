@@ -1,7 +1,7 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Integration;
+namespace Pressody\Records\Tests\Integration;
 
 use WP_UnitTestCase;
 

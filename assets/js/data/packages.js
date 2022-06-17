@@ -3,9 +3,9 @@ import { data, dataControls } from '../utils/index.js';
 const { dispatch, registerStore, select } = data;
 const { apiFetch, controls } = dataControls;
 
-const STORE_KEY = 'pixelgradelt_records/packages';
+const STORE_KEY = 'pressody_records/packages';
 
-const DEFAULT_STATE = {
+const DEFAUPD_STATE = {
 	packages: [],
 	postId: null,
 };
@@ -44,12 +44,12 @@ function setPostId( postId ) {
 
 function* getPackages() {
 	const postId = select( STORE_KEY ).getPostId();
-	const packages = yield apiFetch( { path: `/pixelgradelt_records/v1/packages?postId=${ postId }` } );
+	const packages = yield apiFetch( { path: `/pressody_records/v1/packages?postId=${ postId }` } );
 	dispatch( STORE_KEY ).setPackages( packages.sort( compareByName ) );
 }
 
 const store = {
-	reducer( state = DEFAULT_STATE, action ) {
+	reducer( state = DEFAUPD_STATE, action ) {
 		switch ( action.type ) {
 			case 'SET_PACKAGES' :
 				return {

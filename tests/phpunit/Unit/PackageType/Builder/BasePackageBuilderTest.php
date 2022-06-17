@@ -1,25 +1,25 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
+namespace Pressody\Records\Tests\Unit\PackageType\Builder;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\Client\ComposerClient;
-use PixelgradeLT\Records\ComposerVersionParser;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\BasePackage;
-use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\Queue\ActionQueue;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Storage\Local as LocalStorage;
-use PixelgradeLT\Records\StringHashes;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
-use PixelgradeLT\Records\WordPressReadmeParser;
+use Pressody\Records\Archiver;
+use Pressody\Records\Client\ComposerClient;
+use Pressody\Records\ComposerVersionParser;
+use Pressody\Records\Package;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\BasePackage;
+use Pressody\Records\PackageType\Builder\BasePackageBuilder;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\Queue\ActionQueue;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Storage\Local as LocalStorage;
+use Pressody\Records\StringHashes;
+use Pressody\Records\Tests\Unit\TestCase;
+use Pressody\Records\WordPressReadmeParser;
 use Psr\Log\NullLogger;
 
 class BasePackageBuilderTest extends TestCase {
@@ -42,7 +42,7 @@ class BasePackageBuilderTest extends TestCase {
 		};
 
 		$archiver                = new Archiver( new NullLogger() );
-		$storage                 = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$storage                 = new LocalStorage( \Pressody\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pressody-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 		$composer_client         = new ComposerClient();
 		$logger                  = new NullIO();
@@ -64,7 +64,7 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_name() {
-		$expected = 'PixelgradeLT Records';
+		$expected = 'Pressody Records';
 		$package  = $this->builder->set_name( $expected )->build();
 
 		$this->assertSame( $expected, $package->name );
@@ -92,7 +92,7 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_slug() {
-		$expected = 'pixelgradelt_records';
+		$expected = 'pressody_records';
 		$package  = $this->builder->set_slug( $expected )->build();
 
 		$this->assertSame( $expected, $package->slug );
@@ -101,9 +101,9 @@ class BasePackageBuilderTest extends TestCase {
 	public function test_authors() {
 		$expected = [
 			[
-				'name'     => 'Pixelgrade',
+				'name'     => 'Pressody',
 				'email'    => 'contact@pixelgrade.com',
-				'homepage' => 'https://pixelgrade.com',
+				'homepage' => 'https://pressody.com',
 				'role'     => 'Maker',
 			],
 		];
@@ -114,11 +114,11 @@ class BasePackageBuilderTest extends TestCase {
 
 	public function test_string_authors() {
 		$expected = [
-			[ 'name' => 'Pixelgrade', ],
+			[ 'name' => 'Pressody', ],
 			[ 'name' => 'Wordpressorg', ],
 		];
 
-		$authors = [ 'Pixelgrade ', ' Wordpressorg', '' ];
+		$authors = [ 'Pressody ', ' Wordpressorg', '' ];
 
 		$package = $this->builder->set_authors( $authors )->build();
 
@@ -127,17 +127,17 @@ class BasePackageBuilderTest extends TestCase {
 
 	public function test_clean_authors() {
 		$expected = [
-			[ 'name' => 'Pixelgrade', ],
+			[ 'name' => 'Pressody', ],
 			[ 'name' => 'Wordpressorg', ],
 		];
 
 		$authors = [
-			'Pixelgrade',
+			'Pressody',
 			[],
 			'Wordpressorg',
 			'',
 			[ 'name' => '' ],
-			[ 'homepage' => 'https://pixelgrade.com' ],
+			[ 'homepage' => 'https://pressody.com' ],
 		];
 
 		$package = $this->builder->set_authors( $authors )->build();
@@ -258,11 +258,11 @@ class BasePackageBuilderTest extends TestCase {
 			[
 				'name'     => 'Name',
 				'email'    => 'email@example.com',
-				'homepage' => 'https://pixelgrade.com',
+				'homepage' => 'https://pressody.com',
 				'role'     => 'Dev',
 			],
 		];
-		$expected['homepage']             = 'https://pixelgrade.com';
+		$expected['homepage']             = 'https://pressody.com';
 		$expected['description']          = 'Some description.';
 		$expected['keywords']             = [ 'keyword' ];
 		$expected['license']              = 'GPL-2.0-or-later';
@@ -339,7 +339,7 @@ class BasePackageBuilderTest extends TestCase {
 				'name' => 'Some Theme Author',
 			],
 		];
-		$expected->homepage             = 'https://pixelgradelt.com';
+		$expected->homepage             = 'https://getpressody.com';
 		$expected->description          = 'Some awesome description.';
 		$expected->keywords             = [ 'keyword1', 'keyword2' ];
 		$expected->license              = 'GPL-2.0-only';
@@ -357,7 +357,7 @@ class BasePackageBuilderTest extends TestCase {
 		$package_data['source_type']          = 'local.plugin';
 		$package_data['source_name']          = 'local-plugin/slug';
 		$package_data['authors']              = [];
-		$package_data['homepage']             = 'https://pixelgrade.com';
+		$package_data['homepage']             = 'https://pressody.com';
 		$package_data['description']          = 'Some description.';
 		$package_data['keywords']             = [ 'keyword' ];
 		$package_data['license']              = 'GPL-2.0-or-later';
@@ -651,7 +651,7 @@ class BasePackageBuilderTest extends TestCase {
 			'Name'              => 'Plugin Name',
 			'Author'            => 'Author',
 			'AuthorURI'         => 'https://home.org',
-			'PluginURI'         => 'https://pixelgrade.com',
+			'PluginURI'         => 'https://pressody.com',
 			'Description'       => 'Some description.',
 			'Tags'              => [ 'keyword1', 'keyword2' ],
 			'License'           => 'GPL-2.0-or-later',
@@ -682,7 +682,7 @@ class BasePackageBuilderTest extends TestCase {
 			'Name'              => 'Plugin Name',
 			'Author'            => 'Author',
 			'AuthorURI'         => 'https://home.org',
-			'ThemeURI'          => 'https://pixelgrade.com',
+			'ThemeURI'          => 'https://pressody.com',
 			'Description'       => 'Some description.',
 			'Tags'              => [ 'keyword1', 'keyword2' ],
 			'License'           => 'GPL-2.0-or-later',
@@ -724,7 +724,7 @@ class BasePackageBuilderTest extends TestCase {
 				'name' => 'Some Author',
 			],
 		];
-		$expected->homepage             = 'https://pixelgradelt.com';
+		$expected->homepage             = 'https://getpressody.com';
 		$expected->description          = 'Some awesome description.';
 		$expected->keywords             = [ 'keyword' ];
 		$expected->license              = 'GPL-2.0-only';
@@ -736,7 +736,7 @@ class BasePackageBuilderTest extends TestCase {
 			'Name'              => 'Plugin Name',
 			'Author'            => 'Author',
 			'AuthorURI'         => 'https://home.org',
-			'ThemeURI'          => 'https://pixelgrade.com',
+			'ThemeURI'          => 'https://pressody.com',
 			'Description'       => 'Some description.',
 			'Tags'              => [ 'keyword1', 'keyword2' ],
 			'License'           => 'GPL-2.0-or-later',
@@ -802,7 +802,7 @@ class BasePackageBuilderTest extends TestCase {
 				'name' => 'Some Author',
 			],
 		];
-		$expected->homepage             = 'https://pixelgradelt.com';
+		$expected->homepage             = 'https://getpressody.com';
 		$expected->description          = 'Some awesome description.';
 		$expected->keywords             = [ 'keyword' ];
 		$expected->license              = 'GPL-2.0-only';
@@ -851,7 +851,7 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->source_type          = 'local.plugin';
 		$expected->source_name          = 'local-plugin/slug';
 		$expected->authors              = [];
-		$expected->homepage             = 'https://pixelgrade.com';
+		$expected->homepage             = 'https://pressody.com';
 		$expected->description          = 'Some description.';
 		$expected->keywords             = [ 'keyword' ];
 		$expected->license              = 'GPL-2.0-or-later';

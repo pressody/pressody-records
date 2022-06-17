@@ -4,12 +4,12 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 use Cedaro\WP\Plugin\Provider\I18n;
 use Composer\Semver\VersionParser;
@@ -17,25 +17,25 @@ use Pimple\Container as PimpleContainer;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
 use Pimple\Psr11\ServiceLocator;
-use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
-use PixelgradeLT\Records\Logging\Handler\FileLogHandler;
-use PixelgradeLT\Records\Logging\Logger;
-use PixelgradeLT\Records\Logging\LogsManager;
-use PixelgradeLT\Records\PostType\PackagePostType;
+use Pressody\Records\Exception\PressodyRecordsException;
+use Pressody\Records\Logging\Handler\FileLogHandler;
+use Pressody\Records\Logging\Logger;
+use Pressody\Records\Logging\LogsManager;
+use Pressody\Records\PostType\PackagePostType;
 use Psr\Log\LogLevel;
-use PixelgradeLT\Records\Authentication\ApiKey;
-use PixelgradeLT\Records\Authentication;
-use PixelgradeLT\Records\HTTP\Request;
-use PixelgradeLT\Records\Integration;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\Provider;
-use PixelgradeLT\Records\Repository;
-use PixelgradeLT\Records\Screen;
-use PixelgradeLT\Records\Storage;
-use PixelgradeLT\Records\Transformer\ComposerPackageTransformer;
-use PixelgradeLT\Records\Transformer\ComposerRepositoryTransformer;
-use PixelgradeLT\Records\Validator;
+use Pressody\Records\Authentication\ApiKey;
+use Pressody\Records\Authentication;
+use Pressody\Records\HTTP\Request;
+use Pressody\Records\Integration;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\LocalTheme;
+use Pressody\Records\Provider;
+use Pressody\Records\Repository;
+use Pressody\Records\Screen;
+use Pressody\Records\Storage;
+use Pressody\Records\Transformer\ComposerPackageTransformer;
+use Pressody\Records\Transformer\ComposerRepositoryTransformer;
+use Pressody\Records\Validator;
 
 /**
  * Plugin service provider class.
@@ -66,7 +66,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['authentication.servers'] = function ( $container ) {
 			$servers = apply_filters(
-				'pixelgradelt_records/authentication_servers',
+				'pressody_records/authentication_servers',
 				[
 					20  => 'authentication.api_key',
 					100 => 'authentication.unauthorized', // The last server to take action.
@@ -222,8 +222,8 @@ class ServiceProvider implements ServiceProviderInterface {
 			return $request;
 		};
 
-		$container['integration.ltretailer'] = function () {
-			return new Integration\LTRetailer();
+		$container['integration.pdretailer'] = function () {
+			return new Integration\PDRetailer();
 		};
 
 		$container['logs.logger'] = function ( $container ) {
@@ -423,7 +423,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $plugins Array of plugin basenames.
 			 */
-			$plugins = apply_filters( 'pixelgradelt_records/installed_plugins_in_use', $container['package.manager']->get_managed_installed_plugins() );
+			$plugins = apply_filters( 'pressody_records/installed_plugins_in_use', $container['package.manager']->get_managed_installed_plugins() );
 
 			/**
 			 * Filter the list of installed themes attached to a package (package type: local.theme).
@@ -434,7 +434,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			 *
 			 * @param array $themes Array of theme slugs.
 			 */
-			$themes = apply_filters( 'pixelgradelt_records/installed_themes_in_use', $container['package.manager']->get_managed_installed_themes() );
+			$themes = apply_filters( 'pressody_records/installed_themes_in_use', $container['package.manager']->get_managed_installed_themes() );
 
 			return $container['repository.installed']
 				->with_filter(
@@ -502,7 +502,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['rest.controller.api_keys'] = function ( $container ) {
 			return new REST\ApiKeysController(
-				'pixelgradelt_records/v1',
+				'pressody_records/v1',
 				'apikeys',
 				$container['api_key.factory'],
 				$container['api_key.repository']
@@ -511,7 +511,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['rest.controller.compositions'] = function ( $container ) {
 			return new REST\CompositionsController(
-				'pixelgradelt_records/v1',
+				'pressody_records/v1',
 				'compositions',
 				$container['repository.all.managed'],
 				$container['transformer.composer_repository']
@@ -520,7 +520,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['rest.controller.packages'] = function ( $container ) {
 			return new REST\PackagesController(
-				'pixelgradelt_records/v1',
+				'pressody_records/v1',
 				'packages',
 				$container['repository.all.managed'],
 				$container['transformer.composer_package']
@@ -626,28 +626,28 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['storage.working_directory'] = function ( $container ) {
-			if ( \defined( 'PixelgradeLT\Records\WORKING_DIRECTORY' ) ) {
-				return \PixelgradeLT\Records\WORKING_DIRECTORY;
+			if ( \defined( 'Pressody\Records\WORKING_DIRECTORY' ) ) {
+				return \Pressody\Records\WORKING_DIRECTORY;
 			}
 
 			$upload_config = \wp_upload_dir();
 			$path          = \path_join( $upload_config['basedir'], $container['storage.working_directory_name'] );
 
-			return (string) trailingslashit( apply_filters( 'pixelgradelt_records/working_directory', $path ) );
+			return (string) trailingslashit( apply_filters( 'pressody_records/working_directory', $path ) );
 		};
 
 		$container['storage.working_directory_name'] = function () {
-			$directory = \get_option( 'pixelgradelt_records_working_directory' );
+			$directory = \get_option( 'pressody_records_working_directory' );
 
 			if ( ! empty( $directory ) ) {
 				return $directory;
 			}
 
 			// Append a random string to help hide it from nosey visitors.
-			$directory = sprintf( 'pixelgradelt_records-%s', generate_random_string() );
+			$directory = sprintf( 'pressody_records-%s', generate_random_string() );
 
 			// Save the working directory so we will always use the same directory.
-			\update_option( 'pixelgradelt_records_working_directory', $directory );
+			\update_option( 'pressody_records_working_directory', $directory );
 
 			return $directory;
 		};
@@ -680,7 +680,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['validators.artifact'] = function ( $container ) {
 			$servers = \apply_filters(
-				'pixelgradelt_records/artifact_validators',
+				'pressody_records/artifact_validators',
 				[
 					10 => 'validator.zip',
 					20 => 'validator.hidden_directory',

@@ -4,12 +4,12 @@
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace Pressody\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pimple\ServiceIterator;

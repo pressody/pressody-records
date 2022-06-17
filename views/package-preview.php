@@ -4,13 +4,13 @@
  *
  * @since   1.0.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 ?>
 
-<div id="pixelgradelt_records-package-preview" class="pixelgradelt_records-package-preview"></div>
+<div id="pressody_records-package-preview" class="pressody_records-package-preview"></div>

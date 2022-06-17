@@ -4,16 +4,16 @@
  *
  * Code borrowed and modified from WooCommerce.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.9.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Logging\Handler;
+namespace Pressody\Records\Logging\Handler;
 
-use PixelgradeLT\Records\Logging\LogLevels;
+use Pressody\Records\Logging\LogLevels;
 
 /**
  * Handles log entries by sending an email.
@@ -159,8 +159,8 @@ class EmailLogHandler extends LogHandler {
 		return sprintf(
 			/* translators: 1: Site name 2: Maximum level 3: Log count */
 			_n(
-				'[%1$s] %2$s: %3$s PixelgradeLT Records log message',
-				'[%1$s] %2$s: %3$s PixelgradeLT Records log messages',
+				'[%1$s] %2$s: %3$s Pressody Records log message',
+				'[%1$s] %2$s: %3$s Pressody Records log messages',
 				$log_count,
 				'__plugin_txd'
 			),
@@ -180,8 +180,8 @@ class EmailLogHandler extends LogHandler {
 		$entries   = implode( PHP_EOL, $this->logs );
 		$log_count = count( $this->logs );
 		return _n(
-			'You have received the following PixelgradeLT Records log message:',
-			'You have received the following PixelgradeLT Records log messages:',
+			'You have received the following Pressody Records log message:',
+			'You have received the following Pressody Records log messages:',
 			$log_count,
 			'__plugin_txd'
 		) . PHP_EOL

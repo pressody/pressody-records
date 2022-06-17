@@ -1,12 +1,12 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Integration\Repository;
+namespace Pressody\Records\Tests\Integration\Repository;
 
-use PixelgradeLT\Records\PackageType\LocalTheme;
-use PixelgradeLT\Records\Tests\Integration\TestCase;
+use Pressody\Records\PackageType\LocalTheme;
+use Pressody\Records\Tests\Integration\TestCase;
 
-use function PixelgradeLT\Records\plugin;
+use function Pressody\Records\plugin;
 
 class InstalledThemesTest extends TestCase {
 	protected $original_theme_directories = null;
@@ -15,7 +15,7 @@ class InstalledThemesTest extends TestCase {
 		parent::setUp();
 
 		$this->original_theme_directories = $GLOBALS['wp_theme_directories'];
-		register_theme_directory( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/themes' );
+		register_theme_directory( \Pressody\Records\TESTS_DIR . '/Fixture/wp-content/themes' );
 		delete_site_transient( 'theme_roots' );
 	}
 

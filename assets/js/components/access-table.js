@@ -14,7 +14,7 @@ function AccessTable( props ) {
 		onRevokeApiKey,
 	} = props;
 
-	let body = html`<tr><td colSpan=6>${ __( 'Add an API Key to access the PixelgradeLT Records repository.', 'pixelgradelt_records' ) }</td></tr>`;
+	let body = html`<tr><td colSpan=6>${ __( 'Add an API Key to access the Pressody Records repository.', 'pressody_records' ) }</td></tr>`;
 
 	if ( apiKeys.length ) {
 		body = apiKeys.map( ( item, index ) => {
@@ -29,14 +29,14 @@ function AccessTable( props ) {
 	}
 
 	return html`
-		<table className="pixelgradelt_records-api-key-table widefat">
+		<table className="pressody_records-api-key-table widefat">
 			<thead>
 				<tr>
-					<th>${ __( 'Name', 'pixelgradelt_records' ) }</th>
-					<th className="column-user">${ __( 'User', 'pixelgradelt_records' ) }</th>
-					<th>${ __( 'API Key', 'pixelgradelt_records' ) }</th>
-					<th>${ __( 'Last Used', 'pixelgradelt_records' ) }</th>
-					<th>${ __( 'Created', 'pixelgradelt_records' ) }</th>
+					<th>${ __( 'Name', 'pressody_records' ) }</th>
+					<th className="column-user">${ __( 'User', 'pressody_records' ) }</th>
+					<th>${ __( 'API Key', 'pressody_records' ) }</th>
+					<th>${ __( 'Last Used', 'pressody_records' ) }</th>
+					<th>${ __( 'Created', 'pressody_records' ) }</th>
 					<th></th>
 
 				</tr>
@@ -44,7 +44,7 @@ function AccessTable( props ) {
 			<tbody>${ body }</tbody>
 			<tfoot>
 				<tr>
-					<td colSpan="6" className="pixelgradelt_records-api-key-form">
+					<td colSpan="6" className="pressody_records-api-key-form">
 						<${ ApiKeyForm }
 							onSubmit=${ onCreateApiKey }
 						/>
@@ -82,11 +82,11 @@ function AccessTableRow( props ) {
 			<td className="column-created">${ created }</td>
 			<td className="column-actions">
 				<${ DropdownMenu }
-					label=${ __( 'Toggle dropdown', 'pixelgradelt_records' ) }
+					label=${ __( 'Toggle dropdown', 'pressody_records' ) }
 					icon=${ moreVertical }
 					controls=${ [
 						{
-							title: __( 'Revoke', 'pixelgradelt_records' ),
+							title: __( 'Revoke', 'pressody_records' ),
 							onClick: () => { onRevokeApiKey( token, user ) }
 						}
 					] }

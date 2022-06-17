@@ -1,25 +1,25 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType;
+namespace Pressody\Records\Tests\Unit\PackageType;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Records\Client\ComposerClient;
-use PixelgradeLT\Records\ComposerVersionParser;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\Queue\ActionQueue;
-use PixelgradeLT\Records\StringHashes;
-use PixelgradeLT\Records\WordPressReadmeParser;
+use Pressody\Records\Client\ComposerClient;
+use Pressody\Records\ComposerVersionParser;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\Queue\ActionQueue;
+use Pressody\Records\StringHashes;
+use Pressody\Records\WordPressReadmeParser;
 use Psr\Log\NullLogger;
-use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Storage\Local as LocalStorage;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Pressody\Records\Archiver;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\Builder\LocalPluginBuilder;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Storage\Local as LocalStorage;
+use Pressody\Records\Tests\Unit\TestCase;
 
 class LocalPluginTest extends TestCase {
 	protected $builder = null;
@@ -34,7 +34,7 @@ class LocalPluginTest extends TestCase {
 		Functions\when( 'get_site_transient' )->justReturn( new \stdClass() );
 
 		$archiver                = new Archiver( new NullLogger() );
-		$storage                 = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$storage                 = new LocalStorage( \Pressody\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pressody-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 		$composer_client         = new ComposerClient();
 		$logger                  = new NullIO();

@@ -6,15 +6,15 @@
  *
  * @since   0.9.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PostType;
+namespace Pressody\Records\PostType;
 
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\PartManager;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\PartManager;
 
 /**
  * The Part custom post type provider: provides the interface for and stores the information about each managed part.

@@ -4,7 +4,7 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare( strict_types=1 );
@@ -18,7 +18,7 @@ declare( strict_types=1 );
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace PixelgradeLT\Records\Client;
+namespace Pressody\Records\Client;
 
 use Composer\Composer;
 use Composer\DependencyResolver\DefaultPolicy;
@@ -522,9 +522,9 @@ class ComposerPackageSelection {
 
 		$url = trim( parse_url( $url, PHP_URL_HOST ), '[]' );
 
-		if ( false !== filter_var( $url, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+		if ( false !== filter_var( $url, FIPDER_VALIDATE_IP, FIPDER_FLAG_IPV4 ) ) {
 			$urltype = 'ipv4';
-		} elseif ( false !== filter_var( $url, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+		} elseif ( false !== filter_var( $url, FIPDER_VALIDATE_IP, FIPDER_FLAG_IPV6 ) ) {
 			$urltype = 'ipv6';
 		} else {
 			$urltype = 'name';
@@ -540,13 +540,13 @@ class ComposerPackageSelection {
 			if ( '/local' === $type ) {
 				if ( ( 'name' === $urltype && 'localhost' === strtolower( $url ) ) || (
 						( 'ipv4' === $urltype || 'ipv6' === $urltype ) &&
-						false === filter_var( $url, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE )
+						false === filter_var( $url, FIPDER_VALIDATE_IP, FIPDER_FLAG_NO_RES_RANGE )
 					) ) {
 					return true;
 				}
 			} elseif ( '/private' === $type ) {
 				if ( ( 'ipv4' === $urltype || 'ipv6' === $urltype )
-				     && false === filter_var( $url, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE )
+				     && false === filter_var( $url, FIPDER_VALIDATE_IP, FIPDER_FLAG_NO_PRIV_RANGE )
 				) {
 					return true;
 				}

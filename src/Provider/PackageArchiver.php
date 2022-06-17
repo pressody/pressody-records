@@ -4,26 +4,26 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace Pressody\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Composer\Util\Filesystem;
-use PixelgradeLT\Records\Exception\FileOperationFailed;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\Storage\Storage;
+use Pressody\Records\Exception\FileOperationFailed;
+use Pressody\Records\Package;
+use Pressody\Records\PackageManager;
+use Pressody\Records\Storage\Storage;
 use Psr\Log\LoggerInterface;
-use PixelgradeLT\Records\Exception\PixelgradeltRecordsException;
-use PixelgradeLT\Records\Release;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use function PixelgradeLT\Records\is_debug_mode;
-use function PixelgradeLT\Records\is_dev_url;
+use Pressody\Records\Exception\PressodyRecordsException;
+use Pressody\Records\Release;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Repository\PackageRepository;
+use function Pressody\Records\is_debug_mode;
+use function Pressody\Records\is_dev_url;
 
 /**
  * Package archiver class.
@@ -105,12 +105,12 @@ class PackageArchiver extends AbstractHookProvider {
 
 		add_action( 'wp_trash_post', [ $this, 'clean_on_post_trash' ], 10, 1 );
 
-		$this->add_action( 'pixelgradelt_records/download_url_before', 'hook_before_download_url' );
-		$this->add_action( 'pixelgradelt_records/download_url_after', 'remove_hooks_after_download_url' );
+		$this->add_action( 'pressody_records/download_url_before', 'hook_before_download_url' );
+		$this->add_action( 'pressody_records/download_url_after', 'remove_hooks_after_download_url' );
 	}
 
 	/**
-	 * Archive packages when an PixelgradeLT package CPT is saved.
+	 * Archive packages when an Pressody package CPT is saved.
 	 *
 	 * Archiving packages when they're configured helps ensure a checksum can
 	 * be included in packages.json.
@@ -306,7 +306,7 @@ class PackageArchiver extends AbstractHookProvider {
 			if ( $wp_filesystem->is_dir( $package_vendor_storage_dir_absolute_path ) && ! $wp_filesystem->dirlist( $package_vendor_storage_dir_absolute_path ) ) {
 				$wp_filesystem->delete( $package_vendor_storage_dir_absolute_path );
 			}
-		} catch ( PixelgradeltRecordsException $e ) {
+		} catch ( PressodyRecordsException $e ) {
 			$this->logger->warning(
 				'Could not clean package "{package}" storage before delete. Manual cleanup may be needed.',
 				[
@@ -319,7 +319,7 @@ class PackageArchiver extends AbstractHookProvider {
 	}
 
 	/**
-	 * Clean package artifacts before a ltpackage post is moved to trash.
+	 * Clean package artifacts before a pdpackage post is moved to trash.
 	 *
 	 * @param int $post_ID Post ID.
 	 */

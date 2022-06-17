@@ -2,14 +2,14 @@
 /**
  * Register rewrite rules.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace Pressody\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use WP_Rewrite;
@@ -41,8 +41,8 @@ class RewriteRules extends AbstractHookProvider {
 	 * @return array
 	 */
 	public function register_query_vars( array $vars ): array {
-		$vars[] = 'pixelgradelt_records_params';
-		$vars[] = 'pixelgradelt_records_route';
+		$vars[] = 'pressody_records_params';
+		$vars[] = 'pressody_records_route';
 		return $vars;
 	}
 
@@ -53,22 +53,22 @@ class RewriteRules extends AbstractHookProvider {
 	 */
 	public function register_rewrite_rules() {
 		add_rewrite_rule(
-			'ltpackagist/packages.json$',
-			'index.php?pixelgradelt_records_route=composer_packages',
+			'pdpackagist/packages.json$',
+			'index.php?pressody_records_route=composer_packages',
 			'top'
 		);
 
 		// Don't add a file extension. Some servers don't route file extensions
 		// through WordPress' front controller.
 		add_rewrite_rule(
-			'ltpackagist/([^/]+)(/([^/]+))(/([^/]+))?$',
-			'index.php?pixelgradelt_records_route=download&pixelgradelt_records_params[hashid]=$matches[1]&pixelgradelt_records_params[slug]=$matches[3]&pixelgradelt_records_params[version]=$matches[5]',
+			'pdpackagist/([^/]+)(/([^/]+))(/([^/]+))?$',
+			'index.php?pressody_records_route=download&pressody_records_params[hashid]=$matches[1]&pressody_records_params[slug]=$matches[3]&pressody_records_params[version]=$matches[5]',
 			'top'
 		);
 
 		add_rewrite_rule(
-			'ltparts/packages.json$',
-			'index.php?pixelgradelt_records_route=composer_parts',
+			'pdparts/packages.json$',
+			'index.php?pressody_records_route=composer_parts',
 			'top'
 		);
 	}
@@ -85,13 +85,13 @@ class RewriteRules extends AbstractHookProvider {
 	 */
 	public function register_external_rewrite_rules( WP_Rewrite $wp_rewrite ) {
 		$wp_rewrite->add_external_rule(
-			'ltpackagist/packages.json$',
-			'index.php?pixelgradelt_records_route=composer_packages'
+			'pdpackagist/packages.json$',
+			'index.php?pressody_records_route=composer_packages'
 		);
 
 		$wp_rewrite->add_external_rule(
-			'ltparts/packages.json$',
-			'index.php?pixelgradelt_records_route=composer_parts'
+			'pdparts/packages.json$',
+			'index.php?pressody_records_route=composer_parts'
 		);
 	}
 
@@ -101,11 +101,11 @@ class RewriteRules extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function maybe_flush_rewrite_rules() {
-		if ( is_network_admin() || 'no' === get_option( 'pixelgradelt_records_flush_rewrite_rules' ) ) {
+		if ( is_network_admin() || 'no' === get_option( 'pressody_records_flush_rewrite_rules' ) ) {
 			return;
 		}
 
-		update_option( 'pixelgradelt_records_flush_rewrite_rules', 'no' );
+		update_option( 'pressody_records_flush_rewrite_rules', 'no' );
 		flush_rewrite_rules();
 	}
 }

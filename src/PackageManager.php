@@ -4,19 +4,19 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Env\Env;
-use PixelgradeLT\Records\Authentication\ApiKey\Server;
-use PixelgradeLT\Records\Client\ComposerClient;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\Queue\QueueInterface;
+use Pressody\Records\Authentication\ApiKey\Server;
+use Pressody\Records\Client\ComposerClient;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\Queue\QueueInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -28,14 +28,14 @@ use Psr\Log\LoggerInterface;
  */
 class PackageManager extends AbstractHookProvider {
 
-	const PACKAGE_POST_TYPE = 'ltpackage';
-	const PACKAGE_POST_TYPE_PLURAL = 'ltpackages';
+	const PACKAGE_POST_TYPE = 'pdpackage';
+	const PACKAGE_POST_TYPE_PLURAL = 'pdpackages';
 
-	const PACKAGE_TYPE_TAXONOMY = 'ltpackage_types';
-	const PACKAGE_TYPE_TAXONOMY_SINGULAR = 'ltpackage_type';
+	const PACKAGE_TYPE_TAXONOMY = 'pdpackage_types';
+	const PACKAGE_TYPE_TAXONOMY_SINGULAR = 'pdpackage_type';
 
-	const PACKAGE_KEYWORD_TAXONOMY = 'ltpackage_keywords';
-	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'ltpackage_keyword';
+	const PACKAGE_KEYWORD_TAXONOMY = 'pdpackage_keywords';
+	const PACKAGE_KEYWORD_TAXONOMY_SINGULAR = 'pdpackage_keyword';
 
 	/**
 	 * Used to create the pseudo IDs saved as values for a package's required packages.
@@ -125,11 +125,11 @@ class PackageManager extends AbstractHookProvider {
 		$this->add_action( 'init', 'schedule_recurring_events' );
 
 		// We want to refresh external source packages twice a day: at midday (noon) and midnight.
-		add_action( 'pixelgradelt_records/midnight', [ $this, 'schedule_external_packages_refresh' ] );
-		add_action( 'pixelgradelt_records/midday', [ $this, 'schedule_external_packages_refresh' ] );
+		add_action( 'pressody_records/midnight', [ $this, 'schedule_external_packages_refresh' ] );
+		add_action( 'pressody_records/midday', [ $this, 'schedule_external_packages_refresh' ] );
 
 		// Hook the actual logic to refresh external source packages.
-		add_action( 'pixelgradelt_records/external_package_refresh', [ $this, 'post_fetch_external_packages' ], 10, 1 );
+		add_action( 'pressody_records/external_package_refresh', [ $this, 'post_fetch_external_packages' ], 10, 1 );
 	}
 
 	/**
@@ -138,16 +138,16 @@ class PackageManager extends AbstractHookProvider {
 	 * @since 0.15.0
 	 */
 	protected function schedule_recurring_events() {
-		if ( ! $this->queue->get_next( 'pixelgradelt_records/midnight' ) ) {
-			$this->queue->schedule_recurring( strtotime( 'tomorrow' ), DAY_IN_SECONDS, 'pixelgradelt_records/midnight', [], 'plt_rec' );
+		if ( ! $this->queue->get_next( 'pressody_records/midnight' ) ) {
+			$this->queue->schedule_recurring( strtotime( 'tomorrow' ), DAY_IN_SECONDS, 'pressody_records/midnight', [], 'plt_rec' );
 		}
 
-		if ( ! $this->queue->get_next( 'pixelgradelt_records/midday' ) ) {
-			$this->queue->schedule_recurring( strtotime( 'tomorrow' ) + 12 * HOUR_IN_SECONDS, DAY_IN_SECONDS, 'pixelgradelt_records/midday', [], 'plt_rec' );
+		if ( ! $this->queue->get_next( 'pressody_records/midday' ) ) {
+			$this->queue->schedule_recurring( strtotime( 'tomorrow' ) + 12 * HOUR_IN_SECONDS, DAY_IN_SECONDS, 'pressody_records/midday', [], 'plt_rec' );
 		}
 
-		if ( ! $this->queue->get_next( 'pixelgradelt_records/hourly' ) ) {
-			$this->queue->schedule_recurring( (int) floor( ( time() + HOUR_IN_SECONDS ) / HOUR_IN_SECONDS ), HOUR_IN_SECONDS, 'pixelgradelt_records/hourly', [], 'plt_rec' );
+		if ( ! $this->queue->get_next( 'pressody_records/hourly' ) ) {
+			$this->queue->schedule_recurring( (int) floor( ( time() + HOUR_IN_SECONDS ) / HOUR_IN_SECONDS ), HOUR_IN_SECONDS, 'pressody_records/hourly', [], 'plt_rec' );
 		}
 	}
 
@@ -173,7 +173,7 @@ class PackageManager extends AbstractHookProvider {
 			// Schedule 30 seconds into the future.
 			$this->queue->schedule_single(
 				time() + 30,
-				'pixelgradelt_records/external_package_refresh',
+				'pressody_records/external_package_refresh',
 				[ 'post_id' => $post_id ],
 				'plt_rec_package_refresh'
 			);
@@ -192,7 +192,7 @@ class PackageManager extends AbstractHookProvider {
 		$packages = $this->fetch_external_package_remote_releases( $post_id );
 
 		// We will save the packages (these are actually releases considering we tackle a single package) in the database.
-		// For actually caching the zips, we will rely on PixelgradeLT\Records\PackageType\Builder\PackageBuilder::build() to do the work.
+		// For actually caching the zips, we will rely on Pressody\Records\PackageType\Builder\PackageBuilder::build() to do the work.
 		if ( ! empty( $packages ) ) {
 			update_post_meta( $post_id, '_package_source_cached_release_packages', $packages );
 
@@ -216,27 +216,27 @@ class PackageManager extends AbstractHookProvider {
 	 */
 	public function get_package_post_type_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'LT Packages', 'pixelgradelt_records' ),
-			'singular_name'         => esc_html__( 'LT Package', 'pixelgradelt_records' ),
-			'menu_name'             => esc_html_x( 'LT Packages', 'Admin Menu text', 'pixelgradelt_records' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Package', 'pixelgradelt_records' ),
-			'add_new_item'          => esc_html__( 'Add New LT Package', 'pixelgradelt_records' ),
-			'new_item'              => esc_html__( 'New LT Package', 'pixelgradelt_records' ),
-			'edit_item'             => esc_html__( 'Edit LT Package', 'pixelgradelt_records' ),
-			'view_item'             => esc_html__( 'View LT Package', 'pixelgradelt_records' ),
-			'all_items'             => esc_html__( 'All Packages', 'pixelgradelt_records' ),
-			'search_items'          => esc_html__( 'Search Packages', 'pixelgradelt_records' ),
-			'not_found'             => esc_html__( 'No packages found.', 'pixelgradelt_records' ),
-			'not_found_in_trash'    => esc_html__( 'No packages found in Trash.', 'pixelgradelt_records' ),
-			'uploaded_to_this_item' => esc_html__( 'Uploaded to this package', 'pixelgradelt_records' ),
-			'filter_items_list'     => esc_html__( 'Filter packages list', 'pixelgradelt_records' ),
-			'items_list_navigation' => esc_html__( 'Packages list navigation', 'pixelgradelt_records' ),
-			'items_list'            => esc_html__( 'LT Packages list', 'pixelgradelt_records' ),
+			'name'                  => esc_html__( 'PD Packages', 'pressody_records' ),
+			'singular_name'         => esc_html__( 'PD Package', 'pressody_records' ),
+			'menu_name'             => esc_html_x( 'PD Packages', 'Admin Menu text', 'pressody_records' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Package', 'pressody_records' ),
+			'add_new_item'          => esc_html__( 'Add New PD Package', 'pressody_records' ),
+			'new_item'              => esc_html__( 'New PD Package', 'pressody_records' ),
+			'edit_item'             => esc_html__( 'Edit PD Package', 'pressody_records' ),
+			'view_item'             => esc_html__( 'View PD Package', 'pressody_records' ),
+			'all_items'             => esc_html__( 'All Packages', 'pressody_records' ),
+			'search_items'          => esc_html__( 'Search Packages', 'pressody_records' ),
+			'not_found'             => esc_html__( 'No packages found.', 'pressody_records' ),
+			'not_found_in_trash'    => esc_html__( 'No packages found in Trash.', 'pressody_records' ),
+			'uploaded_to_this_item' => esc_html__( 'Uploaded to this package', 'pressody_records' ),
+			'filter_items_list'     => esc_html__( 'Filter packages list', 'pressody_records' ),
+			'items_list_navigation' => esc_html__( 'Packages list navigation', 'pressody_records' ),
+			'items_list'            => esc_html__( 'PD Packages list', 'pressody_records' ),
 		];
 
 		return array_merge( [
 			'labels'             => $labels,
-			'description'        => esc_html__( 'Composer packages to be used in the PixelgradeLT parts delivered to PixelgradeLT users.', 'pixelgradelt_records' ),
+			'description'        => esc_html__( 'Composer packages to be used in the Pressody parts delivered to Pressody users.', 'pressody_records' ),
 			'hierarchical'       => false,
 			'public'             => false,
 			'publicly_queryable' => false,
@@ -265,22 +265,22 @@ class PackageManager extends AbstractHookProvider {
 	 */
 	public function get_package_type_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'Package Types', 'pixelgradelt_records' ),
-			'singular_name'         => esc_html__( 'Package Type', 'pixelgradelt_records' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Package Type', 'pixelgradelt_records' ),
-			'add_new_item'          => esc_html__( 'Add New Package Type', 'pixelgradelt_records' ),
-			'update_item'           => esc_html__( 'Update Package Type', 'pixelgradelt_records' ),
-			'new_item_name'         => esc_html__( 'New Package Type Name', 'pixelgradelt_records' ),
-			'edit_item'             => esc_html__( 'Edit Package Type', 'pixelgradelt_records' ),
-			'all_items'             => esc_html__( 'All Package Types', 'pixelgradelt_records' ),
-			'search_items'          => esc_html__( 'Search Package Types', 'pixelgradelt_records' ),
-			'parent_item'           => esc_html__( 'Parent Package Type', 'pixelgradelt_records' ),
-			'parent_item_colon'     => esc_html__( 'Parent Package Type:', 'pixelgradelt_records' ),
-			'not_found'             => esc_html__( 'No package types found.', 'pixelgradelt_records' ),
-			'no_terms'              => esc_html__( 'No package types.', 'pixelgradelt_records' ),
-			'items_list_navigation' => esc_html__( 'Package Types list navigation', 'pixelgradelt_records' ),
-			'items_list'            => esc_html__( 'Package Types list', 'pixelgradelt_records' ),
-			'back_to_items'         => esc_html__( '&larr; Go to Package Types', 'pixelgradelt_records' ),
+			'name'                  => esc_html__( 'Package Types', 'pressody_records' ),
+			'singular_name'         => esc_html__( 'Package Type', 'pressody_records' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Package Type', 'pressody_records' ),
+			'add_new_item'          => esc_html__( 'Add New Package Type', 'pressody_records' ),
+			'update_item'           => esc_html__( 'Update Package Type', 'pressody_records' ),
+			'new_item_name'         => esc_html__( 'New Package Type Name', 'pressody_records' ),
+			'edit_item'             => esc_html__( 'Edit Package Type', 'pressody_records' ),
+			'all_items'             => esc_html__( 'All Package Types', 'pressody_records' ),
+			'search_items'          => esc_html__( 'Search Package Types', 'pressody_records' ),
+			'parent_item'           => esc_html__( 'Parent Package Type', 'pressody_records' ),
+			'parent_item_colon'     => esc_html__( 'Parent Package Type:', 'pressody_records' ),
+			'not_found'             => esc_html__( 'No package types found.', 'pressody_records' ),
+			'no_terms'              => esc_html__( 'No package types.', 'pressody_records' ),
+			'items_list_navigation' => esc_html__( 'Package Types list navigation', 'pressody_records' ),
+			'items_list'            => esc_html__( 'Package Types list', 'pressody_records' ),
+			'back_to_items'         => esc_html__( '&larr; Go to Package Types', 'pressody_records' ),
 		];
 
 		return array_merge( [
@@ -307,23 +307,23 @@ class PackageManager extends AbstractHookProvider {
 	 */
 	public function get_package_keyword_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                       => esc_html__( 'Package Keywords', 'pixelgradelt_records' ),
-			'singular_name'              => esc_html__( 'Package Keyword', 'pixelgradelt_records' ),
-			'add_new'                    => esc_html_x( 'Add New', 'LT Package Keyword', 'pixelgradelt_records' ),
-			'add_new_item'               => esc_html__( 'Add New Package Keyword', 'pixelgradelt_records' ),
-			'update_item'                => esc_html__( 'Update Package Keyword', 'pixelgradelt_records' ),
-			'new_item_name'              => esc_html__( 'New Package Keyword Name', 'pixelgradelt_records' ),
-			'edit_item'                  => esc_html__( 'Edit Package Keyword', 'pixelgradelt_records' ),
-			'all_items'                  => esc_html__( 'All Package Keywords', 'pixelgradelt_records' ),
-			'search_items'               => esc_html__( 'Search Package Keywords', 'pixelgradelt_records' ),
-			'not_found'                  => esc_html__( 'No package keywords found.', 'pixelgradelt_records' ),
-			'no_terms'                   => esc_html__( 'No package keywords.', 'pixelgradelt_records' ),
-			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pixelgradelt_records' ),
-			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pixelgradelt_records' ),
-			'most_used'                  => esc_html__( 'Most used.', 'pixelgradelt_records' ),
-			'items_list_navigation'      => esc_html__( 'Package Keywords list navigation', 'pixelgradelt_records' ),
-			'items_list'                 => esc_html__( 'Package Keywords list', 'pixelgradelt_records' ),
-			'back_to_items'              => esc_html__( '&larr; Go to Package Keywords', 'pixelgradelt_records' ),
+			'name'                       => esc_html__( 'Package Keywords', 'pressody_records' ),
+			'singular_name'              => esc_html__( 'Package Keyword', 'pressody_records' ),
+			'add_new'                    => esc_html_x( 'Add New', 'PD Package Keyword', 'pressody_records' ),
+			'add_new_item'               => esc_html__( 'Add New Package Keyword', 'pressody_records' ),
+			'update_item'                => esc_html__( 'Update Package Keyword', 'pressody_records' ),
+			'new_item_name'              => esc_html__( 'New Package Keyword Name', 'pressody_records' ),
+			'edit_item'                  => esc_html__( 'Edit Package Keyword', 'pressody_records' ),
+			'all_items'                  => esc_html__( 'All Package Keywords', 'pressody_records' ),
+			'search_items'               => esc_html__( 'Search Package Keywords', 'pressody_records' ),
+			'not_found'                  => esc_html__( 'No package keywords found.', 'pressody_records' ),
+			'no_terms'                   => esc_html__( 'No package keywords.', 'pressody_records' ),
+			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pressody_records' ),
+			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pressody_records' ),
+			'most_used'                  => esc_html__( 'Most used.', 'pressody_records' ),
+			'items_list_navigation'      => esc_html__( 'Package Keywords list navigation', 'pressody_records' ),
+			'items_list'                 => esc_html__( 'Package Keywords list', 'pressody_records' ),
+			'back_to_items'              => esc_html__( '&larr; Go to Package Keywords', 'pressody_records' ),
 		];
 
 		return array_merge( [
@@ -1074,8 +1074,8 @@ class PackageManager extends AbstractHookProvider {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( Env::get( 'LTRECORDS_PHP_AUTH_USER' ) ) ? [
-									'Authorization: Basic ' . base64_encode( Env::get( 'LTRECORDS_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( Env::get( 'PDRECORDS_PHP_AUTH_USER' ) ) ? [
+									'Authorization: Basic ' . base64_encode( Env::get( 'PDRECORDS_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],

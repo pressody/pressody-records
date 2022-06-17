@@ -2,19 +2,19 @@
 /**
  * External themes repository.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Repository;
+namespace Pressody\Records\Repository;
 
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\PackageTypes;
+use Pressody\Records\Package;
+use Pressody\Records\PackageFactory;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\PackageTypes;
 
 /**
  * External themes repository class.

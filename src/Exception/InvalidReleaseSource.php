@@ -2,16 +2,16 @@
 /**
  * Invalid release source exception.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Exception;
+namespace Pressody\Records\Exception;
 
-use PixelgradeLT\Records\Release;
+use Pressody\Records\Release;
 use Throwable;
 
 /**
@@ -19,7 +19,7 @@ use Throwable;
  *
  * @since 0.1.0
  */
-class InvalidReleaseSource extends \LogicException implements PixelgradeltRecordsException {
+class InvalidReleaseSource extends \LogicException implements PressodyRecordsException {
 	/**
 	 * Create an exception for an invalid release source.
 	 *

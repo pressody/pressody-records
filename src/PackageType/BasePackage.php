@@ -4,17 +4,17 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PackageType;
+namespace Pressody\Records\PackageType;
 
-use PixelgradeLT\Records\Exception\InvalidPackage;
-use PixelgradeLT\Records\Exception\InvalidReleaseVersion;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\Release;
+use Pressody\Records\Exception\InvalidPackage;
+use Pressody\Records\Exception\InvalidReleaseVersion;
+use Pressody\Records\Package;
+use Pressody\Records\Release;
 
 /**
  * Base package class.

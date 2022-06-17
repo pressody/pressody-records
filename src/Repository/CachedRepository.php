@@ -4,16 +4,16 @@
  *
  * This repository will cache the items internally. Any changes during the request will not be taken into account.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Repository;
+namespace Pressody\Records\Repository;
 
-use PixelgradeLT\Records\Package;
+use Pressody\Records\Package;
 
 /**
  * Cached repository class.

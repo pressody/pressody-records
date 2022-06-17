@@ -1,14 +1,14 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Integration\PackageType;
+namespace Pressody\Records\Tests\Integration\PackageType;
 
-use PixelgradeLT\Records\PackageFactory;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\Release;
-use PixelgradeLT\Records\Tests\Integration\TestCase;
-use function PixelgradeLT\Records\plugin;
+use Pressody\Records\PackageFactory;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\Release;
+use Pressody\Records\Tests\Integration\TestCase;
+use function Pressody\Records\plugin;
 
 class LocalPluginTest extends TestCase {
 	/**

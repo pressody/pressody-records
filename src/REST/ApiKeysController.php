@@ -4,17 +4,17 @@
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\REST;
+namespace Pressody\Records\REST;
 
-use PixelgradeLT\Records\Authentication\ApiKey\ApiKey;
-use PixelgradeLT\Records\Authentication\ApiKey\ApiKeyRepository;
-use PixelgradeLT\Records\Authentication\ApiKey\Factory;
-use PixelgradeLT\Records\Capabilities;
+use Pressody\Records\Authentication\ApiKey\ApiKey;
+use Pressody\Records\Authentication\ApiKey\ApiKeyRepository;
+use Pressody\Records\Authentication\ApiKey\Factory;
+use Pressody\Records\Capabilities;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -121,7 +121,7 @@ class ApiKeysController extends WP_REST_Controller {
 						},
 					],
 					'user'    => [
-						'description' => esc_html__( 'The ID for the user associated with the API Key.', 'pixelgradelt_records' ),
+						'description' => esc_html__( 'The ID for the user associated with the API Key.', 'pressody_records' ),
 						'type'        => 'integer',
 						'context'     => [ 'view', 'edit' ],
 						'required'    => true,
@@ -145,7 +145,7 @@ class ApiKeysController extends WP_REST_Controller {
 		if ( ! current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to view API keys.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to view API keys.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -153,7 +153,7 @@ class ApiKeysController extends WP_REST_Controller {
 		if ( ! current_user_can( 'edit_user', $request['user'] ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to view API keys for this user.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to view API keys for this user.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -195,7 +195,7 @@ class ApiKeysController extends WP_REST_Controller {
 		if ( ! current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
-				esc_html__( 'Sorry, you are not allowed to create API keys.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to create API keys.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -203,7 +203,7 @@ class ApiKeysController extends WP_REST_Controller {
 		if ( ! current_user_can( 'edit_user', $request['user'] ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to create API keys for this user.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to create API keys for this user.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -255,7 +255,7 @@ class ApiKeysController extends WP_REST_Controller {
 		if ( null === $api_key ) {
 			return new WP_Error(
 				'rest_resource_invalid_id',
-				esc_html__( 'Invalid API Key token.', 'pixelgradelt_records' ),
+				esc_html__( 'Invalid API Key token.', 'pressody_records' ),
 				[ 'status' => 404 ]
 			);
 		}
@@ -263,7 +263,7 @@ class ApiKeysController extends WP_REST_Controller {
 		if ( ! current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			return new WP_Error(
 				'rest_cannot_delete',
-				esc_html__( 'Sorry, you are not allowed to delete API keys.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to delete API keys.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -271,7 +271,7 @@ class ApiKeysController extends WP_REST_Controller {
 		if ( ! current_user_can( 'edit_user', $request['user'] ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to delete API Keys for this user.', 'pixelgradelt_records' ),
+				esc_html__( 'Sorry, you are not allowed to delete API Keys for this user.', 'pressody_records' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -367,19 +367,19 @@ class ApiKeysController extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'created'    => [
-					'description' => esc_html__( 'The date the API key was created.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The date the API key was created.', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'last_used'  => [
-					'description' => esc_html__( 'The date the API key was last used.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The date the API key was last used.', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'name'       => [
-					'description' => esc_html__( 'A descriptive name for the API key.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'A descriptive name for the API key.', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,
@@ -388,20 +388,20 @@ class ApiKeysController extends WP_REST_Controller {
 					],
 				],
 				'token'      => [
-					'description' => esc_html__( 'The API Key token.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The API Key token.', 'pressody_records' ),
 					'type'        => 'string',
 					'pattern'     => self::TOKEN_PATTERN,
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'user'       => [
-					'description' => esc_html__( 'The ID for the user associated with the API Key.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The ID for the user associated with the API Key.', 'pressody_records' ),
 					'type'        => 'integer',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,
 				],
 				'user_login' => [
-					'description' => esc_html__( 'The username for the user associated with the API key.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The username for the user associated with the API key.', 'pressody_records' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,

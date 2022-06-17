@@ -2,24 +2,24 @@
 /**
  * Upgrade routines.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Provider;
+namespace Pressody\Records\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Psr\Log\LoggerInterface;
-use PixelgradeLT\Records\Htaccess;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use PixelgradeLT\Records\Storage\Storage;
-use PixelgradeLT\Records\Capabilities as Caps;
+use Pressody\Records\Htaccess;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Repository\PackageRepository;
+use Pressody\Records\Storage\Storage;
+use Pressody\Records\Capabilities as Caps;
 
-use const PixelgradeLT\Records\VERSION;
+use const Pressody\Records\VERSION;
 
 /**
  * Class for upgrade routines.
@@ -32,7 +32,7 @@ class Upgrade extends AbstractHookProvider {
 	 *
 	 * @var string
 	 */
-	const VERSION_OPTION_NAME = 'pixelgradelt_records_version';
+	const VERSION_OPTION_NAME = 'pressody_records_version';
 
 	/**
 	 * Htaccess handler.

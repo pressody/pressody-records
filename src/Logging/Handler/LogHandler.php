@@ -2,14 +2,14 @@
 /**
  * Log handling functionality.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.9.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Logging\Handler;
+namespace Pressody\Records\Logging\Handler;
 
 /**
  * Abstract WC Log Handler Class
@@ -84,7 +84,7 @@ abstract class LogHandler implements LogHandlerInterface {
 		}
 
 		return apply_filters(
-			'pixelgradelt_records/format_log_entry',
+			'pressody_records/format_log_entry',
 			$entry,
 			[
 				'timestamp' => $timestamp,

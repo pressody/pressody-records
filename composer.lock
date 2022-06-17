@@ -759,7 +759,7 @@
             "time": "2021-05-05T19:37:51+00:00"
         },
         {
-            "name": "graham-campbell/result-type",
+            "name": "graham-campbell/resupd-type",
             "version": "v1.0.1",
             "source": {
                 "type": "git",
@@ -818,7 +818,7 @@
                     "type": "github"
                 },
                 {
-                    "url": "https://tidelift.com/funding/github/packagist/graham-campbell/result-type",
+                    "url": "https://tidelift.com/funding/github/packagist/graham-campbell/resupd-type",
                     "type": "tidelift"
                 }
             ],
@@ -1334,7 +1334,7 @@
                     "./vendor/bin/phpunit --testsuite=Integration --colors=always"
                 ],
                 "makepot": [
-                    "./vendor/bin/wp i18n make-pot . languages/pixelgradelt-records.pot"
+                    "./vendor/bin/wp i18n make-pot . languages/pressody-records.pot"
                 ],
                 "prepare-for-release": [
                     "composer install",
@@ -1349,7 +1349,7 @@
             "authors": [
                 {
                     "name": "Vlad Olaru",
-                    "email": "vlad@pixelgrade.com",
+                    "email": "vladpotter85@gmail.com",
                     "homepage": "https://pixelgrade.com/"
                 }
             ],
@@ -1360,7 +1360,7 @@
                 "custom-post-type-notes",
                 "notes",
                 "pixelgrade",
-                "pixelgradelt",
+                "pressody",
                 "post-notes",
                 "wordpress"
             ],
@@ -2649,7 +2649,7 @@
             },
             "require": {
                 "ext-pcre": "*",
-                "graham-campbell/result-type": "^1.0.1",
+                "graham-campbell/resupd-type": "^1.0.1",
                 "php": "^7.1.3 || ^8.0",
                 "phpoption/phpoption": "^1.7.4",
                 "symfony/polyfill-ctype": "^1.17",

@@ -1,18 +1,18 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
+namespace Pressody\Records\Tests\Unit\PackageType\Builder;
 
 use Composer\IO\NullIO;
-use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
-use PixelgradeLT\Records\PackageType\Builder\LocalPluginBuilder;
-use PixelgradeLT\Records\PackageType\LocalPlugin;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Pressody\Records\Archiver;
+use Pressody\Records\Package;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\Builder\LocalBasePackageBuilder;
+use Pressody\Records\PackageType\Builder\LocalPluginBuilder;
+use Pressody\Records\PackageType\LocalPlugin;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Tests\Unit\TestCase;
 use Psr\Log\NullLogger;
 
 class LocalPluginBuilderTest extends TestCase {

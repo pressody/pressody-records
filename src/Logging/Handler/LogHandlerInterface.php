@@ -4,14 +4,14 @@
  *
  * Code borrowed and modified from WooCommerce.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.9.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Logging\Handler;
+namespace Pressody\Records\Logging\Handler;
 
 /**
  * Log Handler Interface

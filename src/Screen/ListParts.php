@@ -4,19 +4,19 @@
  *
  * @since   1.0.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Screen;
+namespace Pressody\Records\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\PackageTypes;
-use PixelgradeLT\Records\PartManager;
-use PixelgradeLT\Records\Repository\PackageRepository;
-use PixelgradeLT\Records\Utils\ArrayHelpers;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\PackageTypes;
+use Pressody\Records\PartManager;
+use Pressody\Records\Repository\PackageRepository;
+use Pressody\Records\Utils\ArrayHelpers;
 
 /**
  * List Parts screen provider class.
@@ -88,7 +88,7 @@ class ListParts extends AbstractHookProvider {
 		$taxonomy = get_taxonomy( $this->part_manager::PACKAGE_TYPE_TAXONOMY );
 
 		wp_dropdown_categories( array(
-			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_records' ), $taxonomy->label ),
+			'show_option_all' => sprintf( __( 'All %s', 'pressody_records' ), $taxonomy->label ),
 			'orderby'         => 'term_id',
 			'order'           => 'ASC',
 			'hide_empty'      => false,
@@ -121,8 +121,8 @@ class ListParts extends AbstractHookProvider {
 	 * @since 1.0.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_records-admin' );
-		wp_enqueue_style( 'pixelgradelt_records-admin' );
+		wp_enqueue_script( 'pressody_records-admin' );
+		wp_enqueue_style( 'pressody_records-admin' );
 	}
 
 	protected function add_custom_columns( array $columns ): array {
@@ -134,10 +134,10 @@ class ListParts extends AbstractHookProvider {
 		// Insert after the title columns with dependency details.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
 			[
-				'package_source'            => esc_html__( 'Part Plugin Source', 'pixelgradelt_records' ),
-				'new_releases'              => esc_html__( 'New Releases', 'pixelgradelt_records' ),
-				'package_required_packages' => esc_html__( 'Required Packages', 'pixelgradelt_records' ),
-				'package_required_parts'    => esc_html__( 'Required Parts', 'pixelgradelt_records' ),
+				'package_source'            => esc_html__( 'Part Plugin Source', 'pressody_records' ),
+				'new_releases'              => esc_html__( 'New Releases', 'pressody_records' ),
+				'package_required_packages' => esc_html__( 'Required Packages', 'pressody_records' ),
+				'package_required_parts'    => esc_html__( 'Required Parts', 'pressody_records' ),
 			]
 		);
 
@@ -204,7 +204,7 @@ class ListParts extends AbstractHookProvider {
 		}
 
 		if ( 'new_releases' === $column ) {
-			$seen_list = get_post_meta( $post_id, '_pixelgradelt_package_seen_releases', true );
+			$seen_list = get_post_meta( $post_id, '_pressody_package_seen_releases', true );
 			if ( empty( $seen_list ) ) {
 				$seen_list = [];
 			}
@@ -236,7 +236,7 @@ class ListParts extends AbstractHookProvider {
 				}
 
 				if ( ! empty( $package_details['managed_post_id'] ) ) {
-					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $package_details['managed_post_id'] ) ) . '" title="Edit Required LT Package">' . get_the_title( $package_details['managed_post_id'] ) . ' (' . $item . ')</a>';
+					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $package_details['managed_post_id'] ) ) . '" title="Edit Required PD Package">' . get_the_title( $package_details['managed_post_id'] ) . ' (' . $item . ')</a>';
 				}
 
 				$list[] = $item;
@@ -254,7 +254,7 @@ class ListParts extends AbstractHookProvider {
 				}
 
 				if ( ! empty( $part_details['managed_post_id'] ) ) {
-					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $part_details['managed_post_id'] ) ) . '" title="Edit Required LT Part">' . get_the_title( $part_details['managed_post_id'] ) . ' (' . $item . ')</a>';
+					$item = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $part_details['managed_post_id'] ) ) . '" title="Edit Required PD Part">' . get_the_title( $part_details['managed_post_id'] ) . ' (' . $item . ')</a>';
 				}
 
 				$list[] = $item;

@@ -4,14 +4,14 @@
  *
  * @since   1.0.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
-use PixelgradeLT\Records\PackageType\BasePackage;
+use Pressody\Records\PackageType\BasePackage;
 
 /**
  * @global BasePackage[] $packages
@@ -21,9 +21,9 @@ use PixelgradeLT\Records\PackageType\BasePackage;
  */
 ?>
 
-<div class="pixelgradelt_records-card">
+<div class="pressody_records-card">
 	<p>
-		<?php esc_html_e( 'Your PixelgradeLT Records repository is available at:', 'pixelgradelt_records' ); ?>
+		<?php esc_html_e( 'Your Pressody Records repository is available at:', 'pressody_records' ); ?>
 		<a href="<?php echo esc_url( $packages_permalink ); ?>"><?php echo esc_html( $packages_permalink ); ?></a>. This includes <strong>all your packages, regardless of type.</strong>
 	</p>
 </div>
@@ -33,16 +33,16 @@ use PixelgradeLT\Records\PackageType\BasePackage;
 	$allowed_html = [ 'code' => [] ];
 	printf(
 		/* translators: 1: <code>repositories</code>, 2: <code>composer.json</code> */
-		esc_html__( 'Add it to the %1$s list in your %2$s:', 'pixelgradelt_records' ),
+		esc_html__( 'Add it to the %1$s list in your %2$s:', 'pressody_records' ),
 		'<code>repositories</code>',
 		'<code>composer.json</code>'
 	);
 	?>
 </p>
 
-<pre class="pixelgradelt_records-composer-snippet"><code>{
+<pre class="pressody_records-composer-snippet"><code>{
 	"repositories": {
-		"pixelgradelt-records": {
+		"pressody-records": {
 			"type": "composer",
 			"url": "<?php echo esc_url( get_packages_permalink( [ 'base' => true ] ) ); ?>"
 		}
@@ -54,7 +54,7 @@ use PixelgradeLT\Records\PackageType\BasePackage;
 $allowed_html = [ 'code' => [] ];
 printf(
 	/* translators: 1: <code>config</code> */
-	esc_html__( 'Or run the %1$s command:', 'pixelgradelt_records' ),
+	esc_html__( 'Or run the %1$s command:', 'pressody_records' ),
 	'<code>config</code>'
 );
 ?>
@@ -62,16 +62,16 @@ printf(
 <p>
 	<input
 		type="text"
-		class="pixelgradelt_records-cli-field large-text"
+		class="pressody_records-cli-field large-text"
 		readonly
-		value="composer config repositories.pixelgradelt-records composer <?php echo esc_url( get_packages_permalink( [ 'base' => true ] ) ); ?>"
+		value="composer config repositories.pressody-records composer <?php echo esc_url( get_packages_permalink( [ 'base' => true ] ) ); ?>"
 		onclick="this.select();"
 	>
 </p>
 
-<div class="pixelgradelt_records-card">
+<div class="pressody_records-card">
 	<p>
-		<?php esc_html_e( 'You also have the PixelgradeLT Records Parts repository available at:', 'pixelgradelt_records' ); ?>
+		<?php esc_html_e( 'You also have the Pressody Records Parts repository available at:', 'pressody_records' ); ?>
 		<a href="<?php echo esc_url( $parts_permalink ); ?>"><?php echo esc_html( $parts_permalink ); ?></a>. This is a repository that <strong>includes just the parts</strong> (a subset of the main repository above).
 	</p>
 </div>

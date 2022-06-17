@@ -2,8 +2,8 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: PixelgradeLT Records 0.9.4\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pixelgradelt-records\n"
+"Project-Id-Version: Pressody Records 0.9.4\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pressody-records\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,24 +12,24 @@ msgstr ""
 "POT-Creation-Date: 2021-05-26T10:40:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
-"X-Domain: pixelgradelt_records\n"
+"X-Domain: pressody_records\n"
 
 #. Plugin Name of the plugin
 #: src/Integration/Members.php:44
 #: src/Screen/Settings.php:101
-msgid "PixelgradeLT Records"
+msgid "Pressody Records"
 msgstr ""
 
 #. Plugin URI of the plugin
-msgid "https://github.com/pixelgradelt/pixelgradelt-records"
+msgid "https://github.com/pressody/pressody-records"
 msgstr ""
 
 #. Description of the plugin
-msgid "Define and manage PixelgradeLT modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes."
+msgid "Define and manage Pressody modules and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes."
 msgstr ""
 
 #. Author of the plugin
-msgid "Pixelgrade"
+msgid "Pressody"
 msgstr ""
 
 #. Author URI of the plugin
@@ -38,7 +38,7 @@ msgstr ""
 
 #. translators: %s: documentation URL
 #: src/functions.php:185
-msgid "PixelgradeLT Records is missing required dependencies. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferer\">Learn more.</a>"
+msgid "Pressody Records is missing required dependencies. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferer\">Learn more.</a>"
 msgstr ""
 
 #: src/Integration/Members.php:63
@@ -73,37 +73,37 @@ msgid "%1$s was called with an invalid level \"%2$s\"."
 msgstr ""
 
 #: src/PackageManager.php:108
-msgid "LT Packages"
+msgid "PD Packages"
 msgstr ""
 
 #: src/PackageManager.php:109
-msgid "LT Package"
+msgid "PD Package"
 msgstr ""
 
 #: src/PackageManager.php:110
 msgctxt "Admin Menu text"
-msgid "LT Packages"
+msgid "PD Packages"
 msgstr ""
 
 #: src/PackageManager.php:111
-msgctxt "LT Package"
+msgctxt "PD Package"
 msgid "Add New"
 msgstr ""
 
 #: src/PackageManager.php:112
-msgid "Add New LT Package"
+msgid "Add New PD Package"
 msgstr ""
 
 #: src/PackageManager.php:113
-msgid "New LT Package"
+msgid "New PD Package"
 msgstr ""
 
 #: src/PackageManager.php:114
-msgid "Edit LT Package"
+msgid "Edit PD Package"
 msgstr ""
 
 #: src/PackageManager.php:115
-msgid "View LT Package"
+msgid "View PD Package"
 msgstr ""
 
 #: src/PackageManager.php:116
@@ -136,11 +136,11 @@ msgid "Packages list navigation"
 msgstr ""
 
 #: src/PackageManager.php:123
-msgid "LT Packages list"
+msgid "PD Packages list"
 msgstr ""
 
 #: src/PackageManager.php:128
-msgid "Composer packages to be used in the PixelgradeLT parts delivered to PixelgradeLT users."
+msgid "Composer packages to be used in the Pressody parts delivered to Pressody users."
 msgstr ""
 
 #: src/PackageManager.php:156
@@ -154,7 +154,7 @@ msgid "Package Type"
 msgstr ""
 
 #: src/PackageManager.php:158
-msgctxt "LT Package Type"
+msgctxt "PD Package Type"
 msgid "Add New"
 msgstr ""
 
@@ -219,7 +219,7 @@ msgid "Package Keyword"
 msgstr ""
 
 #: src/PackageManager.php:200
-msgctxt "LT Package Keyword"
+msgctxt "PD Package Keyword"
 msgid "Add New"
 msgstr ""
 
@@ -283,37 +283,37 @@ msgid "&larr; Go to Package Keywords"
 msgstr ""
 
 #: src/PartManager.php:43
-msgid "LT Parts"
+msgid "PD Parts"
 msgstr ""
 
 #: src/PartManager.php:44
-msgid "LT Part"
+msgid "PD Part"
 msgstr ""
 
 #: src/PartManager.php:45
 msgctxt "Admin Menu text"
-msgid "LT Parts"
+msgid "PD Parts"
 msgstr ""
 
 #: src/PartManager.php:46
-msgctxt "LT Part"
+msgctxt "PD Part"
 msgid "Add New"
 msgstr ""
 
 #: src/PartManager.php:47
-msgid "Add New LT Part"
+msgid "Add New PD Part"
 msgstr ""
 
 #: src/PartManager.php:48
-msgid "New LT Part"
+msgid "New PD Part"
 msgstr ""
 
 #: src/PartManager.php:49
-msgid "Edit LT Part"
+msgid "Edit PD Part"
 msgstr ""
 
 #: src/PartManager.php:50
-msgid "View LT Part"
+msgid "View PD Part"
 msgstr ""
 
 #: src/PartManager.php:51
@@ -341,11 +341,11 @@ msgid "Parts list navigation"
 msgstr ""
 
 #: src/PartManager.php:58
-msgid "LT Parts list"
+msgid "PD Parts list"
 msgstr ""
 
 #: src/PartManager.php:63
-msgid "Composer (special) packages to be used as the basis for PixelgradeLT solutions offered to PixelgradeLT users."
+msgid "Composer (special) packages to be used as the basis for Pressody solutions offered to Pressody users."
 msgstr ""
 
 #: src/PartManager.php:91
@@ -357,7 +357,7 @@ msgid "Part Type"
 msgstr ""
 
 #: src/PartManager.php:93
-msgctxt "LT Part Type"
+msgctxt "PD Part Type"
 msgid "Add New"
 msgstr ""
 
@@ -422,7 +422,7 @@ msgid "Part Keyword"
 msgstr ""
 
 #: src/PartManager.php:135
-msgctxt "LT Part Keyword"
+msgctxt "PD Part Keyword"
 msgid "Add New"
 msgstr ""
 
@@ -476,7 +476,7 @@ msgstr ""
 
 #. translators: %s: permalink screen URL
 #: src/Provider/HealthCheck.php:101
-msgid "PixelgradeLT Records requires pretty permalinks to be enabled. <a href=\"%s\">Enable permalinks</a>."
+msgid "Pressody Records requires pretty permalinks to be enabled. <a href=\"%s\">Enable permalinks</a>."
 msgstr ""
 
 #: src/REST/ApiKeysController.php:124
@@ -801,7 +801,7 @@ msgstr ""
 
 #: src/Screen/EditPackage.php:391
 #: src/Screen/EditPart.php:169
-msgid "Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pixelgradelt/satispress</code>). Learn more about it <a href=\"https://getcomposer.org/doc/05-repositories.md#vcs\" target=\"_blank\">here</a>."
+msgid "Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pressody/satispress</code>). Learn more about it <a href=\"https://getcomposer.org/doc/05-repositories.md#vcs\" target=\"_blank\">here</a>."
 msgstr ""
 
 #: src/Screen/EditPackage.php:401
@@ -1139,10 +1139,10 @@ msgid "Pick your required part, carefully.."
 msgstr ""
 
 #: src/Screen/EditUser.php:108
-msgid "PixelgradeLT Records API Keys"
+msgid "Pressody Records API Keys"
 msgstr ""
 
-#. translators: %s: <code>pixelgradelt_records</code>
+#. translators: %s: <code>pressody_records</code>
 #: src/Screen/EditUser.php:113
 #: views/tabs/access.php:23
 msgid "The password for all API Keys is %s. Use the API key as the username."
@@ -1157,7 +1157,7 @@ msgid "Package Source"
 msgstr ""
 
 #: src/Screen/Settings.php:102
-msgid "LT Records"
+msgid "PD Records"
 msgstr ""
 
 #: src/Screen/Settings.php:182
@@ -1193,15 +1193,15 @@ msgid "System Status"
 msgstr ""
 
 #: views/tabs/access.php:17
-msgid "API Keys are used to access your PixelgradeLT Records repository and download packages. Your personal API keys appear below or you can create keys for other users by editing their accounts."
+msgid "API Keys are used to access your Pressody Records repository and download packages. Your personal API keys appear below or you can create keys for other users by editing their accounts."
 msgstr ""
 
 #: views/tabs/access.php:31
-msgid "Read more about securing your PixelgradeLT Records repository."
+msgid "Read more about securing your Pressody Records repository."
 msgstr ""
 
 #: views/tabs/composer.php:26
-msgid "Your PixelgradeLT Records repository is available at:"
+msgid "Your Pressody Records repository is available at:"
 msgstr ""
 
 #. translators: 1: <code>repositories</code>, 2: <code>composer.json</code>
@@ -1215,18 +1215,18 @@ msgid "Or run the %1$s command:"
 msgstr ""
 
 #: views/tabs/composer.php:74
-msgid "You also have the PixelgradeLT Records Parts repository available at:"
+msgid "You also have the Pressody Records Parts repository available at:"
 msgstr ""
 
 #: views/tabs/repository.php:22
 msgid ""
-"These are <strong>all the packages</strong> that PixelgradeLT Records makes available as Composer packages, regardless of their configuration.<br>\n"
+"These are <strong>all the packages</strong> that Pressody Records makes available as Composer packages, regardless of their configuration.<br>\n"
 "This view is primarily available to assist in <strong>double-checking that things work properly.</strong><br>\n"
-"If you want to <strong>dig deeper,</strong> check <a href=\"%s\" target=\"_blank\">the actual JSON</a> of the PixelgradeLT Records repo."
+"If you want to <strong>dig deeper,</strong> check <a href=\"%s\" target=\"_blank\">the actual JSON</a> of the Pressody Records repo."
 msgstr ""
 
 #: views/tabs/system-status.php:25
-msgid "These are a series of system checks to reassure or warn you of <strong>how fit is the webserver for running PixelgradeLT Records.</strong>"
+msgid "These are a series of system checks to reassure or warn you of <strong>how fit is the webserver for running Pressody Records.</strong>"
 msgstr ""
 
 #: views/tabs/system-status.php:31
@@ -1234,7 +1234,7 @@ msgid "None right now."
 msgstr ""
 
 #: assets/js/components/access-table.js:17
-msgid "Add an API Key to access the PixelgradeLT Records repository."
+msgid "Add an API Key to access the Pressody Records repository."
 msgstr ""
 
 #: assets/js/components/access-table.js:35
@@ -1325,7 +1325,7 @@ msgid "Add Packages"
 msgstr ""
 
 #: assets/js/components/repository.js:11
-msgid "Plugins and themes need to be configured as Pixelgrade LT packages to make them available as Composer packages. Packages in your repository will be available for you to install/deploy with Composer."
+msgid "Plugins and themes need to be configured as Pressody packages to make them available as Composer packages. Packages in your repository will be available for you to install/deploy with Composer."
 msgstr ""
 
 #: assets/js/components/repository.js:17

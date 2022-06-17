@@ -1,24 +1,24 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
+namespace Pressody\Records\Tests\Unit\PackageType\Builder;
 
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\Client\ComposerClient;
-use PixelgradeLT\Records\ComposerVersionParser;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\Builder\LocalBasePackageBuilder;
-use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
-use PixelgradeLT\Records\PackageType\LocalBasePackage;
-use PixelgradeLT\Records\Queue\ActionQueue;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Storage\Local as LocalStorage;
-use PixelgradeLT\Records\StringHashes;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
-use PixelgradeLT\Records\WordPressReadmeParser;
+use Pressody\Records\Archiver;
+use Pressody\Records\Client\ComposerClient;
+use Pressody\Records\ComposerVersionParser;
+use Pressody\Records\Package;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\Builder\LocalBasePackageBuilder;
+use Pressody\Records\PackageType\Builder\BasePackageBuilder;
+use Pressody\Records\PackageType\LocalBasePackage;
+use Pressody\Records\Queue\ActionQueue;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Storage\Local as LocalStorage;
+use Pressody\Records\StringHashes;
+use Pressody\Records\Tests\Unit\TestCase;
+use Pressody\Records\WordPressReadmeParser;
 use Psr\Log\NullLogger;
 
 class LocalBasePackageBuilderTest extends TestCase {
@@ -36,7 +36,7 @@ class LocalBasePackageBuilderTest extends TestCase {
 
 
 		$archiver                = new Archiver( new NullLogger() );
-		$storage                 = new LocalStorage( \PixelgradeLT\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-records/packages' );
+		$storage                 = new LocalStorage( \Pressody\Records\TESTS_DIR . '/Fixture/wp-content/uploads/pressody-records/packages' );
 		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
 		$composer_client         = new ComposerClient();
 		$logger                  = new NullIO();

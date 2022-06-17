@@ -2,17 +2,17 @@
 /**
  * HTTP exception.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Exception;
+namespace Pressody\Records\Exception;
 
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\Release;
+use Pressody\Records\Package;
+use Pressody\Records\Release;
 use Throwable;
 use WP_Http as HTTP;
 
@@ -21,7 +21,7 @@ use WP_Http as HTTP;
  *
  * @since 0.1.0
  */
-class HttpException extends \Exception implements PixelgradeltRecordsException {
+class HttpException extends \Exception implements PressodyRecordsException {
 	/**
 	 * HTTP status code.
 	 *

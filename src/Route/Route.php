@@ -2,22 +2,22 @@
 /**
  * Route interface.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Route;
+namespace Pressody\Records\Route;
 
-use PixelgradeLT\Records\HTTP\Request;
-use PixelgradeLT\Records\HTTP\Response;
+use Pressody\Records\HTTP\Request;
+use Pressody\Records\HTTP\Response;
 
 /**
  * Route interface.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @since 0.1.0
  */
 interface Route {

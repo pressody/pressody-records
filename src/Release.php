@@ -4,12 +4,12 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 /**
  * Package release class.
@@ -88,8 +88,8 @@ class Release {
 			'requires_at_least_wp' => 'requires_at_least_wp',
 			'tested_up_to_wp'      => 'tested_up_to_wp',
 			'requires_php'         => 'requires_php',
-			'required_packages'    => 'require_ltpackages',
-			'replaced_packages'    => 'replace_ltpackages',
+			'required_packages'    => 'require_pdpackages',
+			'replaced_packages'    => 'replace_pdpackages',
 			'composer_require'     => 'require',
 		];
 
@@ -120,7 +120,7 @@ class Release {
 	 */
 	public function get_download_url( array $args = [] ): string {
 		$url = sprintf(
-			'/ltpackagist/%s/%s/%s',
+			'/pdpackagist/%s/%s/%s',
 			$this->get_package()->get_managed_post_id_hash(),
 			$this->get_package()->get_slug(),
 			$this->get_version()

@@ -4,12 +4,12 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
 use Cedaro\WP\Plugin\Plugin as BasePlugin;
 use Psr\Container\ContainerInterface;
@@ -29,19 +29,19 @@ class Plugin extends BasePlugin implements Composable {
 		$container = $this->get_container();
 
 		/**
-		 * Start composing the object graph in PixelgradeLT Records.
+		 * Start composing the object graph in Pressody Records.
 		 *
 		 * @since 0.1.0
 		 *
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_records/compose', $this, $container );
+		do_action( 'pressody_records/compose', $this, $container );
 
 		// Register hook providers.
 		$this
 			->register_hooks( $container->get( 'hooks.i18n' ) )
-			->register_hooks( $container->get( 'integration.ltretailer' ) )
+			->register_hooks( $container->get( 'integration.pdretailer' ) )
 			->register_hooks( $container->get( 'hooks.capabilities' ) )
 			->register_hooks( $container->get( 'hooks.maintenance' ) )
 			->register_hooks( $container->get( 'hooks.rewrite_rules' ) )
@@ -88,21 +88,21 @@ class Plugin extends BasePlugin implements Composable {
 		}
 
 		/**
-		 * Finished composing the object graph in PixelgradeLT Records.
+		 * Finished composing the object graph in Pressody Records.
 		 *
 		 * @since 0.1.0
 		 *
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_records/composed', $this, $container );
+		do_action( 'pressody_records/composed', $this, $container );
 	}
 
 	public function define_constants(): Plugin {
 		$upload_dir = wp_upload_dir( null, false );
 
-		if ( ! defined( 'PixelgradeLT\Records\LOG_DIR' ) ) {
-			define( 'PixelgradeLT\Records\LOG_DIR', $upload_dir['basedir'] . '/pixelgradelt-records-logs/' );
+		if ( ! defined( 'Pressody\Records\LOG_DIR' ) ) {
+			define( 'Pressody\Records\LOG_DIR', $upload_dir['basedir'] . '/pressody-records-logs/' );
 		}
 
 		return $this;

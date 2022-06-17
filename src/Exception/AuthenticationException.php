@@ -2,14 +2,14 @@
 /**
  * Authentication exception.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\Exception;
+namespace Pressody\Records\Exception;
 
 use Throwable;
 use WP_Http as HTTP;
@@ -74,7 +74,7 @@ class AuthenticationException extends HttpException {
 		string $code = 'invalid_request',
 		Throwable $previous = null
 	): AuthenticationException {
-		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="PixelgradeLT Records"' ];
+		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="Pressody Records"' ];
 		$message = 'Authentication is required for this resource.';
 
 		return new static( $code, $message, HTTP::UNAUTHORIZED, $headers, $previous );
@@ -96,7 +96,7 @@ class AuthenticationException extends HttpException {
 		string $code = 'invalid_credentials',
 		Throwable $previous = null
 	): AuthenticationException {
-		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="PixelgradeLT Records"' ];
+		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="Pressody Records"' ];
 		$message = 'Invalid credentials.';
 
 		return new static( $code, $message, HTTP::UNAUTHORIZED, $headers, $previous );
@@ -118,7 +118,7 @@ class AuthenticationException extends HttpException {
 		string $code = 'invalid_credentials',
 		Throwable $previous = null
 	): AuthenticationException {
-		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="PixelgradeLT Records"' ];
+		$headers = $headers ?: [ 'WWW-Authenticate' => 'Basic realm="Pressody Records"' ];
 		$message = 'Missing authorization header.';
 
 		return new static( $code, $message, HTTP::UNAUTHORIZED, $headers, $previous );

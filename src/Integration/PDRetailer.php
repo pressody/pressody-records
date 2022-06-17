@@ -1,58 +1,58 @@
 <?php
 /**
- * LT Retailer integration provider.
+ * PD Retailer integration provider.
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Integration;
+namespace Pressody\Records\Integration;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Records\Utils\ArrayHelpers;
-use function PixelgradeLT\Records\get_setting;
-use function PixelgradeLT\Records\is_debug_mode;
-use function PixelgradeLT\Records\is_dev_url;
+use Pressody\Records\Utils\ArrayHelpers;
+use function Pressody\Records\get_setting;
+use function Pressody\Records\is_debug_mode;
+use function Pressody\Records\is_dev_url;
 use WP_Http as HTTP;
 
 /**
- * LT Retailer integration provider class.
+ * PD Retailer integration provider class.
  *
- * When it is suitable, communicate with LT Retailer and let it have its say over matters.
+ * When it is suitable, communicate with PD Retailer and let it have its say over matters.
  * We will only use hooks to intervene.
  *
  * @since 0.10.0
  */
-class LTRetailer extends AbstractHookProvider {
+class PDRetailer extends AbstractHookProvider {
 
-	const LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_LTDETAILS_PARTIAL = 'check_ltdetails';
-	const LTRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL = 'instructions_to_update';
+	const PDRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_PDDETAILS_PARTIAL = 'check_pddetails';
+	const PDRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL = 'instructions_to_update';
 
-	const LTRETAILER_API_PWD = 'pixelgradelt_retailer';
+	const PDRETAILER_API_PWD = 'pressody_retailer';
 
 	/**
 	 * Register hooks.
 	 */
 	public function register_hooks() {
-		$this->add_filter( 'pixelgradelt_records/validate_encrypted_ltdetails', 'validate_encrypted_ltdetails', 10, 3 );
-		$this->add_filter( 'pixelgradelt_records/composition_instructions_to_update', 'composition_instructions_to_update', 10, 2 );
+		$this->add_filter( 'pressody_records/validate_encrypted_pddetails', 'validate_encrypted_pddetails', 10, 3 );
+		$this->add_filter( 'pressody_records/composition_instructions_to_update', 'composition_instructions_to_update', 10, 2 );
 	}
 
 	/**
-	 * Validate the encrypted composition LT details with LT Retailer.
+	 * Validate the encrypted composition PD details with PD Retailer.
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param bool|\WP_Error $valid               Whether the LT details are valid.
-	 * @param string         $encrypted_ltdetails Encrypted composition LT details.
+	 * @param bool|\WP_Error $valid               Whether the PD details are valid.
+	 * @param string         $encrypted_pddetails Encrypted composition PD details.
 	 * @param array          $composition         The full composition data.
 	 *
 	 * @return bool|\WP_Error
 	 */
-	protected function validate_encrypted_ltdetails( $valid, string $encrypted_ltdetails, array $composition ) {
+	protected function validate_encrypted_pddetails( $valid, string $encrypted_pddetails, array $composition ) {
 		// Don't do anything if we have a WP_Error.
 		if ( is_wp_error( $valid ) ) {
 			return $valid;
@@ -63,16 +63,16 @@ class LTRetailer extends AbstractHookProvider {
 			return $valid;
 		}
 
-		// Make the check LT details request to LT Retailer.
-		$url          = path_join( get_setting( 'ltretailer-compositions-root-endpoint' ), self::LTRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_LTDETAILS_PARTIAL );
+		// Make the check PD details request to PD Retailer.
+		$url          = path_join( get_setting( 'pdretailer-compositions-root-endpoint' ), self::PDRETAILER_COMPOSITIONS_ENDPOINT_VALIDATE_PDDETAILS_PARTIAL );
 		$request_args = [
 			'headers'   => [
-				'Authorization' => 'Basic ' . base64_encode( get_setting( 'ltretailer-api-key' ) . ':' . self::LTRETAILER_API_PWD ),
+				'Authorization' => 'Basic ' . base64_encode( get_setting( 'pdretailer-api-key' ) . ':' . self::PDRETAILER_API_PWD ),
 			],
 			'timeout'   => 5,
 			'sslverify' => ! ( is_debug_mode() || is_dev_url( $url ) ),
 			'body'      => [
-				'ltdetails' => $encrypted_ltdetails,
+				'pddetails' => $encrypted_pddetails,
 				'composer'  => $composition,
 			],
 		];
@@ -88,18 +88,18 @@ class LTRetailer extends AbstractHookProvider {
 			return true;
 		}
 
-		// There was something wrong with the data that LT Retailer didn't like.
+		// There was something wrong with the data that PD Retailer didn't like.
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		$error            = [];
-		$error['code']    = 'ltretailer_invalid_ltdetails';
-		$error['message'] = esc_html__( 'Sorry, LT Retailer didn\'t validate the composition\'s encrypted LT details.', 'pixelgradelt_records' );
+		$error['code']    = 'pdretailer_invalid_pddetails';
+		$error['message'] = esc_html__( 'Sorry, PD Retailer didn\'t validate the composition\'s encrypted PD details.', 'pressody_records' );
 		$error['data']    = [
 			'status' => HTTP::NOT_ACCEPTABLE,
 		];
-		// Add the data we received from LT Retailer.
+		// Add the data we received from PD Retailer.
 		$error['data'] = [
-			'ltretailer_response' => [
+			'pdretailer_response' => [
 				'code'    => $response_body['code'] ?? '',
 				'message' => $response_body['message'] ?? '',
 				'data'    => $response_body['data'] ?? '',
@@ -114,7 +114,7 @@ class LTRetailer extends AbstractHookProvider {
 	}
 
 	/**
-	 * Maybe get instructions to update the composition from LT Retailer.
+	 * Maybe get instructions to update the composition from PD Retailer.
 	 *
 	 * @since 0.10.0
 	 *
@@ -134,12 +134,12 @@ class LTRetailer extends AbstractHookProvider {
 			return $instructions_to_update;
 		}
 
-		// Check the composition's LT details with LT Retailer.
-		$url          = path_join( get_setting( 'ltretailer-compositions-root-endpoint' ), self::LTRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL );
+		// Check the composition's PD details with PD Retailer.
+		$url          = path_join( get_setting( 'pdretailer-compositions-root-endpoint' ), self::PDRETAILER_COMPOSITIONS_ENDPOINT_UPDATE_PARTIAL );
 		$request_args = [
 			'headers'   => [
 				'Content-Type'  => 'application/json',
-				'Authorization' => 'Basic ' . base64_encode( get_setting( 'ltretailer-api-key' ) . ':' . self::LTRETAILER_API_PWD ),
+				'Authorization' => 'Basic ' . base64_encode( get_setting( 'pdretailer-api-key' ) . ':' . self::PDRETAILER_API_PWD ),
 			],
 			'timeout'   => 5,
 			'sslverify' => ! ( is_debug_mode() || is_dev_url( $url ) ),
@@ -156,20 +156,20 @@ class LTRetailer extends AbstractHookProvider {
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( HTTP::NO_CONTENT === $response_code ) {
-			// Nothing to update according to LT Retailer.
+			// Nothing to update according to PD Retailer.
 			return $instructions_to_update;
 		}
 
 		if ( $response_code >= HTTP::BAD_REQUEST ) {
 			$error            = [];
-			$error['code']    = 'ltretailer_composition_instructions_to_update_error';
-			$error['message'] = esc_html__( 'Sorry, LT Retailer didn\'t provide composition update instructions due to some errors.', 'pixelgradelt_records' );
+			$error['code']    = 'pdretailer_composition_instructions_to_update_error';
+			$error['message'] = esc_html__( 'Sorry, PD Retailer didn\'t provide composition update instructions due to some errors.', 'pressody_records' );
 			$error['data']    = [
 				'status' => HTTP::NOT_ACCEPTABLE,
 			];
-			// Add the data we received from LT Retailer.
+			// Add the data we received from PD Retailer.
 			$error['data'] = [
-				'ltretailer_response' => [
+				'pdretailer_response' => [
 					'code'    => $response_body['code'] ?? '',
 					'message' => $response_body['message'] ?? '',
 					'data'    => $response_body['data'] ?? '',
@@ -198,8 +198,8 @@ class LTRetailer extends AbstractHookProvider {
 	 * @return bool
 	 */
 	protected function check_settings(): bool {
-		if ( empty( get_setting( 'ltretailer-compositions-root-endpoint' ) )
-		     || empty( get_setting( 'ltretailer-api-key' ) ) ) {
+		if ( empty( get_setting( 'pdretailer-compositions-root-endpoint' ) )
+		     || empty( get_setting( 'pdretailer-api-key' ) ) ) {
 
 			return false;
 		}

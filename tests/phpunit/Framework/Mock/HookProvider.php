@@ -1,5 +1,5 @@
 <?php
-namespace PixelgradeLT\Records\Tests\Framework\Mock;
+namespace Pressody\Records\Tests\Framework\Mock;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 

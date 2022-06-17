@@ -4,14 +4,14 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records;
+namespace Pressody\Records;
 
-use PixelgradeLT\Records\Exception\InvalidComposerVendor;
+use Pressody\Records\Exception\InvalidComposerVendor;
 
 /**
  * Retrieve the main plugin instance.
@@ -38,7 +38,7 @@ function plugin(): Plugin {
  * @return mixed
  */
 function get_setting( string $key, $default = null ) {
-	$option = get_option( 'pixelgradelt_records' );
+	$option = get_option( 'pressody_records' );
 
 	return $option[ $key ] ?? $default;
 }
@@ -127,11 +127,11 @@ function get_packages_permalink( array $args = null ): string {
 
 	$permalink = get_option( 'permalink_structure' );
 	if ( empty( $permalink ) ) {
-		$url = add_query_arg( 'pixelgradelt_records_route', 'composer_packages', home_url( '/' ) );
+		$url = add_query_arg( 'pressody_records_route', 'composer_packages', home_url( '/' ) );
 	} else {
 		// Leave off the packages.json if 'base' arg is true.
 		$suffix = isset( $args['base'] ) && $args['base'] ? '' : 'packages.json';
-		$url    = sprintf( network_home_url( '/ltpackagist/%s' ), $suffix );
+		$url    = sprintf( network_home_url( '/pdpackagist/%s' ), $suffix );
 	}
 
 	return $url;
@@ -153,18 +153,18 @@ function get_parts_permalink( array $args = null ): string {
 
 	$permalink = get_option( 'permalink_structure' );
 	if ( empty( $permalink ) ) {
-		$url = add_query_arg( 'pixelgradelt_records_route', 'composer_parts', home_url( '/' ) );
+		$url = add_query_arg( 'pressody_records_route', 'composer_parts', home_url( '/' ) );
 	} else {
 		// Leave off the packages.json if 'base' arg is true.
 		$suffix = isset( $args['base'] ) && $args['base'] ? '' : 'packages.json';
-		$url    = sprintf( network_home_url( '/ltparts/%s' ), $suffix );
+		$url    = sprintf( network_home_url( '/pdparts/%s' ), $suffix );
 	}
 
 	return $url;
 }
 
 /**
- * Retrieve the PixelgradeLT Records Composer vendor for use with our packages.
+ * Retrieve the Pressody Records Composer vendor for use with our packages.
  *
  * @throws InvalidComposerVendor
  * @return string
@@ -173,13 +173,13 @@ function get_composer_vendor(): string {
 	/**
 	 * The custom vendor configured via the Settings page is hooked through @see CustomVendor::register_hooks()
 	 */
-	$vendor = apply_filters( 'pixelgradelt_records/vendor', 'pixelgradelt-records' );
+	$vendor = apply_filters( 'pressody_records/vendor', 'pressody-records' );
 	if ( empty( $vendor ) || ! is_string( $vendor ) ) {
-		throw new InvalidComposerVendor( "The PixelgradeLT Records Composer vendor must be a string and it can't be empty or falsy." );
+		throw new InvalidComposerVendor( "The Pressody Records Composer vendor must be a string and it can't be empty or falsy." );
 	}
 
 	if ( strlen( $vendor ) < 10 ) {
-		throw new InvalidComposerVendor( "The PixelgradeLT Records Composer vendor must be at least 10 characters long. Please make sure that it is as unique as possible, in the entire Composer ecosystem." );
+		throw new InvalidComposerVendor( "The Pressody Records Composer vendor must be at least 10 characters long. Please make sure that it is as unique as possible, in the entire Composer ecosystem." );
 	}
 
 	// This is the same partial pattern used by Composer.
@@ -229,12 +229,12 @@ function is_plugin_file( string $plugin_file ): bool {
 function display_missing_dependencies_notice() {
 	$message = sprintf(
 	/* translators: %s: documentation URL */
-		__( 'PixelgradeLT Records is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'pixelgradelt_records' ),
-		'https://github.com/pixelgradelt/pixelgradelt-records/blob/master/docs/installation.md'
+		__( 'Pressody Records is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'pressody_records' ),
+		'https://github.com/pressody/pressody-records/blob/master/docs/installation.md'
 	);
 
 	printf(
-		'<div class="pixelgradelt_records-compatibility-notice notice notice-error"><p>%s</p></div>',
+		'<div class="pressody_records-compatibility-notice notice notice-error"><p>%s</p></div>',
 		wp_kses(
 			$message,
 			[
@@ -279,7 +279,7 @@ function is_rest_request() {
 	$rest_prefix         = trailingslashit( rest_get_url_prefix() );
 	$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-	return apply_filters( 'pixelgradelt_records/is_rest_api_request', $is_rest_api_request );
+	return apply_filters( 'pressody_records/is_rest_api_request', $is_rest_api_request );
 }
 
 /**
@@ -290,7 +290,7 @@ function is_rest_request() {
  * @return bool
  */
 function is_running_unit_tests(): bool {
-	return \defined( 'PixelgradeLT\Records\RUNNING_UNIT_TESTS' ) && true === \PixelgradeLT\Records\RUNNING_UNIT_TESTS;
+	return \defined( 'Pressody\Records\RUNNING_UNIT_TESTS' ) && true === \Pressody\Records\RUNNING_UNIT_TESTS;
 }
 
 /**
@@ -306,7 +306,6 @@ function is_dev_url( string $url ): bool {
 		'localhost',
 		':8888',
 		'.local',
-		'pixelgrade.dev',
 		'.dev',
 		':8082',
 		'staging.',

@@ -20,9 +20,9 @@ function ApiKeyForm( props ) {
 		<${ Flex } justify="start">
 			<${ FlexItem }>
 				<${ TextControl }
-					label=${ __( 'API Key Name', 'pixelgradelt_records' ) }
+					label=${ __( 'API Key Name', 'pressody_records' ) }
 					hideLabelFromVision
-					placeholder=${ __( 'Name', 'pixelgradelt_records' ) }
+					placeholder=${ __( 'Name', 'pressody_records' ) }
 					onChange=${ setName }
 					value=${ name }
 				/>
@@ -34,7 +34,7 @@ function ApiKeyForm( props ) {
 					disabled="${ isEmpty && 'disabled' }"
 					onClick=${ onClick }
 				>
-					${ __( 'Create API Key', 'pixelgradelt_records' ) }
+					${ __( 'Create API Key', 'pressody_records' ) }
 				</${ Button }>
 			</${ FlexItem }>
 		</${ Flex }>

@@ -11,7 +11,7 @@ function PackageKeywords( props ) {
 
 	return html`
 		<${ Fragment }>
-			${ keywords.length ? keywords.join(', ') : __( 'None', 'pixelgradelt_records' ) }
+			${ keywords.length ? keywords.join(', ') : __( 'None', 'pressody_records' ) }
 		</${ Fragment }
 	`;
 }

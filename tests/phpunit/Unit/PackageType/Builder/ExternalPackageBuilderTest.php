@@ -1,19 +1,19 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\Tests\Unit\PackageType\Builder;
+namespace Pressody\Records\Tests\Unit\PackageType\Builder;
 
 use Composer\IO\NullIO;
 use Composer\Semver\Constraint\MatchAllConstraint;
 use Composer\Semver\Constraint\MultiConstraint;
-use PixelgradeLT\Records\Archiver;
-use PixelgradeLT\Records\Package;
-use PixelgradeLT\Records\PackageManager;
-use PixelgradeLT\Records\PackageType\Builder\ExternalBasePackageBuilder;
-use PixelgradeLT\Records\PackageType\Builder\BasePackageBuilder;
-use PixelgradeLT\Records\PackageType\ExternalBasePackage;
-use PixelgradeLT\Records\ReleaseManager;
-use PixelgradeLT\Records\Tests\Unit\TestCase;
+use Pressody\Records\Archiver;
+use Pressody\Records\Package;
+use Pressody\Records\PackageManager;
+use Pressody\Records\PackageType\Builder\ExternalBasePackageBuilder;
+use Pressody\Records\PackageType\Builder\BasePackageBuilder;
+use Pressody\Records\PackageType\ExternalBasePackage;
+use Pressody\Records\ReleaseManager;
+use Pressody\Records\Tests\Unit\TestCase;
 use Psr\Log\NullLogger;
 
 class ExternalPackageBuilderTest extends TestCase {

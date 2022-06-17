@@ -24,7 +24,7 @@ function PackageTable( props ) {
 		ltType,
 	} = props;
 
-	let className = 'pixelgradelt_records-package widefat ' + 'lt-type__' + ltType;
+	let className = 'pressody_records-package widefat ' + 'pd-type__' + ltType;
 
 	return html`
 		<table className="${ className }">
@@ -38,41 +38,41 @@ function PackageTable( props ) {
 					<td colSpan="2">${ description }</td>
 				</tr>
 				<tr>
-					<th>${ __( 'Homepage', 'pixelgradelt_records' ) }</th>
+					<th>${ __( 'Homepage', 'pressody_records' ) }</th>
 					<td><a href="${ homepage }" target="_blank" rel="noopener noreferer">${ homepage }</a></td>
 				</tr>
 				<tr>
-					<th>${ __( 'Authors', 'pixelgradelt_records' ) }</th>
+					<th>${ __( 'Authors', 'pressody_records' ) }</th>
 					<td className="package-authors__list">
 						<${ PackageAuthors } authors=${ authors } />
 					</td>
 				</tr>
 				<tr>
-					<th>${ __( 'Releases', 'pixelgradelt_records' ) }</th>
-					<td className="pixelgradelt_records-releases">
+					<th>${ __( 'Releases', 'pressody_records' ) }</th>
+					<td className="pressody_records-releases">
 						<${ Releases } releases=${ releases } name=${ name } composer=${ composer } />
 					</td>
 				</tr>
 				<tr>
-					<th>${ __( 'Required Packages', 'pixelgradelt_records' ) }</th>
-					<td className="pixelgradelt_records-required-packages">
+					<th>${ __( 'Required Packages', 'pressody_records' ) }</th>
+					<td className="pressody_records-required-packages">
 						<${ PackageRequiredPackages } requiredPackages=${ requiredPackages } />
 					</td>
 				</tr>
 				<tr>
-					<th>${ __( 'Replaced Packages', 'pixelgradelt_records' ) }</th>
-					<td className="pixelgradelt_records-required-packages pixelgradelt_records-replaced-packages">
+					<th>${ __( 'Replaced Packages', 'pressody_records' ) }</th>
+					<td className="pressody_records-required-packages pressody_records-replaced-packages">
 						<${ PackageRequiredPackages } requiredPackages=${ replacedPackages } />
 					</td>
 				</tr>
 				<tr>
-					<th>${ __( 'Keywords', 'pixelgradelt_records' ) }</th>
+					<th>${ __( 'Keywords', 'pressody_records' ) }</th>
 					<td className="package-keywords__list">
 						<${ PackageKeywords } keywords=${ keywords } />
 					</td>
 				</tr>
 				<tr>
-					<th>${ __( 'Package Type', 'pixelgradelt_records' ) }</th>
+					<th>${ __( 'Package Type', 'pressody_records' ) }</th>
 					<td><code>${ composer.type }</code></td>
 				</tr>
 			</tbody>

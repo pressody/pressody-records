@@ -2,17 +2,17 @@
 /**
  * Local base package.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Records\PackageType;
+namespace Pressody\Records\PackageType;
 
-use PixelgradeLT\Records\Exception\PackageNotInstalled;
-use PixelgradeLT\Records\Release;
+use Pressody\Records\Exception\PackageNotInstalled;
+use Pressody\Records\Release;
 
 /**
  * Local base package class for locally installed/managed packages (themes and plugins).

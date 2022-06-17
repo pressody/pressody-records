@@ -1,40 +1,40 @@
 /* Settings Screen
 ------------------------------------------------------------------------------*/
 
-.pixelgradelt_records-screen {
+.pressody_records-screen {
 	display: flex;
 	flex-wrap: nowrap;
 }
 
-.pixelgradelt_records-screen-content {
+.pressody_records-screen-content {
 	width: 100%;
 }
 
-.js .pixelgradelt_records-tab-panel {
+.js .pressody_records-tab-panel {
 	display: none;
 	margin-top: 1em;
 }
 
-.pixelgradelt_records-tab-panel.is-active {
+.pressody_records-tab-panel.is-active {
 	display: block;
 }
 
-.pixelgradelt_records-field-error {
+.pressody_records-field-error {
 	color: #ff0000;
 }
 
-.pixelgradelt_records-composer-snippet {
+.pressody_records-composer-snippet {
 	background: #333;
 	color: #fff;
 	line-height: 1.2;
 	padding: 10px;
 }
 
-.pixelgradelt_records-composer-snippet code {
+.pressody_records-composer-snippet code {
 	background: transparent;
 }
 
-.pixelgradelt_records-screen-sidebar {
+.pressody_records-screen-sidebar {
 	background: #fff;
 	color: #1e1e1e;
 	display: none;
@@ -48,7 +48,7 @@
 	z-index: 10;
 }
 
-.pixelgradelt_records-screen-sidebar .components-panel__header {
+.pressody_records-screen-sidebar .components-panel__header {
 	background: #fff;
 	border-top-width: 0;
 	padding-right: 4px;
@@ -57,7 +57,7 @@
 	z-index: 2;
 }
 
-.pixelgradelt_records-screen-sidebar .components-tab-panel__tabs {
+.pressody_records-screen-sidebar .components-tab-panel__tabs {
 	background: #fff;
 	border-bottom: 1px solid #ddd;
 	position: sticky;
@@ -65,23 +65,23 @@
 	z-index: 1;
 }
 
-.pixelgradelt_records-screen-sidebar .components-tab-panel__tab-content {
+.pressody_records-screen-sidebar .components-tab-panel__tab-content {
 	padding: 16px;
 }
 
-.pixelgradelt_records-screen-sidebar .components-tab-panel__tab-content > :first-child {
+.pressody_records-screen-sidebar .components-tab-panel__tab-content > :first-child {
 	margin-top: 0;
 }
 
-.sidebar-is-open .pixelgradelt_records-screen-content {
+.sidebar-is-open .pressody_records-screen-content {
 	margin-right: 370px;
 }
 
-.sidebar-is-open .pixelgradelt_records-screen-sidebar {
+.sidebar-is-open .pressody_records-screen-sidebar {
 	display: block;
 }
 
-.pixelgradelt_records-card {
+.pressody_records-card {
 	background: #fff;
 	border: 1px solid #e5e5e5;
 	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
@@ -95,7 +95,7 @@
 /* Repository Tab
 ----------------------------------------------------------------------------- */
 
-.pixelgradelt_records-repository .components-placeholder {
+.pressody_records-repository .components-placeholder {
 	margin-top: 20px;
 	padding: 0.7em 2em 1em;
 	max-width: 620px;
@@ -103,46 +103,46 @@
 	box-shadow: inset 0 0 0 1px #ccd0d4;
 }
 
-.pixelgradelt_records-repository > .components-button.is-pressed {
+.pressody_records-repository > .components-button.is-pressed {
 	padding-right: 12px;
 }
 
-.pixelgradelt_records-package {
+.pressody_records-package {
 	margin-top: 20px;
 }
 
-.pixelgradelt_records-package thead .components-button {
+.pressody_records-package thead .components-button {
 	float: right;
 }
 
-.pixelgradelt_records-package thead a.edit-package {
+.pressody_records-package thead a.edit-package {
 	float: right;
 }
 
-.pixelgradelt_records-package.lt-type__part {
+.pressody_records-package.pd-type__part {
 	border-color: #2271b1;
 }
 
-.pixelgradelt_records-package.lt-type__part thead th {
+.pressody_records-package.pd-type__part thead th {
 	border-bottom: 1px solid #2271b1;
 }
 
-.pixelgradelt_records-package .error-message {
+.pressody_records-package .error-message {
 	color: #ff0000;
 }
 
-.pixelgradelt_records-package tbody th,
-.pixelgradelt_records-package tbody td {
+.pressody_records-package tbody th,
+.pressody_records-package tbody td {
 	word-break: break-all;
 }
 
-.pixelgradelt_records-package tbody th {
+.pressody_records-package tbody th {
 	font-size: 13px;
 	width: 150px;
 }
 
-.pixelgradelt_records-release.button,
-.pixelgradelt_records-required-package.button {
+.pressody_records-release.button,
+.pressody_records-required-package.button {
 	height: 24px;
 	margin-bottom: 3px;
 	margin-top: 3px;
@@ -150,47 +150,47 @@
 	padding-right: 6px;
 }
 
-.pixelgradelt_records-release-actions {
+.pressody_records-release-actions {
 	background: #f9f9f9;
 	border: 1px solid #dedede;
 	margin-top: 1em;
 }
 
-.pixelgradelt_records-release-actions td,
-.pixelgradelt_records-release-actions th {
+.pressody_records-release-actions td,
+.pressody_records-release-actions th {
 	padding: 5px 10px;
 }
 
-.pixelgradelt_records-release-actions tbody th {
+.pressody_records-release-actions tbody th {
 	width: auto;
 }
 
-.pixelgradelt_records-release-actions tr:first-child td,
-.pixelgradelt_records-release-actions tr:first-child th {
+.pressody_records-release-actions tr:first-child td,
+.pressody_records-release-actions tr:first-child th {
 	padding-top: 8px;
 }
 
-.pixelgradelt_records-release-actions tr:last-child td,
-.pixelgradelt_records-release-actions tr:last-child th {
+.pressody_records-release-actions tr:last-child td,
+.pressody_records-release-actions tr:last-child th {
 	padding-bottom: 10px;
 }
 
-.pixelgradelt_records-release-actions .components-base-control {
+.pressody_records-release-actions .components-base-control {
 	width: 35em;
 }
 
-.pixelgradelt_records-release-actions .components-base-control__field {
+.pressody_records-release-actions .components-base-control__field {
 	margin-bottom: 1px;
 }
 
-.pixelgradelt_records-release-actions .components-text-control__input {
+.pressody_records-release-actions .components-text-control__input {
 	background: #fff;
 	max-width: 100%;
 	width: 35em;
 }
 
 @media screen and ( max-width: 782px ) {
-	.pixelgradelt_records-release.button {
+	.pressody_records-release.button {
 		line-height: normal;
 		height: auto;
 	}
@@ -200,71 +200,71 @@
 /* API Keys Table
 ----------------------------------------------------------------------------- */
 
-.pixelgradelt_records-api-key-table {
+.pressody_records-api-key-table {
 	margin: 1em 0;
 }
 
-.pixelgradelt_records-api-key-table td,
-.pixelgradelt_records-api-key-table th {
+.pressody_records-api-key-table td,
+.pressody_records-api-key-table th {
 	width: auto;
 }
 
-.pixelgradelt_records-api-key-table tbody td,
-.pixelgradelt_records-api-key-table tbody th {
+.pressody_records-api-key-table tbody td,
+.pressody_records-api-key-table tbody th {
 	vertical-align: middle;
 }
 
-.pixelgradelt_records-api-key-table tfoot td {
+.pressody_records-api-key-table tfoot td {
 	background-color: #f9f9f9;
 }
 
-.pixelgradelt_records-api-key-table tfoot td input {
+.pressody_records-api-key-table tfoot td input {
 	margin-left: 0;
 	padding: 0 6px;
 	width: 20em;
 }
 
-.pixelgradelt_records-api-key-table tfoot td label {
+.pressody_records-api-key-table tfoot td label {
 	display: inline-block;
 	line-height: 1;
 }
 
-.pixelgradelt_records-api-key-table tfoot td .spinner {
+.pressody_records-api-key-table tfoot td .spinner {
 	float: none;
 }
 
-.pixelgradelt_records-api-key-table .column-actions {
+.pressody_records-api-key-table .column-actions {
 	text-align: right;
 }
 
-.pixelgradelt_records-api-key-table .column-token input {
+.pressody_records-api-key-table .column-token input {
 	font-family: monospace;
 	max-width: 282px;
 }
 
-.screen-profile .pixelgradelt_records-api-key-table .column-user,
-.screen-user-edit .pixelgradelt_records-api-key-table .column-user,
-.network-admin.profile-php .pixelgradelt_records-api-key-table .column-user,
-.network-admin.user-edit-php .pixelgradelt_records-api-key-table .column-user {
+.screen-profile .pressody_records-api-key-table .column-user,
+.screen-user-edit .pressody_records-api-key-table .column-user,
+.network-admin.profile-php .pressody_records-api-key-table .column-user,
+.network-admin.user-edit-php .pressody_records-api-key-table .column-user {
 	display: none;
 }
 
-.pixelgradelt_records-api-key-form .components-base-control {
+.pressody_records-api-key-form .components-base-control {
 	width: 25em;
 }
 
-.pixelgradelt_records-api-key-form .components-base-control__field {
+.pressody_records-api-key-form .components-base-control__field {
 	margin-bottom: 1px;
 }
 
-.pixelgradelt_records-api-key-form .components-text-control__input {
+.pressody_records-api-key-form .components-text-control__input {
 	height: 36px;
 }
 
 /* Composer Tab
 ----------------------------------------------------------------------------- */
 
-input.pixelgradelt_records-cli-field {
+input.pressody_records-cli-field {
 	background: #f6f6f6;
 	font-family: monospace;
 	max-width: 720px;
@@ -277,14 +277,14 @@ input.pixelgradelt_records-cli-field {
 	margin-right: 15px;
 }
 
-.pixelgradelt_records-package-preview .components-placeholder {
+.pressody_records-package-preview .components-placeholder {
 	margin-top: 20px;
 	padding: 0.7em 2em 1em;
 
 	box-shadow: inset 0 0 0 1px #ccd0d4;
 }
 
-.pixelgradelt_records-package-preview a.edit-package {
+.pressody_records-package-preview a.edit-package {
 	display: none;
 }
 
@@ -296,14 +296,14 @@ input.pixelgradelt_records-cli-field {
 /* List packages screen
 ----------------------------------------------------------------------------- */
 
-.post-type-ltpackage table.table-view-list.posts {
+.post-type-pdpackage table.table-view-list.posts {
 	table-layout: auto;
 }
 .column-package_source, .column-package_required_packages {
 	white-space: nowrap;
 }
 
-.post-type-ltpackage #the-list td span.bubble {
+.post-type-pdpackage #the-list td span.bubble {
 	float:left;
 	margin-right: 5px;
 	margin-bottom: 5px;
@@ -314,14 +314,14 @@ input.pixelgradelt_records-cli-field {
 /* List parts screen
 ----------------------------------------------------------------------------- */
 
-.post-type-ltpart table.table-view-list.posts {
+.post-type-pdpart table.table-view-list.posts {
 	table-layout: auto;
 }
 .column-package_source, .column-package_required_packages {
 	white-space: nowrap;
 }
 
-.post-type-ltpart #the-list td span.bubble {
+.post-type-pdpart #the-list td span.bubble {
 	float:left;
 	margin-right: 5px;
 	margin-bottom: 5px;

@@ -4,16 +4,16 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Records\PackageType\Builder;
+namespace Pressody\Records\PackageType\Builder;
 
 use Composer\Semver\Constraint\Constraint;
 use Composer\Semver\Constraint\ConstraintInterface;
-use PixelgradeLT\Records\Package;
+use Pressody\Records\Package;
 
 /**
  * External package builder class for packages with a source like Packagist.org, WPackagist.org, or a VCS url.
