@@ -477,7 +477,7 @@ class CompositionsController extends WP_REST_Controller {
 			$composition = $this->add_required_packages( $composition, $instructions['require'] );
 		}
 
-		// We will add the new LT details if they are different than what we have.
+		// We will add the new LT details if they are different from what we have.
 		// Before adding the encrypted LT details, allow a third-party check.
 		// We don't want to add data that is later found to be invalid.
 		if ( isset( $instructions['ltdetails'] )
