@@ -168,7 +168,7 @@ class ListPackages extends AbstractHookProvider {
 						break;
 					case 'vcs':
 						if ( false !== strpos( $package_data['vcs_url'], 'github.com' ) ) {
-							$output = 'Github - ';
+							$output = 'GitHub - ';
 						} else {
 							$output = 'VCS - ';
 						}

@@ -167,7 +167,7 @@ In the end this will be joined with the vendor name (like so: <code>vendor/slug<
 				              ] ),
 
 				         Field::make( 'text', 'package_vcs_url', __( 'Package VCS URL', 'pressody_records' ) )
-				              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pressody/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pressody_records' ) )
+				              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a GitHub repo URL like <code>https://github.com/pressody/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pressody_records' ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND',
 						              [

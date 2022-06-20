@@ -176,7 +176,7 @@ class ListParts extends AbstractHookProvider {
 						break;
 					case 'vcs':
 						if ( false !== strpos( $part_data['vcs_url'], 'github.com' ) ) {
-							$output = 'Github - ';
+							$output = 'GitHub - ';
 						} else {
 							$output = 'VCS - ';
 						}

@@ -420,7 +420,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 				              ] ),
 
 				         Field::make( 'text', 'package_vcs_url', __( 'Package VCS URL', 'pressody_records' ) )
-				              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a Github repo URL like <code>https://github.com/pressody/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pressody_records' ) )
+				              ->set_help_text( __( 'Just provide the full URL to your VCS repo (e.g. a GitHub repo URL like <code>https://github.com/pressody/satispress</code>). Learn more about it <a href="https://getcomposer.org/doc/05-repositories.md#vcs" target="_blank">here</a>.', 'pressody_records' ) )
 				              ->set_conditional_logic( [
 						              'relation' => 'AND', // Optional, defaults to "AND"
 						              [
@@ -1313,7 +1313,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_packag
 			if ( ! in_array( $package_source_type, [ 'packagist.org', 'vcs', 'local.manual' ] ) ) {
 				$this->add_user_message( 'error', sprintf(
 						'<p>%s</p>',
-						esc_html__( 'For WordPress-Core-type packages, you can only use choose the following source types: Packagist.org, VCS (e.g. Github repo), or manually uploaded zips.', 'pressody_records' )
+						esc_html__( 'For WordPress-Core-type packages, you can only use choose the following source types: Packagist.org, VCS (e.g. GitHub repo), or manually uploaded zips.', 'pressody_records' )
 				) );
 			}
 		}
