@@ -1,7 +1,7 @@
 {
 	"name": "pressody/pressody-records",
-  	"version": "0.15.0",
-	"description": "Define and manage Pressody parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.",
+  	"version": "0.17.0",
+	"description": "Define and manage Pressody (PD) parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins and themes.",
 	"keywords": [
 		"pressody",
 		"infrastructure",

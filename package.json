@@ -1,6 +1,6 @@
 {
 	"name": "pressody-records",
-	"version": "0.15.0",
+	"version": "0.17.0",
 	"description": "Define and manage Pressody parts (modules) and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins, themes, parts, etc.",
 	"repository": {
 		"type": "git",

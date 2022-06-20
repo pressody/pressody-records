@@ -37,7 +37,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pressody_records-admin',
 			$this->plugin->get_url( 'assets/js/admin.js' ),
 			[ 'jquery' ],
-			'20210524',
+			'20220620',
 			true
 		);
 
@@ -45,7 +45,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pressody_records-access',
 			$this->plugin->get_url( 'assets/js/access.js' ),
 			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
-			'20210211',
+			'20220620',
 			true
 		);
 
@@ -59,7 +59,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pressody_records-repository',
 			$this->plugin->get_url( 'assets/js/repository.js' ),
 			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
-			'20210211',
+			'20220620',
 			true
 		);
 
@@ -73,7 +73,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pressody_records-edit-package',
 			$this->plugin->get_url( 'assets/js/edit-package.js' ),
 			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
-			'20210524',
+			'20220620',
 			true
 		);
 
@@ -87,7 +87,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pressody_records-admin',
 			$this->plugin->get_url( 'assets/css/admin.css' ),
 			[ 'wp-components' ],
-			'20210210'
+			'20220620'
 		);
 	}
 

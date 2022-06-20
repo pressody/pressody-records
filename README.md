@@ -5,6 +5,7 @@ Custom WordPress plugin to hold the RECORDS-entity logic for the Pressody system
 ## About
 
 **Pressody Records** is part of the **Pressody** (PD for short) infrastructure.
+
 It is the part that **manages the deployable code to WordPress sites.** All the code that we account for (i.e. take responsibility for) should be managed and exposed through PD Records.
 
 At a fundamental level, the WordPress instance that has this plugin active (let's call it **the Pressody Records instance)** is **a private Composer repository.** This means that in the same way [Packagist.org](https://packagist.org) or [WPackagist.org](https://wpackagist.org) provide a public Composer repository, we provide to our users private packages (of code) that Composer can install and update. Even if we deliver public packages from the public repositories, we will ingest them and expose them as Pressody packages for redundancy and control.
@@ -15,7 +16,7 @@ Pressody Records focuses on **two entities: PD Packages and PD Parts.**
 
 ### PD Packages
 
-An PD Package is **the most fundamental, low-level entity** in the entire Pressody ecosystem. It is basically a regular Composer package managed by us and made available to be included in PD Parts.
+An PD Package is **the most fundamental, low-level entity** in the entire Pressody ecosystem. It is basically a regular Composer package managed by Pressody Records and made available to be included in PD Parts.
 
 **PD Packages are to remain internal to PD Records,** not to be used directly by external entities. This way we remain free to manage PD Packages without wondering about unexpected, external side effects.
 
@@ -23,19 +24,34 @@ An PD Package is **the most fundamental, low-level entity** in the entire Presso
 
 ### PD Parts
 
-An PD Part is the upper hierarchical level above PD Packages. This is the **only entity that PD Records exposes externally** to be used by other Pressody entities (like Pressody Retailer).
+An PD Part is the upper hierarchical level above PD Packages. This is the **only entity that Pressody Records exposes externally** to be used by other Pressody entities (like Pressody Retailer).
 
 **PD Parts group PD Packages** into meaningful functional entities. While a PD Packages may not be able to be used as a standalone piece of functionality, **a PD Part should deliver actual functionality** while allowing for further composition into bigger PD Parts.
 
 While the bulk of the code delivered by a PD Part will be provided by the required PD Packages (i.e. actual WordPress plugins, themes, etc.), **the code specific to a PD Part should handle the integration** of those PD Packages. 
 
-**An PD Part must provide its own code** in the form of a dedicated PD Part Plugin. Even if there is no integration to be made, an "empty" (skeleton) plugin must be attached to each PD Part release since PD Parts are not Composer `metapackages`. An easy way to generate such a PD Part Plugin will be provided.
+**An PD Part must provide its own code** in the form of a dedicated PD Part Plugin. Even if there is no integration to be made, an "empty" (skeleton) plugin must be attached to each PD Part release since PD Parts _are not_ Composer `metapackages`. An easy way to generate such a PD Part Plugin will be provided.
 
 ### PD Solutions
 
-All the (public) PD Parts managed by Pressody Records are available to be included in **PD Solutions** by the [Pressody Retailer](https://github.com/pressody/pressody-retailer) instance. Only by being part of a PD Solution that a PD Part can become part of an actual site.
+All the (public) PD Parts managed by Pressody Records are available to be included in **PD Solutions** by the [Pressody Retailer](https://github.com/pressody/pressody-retailer) instance. _Only_ by being part of a PD Solution that a PD Part can become part of an actual site.
 
-## Running Tests
+## Contributing
+
+Contributions are more than welcomed! In **any shape or form:** open up [Github issues](https://github.com/pressody/pressody-records/issues/new), give your input to [existing issues](https://github.com/pressody/pressody-records/issues), propose changes through [pull requests](https://github.com/pressody/pressody-records/pulls), or [send a though or two](vladpotter85@gmail.com) may way. Either way, you are welcomed!
+
+### Start developing
+
+To start developing, clone this repository (or a fork of it) into your WordPress' installation `wp-content/plugins` directory. Open a console in the newly cloned repository directory (`wp-content/plugins/pressody-records/`) and run:
+
+```
+composer install
+npm install
+```
+
+After you've made your changes or additions, please [open a pull-request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests) and we'll work through it.
+
+### Running Tests
 
 To run the PHPUnit tests, in the root directory of the plugin, run something like:
 
