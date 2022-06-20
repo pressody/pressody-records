@@ -1,6 +1,6 @@
 # Pressody Records Documentation
 
-Define and manage Pressody parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins, themes and parts.
+Define and manage Pressody (PD) parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins, themes and parts.
 
 ## Why a WordPress Installation?
 
