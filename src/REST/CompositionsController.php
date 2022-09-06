@@ -983,7 +983,7 @@ class CompositionsController extends WP_REST_Controller {
 			'authors'           => [
 				[
 					'name'     => 'Vlad Olaru',
-					'email'    => 'vladpotter85@gmail.com',
+					'email'    => 'vlad@thinkwritecode.com',
 					'homepage' => 'https://thinkwritecode.com',
 					'role'     => 'Development, infrastructure, and product development',
 				],
