@@ -80,3 +80,7 @@ composer run tests-integration
 ## Credits
 
 This WordPress plugin took the wonderful work from [SatisPress](https://github.com/cedaro/satispress) and adapted/expanded it to our specific needs.
+
+---
+
+Copyright (c) 2021, 2022 Vlad Olaru (vlad@thinkwritecode.com)
